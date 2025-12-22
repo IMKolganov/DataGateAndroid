@@ -4,6 +4,9 @@ import OvpnApiClient
 import android.util.Log
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
 import java.util.concurrent.atomic.AtomicBoolean
+import android.util.Base64
+import java.nio.ByteBuffer
+import java.util.UUID
 
 class VpnConnectInteractor(
     private val getExternalId: () -> String?,
@@ -30,7 +33,8 @@ class VpnConnectInteractor(
 
             vpnController.showStatus("GETTING_INSTALLATION_ID", "Reading installation id")
             val installationId = getInstallationId()
-            if (installationId.isNullOrBlank()) {
+            val shortInstallationId = uuidToShort(installationId)
+            if (shortInstallationId.isBlank()) {
                 vpnController.showError("InstallationId is not ready yet")
                 return
             }
@@ -43,27 +47,99 @@ class VpnConnectInteractor(
             }
 
             vpnController.showStatus("BUILDING_COMMON_NAME", "Preparing certificate identity for $serverName")
-            val commonName = "adg-${best.serverId}-$externalId-$installationId"
+            val commonName = "adg-${best.serverId}-$externalId-$shortInstallationId"
 
             vpnController.showStatus("DOWNLOADING_CONFIG", "Requesting VPN profile for $serverName")
             val downloaded = api.ensureAndDownloadDeviceFile(
                 vpnServerId = best.serverId,
                 commonName = commonName,
                 externalId = externalId,
-                issuedTo = "datagate android user $externalId device $installationId"
+                issuedTo = "datagate android user $externalId device $shortInstallationId"
             )
 
             vpnController.showStatus("CONFIG_RECEIVED", "size=${downloaded.content.size}")
 
             val configText = downloaded.content.toString(Charsets.UTF_8)
+            val patchedConfig = forceWssConfig(configText)
             Log.d("OpenVPN3", "OVPN FILE RECEIVED, size=${downloaded.content.size}")
 
-            vpnController.startWithConfig(configText)
+            vpnController.startWithConfig(patchedConfig)
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
             vpnController.showError("Connect failed: ${t.message ?: t.javaClass.simpleName}")
         } finally {
             isConnecting.set(false)
         }
+    }
+    private val BRIDGE_PORT = 41194
+    private fun forceWssConfig(original: String): String {
+        val lines = original
+            .replace("\r\n", "\n")
+            .split("\n")
+
+        val out = ArrayList<String>(lines.size + 2)
+
+        var remoteWritten = false
+        var protoWritten = false
+
+        for (raw in lines) {
+            val line = raw.trimEnd()
+            val lower = line.trimStart().lowercase()
+
+            when {
+                lower.startsWith("remote ") -> {
+                    if (!remoteWritten) {
+                        out.add("remote 127.0.0.1 $BRIDGE_PORT")
+                        remoteWritten = true
+                    }
+                    // drop all other remote lines
+                }
+
+                lower.startsWith("proto ") -> {
+                    out.add("proto tcp-client")
+                    protoWritten = true
+                }
+
+                else -> out.add(line)
+            }
+        }
+
+        if (!protoWritten) out.add(0, "proto tcp-client")
+        if (!remoteWritten) out.add(0, "remote 127.0.0.1 $BRIDGE_PORT")
+
+        return out.joinToString("\n").trimEnd() + "\n"
+    }
+
+    fun uuidToShort(uuid: String?): String {
+        if (uuid.isNullOrBlank()) {
+            error("UUID is null or blank")
+        }
+
+        val parsed = UUID.fromString(uuid)
+
+        val buffer = ByteBuffer.allocate(16)
+        buffer.putLong(parsed.mostSignificantBits)
+        buffer.putLong(parsed.leastSignificantBits)
+
+        return Base64.encodeToString(
+            buffer.array(),
+            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+        )
+    }
+
+    fun shortToUuid(value: String?): String {
+        if (value.isNullOrBlank()) {
+            error("Short UUID is null or blank")
+        }
+
+        val bytes = Base64.decode(
+            value,
+            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+        )
+
+        val buffer = ByteBuffer.wrap(bytes)
+        val uuid = UUID(buffer.long, buffer.long)
+
+        return uuid.toString()
     }
 }

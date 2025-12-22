@@ -58,6 +58,16 @@ class OpenVpn3Client(
 
         builder = service.Builder().apply {
             setSession("DataGate VPN")
+
+            // Full tunnel
+            addRoute("0.0.0.0", 0)
+
+            // DNS
+            addDnsServer("8.8.8.8")
+            addDnsServer("1.1.1.1")
+
+            // Important on many devices
+            setBlocking(true)
         }
 
         return builder != null
@@ -133,14 +143,20 @@ class OpenVpn3Client(
     }
 
     override fun tun_builder_set_dns_options(dns: DnsOptions): Boolean {
-        Log.d(TAG, "tun_builder_set_dns_options: ${dns.to_string()}")
-        // todo: parse here  dns.getServers() and call builder?.addDnsServer(...)
-        return true
+        return try {
+            builder?.addDnsServer("8.8.8.8")
+            builder?.addDnsServer("1.1.1.1")
+            true
+        } catch (t: Throwable) {
+            Log.e(TAG, "addDnsServer failed", t)
+            false
+        }
     }
 
     override fun tun_builder_set_mtu(mtu: Int): Boolean {
-        Log.d(TAG, "tun_builder_set_mtu($mtu)")
-        builder?.setMtu(mtu)
+        val safeMtu = mtu.coerceIn(1200, 1500)
+        Log.d(TAG, "tun_builder_set_mtu($mtu) -> $safeMtu")
+        builder?.setMtu(safeMtu)
         return true
     }
 
@@ -199,17 +215,15 @@ class OpenVpn3Client(
                 Log.e(TAG, "tun_builder_establish: establish() returned null")
                 -1
             } else {
-                // ВАЖНО:
-                // 1) detachFd() — отдаём владение fd в OpenVPN core
-                // 2) закрываем только оболочку ParcelFileDescriptor
+                Log.d(TAG, "tun_builder_establish: TUN established, pfd.fd=${pfd.fd}")
+
+                // For UI/debugging only (do NOT close pfd here)
+                onTunChanged(pfd)
+
                 val fd = pfd.detachFd()
                 pfd.close()
 
-                Log.d(TAG, "tun_builder_establish: TUN established, fd=$fd")
-
-                // Для UI, если хочешь что-то отметить
-                onTunChanged(null)
-
+                Log.d(TAG, "tun_builder_establish: detached fd=$fd")
                 fd
             }
         } catch (t: Throwable) {
