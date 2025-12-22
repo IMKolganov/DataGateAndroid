@@ -128,3 +128,4 @@ Thumbs.db
 # Version control leftovers
 ####################################
 vcs.xml
+keystore.*
