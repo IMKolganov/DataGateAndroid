@@ -10,7 +10,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.28.3/CMakeCCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeSystem.cmake"
-  "/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/CMakeLists.txt"
+  "/home/imkolganov/Android/DataGateAndroid/native-openvpn3/CMakeLists.txt"
   "/home/imkolganov/Android/Sdk/ndk/26.1.10909125/build/cmake/android-legacy.toolchain.cmake"
   "/home/imkolganov/Android/Sdk/ndk/26.1.10909125/build/cmake/android.toolchain.cmake"
   "/home/imkolganov/Android/Sdk/ndk/26.1.10909125/build/cmake/flags.cmake"

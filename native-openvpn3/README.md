@@ -16,7 +16,7 @@ Creates:
 ## 2. Build native libraries
 
 ```
-cd ~/Android/DataGateOpenVpn3
+cd ~/Android/DataGateAndroid
 
 export ANDROID_NDK_HOME="$HOME/Android/Sdk/ndk/26.1.10909125"
 

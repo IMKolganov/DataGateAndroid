@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/client/ovpncli.cpp" "CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o" "gcc" "CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o.d"
-  "/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp" "CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o" "gcc" "CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o.d"
+  "/home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/client/ovpncli.cpp" "CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o" "gcc" "CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o.d"
+  "/home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp" "CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o" "gcc" "CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/out/arm64-v8a/libovpncli.pdb"
-  "/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/out/arm64-v8a/libovpncli.so"
+  "/home/imkolganov/Android/DataGateAndroid/native-openvpn3/out/arm64-v8a/libovpncli.pdb"
+  "/home/imkolganov/Android/DataGateAndroid/native-openvpn3/out/arm64-v8a/libovpncli.so"
   "CMakeFiles/ovpncli.dir/out/swig/ovpncli_wrap.cxx.o"
   "CMakeFiles/ovpncli.dir/out/swig/ovpncli_wrap.cxx.o.d"
 )

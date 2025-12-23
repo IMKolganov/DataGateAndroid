@@ -4,7 +4,7 @@
 # compile CXX with /home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++
 CXX_DEFINES = -DASIO_STANDALONE -DFMT_HEADER_ONLY -DHAVE_LZ4 -DUSE_ASIO -DUSE_OPENSSL -Dovpncli_EXPORTS
 
-CXX_INCLUDES = -I/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3 -I/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/client -I/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/external/fmt/include -I/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/third_party/asio/asio/include -I/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/out/swig -I/home/imkolganov/Android/deps/arm64-v8a/openssl/include -I/home/imkolganov/Android/deps/arm64-v8a/lz4/include
+CXX_INCLUDES = -I/home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3 -I/home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/client -I/home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/external/fmt/include -I/home/imkolganov/Android/DataGateAndroid/native-openvpn3/third_party/asio/asio/include -I/home/imkolganov/Android/DataGateAndroid/native-openvpn3/out/swig -I/home/imkolganov/Android/deps/arm64-v8a/openssl/include -I/home/imkolganov/Android/deps/arm64-v8a/lz4/include
 
 CXX_FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu++20 -fPIC
 

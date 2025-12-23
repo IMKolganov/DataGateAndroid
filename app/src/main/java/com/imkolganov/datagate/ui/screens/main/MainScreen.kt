@@ -29,7 +29,7 @@ import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.settings.SettingsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
-import com.imkolganov.datagate.ui.theme.DataGateOpenVpn3Theme
+import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 enum class BottomTab {
@@ -126,7 +126,7 @@ private class PreviewStatsViewModel :
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    DataGateOpenVpn3Theme {
+    DataGateAndroidTheme {
         MainScreen(
             vpnState = VpnStatusUiState(),
             onRequestConnect = {},

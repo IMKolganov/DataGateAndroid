@@ -24,7 +24,7 @@ import com.imkolganov.datagate.ui. screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.access.AccessViewModelFactory
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModelFactory
-import com.imkolganov.datagate.ui.theme.DataGateOpenVpn3Theme
+import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import com.imkolganov.datagate.vpn.VpnConnectInteractor
 import com.imkolganov.datagate.vpn.VpnController
 import com.imkolganov.datagate.vpn.VpnStatusUiState
@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            DataGateOpenVpn3Theme {
+            DataGateAndroidTheme {
                 SystemBars()
                 AppRoot(
                     authViewModel = authViewModel,

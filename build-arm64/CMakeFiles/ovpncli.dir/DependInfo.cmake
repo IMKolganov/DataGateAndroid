@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/out/swig/ovpncli_wrap.cxx" "CMakeFiles/ovpncli.dir/out/swig/ovpncli_wrap.cxx.o" "gcc" "CMakeFiles/ovpncli.dir/out/swig/ovpncli_wrap.cxx.o.d"
+  "/home/imkolganov/Android/DataGateAndroid/native-openvpn3/out/swig/ovpncli_wrap.cxx" "CMakeFiles/ovpncli.dir/out/swig/ovpncli_wrap.cxx.o" "gcc" "CMakeFiles/ovpncli.dir/out/swig/ovpncli_wrap.cxx.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

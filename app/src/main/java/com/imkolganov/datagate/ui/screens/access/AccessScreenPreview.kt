@@ -2,13 +2,13 @@ package com.imkolganov.datagate.ui.screens.access
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.imkolganov.datagate.ui.theme.DataGateOpenVpn3Theme
+import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Preview(showBackground = true)
 @Composable
 fun AccessScreenPreview() {
-    DataGateOpenVpn3Theme {
+    DataGateAndroidTheme {
         AccessScreen(
             state = AccessContract.UiState(
                 isLoading = false,

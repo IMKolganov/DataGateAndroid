@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DataGateOpenVpn3"
+rootProject.name = "DataGateAndroid"
 include(":app")

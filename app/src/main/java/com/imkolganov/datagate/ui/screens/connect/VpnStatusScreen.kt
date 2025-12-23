@@ -1,7 +1,7 @@
 package com.imkolganov.datagate.ui.screens.connect
 
 import androidx.compose.ui.tooling.preview.Preview
-import com.imkolganov.datagate.ui.theme.DataGateOpenVpn3Theme
+import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -209,7 +209,7 @@ fun VpnStatusScreen(
 @Preview(showBackground = true)
 @Composable
 fun VpnStatusScreenPreview_Connected() {
-    DataGateOpenVpn3Theme {
+    DataGateAndroidTheme {
         VpnStatusScreen(
             state = VpnStatusUiState(
                 isConnectRequested = true,
@@ -224,7 +224,7 @@ fun VpnStatusScreenPreview_Connected() {
 @Preview(showBackground = true)
 @Composable
 fun VpnStatusScreenPreview_Connecting() {
-    DataGateOpenVpn3Theme {
+    DataGateAndroidTheme {
         VpnStatusScreen(
             state = VpnStatusUiState(
                 isConnectRequested = true,
@@ -239,7 +239,7 @@ fun VpnStatusScreenPreview_Connecting() {
 @Preview(showBackground = true)
 @Composable
 fun VpnStatusScreenPreview_Disconnected() {
-    DataGateOpenVpn3Theme {
+    DataGateAndroidTheme {
         VpnStatusScreen(
             state = VpnStatusUiState(
                 isConnectRequested = false,

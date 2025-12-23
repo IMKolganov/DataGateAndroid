@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3
+CMAKE_SOURCE_DIR = /home/imkolganov/Android/DataGateAndroid/native-openvpn3
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/imkolganov/Android/DataGateOpenVpn3/build-arm64
+CMAKE_BINARY_DIR = /home/imkolganov/Android/DataGateAndroid/build-arm64
 
 # Include any dependencies generated for this target.
 include CMakeFiles/ovpn3-core.dir/depend.make
@@ -70,32 +70,32 @@ include CMakeFiles/ovpn3-core.dir/progress.make
 include CMakeFiles/ovpn3-core.dir/flags.make
 
 CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o: CMakeFiles/ovpn3-core.dir/flags.make
-CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o: /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/client/ovpncli.cpp
+CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o: /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/client/ovpncli.cpp
 CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o: CMakeFiles/ovpn3-core.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/imkolganov/Android/DataGateOpenVpn3/build-arm64/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o"
-	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o -MF CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o.d -o CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o -c /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/client/ovpncli.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o"
+	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o -MF CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o.d -o CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o -c /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/client/ovpncli.cpp
 
 CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.i"
-	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/client/ovpncli.cpp > CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.i
+	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/client/ovpncli.cpp > CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.i
 
 CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.s"
-	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/client/ovpncli.cpp -o CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.s
+	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/client/ovpncli.cpp -o CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.s
 
 CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o: CMakeFiles/ovpn3-core.dir/flags.make
-CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o: /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp
+CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o: /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp
 CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o: CMakeFiles/ovpn3-core.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/imkolganov/Android/DataGateOpenVpn3/build-arm64/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o"
-	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o -MF CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o.d -o CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o -c /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o"
+	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o -MF CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o.d -o CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o -c /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp
 
 CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.i"
-	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp > CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.i
+	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp > CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.i
 
 CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.s"
-	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp -o CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.s
+	/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android24 --sysroot=/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/sysroot $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/crypto/data_epoch.cpp -o CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.s
 
 # Object files for target ovpn3-core
 ovpn3__core_OBJECTS = \
@@ -109,7 +109,7 @@ libovpn3-core.a: CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o
 libovpn3-core.a: CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o
 libovpn3-core.a: CMakeFiles/ovpn3-core.dir/build.make
 libovpn3-core.a: CMakeFiles/ovpn3-core.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/imkolganov/Android/DataGateOpenVpn3/build-arm64/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libovpn3-core.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libovpn3-core.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/ovpn3-core.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ovpn3-core.dir/link.txt --verbose=$(VERBOSE)
 
@@ -122,6 +122,6 @@ CMakeFiles/ovpn3-core.dir/clean:
 .PHONY : CMakeFiles/ovpn3-core.dir/clean
 
 CMakeFiles/ovpn3-core.dir/depend:
-	cd /home/imkolganov/Android/DataGateOpenVpn3/build-arm64 && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3 /home/imkolganov/Android/DataGateOpenVpn3/native-openvpn3 /home/imkolganov/Android/DataGateOpenVpn3/build-arm64 /home/imkolganov/Android/DataGateOpenVpn3/build-arm64 /home/imkolganov/Android/DataGateOpenVpn3/build-arm64/CMakeFiles/ovpn3-core.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/imkolganov/Android/DataGateAndroid/build-arm64 && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/imkolganov/Android/DataGateAndroid/native-openvpn3 /home/imkolganov/Android/DataGateAndroid/native-openvpn3 /home/imkolganov/Android/DataGateAndroid/build-arm64 /home/imkolganov/Android/DataGateAndroid/build-arm64 /home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles/ovpn3-core.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/ovpn3-core.dir/depend
 
