@@ -1,5 +1,7 @@
-package com.imkolganov.datagate.ui
+package com.imkolganov.datagate.ui.screens.connect
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.imkolganov.datagate.ui.theme.DataGateOpenVpn3Theme
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -18,6 +20,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,11 +41,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.imkolganov.datagate.vpn.VpnStatusUiState
-import com.imkolganov.datagate.ui.theme.DataGateOpenVpn3Theme
 
 @Composable
 fun VpnStatusScreen(
@@ -76,22 +78,17 @@ fun VpnStatusScreen(
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
 
-    // Pulse animation for "connecting" state
     val infiniteTransition = rememberInfiniteTransition(label = "vpnPulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 1.12f,
         animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 900,
-                easing = FastOutSlowInEasing
-            ),
+            animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "vpnPulseScale"
     )
 
-    // Smooth scale change when switching states
     val targetScale = if (isConnecting) pulseScale else 1f
     val animatedScale by animateFloatAsState(
         targetValue = targetScale,
@@ -100,12 +97,10 @@ fun VpnStatusScreen(
     )
 
     val onClick = {
-        if (isConnected || isConnecting) {
-            onDisconnectClick()
-        } else {
-            onConnectClick()
-        }
+        if (isConnected || isConnecting) onDisconnectClick() else onConnectClick()
     }
+
+    val scrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -114,10 +109,13 @@ fun VpnStatusScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = "DataGate OpenVPN 3",
                 style = MaterialTheme.typography.headlineSmall
@@ -125,15 +123,14 @@ fun VpnStatusScreen(
 
             Card(
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .widthIn(max = 520.dp)
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -144,10 +141,7 @@ fun VpnStatusScreen(
                             .background(mainColor)
                     )
 
-                    Text(
-                        text = statusTitle,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Text(text = statusTitle, style = MaterialTheme.typography.titleMedium)
 
                     Text(
                         text = statusSubtitle,
@@ -159,7 +153,6 @@ fun VpnStatusScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Circular animated button
             Box(
                 modifier = Modifier
                     .size(180.dp)
@@ -174,17 +167,13 @@ fun VpnStatusScreen(
                     .clickable(onClick = onClick),
                 contentAlignment = Alignment.Center
             ) {
-                // Inner gradient circle
                 Box(
                     modifier = Modifier
                         .size(140.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.radialGradient(
-                                colors = listOf(
-                                    mainColor,
-                                    mainColor.copy(alpha = 0.7f)
-                                )
+                                colors = listOf(mainColor, mainColor.copy(alpha = 0.7f))
                             )
                         ),
                     contentAlignment = Alignment.Center
@@ -211,6 +200,8 @@ fun VpnStatusScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

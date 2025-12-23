@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.stats.FakeStatsApiClient
-import com.imkolganov.datagate.ui.VpnStatusScreen
+import com.imkolganov.datagate.ui.screens.connect.VpnStatusScreen
 import com.imkolganov.datagate.ui.screens.access.AccessContract
 import com.imkolganov.datagate.ui.screens.access.AccessScreen
 import com.imkolganov.datagate.ui.screens.access.AccessViewModel
