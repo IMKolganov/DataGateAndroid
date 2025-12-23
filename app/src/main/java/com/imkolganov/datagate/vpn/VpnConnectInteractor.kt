@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.vpn
 
 import OvpnApiClient
+import android.net.Uri
 import android.util.Log
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
 import java.util.concurrent.atomic.AtomicBoolean
@@ -63,7 +64,11 @@ class VpnConnectInteractor(
             val patchedConfig = forceWssConfig(configText)
             Log.d("OpenVPN3", "OVPN FILE RECEIVED, size=${downloaded.content.size}")
 
-            vpnController.startWithConfig(patchedConfig)
+            val apiUrl = best.apiUrl
+                ?: error("Best server apiUrl is null")
+
+            val wssUrl = httpsToWssProxy(apiUrl)
+            vpnController.startWithConfig(patchedConfig, wssUrl)
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
             vpnController.showError("Connect failed: ${t.message ?: t.javaClass.simpleName}")
@@ -141,5 +146,24 @@ class VpnConnectInteractor(
         val uuid = UUID(buffer.long, buffer.long)
 
         return uuid.toString()
+    }
+
+
+    fun httpsToWssProxy(baseUrl: String): String {
+        val uri = Uri.parse(baseUrl)
+
+        val scheme = when (uri.scheme) {
+            "https" -> "wss"
+            "http" -> "ws"
+            else -> throw IllegalArgumentException("Unsupported scheme: ${uri.scheme}")
+        }
+
+        return uri.buildUpon()
+            .scheme(scheme)
+            .path("/api/proxy")
+            .clearQuery()
+            .fragment(null)
+            .build()
+            .toString()
     }
 }

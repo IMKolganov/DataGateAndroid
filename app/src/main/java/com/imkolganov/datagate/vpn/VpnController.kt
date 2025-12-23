@@ -19,6 +19,7 @@ class VpnController(
 ) {
     private var isReceiverRegistered = false
     private var pendingConfigText: String? = null
+    private var pendingWssLink: String? = null
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
 
     companion object {
@@ -74,11 +75,12 @@ class VpnController(
         onStateChange(next)
     }
 
-    fun startWithConfig(configText: String) {
+    fun startWithConfig(configText: String, wssLink: String) {
         // Do not block on isConnectRequested here because it may already be set by pre-connect flow.
         // The real connection state will be driven by OpenVPN core events.
 
         pendingConfigText = configText
+        pendingWssLink = wssLink
 
         Log.d(TAG, "Calling VpnService.prepare()")
         val prepareIntent = VpnService.prepare(activity)
@@ -97,20 +99,23 @@ class VpnController(
         }
 
         Log.d(TAG, "VPN permission already granted, starting service...")
-        startServiceWithConfig(configText)
+        startServiceWithConfig(configText, wssLink)
     }
 
     fun onPermissionGranted() {
         Log.d(TAG, "VPN permission granted from launcher")
 
         val cfg = pendingConfigText
+        val wss = pendingWssLink
         pendingConfigText = null
-        if (cfg.isNullOrBlank()) {
-            showError("VPN permission granted, but config is missing")
+        pendingWssLink = null
+
+        if (cfg.isNullOrBlank() || wss.isNullOrBlank()) {
+            showError("VPN permission granted, but config or WSS link is missing")
             return
         }
 
-        startServiceWithConfig(cfg)
+        startServiceWithConfig(cfg, wss)
     }
 
     fun onPermissionDenied() {
@@ -147,10 +152,11 @@ class VpnController(
         activity.sendBroadcast(testIntent)
     }
 
-    private fun startServiceWithConfig(configText: String) {
+    private fun startServiceWithConfig(configText: String, wssLink: String) {
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_CONNECT
             putExtra(OpenVpn3Service.EXTRA_OVPN_CONFIG, configText)
+            putExtra(OpenVpn3Service.EXTRA_WSS_URL, wssLink)
         }
 
         startServiceCompat(intent)

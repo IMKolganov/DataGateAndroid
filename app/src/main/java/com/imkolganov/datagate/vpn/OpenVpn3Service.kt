@@ -32,6 +32,7 @@ class OpenVpn3Service : VpnService() {
 
     companion object {
         const val EXTRA_OVPN_CONFIG = "com.imkolganov.datagate.vpn.EXTRA_OVPN_CONFIG"
+        const val EXTRA_WSS_URL = "com.imkolganov.datagate.vpn.EXTRA_WSS_URL"
 
         init {
             System.loadLibrary("ovpncli")
@@ -55,7 +56,6 @@ class OpenVpn3Service : VpnService() {
         const val ACTION_PAUSE = "com.imkolganov.datagate.vpn.PAUSE"
         const val ACTION_RESUME = "com.imkolganov.datagate.vpn.RESUME"
     }
-    private val WSS_URL = "wss://your-wss"
     private val BRIDGE_PORT = 41194
     private var bridge: TcpToWssBridge? = null
     private var bridgeHttp: okhttp3.OkHttpClient? = null
@@ -172,18 +172,17 @@ class OpenVpn3Service : VpnService() {
         }
     }
 
-    private fun startVpn(configText: String) {
+    private fun startVpn(configText: String, wssUrl: String) {
         stopVpnInternal()
 
         val http = buildProtectedOkHttp(this@OpenVpn3Service)
-
 
         bridgeHttp = http
 
         bridge = TcpToWssBridge(
             service = this@OpenVpn3Service,
             port = BRIDGE_PORT,
-            wssUrl = WSS_URL,
+            wssUrl = wssUrl,
             http = http
         ).also { it.start() }
 
@@ -312,10 +311,13 @@ class OpenVpn3Service : VpnService() {
         when (action) {
             ACTION_CONNECT -> {
                 isStopping = false
+
                 val configText = intent.getStringExtra(EXTRA_OVPN_CONFIG)
-                if (configText.isNullOrBlank()) {
-                    Log.e(TAG, "ACTION_CONNECT missing config")
-                    broadcastStatus("ERROR", "Missing config")
+                val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
+
+                if (configText.isNullOrBlank() || wssUrl.isNullOrBlank()) {
+                    Log.e(TAG, "ACTION_CONNECT missing config or WSS URL")
+                    broadcastStatus("ERROR", "Missing config or WSS URL")
                     stopSelf()
                     return START_NOT_STICKY
                 }
@@ -328,7 +330,7 @@ class OpenVpn3Service : VpnService() {
 
                 connectInProgress = true
                 startForeground(NOTIFICATION_ID, buildNotification("Connecting..."))
-                startVpn(configText)
+                startVpn(configText, wssUrl)
             }
 
             ACTION_DISCONNECT -> {

@@ -30,9 +30,11 @@ class OpenVpnServersRepository(
             if (server.isOnline != true) return@mapNotNull null
             if (server.isEnableWss != true) return@mapNotNull null
 
+
             BestServerResult(
                 serverId = id,
                 name = server.serverName?.trim().takeUnless { it.isNullOrBlank() } ?: "Server #$id",
+                apiUrl = server.apiUrl,
                 countConnectedClients = (item.countConnectedClients ?: 0).coerceAtLeast(0),
                 isDefault = false
             )
