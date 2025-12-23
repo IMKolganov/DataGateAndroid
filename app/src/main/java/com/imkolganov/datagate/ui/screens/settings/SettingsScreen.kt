@@ -2,6 +2,7 @@ package com.imkolganov.datagate.ui.screens.settings
 
 import android.content.ClipData
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,10 +28,13 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.identity.InstallationIdDataStoreProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 @Composable
@@ -42,17 +46,26 @@ fun SettingsScreen(
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
 
-    val authInfo = tokenStore.getAuthInfo()
+    var authInfo by remember { mutableStateOf(tokenStore.getAuthInfo()) }
+
+    LaunchedEffect(Unit) {
+        authInfo = withContext(Dispatchers.IO) { tokenStore.getAuthInfo() }
+    }
 
     var installationId by remember { mutableStateOf<String?>(null) }
     var copiedMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        val files = getCrashFiles(context.applicationContext)
-        crashFilesCount = files.size
-        installationId = InstallationIdDataStoreProvider.getOrCreate(
-            context.applicationContext
-        )
+        val appContext = context.applicationContext
+
+        val result = withContext(Dispatchers.IO) {
+            val files = getCrashFiles(appContext)
+            val id = InstallationIdDataStoreProvider.getOrCreate(appContext)
+            files.size to id
+        }
+
+        crashFilesCount = result.first
+        installationId = result.second
     }
 
     Column(
@@ -159,8 +172,7 @@ fun SettingsScreen(
                             return@Button
                         }
 
-                        crashShareMessage = null
-                        shareCrashFiles(context, files)
+                        crashShareMessage = shareCrashFiles(context.applicationContext, files)
                     },
                     enabled = crashFilesCount > 0
                 ) {
@@ -193,20 +205,45 @@ private fun getCrashFiles(context: android.content.Context): List<File> {
         ?: emptyList()
 }
 
-private fun shareCrashFiles(context: android.content.Context, files: List<File>) {
-    val uris = ArrayList<android.net.Uri>(files.size)
-    val authority = "${context.packageName}.fileprovider"
+private fun shareCrashFiles(
+    context: android.content.Context,
+    files: List<File>
+): String? {
+    val appContext = context.applicationContext
+    val authority = "${BuildConfig.APPLICATION_ID}.fileprovider"
 
-    for (f in files) {
-        val uri = FileProvider.getUriForFile(context, authority, f)
-        uris.add(uri)
+    val shareDir = File(appContext.cacheDir, "share/crash").apply { mkdirs() }
+    val uris = ArrayList<Uri>(files.size)
+
+    for (src in files) {
+        try {
+            val dst = File(shareDir, src.name)
+            src.copyTo(dst, overwrite = true)
+
+            val uri = FileProvider.getUriForFile(appContext, authority, dst)
+            uris.add(uri)
+        } catch (e: Exception) {
+            android.util.Log.e("CrashShare", "Failed to prepare share file: ${src.absolutePath}", e)
+        }
     }
 
-    val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-        type = "text/plain"
+    if (uris.isEmpty()) return "No shareable files."
+
+    val sendIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        type = "*/*"
         putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    context.startActivity(Intent.createChooser(intent, "Share error logs"))
+    val chooserIntent = Intent.createChooser(sendIntent, "Share error logs").apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    return try {
+        appContext.startActivity(chooserIntent)
+        null
+    } catch (e: Exception) {
+        android.util.Log.e("CrashShare", "Failed to start chooser", e)
+        e.message ?: "Failed to share files."
+    }
 }
