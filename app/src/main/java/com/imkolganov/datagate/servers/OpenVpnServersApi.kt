@@ -101,6 +101,7 @@ class OpenVpnServersApi(
             apiUrl = o.optStringOrNull("apiUrl"),
             latitude = o.optDoubleOrNull("latitude"),
             longitude = o.optDoubleOrNull("longitude"),
+            isEnableWss = o.optBooleanOrNull("isEnableWss"),
             createDate = o.optStringOrNull("createDate"),
             lastUpdate = o.optStringOrNull("lastUpdate")
         )

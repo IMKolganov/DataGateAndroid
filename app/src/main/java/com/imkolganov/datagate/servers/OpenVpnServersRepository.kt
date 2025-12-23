@@ -27,23 +27,19 @@ class OpenVpnServersRepository(
             val server = item.openVpnServerResponses?.openVpnServer ?: return@mapNotNull null
 
             val id = server.id ?: return@mapNotNull null
-            if (id != 63) return@mapNotNull null
             if (server.isOnline != true) return@mapNotNull null
-
-            val name = server.serverName?.trim().orEmpty()
+            if (server.isEnableWss != true) return@mapNotNull null
 
             BestServerResult(
                 serverId = id,
-                name = name.ifBlank { "Server #$id" },
+                name = server.serverName?.trim().takeUnless { it.isNullOrBlank() } ?: "Server #$id",
                 countConnectedClients = (item.countConnectedClients ?: 0).coerceAtLeast(0),
-                isDefault = true
+                isDefault = false
             )
         }
 
-        if (candidates.isEmpty()) {
-            throw IllegalStateException("Server 63 is offline or not found")
-        }
-
-        return candidates.first()
+        return candidates
+            .minByOrNull { it.countConnectedClients }
+            ?: throw IllegalStateException("No online WSS servers available")
     }
 }

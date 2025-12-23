@@ -8,6 +8,7 @@ data class OpenVpnServer(
     val apiUrl: String?,
     val latitude: Double?,
     val longitude: Double?,
+    val isEnableWss: Boolean?,
     val createDate: String?,
     val lastUpdate: String?
 )
