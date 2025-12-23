@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.auth.AuthViewModel
 
 @Composable
@@ -26,6 +27,8 @@ fun LoginScreenContent(
     errorMessage: String?,
     onLoginClick: () -> Unit
 ) {
+    val versionLabel = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+
     Scaffold { innerPadding ->
         Surface(
             modifier = Modifier
@@ -34,12 +37,16 @@ fun LoginScreenContent(
             color = MaterialTheme.colorScheme.background
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
+
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("DataGate", style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        text = "DataGate",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
 
                     if (isLoading) {
                         CircularProgressIndicator()
@@ -49,6 +56,14 @@ fun LoginScreenContent(
                         }
                     }
 
+                    Text(
+                        text = "Welcome to the VPN service.\nFor any questions, feel free to contact me at imkolganov@gmail.com.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+
                     if (!errorMessage.isNullOrBlank()) {
                         Text(
                             text = errorMessage,
@@ -57,6 +72,15 @@ fun LoginScreenContent(
                         )
                     }
                 }
+
+                Text(
+                    text = versionLabel,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
