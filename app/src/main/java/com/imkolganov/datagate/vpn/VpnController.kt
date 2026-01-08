@@ -170,7 +170,9 @@ class VpnController(
     }
 
     private fun startServiceCompat(intent: Intent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val isConnect = intent.action == OpenVpn3Service.ACTION_CONNECT
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isConnect) {
             activity.startForegroundService(intent)
         } else {
             activity.startService(intent)

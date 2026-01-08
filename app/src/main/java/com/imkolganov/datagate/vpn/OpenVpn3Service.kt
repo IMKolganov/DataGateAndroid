@@ -85,10 +85,6 @@ class OpenVpn3Service : VpnService() {
         super.onDestroy()
     }
 
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//
-//    }
-
     private fun buildNotification(text: String): Notification {
         val disconnectIntent = Intent(this, OpenVpn3Service::class.java).apply {
             action = ACTION_DISCONNECT
@@ -302,11 +298,14 @@ class OpenVpn3Service : VpnService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
-        Log.d(TAG, "onStartCommand: action=$action")
+        val shouldBeForeground = action == ACTION_CONNECT || hasActiveSession || connectInProgress
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            startForeground(NOTIFICATION_ID, buildNotification("Running..."))
-//        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && shouldBeForeground) {
+            startForeground(
+                NOTIFICATION_ID,
+                buildNotification(if (hasActiveSession) "Connected" else "Connecting...")
+            )
+        }
 
         when (action) {
             ACTION_CONNECT -> {
@@ -357,11 +356,20 @@ class OpenVpn3Service : VpnService() {
                 stopSelf()
             }
 
-
-
             ACTION_QUERY_STATUS -> {
-                Log.d(TAG, "ACTION_QUERY_STATUS received")
-                broadcastStatus(lastEventName, lastEventInfo)
+                val name = when {
+                    hasActiveSession -> "CONNECTED"
+                    connectInProgress -> "CONNECTING"
+                    else -> "DISCONNECTED"
+                }
+                val info = when {
+                    hasActiveSession -> "Session active"
+                    connectInProgress -> "Connecting..."
+                    else -> "No active session"
+                }
+
+                broadcastStatus(name, info)
+                stopSelf()
             }
 
             ACTION_PAUSE -> {

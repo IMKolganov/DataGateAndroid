@@ -6,7 +6,9 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +20,6 @@ import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.identity.InstallationIdDataStoreProvider
 import com.imkolganov.datagate.ui.AppRoot
-import com.imkolganov.datagate.ui.SystemBars
 import com.imkolganov.datagate.ui.screens.access.AccessRepositoryImpl
 import com.imkolganov.datagate.ui. screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.access.AccessViewModelFactory
@@ -66,6 +67,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                lightScrim = 0xFFFFFFFF.toInt(),
+                darkScrim = 0xFF000000.toInt()
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                lightScrim = 0xFFFFFFFF.toInt(),
+                darkScrim = 0xFF000000.toInt()
+            )
+        )
 
         requestNotificationsPermissionIfNeeded()
 
@@ -116,7 +128,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DataGateAndroidTheme {
-                SystemBars()
                 AppRoot(
                     authViewModel = authViewModel,
                     tokenStore = graph.tokenStore,
