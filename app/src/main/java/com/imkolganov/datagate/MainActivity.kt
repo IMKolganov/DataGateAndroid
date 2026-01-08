@@ -79,7 +79,8 @@ class MainActivity : ComponentActivity() {
         graph = AppGraph(
             activity = this,
             appContext = applicationContext,
-            vpnController = vpnController
+            vpnController = vpnController,
+            getInstallationId = { installationId },
         )
 
         authViewModel = AuthModule.createAuthViewModel(

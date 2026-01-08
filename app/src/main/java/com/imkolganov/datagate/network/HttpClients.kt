@@ -3,8 +3,7 @@ package com.imkolganov.datagate.network
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.http.AuthHeaderInterceptor
 import com.imkolganov.datagate.auth.http.BackendAuthApi
-import com.imkolganov.datagate.auth.http.GoogleIdTokenProvider
-import com.imkolganov.datagate.auth.http.GoogleReLoginAuthenticator
+import com.imkolganov.datagate.auth.http.RefreshTokenAuthenticator
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
@@ -18,18 +17,20 @@ object HttpClients {
 
     fun createAuth(
         tokenStore: TokenStore,
-        idTokenProvider: GoogleIdTokenProvider,
-        backendAuthApi: BackendAuthApi
+        backendAuthApi: BackendAuthApi,
+        deviceIdProvider: () -> String?,
+        userAgentProvider: () -> String?
     ): OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(AuthHeaderInterceptor(tokenStore))
             .authenticator(
-                GoogleReLoginAuthenticator(
+                RefreshTokenAuthenticator(
                     tokenStore = tokenStore,
-                    idTokenProvider = idTokenProvider,
-                    backendAuthApi = backendAuthApi
+                    backendAuthApi = backendAuthApi,
+                    deviceIdProvider = deviceIdProvider,
+                    userAgentProvider = userAgentProvider
                 )
             )
             .build()

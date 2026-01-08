@@ -4,7 +4,7 @@ import org.json.JSONObject
 
 fun JSONObject.optStringOrNull(name: String): String? {
     if (!has(name) || isNull(name)) return null
-    return optString(name, null)
+    return optString(name)
 }
 
 fun JSONObject.optIntOrNull(name: String): Int? {
