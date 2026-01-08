@@ -42,7 +42,7 @@ open class StatsApiClient(
             .build()
 
         return http.executeSuspending(request).use { resp ->
-            val body = resp.body?.string().orEmpty()
+            val body = resp.body.string().orEmpty()
             if (resp.code !in 200..299) {
                 throw IOException("Request failed: ${resp.code} ${resp.message}. Body=$body")
             }

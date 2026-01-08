@@ -56,7 +56,7 @@ class OvpnApiClient(
         return http.executeSuspending(request).use { resp ->
             when (resp.code) {
                 200 -> {
-                    val rawText = resp.body?.string().orEmpty()
+                    val rawText = resp.body.string().orEmpty()
                     val obj = JSONObject(rawText)
                     val data = obj.getJSONObject("data")
 
@@ -74,12 +74,12 @@ class OvpnApiClient(
                 }
                 404 -> null
                 400 -> {
-                    val err = resp.body?.string().orEmpty()
+                    val err = resp.body.string().orEmpty()
                     if (isNotFoundApiMessage(err)) null
                     else throw IOException("Download failed: ${resp.code} ${resp.message}. Body=$err")
                 }
                 else -> {
-                    val err = resp.body?.string().orEmpty()
+                    val err = resp.body.string().orEmpty()
                     throw IOException("Download failed: ${resp.code} ${resp.message}. Body=$err")
                 }
             }
@@ -122,7 +122,7 @@ class OvpnApiClient(
 
         http.executeSuspending(request).use { resp ->
             if (resp.code !in 200..299) {
-                val err = resp.body?.string().orEmpty()
+                val err = resp.body.string().orEmpty()
                 throw IOException("Create failed: ${resp.code} ${resp.message}. Body=$err")
             }
         }

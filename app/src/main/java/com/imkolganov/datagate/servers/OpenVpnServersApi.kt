@@ -33,7 +33,7 @@ class OpenVpnServersApi(
 
         http.newCall(req).execute().use { resp ->
             val code = resp.code
-            val body = resp.body?.string().orEmpty()
+            val body = resp.body.string().orEmpty()
 
             if (code !in 200..299) {
                 throw IOException("Request failed: HTTP $code, body=$body")
@@ -47,7 +47,7 @@ class OpenVpnServersApi(
         val root = JSONObject(body)
 
         val success = root.optBoolean("success", false)
-        val message = root.optString("message", null)
+        val message = root.optString("message")
 
         val dataObj = root.optJSONObject("data")
         val list = if (dataObj != null) {

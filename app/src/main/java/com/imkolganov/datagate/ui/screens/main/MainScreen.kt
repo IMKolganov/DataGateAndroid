@@ -103,13 +103,6 @@ fun MainScreen(
     }
 }
 
-private class PreviewTokenStore : TokenStore {
-    private var token: String? = null
-    override fun getAccessToken(): String? = token
-    override fun saveAccessToken(token: String) { this.token = token }
-    override fun clear() { token = null }
-}
-
 private class PreviewAccessViewModel : AccessViewModel(
     repo = object : com.imkolganov.datagate.ui.screens.access.AccessRepository {
         override suspend fun getServers(): List<AccessContract.ServerItem> = emptyList()
@@ -136,5 +129,29 @@ fun MainScreenPreview() {
             accessViewModel = PreviewAccessViewModel(),
             statsViewModel = PreviewStatsViewModel()
         )
+    }
+}
+
+
+private class PreviewTokenStore : TokenStore {
+    private var accessToken: String? = null
+    private var refreshToken: String? = null
+    private var accessExpiration: String? = null
+    private var refreshExpiration: String? = null
+
+    override fun getAccessToken(): String? = accessToken
+    override fun saveAccessToken(token: String) { accessToken = token }
+
+    override fun getRefreshToken(): String? = refreshToken
+    override fun saveRefreshToken(token: String) { refreshToken = token }
+
+    override fun saveAccessTokenExpiration(value: String) { accessExpiration = value }
+    override fun saveRefreshTokenExpiration(value: String?) { refreshExpiration = value }
+
+    override fun clear() {
+        accessToken = null
+        refreshToken = null
+        accessExpiration = null
+        refreshExpiration = null
     }
 }
