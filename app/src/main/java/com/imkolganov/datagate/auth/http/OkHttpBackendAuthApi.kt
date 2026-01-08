@@ -1,6 +1,11 @@
+
 package com.imkolganov.datagate.auth.http
 
 import com.imkolganov.datagate.configs.ApiConfig
+import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
+import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
+import com.imkolganov.datagate.model.auth.RefreshRequestDto
+import com.imkolganov.datagate.model.auth.RefreshResponseDto
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -32,10 +37,10 @@ class OkHttpBackendAuthApi(
             .build()
 
         val resp = http.newCall(req).execute()
-        resp.use {
-            val raw = it.body?.string().orEmpty()
-            if (it.code !in 200..299) {
-                throw IOException("google-login failed: ${it.code} ${it.message}. Body=$raw")
+        resp.use { r ->
+            val raw = r.body.string()
+            if (r.code !in 200..299) {
+                throw IOException("google-login failed: ${r.code} ${r.message}. Body=$raw")
             }
 
             val obj = JSONObject(raw)
@@ -43,15 +48,59 @@ class OkHttpBackendAuthApi(
 
             val token = data.getString("token")
             val expirationIso = data.getString("expiration")
-
-            val expEpochSeconds = parseIsoToEpochSeconds(expirationIso)
-                ?: throw IOException("Invalid expiration format: $expirationIso")
+            val refreshToken = data.optStringOrNull("refreshToken")
+            val refreshExpirationIso = data.optStringOrNull("refreshExpiration")
 
             return GoogleLoginResponseDto(
                 token = token,
-                expirationEpochSeconds = expEpochSeconds
+                expiration = expirationIso,
+                refreshToken = refreshToken,
+                refreshExpiration = refreshExpirationIso
             )
         }
+    }
+
+    override suspend fun refresh(request: RefreshRequestDto): RefreshResponseDto {
+        val url = joinUrl(baseUrl, ApiConfig.REFRESH_PATH)
+
+        val bodyJson = JSONObject()
+            .put("refreshToken", request.refreshToken)
+            .put("deviceId", request.deviceId)
+            .put("userAgent", request.userAgent)
+            .toString()
+
+        val req = Request.Builder()
+            .url(url)
+            .post(bodyJson.toRequestBody(jsonMediaType))
+            .build()
+
+        val resp = http.newCall(req).execute()
+        resp.use { r ->
+            val raw = r.body.string()
+            if (r.code !in 200..299) {
+                throw IOException("google-login failed: ${r.code} ${r.message}. Body=$raw")
+            }
+
+            val obj = JSONObject(raw)
+            val data = obj.getJSONObject("data")
+
+            val token = data.getString("token")
+            val expirationIso = data.getString("expiration")
+            val refreshToken = data.optStringOrNull("refreshToken")
+            val refreshExpirationIso = data.optStringOrNull("refreshExpiration")
+
+            return RefreshResponseDto(
+                token = token,
+                expiration = expirationIso,
+                refreshToken = refreshToken,
+                refreshExpiration = refreshExpirationIso
+            )
+        }
+    }
+
+    private fun JSONObject.optStringOrNull(key: String): String? {
+        val v = optString(key, "").trim()
+        return v.takeIf { it.isNotEmpty() }
     }
 
     private fun parseIsoToEpochSeconds(iso: String): Long? {

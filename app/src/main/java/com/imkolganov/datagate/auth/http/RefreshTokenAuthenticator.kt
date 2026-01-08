@@ -1,6 +1,8 @@
 package com.imkolganov.datagate.auth.http
 
 import com.imkolganov.datagate.auth.TokenStore
+import com.imkolganov.datagate.configs.ApiConfig
+import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -9,16 +11,20 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 
-class GoogleReLoginAuthenticator(
+class RefreshTokenAuthenticator(
     private val tokenStore: TokenStore,
-    private val idTokenProvider: GoogleIdTokenProvider,
-    private val backendAuthApi: BackendAuthApi
+    private val backendAuthApi: BackendAuthApi,
+    private val deviceIdProvider: () -> String?,
+    private val userAgentProvider: () -> String?
 ) : Authenticator {
 
     private val mutex = Mutex()
 
     override fun authenticate(route: Route?, response: Response): Request? {
         if (responseCount(response) >= 2) return null
+
+        val path = response.request.url.encodedPath
+        if (path.endsWith(ApiConfig.REFRESH_PATH)) return null
 
         return runBlocking {
             mutex.withLock {
@@ -33,24 +39,36 @@ class GoogleReLoginAuthenticator(
                         .build()
                 }
 
-                val idToken = idTokenProvider.getIdTokenOrNull()
-                if (idToken.isNullOrBlank()) {
+                val refresh = tokenStore.getRefreshToken()
+                if (refresh.isNullOrBlank()) {
                     tokenStore.clear()
                     return@runBlocking null
                 }
 
-                val login = try {
-                    backendAuthApi.googleLogin(GoogleLoginRequestDto(idToken))
+                val refreshed = try {
+                    backendAuthApi.refresh(
+                        RefreshRequestDto(
+                            refreshToken = refresh,
+                            deviceId = deviceIdProvider(),
+                            userAgent = userAgentProvider()
+                        )
+                    )
                 } catch (t: Throwable) {
-                    android.util.Log.e("Auth", "googleLogin failed", t)
+                    android.util.Log.e("Auth", "refresh failed", t)
                     tokenStore.clear()
                     return@runBlocking null
                 }
 
-                tokenStore.saveAccessToken(login.token)
+                tokenStore.saveAccessToken(refreshed.token)
+                tokenStore.saveAccessTokenExpiration(refreshed.expiration)
+
+                if (!refreshed.refreshToken.isNullOrBlank()) {
+                    tokenStore.saveRefreshToken(refreshed.refreshToken)
+                }
+                tokenStore.saveRefreshTokenExpiration(refreshed.refreshExpiration)
 
                 response.request.newBuilder()
-                    .header("Authorization", "Bearer ${login.token}")
+                    .header("Authorization", "Bearer ${refreshed.token}")
                     .build()
             }
         }

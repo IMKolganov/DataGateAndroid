@@ -3,14 +3,12 @@ package com.imkolganov.datagate
 import OvpnApiClient
 import android.app.Activity
 import android.content.Context
-import com.imkolganov.datagate.configs.AuthConfig
-import com.imkolganov.datagate.auth.AuthModule
-import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.SharedPrefsTokenStore
+import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.auth.http.BackendAuthApi
-import com.imkolganov.datagate.auth.http.GoogleIdTokenProvider
 import com.imkolganov.datagate.auth.http.OkHttpBackendAuthApi
+import com.imkolganov.datagate.configs.AuthConfig
 import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.servers.OpenVpnServersApi
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
@@ -22,7 +20,8 @@ import okhttp3.OkHttpClient
 class AppGraph(
     activity: Activity,
     appContext: Context,
-    private val vpnController: VpnController
+    private val vpnController: VpnController,
+    private val getInstallationId: () -> String?
 ) {
     val tokenStore: TokenStore = SharedPrefsTokenStore(appContext)
 
@@ -34,18 +33,12 @@ class AppGraph(
             baseUrl = AuthConfig.BACKEND_BASE_URL
         )
 
-    val idTokenProvider: GoogleIdTokenProvider =
-        AuthModule.createGoogleIdTokenProvider(
-            activity = activity,
-            context = appContext
-        )
-
-    val httpAuth: OkHttpClient =
-        HttpClients.createAuth(
-            tokenStore = tokenStore,
-            idTokenProvider = idTokenProvider,
-            backendAuthApi = backendAuthApi
-        )
+    val httpAuth = HttpClients.createAuth(
+        tokenStore = tokenStore,
+        backendAuthApi = backendAuthApi,
+        deviceIdProvider = { getInstallationId() },
+        userAgentProvider = { System.getProperty("http.agent") }
+    )
 
     val serversRepository: OpenVpnServersRepository =
         OpenVpnServersRepository(
@@ -76,5 +69,4 @@ class AppGraph(
             baseUrl = AuthConfig.BACKEND_BASE_URL,
             tokenProvider = { tokenStore.getAccessToken() }
         )
-
 }

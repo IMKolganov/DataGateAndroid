@@ -1,12 +1,11 @@
 package com.imkolganov.datagate.auth.http
 
-data class GoogleLoginRequestDto(val idToken: String)
-
-data class GoogleLoginResponseDto(
-    val token: String,
-    val expirationEpochSeconds: Long
-)
+import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
+import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
+import com.imkolganov.datagate.model.auth.RefreshRequestDto
+import com.imkolganov.datagate.model.auth.RefreshResponseDto
 
 interface BackendAuthApi {
     suspend fun googleLogin(request: GoogleLoginRequestDto): GoogleLoginResponseDto
+    suspend fun refresh(request: RefreshRequestDto): RefreshResponseDto
 }
