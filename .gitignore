@@ -129,3 +129,4 @@ Thumbs.db
 ####################################
 vcs.xml
 keystore.*
+env.properties

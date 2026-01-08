@@ -1,8 +1,33 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
+
+fun loadProps(path: String): Properties {
+    val p = Properties()
+    val f = rootProject.file(path)
+    if (f.exists()) {
+        FileInputStream(f).use { p.load(it) }
+    }
+    return p
+}
+
+val envProps = loadProps("env.properties")
+val keystoreProps = loadProps("keystore.properties")
+
+fun env(name: String): String =
+    envProps.getProperty(name)
+        ?: System.getenv(name)
+        ?: error("Missing env property: $name")
+
+fun ks(name: String): String =
+    keystoreProps.getProperty(name)
+        ?: System.getenv(name)
+        ?: error("Missing keystore property: $name")
 
 android {
     namespace = "com.imkolganov.datagate"
@@ -23,19 +48,52 @@ android {
         }
     }
 
-    sourceSets {
-        getByName("main") {
-            jniLibs.srcDirs("src/main/jniLibs")
+    // ---------- Signing (for ANY release variant: devRelease + prodRelease) ----------
+    signingConfigs {
+        create("release") {
+            storeFile = file(ks("storeFile"))
+            storePassword = ks("storePassword")
+            keyAlias = ks("keyAlias")
+            keyPassword = ks("keyPassword")
         }
     }
 
     buildTypes {
+        debug {
+            // default debug signing
+        }
+
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    // ---------- Flavors ----------
+    flavorDimensions += "env"
+
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            buildConfigField("String", "BACKEND_BASE_URL", "\"${env("DEV_BACKEND_URL")}\"")
+            buildConfigField("String", "WEB_CLIENT_ID", "\"${env("DEV_WEB_CLIENT_ID")}\"")
+        }
+
+        create("prod") {
+            dimension = "env"
+            buildConfigField("String", "BACKEND_BASE_URL", "\"${env("PROD_BACKEND_URL")}\"")
+            buildConfigField("String", "WEB_CLIENT_ID", "\"${env("PROD_WEB_CLIENT_ID")}\"")
+        }
+    }
+
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
         }
     }
 
@@ -49,6 +107,7 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -65,13 +124,16 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.material.icons.extended)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
     implementation(libs.androidx.credential.manager.core)
     implementation(libs.androidx.credential.manager.play)
     implementation(libs.googleid)

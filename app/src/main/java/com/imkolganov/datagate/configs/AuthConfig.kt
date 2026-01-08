@@ -1,9 +1,8 @@
 package com.imkolganov.datagate.configs
 
+import com.imkolganov.datagate.BuildConfig
+
 object AuthConfig {
-//    const val WEB_CLIENT_ID = "590050741192-ipp62ea6rajktop6ln9nim5skkqv299v.apps.googleusercontent.com"
-//    const val BACKEND_BASE_URL = "https://api.datagateapp.com"
-    //dev credentials
-    const val WEB_CLIENT_ID = "590050741192-sebfmt0ig52qct5kp19oit7mva42tj4d.apps.googleusercontent.com"
-    const val BACKEND_BASE_URL = "https://dev-api.datagateapp.com"
+    val WEB_CLIENT_ID: String = BuildConfig.WEB_CLIENT_ID
+    val BACKEND_BASE_URL: String = BuildConfig.BACKEND_BASE_URL
 }
