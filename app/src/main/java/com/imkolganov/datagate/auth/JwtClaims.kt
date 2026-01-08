@@ -20,7 +20,7 @@ object JwtClaimsReader {
 
         val parts = token.split(".")
         if (parts.size < 2) {
-            return JwtClaims(null, null,null, null, null)
+            return JwtClaims(null, null, null, null, null)
         }
 
         val payloadJson = try {
@@ -37,27 +37,27 @@ object JwtClaimsReader {
         }
 
         val userId = firstNonBlank(
-            obj.optString("nameid", null),
-            obj.optString("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", null)
+            obj.optStringOrNull("nameid"),
+            obj.optStringOrNull("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
         )
 
         val role = firstNonBlank(
-            obj.optString("role", null),
-            obj.optString("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", null)
+            obj.optStringOrNull("role"),
+            obj.optStringOrNull("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
         )
 
         val displayName = firstNonBlank(
-            obj.optString("displayName", null),
-            obj.optString("unique_name", null),
-            obj.optString("name", null)
+            obj.optStringOrNull("displayName"),
+            obj.optStringOrNull("unique_name"),
+            obj.optStringOrNull("name")
         )
 
         val externalId = firstNonBlank(
-            obj.optString("externalId", null),
-            obj.optString("sub", null)
+            obj.optStringOrNull("externalId"),
+            obj.optStringOrNull("sub")
         )
 
-        val email = obj.optString("email", null)
+        val email = obj.optStringOrNull("email")
 
         return JwtClaims(
             userId = userId,
@@ -74,7 +74,12 @@ object JwtClaimsReader {
         if (pad != 0) {
             normalized += "=".repeat(4 - pad)
         }
-        return Base64.decode(normalized, Base64.DEFAULT)
+        return Base64.decode(normalized, Base64.NO_WRAP)
+    }
+
+    private fun JSONObject.optStringOrNull(key: String): String? {
+        val v = optString(key, "").trim()
+        return v.takeIf { it.isNotEmpty() }
     }
 
     private fun firstNonBlank(vararg values: String?): String? {
