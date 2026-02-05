@@ -1,3 +1,4 @@
 [submodule "native-openvpn3/openvpn3"]
     path = native-openvpn3/openvpn3
     url = <PASTE_URL_FROM_REMOTE_HERE>
+	ignore = dirty
