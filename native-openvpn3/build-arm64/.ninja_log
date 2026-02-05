@@ -1,6 +1,0 @@
-# ninja log v5
-1	957	1765148095774096180	CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o	73727cab3f6981b4
-1	1489	1765148096300116830	CMakeFiles/ovpncli.dir/out/swig/ovpncli_wrap.cxx.o	9cc51a29e262d1e
-1	5820	1765148100581285131	CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o	cc1d090a08590268
-5820	5845	1765148100665288437	libovpn3-core.a	804fa82c33cca8dd
-5845	5912	1765148100729290956	/home/imkolganov/Android/DataGateAndroid/native-openvpn3/out/arm64-v8a/libovpncli.so	df6c612fe57236e1
