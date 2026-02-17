@@ -1,0 +1,4 @@
+/home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles/ovpn3-core.dir
+/home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles/ovpncli.dir
+/home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles/edit_cache.dir
+/home/imkolganov/Android/DataGateAndroid/build-arm64/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar qc libovpn3-core.a "CMakeFiles/ovpn3-core.dir/openvpn3/client/ovpncli.cpp.o" "CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o"
+/home/imkolganov/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib libovpn3-core.a

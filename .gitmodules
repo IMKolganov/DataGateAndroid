@@ -1,0 +1,8 @@
+[submodule "native-openvpn3/openvpn3"]
+    path = native-openvpn3/openvpn3
+	url = https://github.com/OpenVPN/openvpn3.git
+	ignore = dirty
+
+[submodule "native-openvpn3/third_party/asio"]
+    path = native-openvpn3/third_party/asio
+    url = https://github.com/chriskohlhoff/asio.git

@@ -1,34 +1,132 @@
-# Gradle files
+####################################
+# Built application files
+####################################
+*.apk
+*.ap_
+*.aab
+
+####################################
+# ART / Dalvik
+####################################
+*.dex
+
+####################################
+# Java / Kotlin
+####################################
+*.class
+
+####################################
+# Generated files
+####################################
+bin/
+gen/
+out/
+release/
+
+####################################
+# Gradle
+####################################
 .gradle/
 build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
 
-# Local configuration file (sdk path, etc)
+####################################
+# Local configuration (SDK paths, etc.)
+####################################
 local.properties
+key.properties
 
-# Log/OS Files
+####################################
+# Proguard
+####################################
+proguard/
+
+####################################
+# Logs
+####################################
 *.log
 
-# Android Studio generated files and folders
+####################################
+# Android Studio / IntelliJ
+####################################
+.idea/
+*.iml
+out/
+
+####################################
+# Android Studio specific
+####################################
+.navigation/
 captures/
 .externalNativeBuild/
 .cxx/
-*.aab
-*.apk
-output-metadata.json
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+####################################
+# Lint
+####################################
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
+# lint/reports/
 
-# Keystore files
+####################################
+# Signing / Certificates (IMPORTANT)
+####################################
 *.jks
 *.keystore
+*.p12
+*.pem
+*.key
+*.der
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
+####################################
+# Environment / Secrets
+####################################
+.env
+.env.*
+!.env.example
 
-# Android Profiling
-*.hprof
+####################################
+# Google / Firebase
+####################################
+**/service-account.json
+**/client_secret.json
+
+# google-services.json is usually safe to commit,
+# uncomment if you want to keep it private
+# **/google-services.json
+
+####################################
+# Native builds
+####################################
+obj/
+*.so
+*.a
+
+####################################
+# fastlane
+####################################
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+####################################
+# OS / Editor
+####################################
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+
+####################################
+# Version control leftovers
+####################################
+vcs.xml
+keystore.*
+env.properties
