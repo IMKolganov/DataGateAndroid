@@ -11,6 +11,7 @@ import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.login.LoginScreen
 import com.imkolganov.datagate.ui.screens.main.MainScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
+import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
@@ -19,7 +20,8 @@ fun AppRoot(
     authViewModel: AuthViewModel,
     tokenStore: TokenStore,
     vpnState: VpnStatusUiState,
-    onRequestConnect: () -> Unit,
+    onConnectFromHome: () -> Unit,
+    onConnectFromAccess: () -> Unit,
     onRequestDisconnect: () -> Unit,
     onReconnectVpn: () -> Unit,
     authVersion: Int,
@@ -27,7 +29,9 @@ fun AppRoot(
     accessViewModel: AccessViewModel,
     statsViewModel: StatsViewModel,
     themeMode: ThemeMode,
-    onThemeModeChange: (ThemeMode) -> Unit
+    onThemeModeChange: (ThemeMode) -> Unit,
+    appLocale: AppLocale,
+    onAppLocaleChange: (AppLocale) -> Unit
 ) {
     val authState by authViewModel.state.collectAsState()
 
@@ -44,7 +48,8 @@ fun AppRoot(
     if (isLoggedIn) {
         MainScreen(
             vpnState = vpnState,
-            onRequestConnect = onRequestConnect,
+            onConnectFromHome = onConnectFromHome,
+            onConnectFromAccess = onConnectFromAccess,
             onRequestDisconnect = onRequestDisconnect,
             onReconnectVpn = onReconnectVpn,
             onLogout = {
@@ -55,7 +60,9 @@ fun AppRoot(
             accessViewModel = accessViewModel,
             statsViewModel = statsViewModel,
             themeMode = themeMode,
-            onThemeModeChange = onThemeModeChange
+            onThemeModeChange = onThemeModeChange,
+            appLocale = appLocale,
+            onAppLocaleChange = onAppLocaleChange
         )
     } else {
         LoginScreen(viewModel = authViewModel)

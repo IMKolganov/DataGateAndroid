@@ -21,7 +21,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewSummary
 import com.imkolganov.datagate.model.overview.StatsGrouping
@@ -48,9 +50,9 @@ fun GroupingDropdown(
                 enabled = true
             ),
             readOnly = true,
-            value = value.name,
+            value = value.localizedName(),
             onValueChange = {},
-            label = { Text("Grouping") },
+            label = { Text(stringResource(R.string.stats_grouping)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             singleLine = true
         )
@@ -59,9 +61,9 @@ fun GroupingDropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            StatsGrouping.values().forEach { option ->
+            StatsGrouping.all.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option.name) },
+                    text = { Text(option.localizedName()) },
                     onClick = {
                         onChange(option)
                         expanded = false
@@ -93,9 +95,9 @@ fun MetricDropdown(
                 enabled = true
             ),
             readOnly = true,
-            value = value.displayName,
+            value = value.localizedName(),
             onValueChange = {},
-            label = { Text("Metric") },
+            label = { Text(stringResource(R.string.stats_metric)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             singleLine = true
         )
@@ -106,7 +108,7 @@ fun MetricDropdown(
         ) {
             Metric.all.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option.displayName) },
+                    text = { Text(option.localizedName()) },
                     onClick = {
                         onChange(option)
                         expanded = false
@@ -125,12 +127,12 @@ fun SummaryRow(summary: OverviewSummary) {
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         SummaryCard(
-            title = "Traffic In",
+            title = stringResource(R.string.stats_traffic_in),
             value = formatBytes(summary.totalTrafficInBytes),
             modifier = Modifier.weight(1f)
         )
         SummaryCard(
-            title = "Traffic Out",
+            title = stringResource(R.string.stats_traffic_out),
             value = formatBytes(summary.totalTrafficOutBytes),
             modifier = Modifier.weight(1f)
         )

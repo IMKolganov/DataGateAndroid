@@ -24,6 +24,7 @@ class AccessRepositoryImpl(
                 name = server.serverName ?: "OpenVPN Server",
                 protocol = "unknow",
                 isOnline = server.isOnline == true,
+                isEnableWss = server.isEnableWss == true,
 
                 uptimeText = status?.upSince,
                 openVpnVersionText = status?.version,

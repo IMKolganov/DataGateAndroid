@@ -6,16 +6,31 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,30 +40,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.imkolganov.datagate.BuildConfig
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.identity.InstallationIdDataStoreProvider
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     tokenStore: TokenStore,
     onLogout: () -> Unit,
     themeMode: ThemeMode,
-    onThemeModeChange: (ThemeMode) -> Unit
+    onThemeModeChange: (ThemeMode) -> Unit,
+    appLocale: AppLocale,
+    onAppLocaleChange: (AppLocale) -> Unit
 ) {
     val context = LocalContext.current
+    val uiLocale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
+    val copiedLabel = stringResource(R.string.copied)
+    val noErrorLogsLabel = stringResource(R.string.no_error_logs)
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
 
@@ -81,7 +109,17 @@ fun SettingsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Settings", style = MaterialTheme.typography.headlineSmall)
+        Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
+
+        SessionLogoutCard(
+            displayName = authInfo.displayName,
+            role = authInfo.role,
+            email = authInfo.email,
+            onLogout = {
+                copiedMessage = null
+                onLogout()
+            }
+        )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -93,9 +131,9 @@ fun SettingsScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text("Appearance", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.settings_appearance), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Light, dark, or match the device setting.",
+                    stringResource(R.string.settings_appearance_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -107,17 +145,17 @@ fun SettingsScreen(
                     FilterChip(
                         selected = themeMode == ThemeMode.LIGHT,
                         onClick = { onThemeModeChange(ThemeMode.LIGHT) },
-                        label = { Text("Light") }
+                        label = { Text(stringResource(R.string.theme_light)) }
                     )
                     FilterChip(
                         selected = themeMode == ThemeMode.DARK,
                         onClick = { onThemeModeChange(ThemeMode.DARK) },
-                        label = { Text("Dark") }
+                        label = { Text(stringResource(R.string.theme_dark)) }
                     )
                     FilterChip(
                         selected = themeMode == ThemeMode.SYSTEM,
                         onClick = { onThemeModeChange(ThemeMode.SYSTEM) },
-                        label = { Text("System") }
+                        label = { Text(stringResource(R.string.theme_system)) }
                     )
                 }
             }
@@ -133,12 +171,17 @@ fun SettingsScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text("Account", style = MaterialTheme.typography.titleMedium)
-
-                KeyValueRow("UserId", authInfo.userId ?: "Not available")
-                KeyValueRow("Role", authInfo.role ?: "Not available")
-                KeyValueRow("DisplayName", authInfo.displayName ?: "Not available")
-                KeyValueRow("Email", authInfo.email ?: "Not available")
+                Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.settings_language_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                LanguageDropdown(
+                    current = appLocale,
+                    uiLocale = uiLocale,
+                    onSelect = onAppLocaleChange
+                )
             }
         }
 
@@ -152,9 +195,12 @@ fun SettingsScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text("Device", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.settings_device), style = MaterialTheme.typography.titleMedium)
 
-                KeyValueRow("InstallationId", installationId ?: "Loading...")
+                KeyValueRow(
+                    stringResource(R.string.settings_installation_id),
+                    installationId ?: stringResource(R.string.settings_loading)
+                )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     val clipboard = LocalClipboard.current
@@ -169,12 +215,12 @@ fun SettingsScreen(
                                         val clip = ClipData.newPlainText("installationId", value)
                                         clipboard.setClipEntry(ClipEntry(clip))
                                     }
-                                    copiedMessage = "Copied"
+                                    copiedMessage = copiedLabel
                                 }
                         },
                         enabled = !installationId.isNullOrBlank()
                     ) {
-                        Text("Copy InstallationId")
+                        Text(stringResource(R.string.settings_copy_installation_id))
                     }
 
                     Button(
@@ -186,12 +232,12 @@ fun SettingsScreen(
                                         val clip = ClipData.newPlainText("userId", value)
                                         clipboard.setClipEntry(ClipEntry(clip))
                                     }
-                                    copiedMessage = "Copied"
+                                    copiedMessage = copiedLabel
                                 }
                         },
                         enabled = !authInfo.userId.isNullOrBlank()
                     ) {
-                        Text("Copy UserId")
+                        Text(stringResource(R.string.settings_copy_user_id))
                     }
                 }
 
@@ -199,15 +245,6 @@ fun SettingsScreen(
                     Text(it, style = MaterialTheme.typography.bodySmall)
                 }
             }
-        }
-
-        Button(
-            onClick = {
-                copiedMessage = null
-                onLogout()
-            }
-        ) {
-            Text("Logout")
         }
 
         Card(
@@ -220,8 +257,11 @@ fun SettingsScreen(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text("Diagnostics", style = MaterialTheme.typography.titleMedium)
-                KeyValueRow("Error logs", "$crashFilesCount file(s)")
+                Text(stringResource(R.string.settings_diagnostics), style = MaterialTheme.typography.titleMedium)
+                KeyValueRow(
+                    stringResource(R.string.settings_error_logs),
+                    stringResource(R.string.settings_error_logs_count, crashFilesCount)
+                )
 
                 Button(
                     onClick = {
@@ -229,7 +269,7 @@ fun SettingsScreen(
                         crashFilesCount = files.size
 
                         if (files.isEmpty()) {
-                            crashShareMessage = "No error logs found"
+                            crashShareMessage = noErrorLogsLabel
                             return@Button
                         }
 
@@ -237,13 +277,183 @@ fun SettingsScreen(
                     },
                     enabled = crashFilesCount > 0
                 ) {
-                    Text("Share Error Logs")
+                    Text(stringResource(R.string.settings_share_logs))
                 }
 
                 crashShareMessage?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall)
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguageDropdown(
+    current: AppLocale,
+    uiLocale: Locale,
+    onSelect: (AppLocale) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val currentLabel = when (current) {
+        AppLocale.SYSTEM -> stringResource(R.string.language_system)
+        else -> current.displayLabel(uiLocale)
+    }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
+                .fillMaxWidth(),
+            readOnly = true,
+            value = currentLabel,
+            onValueChange = {},
+            label = { Text(stringResource(R.string.settings_language)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            singleLine = true
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            for (option in AppLocale.pickerOrder) {
+                val optionLabel = when (option) {
+                    AppLocale.SYSTEM -> stringResource(R.string.language_system)
+                    else -> option.displayLabel(uiLocale)
+                }
+                DropdownMenuItem(
+                    text = { Text(optionLabel) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SessionLogoutCard(
+    displayName: String?,
+    role: String?,
+    email: String?,
+    onLogout: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = AppCards.shape,
+        colors = AppCards.defaultColors(),
+        elevation = AppCards.defaultElevation()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.account_title),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = stringResource(R.string.account_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            val name = displayName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.em_dash)
+            Text(
+                text = name,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            SessionInfoRow(
+                icon = {
+                    Icon(
+                        Icons.Outlined.Badge,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                label = stringResource(R.string.label_role),
+                value = role?.takeIf { it.isNotBlank() } ?: stringResource(R.string.not_available)
+            )
+            SessionInfoRow(
+                icon = {
+                    Icon(
+                        Icons.Outlined.MailOutline,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                label = stringResource(R.string.label_email),
+                value = email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.not_available)
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+            Button(
+                onClick = onLogout,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                shape = AppCards.shape
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Logout,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.sign_out),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = stringResource(R.string.sign_out_subtitle),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SessionInfoRow(
+    icon: @Composable () -> Unit,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        icon()
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -288,7 +498,7 @@ private fun shareCrashFiles(
         }
     }
 
-    if (uris.isEmpty()) return "No shareable files."
+    if (uris.isEmpty()) return context.getString(R.string.no_shareable_files)
 
     val sendIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
         type = "*/*"
@@ -296,7 +506,10 @@ private fun shareCrashFiles(
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
-    val chooserIntent = Intent.createChooser(sendIntent, "Share error logs").apply {
+    val chooserIntent = Intent.createChooser(
+        sendIntent,
+        context.getString(R.string.share_logs_chooser_title)
+    ).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
@@ -305,6 +518,6 @@ private fun shareCrashFiles(
         null
     } catch (e: Exception) {
         android.util.Log.e("CrashShare", "Failed to start chooser", e)
-        e.message ?: "Failed to share files."
+        e.message ?: context.getString(R.string.share_failed)
     }
 }

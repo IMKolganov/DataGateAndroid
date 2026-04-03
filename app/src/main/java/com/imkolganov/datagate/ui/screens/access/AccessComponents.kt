@@ -33,8 +33,10 @@ import com.imkolganov.datagate.ui.components.AppCards
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.imkolganov.datagate.R
 
 private val ServerBadgeWidth = 88.dp
 private val ServerBadgeHeight = 36.dp
@@ -55,11 +57,12 @@ fun ServersSummaryFooter(
 ) {
     Text(
         modifier = modifier.fillMaxWidth(),
-        text = buildString {
-            append("$totalUsers users total")
-            append(" · ")
-            append("$onlineServers of $totalServers servers online")
-        },
+        text = stringResource(
+            R.string.access_users_footer,
+            totalUsers,
+            onlineServers,
+            totalServers
+        ),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -82,14 +85,16 @@ fun ActiveConnectionsBlock(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Active connection")
+                Text(text = stringResource(R.string.access_active_connection))
             }
 
             connections.forEach { c ->
                 Spacer(modifier = Modifier.padding(top = 8.dp))
-                KeyValueRow(label = "Server", value = c.serverTitle)
-                c.virtualIpText?.let { KeyValueRow(label = "IP", value = it) }
-                c.connectedSinceText?.let { KeyValueRow(label = "Since", value = it) }
+                KeyValueRow(label = stringResource(R.string.label_server), value = c.serverTitle)
+                c.virtualIpText?.let { KeyValueRow(label = stringResource(R.string.label_ip), value = it) }
+                c.connectedSinceText?.let {
+                    KeyValueRow(label = stringResource(R.string.label_since), value = it)
+                }
             }
         }
     }
@@ -103,7 +108,7 @@ fun ServersList(
     onConnect: (Int) -> Unit
 ) {
     Column {
-        Text(text = "Available servers")
+        Text(text = stringResource(R.string.access_available_servers))
 
         servers.forEach { server ->
             ServerCard(
@@ -237,14 +242,14 @@ private fun ServerCardInner(
             Column(modifier = Modifier.weight(1f)) {
                 IconKeyValueRow(
                     icon = Icons.Outlined.Cloud,
-                    label = "OpenVPN",
+                    label = stringResource(R.string.label_openvpn),
                     value = server.openVpnVersionText ?: "-"
                 )
                 server.uptimeText?.let { uptime ->
                     val parts = uptime.split(", ")
                     IconKeyValueRow(
                         icon = Icons.Outlined.Schedule,
-                        label = "Uptime",
+                        label = stringResource(R.string.label_uptime),
                         value = parts.firstOrNull() ?: uptime
                     )
                     if (parts.size > 1) {
@@ -257,7 +262,7 @@ private fun ServerCardInner(
                 } ?: run {
                     IconKeyValueRow(
                         icon = Icons.Outlined.Schedule,
-                        label = "Uptime",
+                        label = stringResource(R.string.label_uptime),
                         value = "-"
                     )
                 }
@@ -266,12 +271,12 @@ private fun ServerCardInner(
             Column(modifier = Modifier.weight(1f)) {
                 IconKeyValueRow(
                     icon = Icons.Outlined.SwapVert,
-                    label = "IN",
+                    label = stringResource(R.string.label_in),
                     value = server.totalInText ?: "-"
                 )
                 IconKeyValueRow(
                     icon = Icons.Outlined.SwapVert,
-                    label = "OUT",
+                    label = stringResource(R.string.label_out),
                     value = server.totalOutText ?: "-"
                 )
             }
@@ -287,24 +292,24 @@ private fun ServerCardInner(
                 when {
                     isVpnSessionOnThisServer -> {
                         Button(onClick = onDisconnect) {
-                            Text(text = "Disconnect")
+                            Text(text = stringResource(R.string.action_disconnect))
                         }
                     }
                     isSelected -> {
                         when {
                             isVpnConnectingToThisServer -> {
                                 Button(onClick = {}, enabled = false) {
-                                    Text(text = "Connecting…")
+                                    Text(text = stringResource(R.string.access_connecting))
                                 }
                             }
                             !server.isOnline -> {
                                 Button(onClick = {}, enabled = false) {
-                                    Text(text = "Offline")
+                                    Text(text = stringResource(R.string.status_offline))
                                 }
                             }
                             connectBusy -> {
                                 Button(onClick = {}, enabled = false) {
-                                    Text(text = "Connect")
+                                    Text(text = stringResource(R.string.action_connect))
                                 }
                             }
                             else -> {
@@ -312,7 +317,7 @@ private fun ServerCardInner(
                                     onClick = onConnect,
                                     enabled = server.isOnline
                                 ) {
-                                    Text(text = "Connect")
+                                    Text(text = stringResource(R.string.action_connect))
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
@@ -330,7 +335,11 @@ private fun ServerCardInner(
 
 @Composable
 private fun StatusPill(isOnline: Boolean, containerColor: Color) {
-    val text = if (isOnline) "Online" else "Offline"
+    val text = if (isOnline) {
+        stringResource(R.string.status_online)
+    } else {
+        stringResource(R.string.status_offline)
+    }
     val borderColor = when {
         isOnline -> StatusOnlineGreen.copy(alpha = 0.38f)
         else -> StatusOfflineRed.copy(alpha = 0.35f)

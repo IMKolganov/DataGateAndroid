@@ -41,7 +41,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Composable
@@ -54,15 +56,15 @@ fun VpnStatusScreen(
     val isConnecting = state.isConnectRequested && !state.isVpnConnected
 
     val statusTitle = when {
-        isConnected -> "Connected"
-        isConnecting -> "Connecting..."
-        else -> "Disconnected"
+        isConnected -> stringResource(R.string.vpn_status_connected)
+        isConnecting -> stringResource(R.string.vpn_status_connecting)
+        else -> stringResource(R.string.vpn_status_disconnected)
     }
 
     val statusSubtitle = if (state.lastMessage.isNotBlank()) {
         state.lastMessage
     } else {
-        "Waiting for VPN events..."
+        stringResource(R.string.vpn_waiting_events)
     }
 
     val mainColor = when {
@@ -116,7 +118,7 @@ fun VpnStatusScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "DataGate OpenVPN 3",
+                text = stringResource(R.string.vpn_home_title),
                 style = MaterialTheme.typography.headlineSmall
             )
 
@@ -183,15 +185,15 @@ fun VpnStatusScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.PowerSettingsNew,
-                            contentDescription = "Power",
+                            contentDescription = stringResource(R.string.vpn_power),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(36.dp)
                         )
                         Text(
                             text = when {
-                                isConnected -> "Disconnect"
-                                isConnecting -> "Cancel"
-                                else -> "Connect"
+                                isConnected -> stringResource(R.string.action_disconnect)
+                                isConnecting -> stringResource(R.string.action_cancel)
+                                else -> stringResource(R.string.action_connect)
                             },
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimary
@@ -204,9 +206,7 @@ fun VpnStatusScreen(
                 modifier = Modifier
                     .widthIn(max = 520.dp)
                     .padding(horizontal = 8.dp),
-                text =
-                    "Connect chooses a server automatically using the app's selection rules. " +
-                        "To pick a specific server, open the Access tab.",
+                text = stringResource(R.string.vpn_home_footer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

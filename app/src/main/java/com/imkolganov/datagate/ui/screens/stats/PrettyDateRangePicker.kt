@@ -17,7 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.imkolganov.datagate.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -45,12 +47,12 @@ fun PrettyDateRangePicker(
         Icon(Icons.Filled.DateRange, contentDescription = null)
         Text("  ")
         Text(
-            text = "Date range",
+            text = stringResource(R.string.date_range_label),
             fontWeight = FontWeight.SemiBold
         )
         Text("  ")
         Text(
-            text = "$fromLabel → $toLabel",
+            text = stringResource(R.string.date_range_arrow, fromLabel, toLabel),
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -77,10 +79,10 @@ fun PrettyDateRangePicker(
                         }
                         open = false
                     }
-                ) { Text("OK") }
+                ) { Text(stringResource(R.string.action_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { open = false }) { Text("Cancel") }
+                TextButton(onClick = { open = false }) { Text(stringResource(R.string.action_cancel)) }
             }
         ) {
             DateRangePicker(state = pickerState)

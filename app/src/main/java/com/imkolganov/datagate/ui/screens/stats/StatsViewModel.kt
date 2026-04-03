@@ -1,7 +1,9 @@
 package com.imkolganov.datagate.ui.screens.stats
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewSeriesResponse
 import com.imkolganov.datagate.model.overview.StatsGrouping
@@ -31,26 +33,32 @@ data class StatsUiState(
     val error: String? = null,
     val filters: StatsFilters,
     val metric: Metric = Metric.TrafficTotal,
-    val response: OverviewSeriesResponse? = null
+    val response: OverviewSeriesResponse? = null,
+    /** Matches "Last 7 days" / "Last 30 days" chips; null after a custom date range. */
+    val selectedPresetDays: Int? = 7
 )
 
 open class StatsViewModel(
+    application: Application,
     private val api: StatsApiClient,
     private val externalIdProvider: () -> String
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val utcTz: TimeZone = TimeZone.getTimeZone("UTC")
-    private val nicosiaTz: TimeZone = TimeZone.getTimeZone("Europe/Nicosia")
 
     private val _state = MutableStateFlow(
-        StatsUiState(
-            filters = StatsFilters(
-                fromIso = isoUtc(truncateToSeconds(System.currentTimeMillis() - daysToMillis(7))),
-                toIso = isoUtc(truncateToSeconds(System.currentTimeMillis())),
-                grouping = StatsGrouping.Auto,
-                externalId = ""
+        run {
+            val (fromIso, toIso) = rangeForLastCalendarDays(7)
+            StatsUiState(
+                filters = StatsFilters(
+                    fromIso = fromIso,
+                    toIso = toIso,
+                    grouping = StatsGrouping.Auto,
+                    externalId = ""
+                ),
+                selectedPresetDays = 7
             )
-        )
+        }
     )
 
     val state: StateFlow<StatsUiState> = _state
@@ -71,21 +79,41 @@ open class StatsViewModel(
     }
 
     fun setFromIso(fromIso: String) {
-        _state.update { it.copy(filters = it.filters.copy(fromIso = fromIso)) }
+        _state.update {
+            it.copy(
+                filters = it.filters.copy(fromIso = fromIso),
+                selectedPresetDays = null
+            )
+        }
     }
 
     fun setToIso(toIso: String) {
-        _state.update { it.copy(filters = it.filters.copy(toIso = toIso)) }
+        _state.update {
+            it.copy(
+                filters = it.filters.copy(toIso = toIso),
+                selectedPresetDays = null
+            )
+        }
     }
 
     fun setLastDays(days: Long) {
-        val todayStart = startOfTodayMillis(nicosiaTz)            // 00:00 in Nicosia
-        val from = addDays(todayStart, -days.toInt(), nicosiaTz)  // minus N days (still local day boundaries)
-        val toExclusive = addDays(todayStart, 1, nicosiaTz)       // start of tomorrow
-        val to = toExclusive - 1000L                              // last second of today
+        val (fromIso, toIso) = rangeForLastCalendarDays(days.toInt())
+        _state.update {
+            it.copy(
+                filters = it.filters.copy(fromIso = fromIso, toIso = toIso),
+                selectedPresetDays = days.toInt()
+            )
+        }
+    }
 
-        setFromIso(isoUtc(from))
-        setToIso(isoUtc(to))
+    /** Last [days] calendar days in the device default timezone, through end of “today” there — matches preset chips. */
+    private fun rangeForLastCalendarDays(days: Int): Pair<String, String> {
+        val tz = TimeZone.getDefault()
+        val todayStart = startOfTodayMillis(tz)
+        val from = addDays(todayStart, -days, tz)
+        val toExclusive = addDays(todayStart, 1, tz)
+        val to = toExclusive - 1000L
+        return isoUtc(from) to isoUtc(to)
     }
 
     fun load() {
@@ -116,7 +144,7 @@ open class StatsViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = ex.message ?: "Request failed"
+                        error = ex.message ?: getApplication<Application>().getString(R.string.error_request_failed)
                     )
                 }
             }
@@ -145,11 +173,4 @@ open class StatsViewModel(
         return c.timeInMillis
     }
 
-    private fun truncateToSeconds(millis: Long): Long {
-        return (millis / 1000L) * 1000L
-    }
-
-    private fun daysToMillis(days: Int): Long {
-        return days.toLong() * 24L * 60L * 60L * 1000L
-    }
 }

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_system">Як у системі</string>
+
+    <string name="nav_home">Головна</string>
+    <string name="nav_access">Доступ</string>
+    <string name="nav_statistics">Статистика</string>
+    <string name="nav_settings">Налаштування</string>
+
+    <string name="login_title">DataGate</string>
+    <string name="login_sign_in_google">Увійти через Google</string>
+    <string name="login_welcome">Ласкаво просимо до VPN-сервісу.\nЗапитання надсилайте на imkolganov@gmail.com.</string>
+    <string name="login_version">v%1$s (%2$d)</string>
+
+    <string name="vpn_status_connected">Підключено</string>
+    <string name="vpn_status_connecting">Підключення…</string>
+    <string name="vpn_status_disconnected">Відключено</string>
+    <string name="vpn_waiting_events">Очікування подій VPN…</string>
+    <string name="vpn_home_title">DataGate OpenVPN 3</string>
+    <string name="vpn_power">Живлення</string>
+    <string name="action_disconnect">Відключити</string>
+    <string name="action_cancel">Скасувати</string>
+    <string name="action_connect">Підключити</string>
+    <string name="vpn_home_footer">«Підключити» обирає сервер автоматично. Щоб вказати сервер вручну, відкрийте вкладку «Доступ».</string>
+
+    <string name="stats_filters">Фільтри</string>
+    <string name="stats_overview">Огляд</string>
+    <string name="stats_chart_hint">Торкніться графіка для значень · стисніть для масштабу · перетягніть для прокрутки</string>
+    <string name="stats_loading_message">Завантаження статистики може тривати довго.\nЗачекайте або змініть діапазон дат і спробуйте знову.</string>
+    <string name="stats_error_prefix">Помилка: %1$s</string>
+    <string name="chart_no_points">Немає точок у цьому діапазоні — розширте дати або оновіть.</string>
+
+    <string name="stats_grouping">Групування</string>
+    <string name="stats_metric">Метрика</string>
+    <string name="stats_traffic_in">Трафік вхідний</string>
+    <string name="stats_traffic_out">Трафік вихідний</string>
+
+    <string name="grouping_auto">Авто</string>
+    <string name="grouping_hours">Години</string>
+    <string name="grouping_months">Місяці</string>
+    <string name="grouping_years">Роки</string>
+
+    <string name="metric_active_clients">Активні клієнти</string>
+    <string name="metric_traffic_total">Трафік загалом</string>
+    <string name="metric_traffic_in">Трафік вхідний</string>
+    <string name="metric_traffic_out">Трафік вихідний</string>
+
+    <string name="presets_last_7">Останні 7 днів</string>
+    <string name="presets_last_30">Останні 30 днів</string>
+    <string name="action_reload">Оновити</string>
+
+    <string name="date_range_label">Діапазон дат</string>
+    <string name="date_range_arrow">%1$s → %2$s</string>
+    <string name="action_ok">OK</string>
+
+    <string name="settings_title">Налаштування</string>
+    <string name="settings_language">Мова</string>
+    <string name="settings_language_subtitle">Оберіть мову або використовуйте мову пристрою.</string>
+    <string name="settings_appearance">Оформлення</string>
+    <string name="settings_appearance_subtitle">Світла, темна тема або як у системі.</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="theme_system">Системна</string>
+
+    <string name="settings_device">Пристрій</string>
+    <string name="settings_installation_id">InstallationId</string>
+    <string name="settings_loading">Завантаження…</string>
+    <string name="settings_copy_installation_id">Копіювати InstallationId</string>
+    <string name="settings_copy_user_id">Копіювати UserId</string>
+    <string name="settings_diagnostics">Діагностика</string>
+    <string name="settings_error_logs">Журнали помилок</string>
+    <string name="settings_error_logs_count">%1$d файл(ів)</string>
+    <string name="settings_share_logs">Поділитися журналами</string>
+    <string name="share_logs_chooser_title">Поділитися журналами помилок</string>
+
+    <string name="copied">Скопійовано</string>
+    <string name="no_error_logs">Журналів помилок не знайдено</string>
+    <string name="no_shareable_files">Немає файлів для надсилання.</string>
+    <string name="share_failed">Не вдалося надіслати файли.</string>
+
+    <string name="account_title">Обліковий запис і вихід</string>
+    <string name="account_subtitle">Ви увійшли під профілем нижче. Вихід видалить локальні токени на цьому пристрої.</string>
+    <string name="not_available">Недоступно</string>
+    <string name="em_dash">—</string>
+    <string name="label_role">Роль</string>
+    <string name="label_email">Електронна пошта</string>
+    <string name="sign_out">Вийти</string>
+    <string name="sign_out_subtitle">Завершити сеанс на цьому пристрої</string>
+
+    <string name="access_no_wss_dialog_title">Підключення в застосунку недоступне</string>
+    <string name="access_switch_title">Змінити сервер?</string>
+    <string name="access_switch_message">Відключити поточний VPN і підключитися до «%1$s»?</string>
+    <string name="access_switch">Змінити</string>
+    <string name="access_active_connection">Активне з\'єднання</string>
+    <string name="access_available_servers">Доступні сервери</string>
+    <string name="label_server">Сервер</string>
+    <string name="label_ip">IP</string>
+    <string name="label_since">Від</string>
+    <string name="label_openvpn">OpenVPN</string>
+    <string name="label_uptime">Час роботи</string>
+    <string name="label_in">Вх.</string>
+    <string name="label_out">Вих.</string>
+    <string name="status_offline">Офлайн</string>
+    <string name="status_online">Онлайн</string>
+    <string name="access_users_footer">Усього користувачів: %1$d · онлайн %2$d із %3$d серверів</string>
+    <string name="access_choose_server">Оберіть сервер</string>
+    <string name="access_refresh">Оновити</string>
+    <string name="access_use_home_hint">На головній можна підключитися з автоматичним вибором сервера. Тут оберіть сервер і натисніть «Підключити» — або «Відключити» на активному.</string>
+    <string name="access_vpn_active">VPN активний</string>
+    <string name="access_establishing">Встановлення сесії…</string>
+    <string name="access_connected">Підключено</string>
+    <string name="access_not_connected">Не підключено</string>
+    <string name="access_connecting">Підключення…</string>
+
+    <string name="error_request_failed">Запит не виконано</string>
+
+    <string name="vpn_selecting_best_server">Вибір найкращого сервера</string>
+    <string name="vpn_resolving_server">Пошук сервера</string>
+    <string name="vpn_fallback_server_name">Сервер</string>
+    <string name="vpn_reading_installation_id">Читання installation id</string>
+    <string name="vpn_installation_id_not_ready">InstallationId ще не готовий</string>
+    <string name="vpn_reading_external_id">Читання external id для %1$s</string>
+    <string name="vpn_external_id_unavailable">ExternalId недоступний</string>
+    <string name="vpn_preparing_cert_identity">Підготовка сертифіката для %1$s</string>
+    <string name="vpn_requesting_profile">Запит профілю VPN для %1$s</string>
+    <string name="vpn_config_received">Профіль отримано (%1$d байт)</string>
+    <string name="vpn_connect_failed">Помилка підключення: %1$s</string>
+    <string name="vpn_server_selected">Сервер обрано</string>
+    <string name="vpn_waiting_permission">Очікування дозволу VPN…</string>
+    <string name="vpn_error_permission_missing_config">Дозвіл VPN є, але немає конфігурації або WSS</string>
+    <string name="vpn_error_permission_denied">Дозвіл VPN відхилено</string>
+    <string name="vpn_disconnecting">Відключення…</string>
+    <string name="vpn_connecting_generic">Підключення…</string>
+    <string name="vpn_requires_openvpn_connect">Сервер «%1$s» не підтримує підключення в цьому застосунку (потрібен WSS). Використовуйте офіційний OpenVPN Connect із профілем цього сервера.\n\nУ країнах із сильним державним контролем мережі (зокрема Росія, Іран) з’єднання все одно може не працювати.</string>
+    <string name="vpn_server_manual_unavailable">Сервер №%1$d недоступний або не підходить для підключення в застосунку.</string>
+
+    <string name="vpn_msg_selecting_server">Вибір найкращого сервера…</string>
+    <string name="vpn_msg_server_selected">Сервер обрано</string>
+    <string name="vpn_msg_preparing_device">Підготовка ідентифікатора пристрою…</string>
+    <string name="vpn_msg_checking_user">Перевірка облікового запису…</string>
+    <string name="vpn_msg_creating_cert">Створення запиту сертифіката…</string>
+    <string name="vpn_msg_downloading_profile">Завантаження профілю VPN…</string>
+    <string name="vpn_msg_profile_received">Профіль VPN отримано</string>
+    <string name="vpn_msg_resolving_address">Визначення адреси сервера…</string>
+    <string name="vpn_msg_waiting_server">Очікування відповіді сервера…</string>
+    <string name="vpn_msg_negotiating_config">Узгодження конфігурації…</string>
+    <string name="vpn_msg_establishing_tunnel">Встановлення тунелю…</string>
+    <string name="vpn_msg_reconnecting">Перепідключення…</string>
+    <string name="vpn_msg_connecting">Підключення…</string>
+    <string name="vpn_msg_connected_to">Підключено до %1$s</string>
+    <string name="vpn_msg_connected">Підключено</string>
+    <string name="vpn_msg_disconnected">Відключено</string>
+    <string name="vpn_msg_tunnel_failed">Помилка налаштування тунелю</string>
+</resources>

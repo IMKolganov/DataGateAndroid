@@ -17,8 +17,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.BuildConfig
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.AuthViewModel
 
 @Composable
@@ -27,7 +29,11 @@ fun LoginScreenContent(
     errorMessage: String?,
     onLoginClick: () -> Unit
 ) {
-    val versionLabel = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+    val versionLabel = stringResource(
+        R.string.login_version,
+        BuildConfig.VERSION_NAME,
+        BuildConfig.VERSION_CODE
+    )
 
     Scaffold { innerPadding ->
         Surface(
@@ -44,7 +50,7 @@ fun LoginScreenContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "DataGate",
+                        text = stringResource(R.string.login_title),
                         style = MaterialTheme.typography.headlineSmall
                     )
 
@@ -52,12 +58,12 @@ fun LoginScreenContent(
                         CircularProgressIndicator()
                     } else {
                         Button(onClick = onLoginClick) {
-                            Text("Sign in with Google")
+                            Text(stringResource(R.string.login_sign_in_google))
                         }
                     }
 
                     Text(
-                        text = "Welcome to the VPN service.\nFor any questions, feel free to contact me at imkolganov@gmail.com.",
+                        text = stringResource(R.string.login_welcome),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp),

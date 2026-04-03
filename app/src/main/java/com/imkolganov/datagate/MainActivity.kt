@@ -5,7 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,16 +26,19 @@ import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.access.AccessViewModelFactory
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModelFactory
+import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
+import com.imkolganov.datagate.ui.theme.LanguagePreferenceStore
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import com.imkolganov.datagate.ui.theme.ThemePreferenceStore
 import com.imkolganov.datagate.vpn.VpnConnectInteractor
+import com.imkolganov.datagate.vpn.VpnConnectSource
 import com.imkolganov.datagate.vpn.VpnController
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "OpenVPN3"
@@ -46,6 +49,7 @@ class MainActivity : ComponentActivity() {
     private var vpnState by mutableStateOf(VpnStatusUiState())
     private var authVersion by mutableStateOf(0)
     private var themeMode by mutableStateOf(ThemeMode.SYSTEM)
+    private var appLocale by mutableStateOf(AppLocale.SYSTEM)
 
     private lateinit var vpnController: VpnController
     private lateinit var graph: AppGraph
@@ -71,6 +75,7 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        LanguagePreferenceStore.apply(applicationContext)
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge(
@@ -116,6 +121,7 @@ class MainActivity : ComponentActivity() {
             .get(AccessViewModel::class.java)
 
         val statsFactory = StatsViewModelFactory(
+            application = application,
             api = graph.statsApi,
             externalIdProvider = { graph.tokenStore.getAuthInfo().externalId.toString() }
         )
@@ -135,6 +141,7 @@ class MainActivity : ComponentActivity() {
         }
 
         themeMode = ThemePreferenceStore.get(applicationContext)
+        appLocale = LanguagePreferenceStore.get(applicationContext)
 
         setContent {
             val systemDark = isSystemInDarkTheme()
@@ -143,13 +150,18 @@ class MainActivity : ComponentActivity() {
                     authViewModel = authViewModel,
                     tokenStore = graph.tokenStore,
                     vpnState = vpnState,
-                    onRequestConnect = { lifecycleScope.launch { connectInteractor.connect() } },
+                    onConnectFromHome = {
+                        lifecycleScope.launch { connectInteractor.connect(VpnConnectSource.Home) }
+                    },
+                    onConnectFromAccess = {
+                        lifecycleScope.launch { connectInteractor.connect(VpnConnectSource.Access) }
+                    },
                     onRequestDisconnect = { vpnController.requestDisconnect() },
                     onReconnectVpn = {
                         lifecycleScope.launch {
                             vpnController.requestDisconnect()
                             delay(2500)
-                            connectInteractor.connect()
+                            connectInteractor.connect(VpnConnectSource.Access)
                         }
                     },
                     onAuthChanged = { authVersion++ },
@@ -160,6 +172,11 @@ class MainActivity : ComponentActivity() {
                     onThemeModeChange = { next ->
                         themeMode = next
                         ThemePreferenceStore.save(applicationContext, next)
+                    },
+                    appLocale = appLocale,
+                    onAppLocaleChange = { next ->
+                        appLocale = next
+                        LanguagePreferenceStore.setLocale(applicationContext, next)
                     }
                 )
             }

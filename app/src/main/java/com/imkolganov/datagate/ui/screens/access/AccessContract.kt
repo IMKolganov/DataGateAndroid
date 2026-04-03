@@ -20,6 +20,8 @@ interface AccessContract {
         val name: String,
         val protocol: String?,
         val isOnline: Boolean,
+        /** In-app VPN requires WSS; if false, show dialog and use OpenVPN Connect instead. */
+        val isEnableWss: Boolean,
 
         val uptimeText: String?,
         val openVpnVersionText: String?,

@@ -34,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.vpn.ServerSelectionMode
 import com.imkolganov.datagate.vpn.VpnServerSelectionStore
@@ -74,7 +76,8 @@ fun AccessScreen(
             null
         }
 
-    var switchTarget by remember { mutableStateOf<Pair<Int, String>?>(null) }
+    var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
+    var noWssDialogName by remember { mutableStateOf<String?>(null) }
 
     fun runConnectToServer(server: AccessContract.ServerItem) {
         val sessionServerId = vpnState.selectedServerId
@@ -93,35 +96,61 @@ fun AccessScreen(
         }
         onEvent(AccessContract.UiEvent.SelectServer(server.id))
         if (vpnConnected || connectBusy) {
-            switchTarget = server.id to server.name
+            switchTargetServer = server
         } else {
+            if (!server.isEnableWss) {
+                noWssDialogName = server.name
+                return
+            }
             onConnectVpn()
         }
     }
 
-    switchTarget?.let { (_, name) ->
+    switchTargetServer?.let { target ->
         AlertDialog(
-            onDismissRequest = { switchTarget = null },
-            title = { Text("Switch server?") },
+            onDismissRequest = { switchTargetServer = null },
+            title = { Text(stringResource(R.string.access_switch_title)) },
             text = {
                 Text(
-                    "Disconnect from the current VPN and connect to \"$name\"?",
+                    stringResource(R.string.access_switch_message, target.name),
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        switchTarget = null
-                        onReconnectVpn()
+                        switchTargetServer = null
+                        if (!target.isEnableWss) {
+                            noWssDialogName = target.name
+                        } else {
+                            onReconnectVpn()
+                        }
                     }
                 ) {
-                    Text("Switch")
+                    Text(stringResource(R.string.access_switch))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { switchTarget = null }) {
-                    Text("Cancel")
+                TextButton(onClick = { switchTargetServer = null }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
+    noWssDialogName?.let { serverName ->
+        AlertDialog(
+            onDismissRequest = { noWssDialogName = null },
+            title = { Text(stringResource(R.string.access_no_wss_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(R.string.vpn_requires_openvpn_connect, serverName),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { noWssDialogName = null }) {
+                    Text(stringResource(R.string.action_ok))
                 }
             }
         )
@@ -227,9 +256,9 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = when {
-                    connected -> "Connected"
-                    busy -> "Connecting…"
-                    else -> "Not connected"
+                    connected -> stringResource(R.string.access_connected)
+                    busy -> stringResource(R.string.access_connecting)
+                    else -> stringResource(R.string.access_not_connected)
                 },
                 style = MaterialTheme.typography.titleSmall
             )
@@ -238,7 +267,7 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
                 connected -> {
                     val name = vpnState.selectedServerName?.takeIf { it.isNotBlank() }
                     Text(
-                        text = name ?: "VPN active",
+                        text = name ?: stringResource(R.string.access_vpn_active),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     if (vpnState.lastMessage.isNotBlank()) {
@@ -250,16 +279,16 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
                     }
                 }
                 busy -> {
+                    val establishing = stringResource(R.string.access_establishing)
                     Text(
-                        text = vpnState.lastMessage.ifBlank { "Establishing session…" },
+                        text = vpnState.lastMessage.ifBlank { establishing },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 else -> {
                     Text(
-                        text = "Use Home to connect with automatic server selection. " +
-                            "Here, pick a server and tap Connect—or Disconnect on the active server.",
+                        text = stringResource(R.string.access_use_home_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -279,13 +308,13 @@ private fun HeaderRow(
     ) {
         Text(
             modifier = Modifier.weight(1f),
-            text = "Choose a server",
+            text = stringResource(R.string.access_choose_server),
             style = MaterialTheme.typography.titleMedium
         )
         IconButton(onClick = onRefresh) {
             Icon(
                 imageVector = Icons.Outlined.Refresh,
-                contentDescription = "Refresh"
+                contentDescription = stringResource(R.string.access_refresh)
             )
         }
     }

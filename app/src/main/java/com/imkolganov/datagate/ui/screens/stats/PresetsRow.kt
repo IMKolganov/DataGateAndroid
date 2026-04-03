@@ -11,7 +11,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.R
 
 @Composable
 fun PresetsRow(
@@ -27,20 +29,20 @@ fun PresetsRow(
         FilterChip(
             selected = selectedDays == 7,
             onClick = { onSelectDays(7) },
-            label = { Text("Last 7 days") }
+            label = { Text(stringResource(R.string.presets_last_7)) }
         )
 
         FilterChip(
             selected = selectedDays == 30,
             onClick = { onSelectDays(30) },
-            label = { Text("Last 30 days") }
+            label = { Text(stringResource(R.string.presets_last_30)) }
         )
 
         IconButton(
             onClick = onReload,
             enabled = !isLoading
         ) {
-            Icon(Icons.Filled.Refresh, contentDescription = "Reload")
+            Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.action_reload))
         }
     }
 }

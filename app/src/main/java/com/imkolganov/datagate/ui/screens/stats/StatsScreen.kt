@@ -22,7 +22,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.R
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.imkolganov.datagate.ui.components.AppCards
@@ -52,7 +54,7 @@ fun StatsScreen(viewModel: StatsViewModel) {
                         modifier = Modifier.padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text("Filters")
+                        Text(stringResource(R.string.stats_filters))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -70,9 +72,9 @@ fun StatsScreen(viewModel: StatsViewModel) {
                             )
                         }
 
-                        PresetsRow(
-                            selectedDays = null,
-                            isLoading = state.isLoading,
+                    PresetsRow(
+                        selectedDays = state.selectedPresetDays,
+                        isLoading = state.isLoading,
                             onSelectDays = { days ->
                                 viewModel.setLastDays(days.toLong())
                                 viewModel.load()
@@ -100,7 +102,7 @@ fun StatsScreen(viewModel: StatsViewModel) {
                         elevation = AppCards.defaultElevation()
                     ) {
                         Text(
-                            text = "Error: ${state.error}",
+                            text = stringResource(R.string.stats_error_prefix, state.error ?: ""),
                             modifier = Modifier.padding(12.dp)
                         )
                     }
@@ -120,9 +122,9 @@ fun StatsScreen(viewModel: StatsViewModel) {
                             elevation = AppCards.defaultElevation()
                         ) {
                             Column(Modifier.padding(12.dp)) {
-                                Text("Overview")
+                                Text(stringResource(R.string.stats_overview))
                                 Text(
-                                    text = "Tap the chart for values · pinch to zoom · drag to scroll",
+                                    text = stringResource(R.string.stats_chart_hint),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(top = 4.dp)
@@ -170,7 +172,7 @@ fun StatsScreen(viewModel: StatsViewModel) {
                     ) {
                         CircularProgressIndicator()
                         Text(
-                            text = "Loading statistics can take a while.\nPlease wait, or change the date range and try again.",
+                            text = stringResource(R.string.stats_loading_message),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -178,7 +180,7 @@ fun StatsScreen(viewModel: StatsViewModel) {
                             onClick = { viewModel.cancelLoad() },
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.action_cancel))
                         }
                     }
                 }

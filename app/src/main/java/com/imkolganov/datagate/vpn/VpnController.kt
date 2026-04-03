@@ -10,6 +10,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
+import com.imkolganov.datagate.R
 
 class VpnController(
     private val activity: Activity,
@@ -32,7 +33,7 @@ class VpnController(
         if (eventName == "DISCONNECTED") {
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
-        val newState = VpnEventMapper.map(getState(), eventName, eventInfo)
+        val newState = VpnEventMapper.map(activity.resources, getState(), eventName, eventInfo)
         onStateChange(newState)
         Log.d(TAG, "VPN status updated: $eventName - $eventInfo")
     }
@@ -80,7 +81,7 @@ class VpnController(
                 }
                 getState().copy(
                     selectedServerName = name,
-                    lastMessage = "Server selected",
+                    lastMessage = activity.getString(R.string.vpn_server_selected),
                     isConnectRequested = true,
                     isVpnConnected = false
                 )
@@ -111,7 +112,7 @@ class VpnController(
             getState().copy(
                 selectedServerName = serverName,
                 selectedServerId = serverId,
-                lastMessage = "Server selected",
+                lastMessage = activity.getString(R.string.vpn_server_selected),
                 isConnectRequested = true,
                 isVpnConnected = false
             )
@@ -136,7 +137,7 @@ class VpnController(
             onStateChange(
                 getState().copy(
                     isConnectRequested = true,
-                    lastMessage = "Waiting for VPN permission..."
+                    lastMessage = activity.getString(R.string.vpn_waiting_permission)
                 )
             )
             return
@@ -157,7 +158,7 @@ class VpnController(
         pendingLinkProtocol = null
 
         if (cfg.isNullOrBlank() || wss.isNullOrBlank()) {
-            showError("VPN permission granted, but config or WSS link is missing")
+            showError(activity.getString(R.string.vpn_error_permission_missing_config))
             return
         }
 
@@ -169,7 +170,7 @@ class VpnController(
         pendingConfigText = null
         pendingWssLink = null
         pendingLinkProtocol = null
-        showError("VPN permission denied")
+        showError(activity.getString(R.string.vpn_error_permission_denied))
     }
 
     fun requestDisconnect() {
@@ -190,7 +191,7 @@ class VpnController(
                 isVpnConnected = false,
                 selectedServerName = null,
                 selectedServerId = null,
-                lastMessage = "Disconnecting..."
+                lastMessage = activity.getString(R.string.vpn_disconnecting)
             )
         )
     }
@@ -218,7 +219,7 @@ class VpnController(
         onStateChange(
             getState().copy(
                 isConnectRequested = true,
-                lastMessage = "Connecting..."
+                lastMessage = activity.getString(R.string.vpn_connecting_generic)
             )
         )
     }

@@ -4,6 +4,8 @@ import OvpnApiClient
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.imkolganov.datagate.R
+import com.imkolganov.datagate.servers.ManualServerResolve
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
 import java.util.concurrent.atomic.AtomicBoolean
 import android.util.Base64
@@ -21,54 +23,95 @@ class VpnConnectInteractor(
     private val isConnecting = AtomicBoolean(false)
 
     /**
-     * Starts VPN using [VpnServerSelectionStore] (same rules as Home and Access).
+     * Starts VPN. [VpnConnectSource.Home] always picks the best online WSS server (lowest clients).
+     * [VpnConnectSource.Access] uses [VpnServerSelectionStore] (AUTO = best server, MANUAL = selected id).
      */
-    suspend fun connect() {
+    suspend fun connect(source: VpnConnectSource = VpnConnectSource.Access) {
         if (!isConnecting.compareAndSet(false, true)) {
             Log.w("OpenVPN3", "Connect ignored: already in progress")
             return
         }
 
         try {
-            val preferredServerId = when (VpnServerSelectionStore.getMode(appContext)) {
-                ServerSelectionMode.AUTO -> null
-                ServerSelectionMode.MANUAL -> VpnServerSelectionStore.getSelectedServerId(appContext)
+            val preferredServerId = when (source) {
+                VpnConnectSource.Home -> null
+                VpnConnectSource.Access -> when (VpnServerSelectionStore.getMode(appContext)) {
+                    ServerSelectionMode.AUTO -> null
+                    ServerSelectionMode.MANUAL -> VpnServerSelectionStore.getSelectedServerId(appContext)
+                }
             }
+            val res = appContext.resources
             val best = if (preferredServerId == null) {
-                vpnController.showStatus("SELECTING_SERVER", "Selecting best server")
+                vpnController.showStatus(
+                    "SELECTING_SERVER",
+                    res.getString(R.string.vpn_selecting_best_server)
+                )
                 Log.d("OpenVPN3", "Selecting best server...")
                 serversRepository.pickBestServer()
             } else {
-                vpnController.showStatus("SELECTING_SERVER", "Resolving server")
+                vpnController.showStatus(
+                    "SELECTING_SERVER",
+                    res.getString(R.string.vpn_resolving_server)
+                )
                 Log.d("OpenVPN3", "Using selected serverId=$preferredServerId")
-                serversRepository.getServerByIdOrThrow(preferredServerId)
+                when (val resolved = serversRepository.resolveManualConnection(preferredServerId)) {
+                    is ManualServerResolve.Ok -> resolved.result
+                    is ManualServerResolve.RequiresExternalOpenVpn -> {
+                        vpnController.showError(
+                            res.getString(
+                                R.string.vpn_requires_openvpn_connect,
+                                resolved.serverName
+                                    ?: res.getString(R.string.vpn_fallback_server_name)
+                            )
+                        )
+                        return
+                    }
+                    is ManualServerResolve.NotAvailable -> {
+                        vpnController.showError(
+                            res.getString(R.string.vpn_server_manual_unavailable, preferredServerId)
+                        )
+                        return
+                    }
+                }
             }
             val serverName = best.name
             Log.d("OpenVPN3", "Selected serverId=${best.serverId}")
             vpnController.notifyServerSelectedForConnection(
                 best.serverId,
-                serverName ?: "Server"
+                serverName ?: res.getString(R.string.vpn_fallback_server_name)
             )
 
-            vpnController.showStatus("GETTING_INSTALLATION_ID", "Reading installation id")
+            vpnController.showStatus(
+                "GETTING_INSTALLATION_ID",
+                res.getString(R.string.vpn_reading_installation_id)
+            )
             val installationId = getInstallationId()
             val shortInstallationId = uuidToShort(installationId)
             if (shortInstallationId.isBlank()) {
-                vpnController.showError("InstallationId is not ready yet")
+                vpnController.showError(res.getString(R.string.vpn_installation_id_not_ready))
                 return
             }
 
-            vpnController.showStatus("GETTING_EXTERNAL_ID", "Reading external id for $serverName")
+            vpnController.showStatus(
+                "GETTING_EXTERNAL_ID",
+                res.getString(R.string.vpn_reading_external_id, serverName ?: "")
+            )
             val externalId = getExternalId()
             if (externalId.isNullOrBlank()) {
-                vpnController.showError("ExternalId is not available")
+                vpnController.showError(res.getString(R.string.vpn_external_id_unavailable))
                 return
             }
 
-            vpnController.showStatus("BUILDING_COMMON_NAME", "Preparing certificate identity for $serverName")
+            vpnController.showStatus(
+                "BUILDING_COMMON_NAME",
+                res.getString(R.string.vpn_preparing_cert_identity, serverName ?: "")
+            )
             val commonName = "adg-${best.serverId}-$externalId-$shortInstallationId"
 
-            vpnController.showStatus("DOWNLOADING_CONFIG", "Requesting VPN profile for $serverName")
+            vpnController.showStatus(
+                "DOWNLOADING_CONFIG",
+                res.getString(R.string.vpn_requesting_profile, serverName ?: "")
+            )
             val downloaded = api.ensureAndDownloadDeviceFile(
                 vpnServerId = best.serverId,
                 commonName = commonName,
@@ -76,7 +119,10 @@ class VpnConnectInteractor(
                 issuedTo = "datagate android user $externalId device $shortInstallationId"
             )
 
-            vpnController.showStatus("CONFIG_RECEIVED", "size=${downloaded.content.size}")
+            vpnController.showStatus(
+                "CONFIG_RECEIVED",
+                res.getString(R.string.vpn_config_received, downloaded.content.size)
+            )
 
             val configText = downloaded.content.toString(Charsets.UTF_8)
             val linkProtocol = VpnLinkProtocol.fromOvpnConfigContent(configText)
@@ -93,7 +139,12 @@ class VpnConnectInteractor(
             vpnController.startWithConfig(patchedConfig, wssUrl, linkProtocol)
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
-            vpnController.showError("Connect failed: ${t.message ?: t.javaClass.simpleName}")
+            vpnController.showError(
+                appContext.getString(
+                    R.string.vpn_connect_failed,
+                    t.message ?: t.javaClass.simpleName
+                )
+            )
         } finally {
             isConnecting.set(false)
         }

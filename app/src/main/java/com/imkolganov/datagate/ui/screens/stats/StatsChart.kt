@@ -10,7 +10,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.R
 import androidx.compose.ui.unit.sp
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewRow
@@ -57,7 +59,7 @@ fun StatsChart(
     if (rows.isEmpty()) {
         Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Text(
-                text = "No points in this range — widen the dates or reload.",
+                text = stringResource(R.string.chart_no_points),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -158,18 +160,27 @@ fun StatsChart(
         )
 
         val bottomAxis = HorizontalAxis.rememberBottom(
-            valueFormatter = { _, value, _ ->
-                if (!value.isFinite()) "" else labels.getOrNull(value.roundToInt()).orEmpty()
+            valueFormatter = remember(labels) {
+                CartesianValueFormatter { _, value, _ ->
+                    if (!value.isFinite()) {
+                        AXIS_PLACEHOLDER
+                    } else {
+                        val idx = value.roundToInt().coerceIn(0, (labels.size - 1).coerceAtLeast(0))
+                        labels.getOrNull(idx)?.takeIf { it.isNotBlank() } ?: AXIS_PLACEHOLDER
+                    }
+                }
             }
         )
 
         val startAxis = VerticalAxis.rememberStart(
             valueFormatter = remember(trafficMetrics) {
                 CartesianValueFormatter { _, value, _ ->
-                    if (trafficMetrics) {
+                    if (!value.isFinite()) {
+                        AXIS_PLACEHOLDER
+                    } else if (trafficMetrics) {
                         formatBytes(value.toLong().absoluteValue)
                     } else {
-                        value.roundToInt().toString()
+                        value.roundToInt().toString().ifBlank { AXIS_PLACEHOLDER }
                     }
                 }
             }
@@ -206,8 +217,15 @@ private fun metricValue(r: OverviewRow, metric: Metric): Long {
     }
 }
 
+/** Vico forbids empty axis labels; use this instead of "". */
+private const val AXIS_PLACEHOLDER = "—"
+
 private fun formatLabel(ts: String): String {
-    val millis = parseIsoToMillis(ts) ?: return ""
+    val millis = parseIsoToMillis(ts)
+    if (millis == null) {
+        val t = ts.trim()
+        return if (t.isNotEmpty()) t.take(16) else AXIS_PLACEHOLDER
+    }
     val df = SimpleDateFormat("MM-dd", Locale.US).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
