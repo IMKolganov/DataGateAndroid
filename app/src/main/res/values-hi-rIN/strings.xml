@@ -73,6 +73,8 @@
     <string name="label_email">ईमेल</string>
     <string name="sign_out">साइन आउट</string>
     <string name="sign_out_subtitle">इस डिवाइस पर सत्र समाप्त करें</string>
+    <string name="sign_out_confirm_title">साइन आउट?</string>
+    <string name="sign_out_confirm_message">क्या आप वाकई साइन आउट करना चाहते हैं?</string>
     <string name="access_no_wss_dialog_title">इस ऐप में कनेक्ट नहीं हो सकता</string>
     <string name="access_switch_title">सर्वर बदलें?</string>
     <string name="access_switch_message">वर्तमान VPN काटें और «%1$s» से जोड़ें?</string>

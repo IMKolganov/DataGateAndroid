@@ -73,6 +73,8 @@
     <string name="label_email">ایمیل</string>
     <string name="sign_out">خروج</string>
     <string name="sign_out_subtitle">پایان جلسه روی این دستگاه</string>
+    <string name="sign_out_confirm_title">خروج؟</string>
+    <string name="sign_out_confirm_message">مطمئنید که می‌خواهید خارج شوید؟</string>
     <string name="access_no_wss_dialog_title">اتصال در این برنامه ممکن نیست</string>
     <string name="access_switch_title">تعویض سرور؟</string>
     <string name="access_switch_message">VPN فعلی قطع و به «%1$s» متصل شود؟</string>

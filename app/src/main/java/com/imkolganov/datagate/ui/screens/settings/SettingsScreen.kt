@@ -1,6 +1,5 @@
 package com.imkolganov.datagate.ui.screens.settings
 
-import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,18 +32,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -53,13 +51,11 @@ import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
-import com.imkolganov.datagate.identity.InstallationIdDataStoreProvider
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -75,7 +71,6 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val uiLocale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
-    val copiedLabel = stringResource(R.string.copied)
     val noErrorLogsLabel = stringResource(R.string.no_error_logs)
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
@@ -86,20 +81,10 @@ fun SettingsScreen(
         authInfo = withContext(Dispatchers.IO) { tokenStore.getAuthInfo() }
     }
 
-    var installationId by remember { mutableStateOf<String?>(null) }
-    var copiedMessage by remember { mutableStateOf<String?>(null) }
-
     LaunchedEffect(Unit) {
-        val appContext = context.applicationContext
-
-        val result = withContext(Dispatchers.IO) {
-            val files = getCrashFiles(appContext)
-            val id = InstallationIdDataStoreProvider.getOrCreate(appContext)
-            files.size to id
+        crashFilesCount = withContext(Dispatchers.IO) {
+            getCrashFiles(context.applicationContext).size
         }
-
-        crashFilesCount = result.first
-        installationId = result.second
     }
 
     Column(
@@ -115,10 +100,7 @@ fun SettingsScreen(
             displayName = authInfo.displayName,
             role = authInfo.role,
             email = authInfo.email,
-            onLogout = {
-                copiedMessage = null
-                onLogout()
-            }
+            onLogout = onLogout
         )
 
         Card(
@@ -182,68 +164,6 @@ fun SettingsScreen(
                     uiLocale = uiLocale,
                     onSelect = onAppLocaleChange
                 )
-            }
-        }
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = AppCards.shape,
-            colors = AppCards.defaultColors(),
-            elevation = AppCards.defaultElevation()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(stringResource(R.string.settings_device), style = MaterialTheme.typography.titleMedium)
-
-                KeyValueRow(
-                    stringResource(R.string.settings_installation_id),
-                    installationId ?: stringResource(R.string.settings_loading)
-                )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    val clipboard = LocalClipboard.current
-                    val scope = rememberCoroutineScope()
-
-                    Button(
-                        onClick = {
-                            installationId
-                                ?.takeIf { it.isNotBlank() }
-                                ?.let { value ->
-                                    scope.launch {
-                                        val clip = ClipData.newPlainText("installationId", value)
-                                        clipboard.setClipEntry(ClipEntry(clip))
-                                    }
-                                    copiedMessage = copiedLabel
-                                }
-                        },
-                        enabled = !installationId.isNullOrBlank()
-                    ) {
-                        Text(stringResource(R.string.settings_copy_installation_id))
-                    }
-
-                    Button(
-                        onClick = {
-                            authInfo.userId
-                                ?.takeIf { it.isNotBlank() }
-                                ?.let { value ->
-                                    scope.launch {
-                                        val clip = ClipData.newPlainText("userId", value)
-                                        clipboard.setClipEntry(ClipEntry(clip))
-                                    }
-                                    copiedMessage = copiedLabel
-                                }
-                        },
-                        enabled = !authInfo.userId.isNullOrBlank()
-                    ) {
-                        Text(stringResource(R.string.settings_copy_user_id))
-                    }
-                }
-
-                copiedMessage?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall)
-                }
             }
         }
 
@@ -345,6 +265,31 @@ private fun SessionLogoutCard(
     email: String?,
     onLogout: () -> Unit
 ) {
+    var showLogoutConfirm by remember { mutableStateOf(false) }
+
+    if (showLogoutConfirm) {
+        AlertDialog(
+            onDismissRequest = { showLogoutConfirm = false },
+            title = { Text(stringResource(R.string.sign_out_confirm_title)) },
+            text = { Text(stringResource(R.string.sign_out_confirm_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutConfirm = false
+                        onLogout()
+                    }
+                ) {
+                    Text(stringResource(R.string.sign_out))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutConfirm = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = AppCards.shape,
@@ -400,7 +345,7 @@ private fun SessionLogoutCard(
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
             Button(
-                onClick = onLogout,
+                onClick = { showLogoutConfirm = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,

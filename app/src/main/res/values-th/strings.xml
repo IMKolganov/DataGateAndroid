@@ -73,6 +73,8 @@
     <string name="label_email">อีเมล</string>
     <string name="sign_out">ออกจากระบบ</string>
     <string name="sign_out_subtitle">จบเซสชันบนอุปกรณ์นี้</string>
+    <string name="sign_out_confirm_title">ออกจากระบบ?</string>
+    <string name="sign_out_confirm_message">ต้องการออกจากระบบหรือไม่?</string>
     <string name="access_no_wss_dialog_title">เชื่อมต่อในแอปไม่ได้</string>
     <string name="access_switch_title">เปลี่ยนเซิร์ฟเวอร์?</string>
     <string name="access_switch_message">ตัด VPN ปัจจุบันและเชื่อมต่อ «%1$s»?</string>

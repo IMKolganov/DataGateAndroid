@@ -73,6 +73,8 @@
     <string name="label_email">Email</string>
     <string name="sign_out">Đăng xuất</string>
     <string name="sign_out_subtitle">Kết thúc phiên trên thiết bị này</string>
+    <string name="sign_out_confirm_title">Đăng xuất?</string>
+    <string name="sign_out_confirm_message">Bạn có chắc muốn đăng xuất?</string>
     <string name="access_no_wss_dialog_title">Không thể kết nối trong ứng dụng</string>
     <string name="access_switch_title">Đổi máy chủ?</string>
     <string name="access_switch_message">Ngắt VPN hiện tại và kết nối tới «%1$s»?</string>

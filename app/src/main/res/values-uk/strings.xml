@@ -86,6 +86,8 @@
     <string name="label_email">Електронна пошта</string>
     <string name="sign_out">Вийти</string>
     <string name="sign_out_subtitle">Завершити сеанс на цьому пристрої</string>
+    <string name="sign_out_confirm_title">Вийти?</string>
+    <string name="sign_out_confirm_message">Ви впевнені, що хочете вийти?</string>
 
     <string name="access_no_wss_dialog_title">Підключення в застосунку недоступне</string>
     <string name="access_switch_title">Змінити сервер?</string>

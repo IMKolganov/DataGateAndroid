@@ -86,6 +86,8 @@
     <string name="label_email">Email</string>
     <string name="sign_out">Sign out</string>
     <string name="sign_out_subtitle">End session on this device</string>
+    <string name="sign_out_confirm_title">Sign out?</string>
+    <string name="sign_out_confirm_message">Are you sure you want to sign out?</string>
 
     <string name="access_no_wss_dialog_title">Cannot connect in this app</string>
     <string name="access_switch_title">Switch server?</string>

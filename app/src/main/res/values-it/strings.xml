@@ -73,6 +73,8 @@
     <string name="label_email">Email</string>
     <string name="sign_out">Esci</string>
     <string name="sign_out_subtitle">Termina la sessione su questo dispositivo</string>
+    <string name="sign_out_confirm_title">Uscire?</string>
+    <string name="sign_out_confirm_message">Uscire dall\'account?</string>
     <string name="access_no_wss_dialog_title">Impossibile connettersi nell\'app</string>
     <string name="access_switch_title">Cambiare server?</string>
     <string name="access_switch_message">Disconnettere la VPN corrente e connettersi a «%1$s»?</string>

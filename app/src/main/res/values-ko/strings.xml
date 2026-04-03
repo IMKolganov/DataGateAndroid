@@ -73,6 +73,8 @@
     <string name="label_email">이메일</string>
     <string name="sign_out">로그아웃</string>
     <string name="sign_out_subtitle">이 기기에서 세션 종료</string>
+    <string name="sign_out_confirm_title">로그아웃?</string>
+    <string name="sign_out_confirm_message">정말 로그아웃할까요?</string>
     <string name="access_no_wss_dialog_title">이 앱에서 연결할 수 없음</string>
     <string name="access_switch_title">서버를 바꿀까요?</string>
     <string name="access_switch_message">현재 VPN을 끊고 «%1$s»에 연결할까요?</string>

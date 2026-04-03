@@ -73,6 +73,8 @@
     <string name="label_email">Sähköposti</string>
     <string name="sign_out">Kirjaudu ulos</string>
     <string name="sign_out_subtitle">Lopeta istunto tällä laitteella</string>
+    <string name="sign_out_confirm_title">Kirjaudu ulos?</string>
+    <string name="sign_out_confirm_message">Haluatko varmasti kirjautua ulos?</string>
     <string name="access_no_wss_dialog_title">Sovelluksessa ei voi yhdistää</string>
     <string name="access_switch_title">Vaihdetaanko palvelin?</string>
     <string name="access_switch_message">Katkaistaanko nykyinen VPN ja yhdistetäänkö «%1$s»?</string>

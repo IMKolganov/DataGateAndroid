@@ -86,7 +86,8 @@
     <string name="label_email">Email</string>
     <string name="sign_out">Sign out</string>
     <string name="sign_out_subtitle">End session on this device</string>
-
+    <string name="sign_out_confirm_title">Logi välja?</string>
+    <string name="sign_out_confirm_message">Kas oled kindel, et soovid välja logida?</string>
     <string name="access_no_wss_dialog_title">Cannot connect in this app</string>
     <string name="access_switch_title">Switch server?</string>
     <string name="access_switch_message">Disconnect from the current VPN and connect to \"%1$s\"?</string>

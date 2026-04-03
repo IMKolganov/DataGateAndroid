@@ -73,6 +73,8 @@
     <string name="label_email">E-posta</string>
     <string name="sign_out">Çıkış yap</string>
     <string name="sign_out_subtitle">Bu cihazdaki oturumu sonlandır</string>
+    <string name="sign_out_confirm_title">Çıkış?</string>
+    <string name="sign_out_confirm_message">Çıkış yapmak istediğinizden emin misiniz?</string>
     <string name="access_no_wss_dialog_title">Uygulamada bağlanılamıyor</string>
     <string name="access_switch_title">Sunucu değiştirilsin mi?</string>
     <string name="access_switch_message">Mevcut VPN kesilip «%1$s» bağlansın mı?</string>

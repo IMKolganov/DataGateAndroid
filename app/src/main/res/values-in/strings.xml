@@ -73,6 +73,8 @@
     <string name="label_email">Email</string>
     <string name="sign_out">Keluar</string>
     <string name="sign_out_subtitle">Akhiri sesi di perangkat ini</string>
+    <string name="sign_out_confirm_title">Keluar?</string>
+    <string name="sign_out_confirm_message">Yakin ingin keluar?</string>
     <string name="access_no_wss_dialog_title">Tidak dapat terhubung di aplikasi ini</string>
     <string name="access_switch_title">Ganti server?</string>
     <string name="access_switch_message">Putuskan VPN saat ini dan hubungkan ke «%1$s»?</string>

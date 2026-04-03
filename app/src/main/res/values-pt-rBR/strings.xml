@@ -73,6 +73,8 @@
     <string name="label_email">E-mail</string>
     <string name="sign_out">Sair</string>
     <string name="sign_out_subtitle">Encerrar sessão neste aparelho</string>
+    <string name="sign_out_confirm_title">Sair?</string>
+    <string name="sign_out_confirm_message">Tem certeza de que deseja sair?</string>
     <string name="access_no_wss_dialog_title">Não é possível conectar neste app</string>
     <string name="access_switch_title">Trocar de servidor?</string>
     <string name="access_switch_message">Desconectar a VPN atual e conectar a «%1$s»?</string>

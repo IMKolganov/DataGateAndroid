@@ -73,6 +73,8 @@
     <string name="label_email">البريد</string>
     <string name="sign_out">تسجيل الخروج</string>
     <string name="sign_out_subtitle">إنهاء الجلسة على هذا الجهاز</string>
+    <string name="sign_out_confirm_title">تسجيل الخروج؟</string>
+    <string name="sign_out_confirm_message">هل أنت متأكد أنك تريد تسجيل الخروج؟</string>
     <string name="access_no_wss_dialog_title">لا يمكن الاتصال في هذا التطبيق</string>
     <string name="access_switch_title">تبديل الخادم؟</string>
     <string name="access_switch_message">قطع VPN الحالي والاتصال بـ «%1$s»؟</string>

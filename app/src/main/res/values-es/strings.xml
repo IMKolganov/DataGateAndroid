@@ -73,6 +73,8 @@
     <string name="label_email">Correo</string>
     <string name="sign_out">Cerrar sesión</string>
     <string name="sign_out_subtitle">Finalizar sesión en este dispositivo</string>
+    <string name="sign_out_confirm_title">¿Cerrar sesión?</string>
+    <string name="sign_out_confirm_message">¿Seguro que quieres cerrar sesión?</string>
     <string name="access_no_wss_dialog_title">No se puede conectar en la app</string>
     <string name="access_switch_title">¿Cambiar de servidor?</string>
     <string name="access_switch_message">¿Desconectar la VPN actual y conectar a «%1$s»?</string>

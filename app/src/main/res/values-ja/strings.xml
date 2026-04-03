@@ -73,6 +73,8 @@
     <string name="label_email">メール</string>
     <string name="sign_out">ログアウト</string>
     <string name="sign_out_subtitle">この端末のセッションを終了</string>
+    <string name="sign_out_confirm_title">ログアウト？</string>
+    <string name="sign_out_confirm_message">ログアウトしてもよろしいですか？</string>
     <string name="access_no_wss_dialog_title">このアプリからは接続できません</string>
     <string name="access_switch_title">サーバーを切り替えますか？</string>
     <string name="access_switch_message">現在の VPN を切断して「%1$s」に接続しますか？</string>

@@ -73,6 +73,8 @@
     <string name="label_email">邮箱</string>
     <string name="sign_out">退出登录</string>
     <string name="sign_out_subtitle">在此设备上结束会话</string>
+    <string name="sign_out_confirm_title">退出登录？</string>
+    <string name="sign_out_confirm_message">确定要退出登录吗？</string>
     <string name="access_no_wss_dialog_title">无法在本应用内连接</string>
     <string name="access_switch_title">切换服务器？</string>
     <string name="access_switch_message">断开当前 VPN 并连接到「%1$s」？</string>
