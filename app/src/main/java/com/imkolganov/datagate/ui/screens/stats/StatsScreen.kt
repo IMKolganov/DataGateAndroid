@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +33,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.imkolganov.datagate.ui.components.AppCards
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun StatsScreen(viewModel: StatsViewModel) {
     val state by viewModel.state.collectAsState()
@@ -37,7 +42,16 @@ fun StatsScreen(viewModel: StatsViewModel) {
         viewModel.load()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = state.isLoading,
+        onRefresh = { viewModel.load() }
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(pullRefreshState)
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -147,6 +161,12 @@ fun StatsScreen(viewModel: StatsViewModel) {
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
+
+        PullRefreshIndicator(
+            refreshing = state.isLoading,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
 
         if (state.isLoading) {
             Dialog(

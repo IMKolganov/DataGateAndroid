@@ -23,6 +23,14 @@
     <string name="action_connect">Connect</string>
     <string name="vpn_home_footer">Connect chooses a server automatically using the app\'s selection rules. To pick a specific server, open the Access tab.</string>
 
+
+    <string name="home_report_issue">Raportează o problemă</string>
+    <string name="home_report_issue_title">Contactează suportul</string>
+    <string name="home_report_issue_hint">Alege cum vrei să ne contactezi:</string>
+    <string name="home_report_telegram">Bot Telegram @DataGateVPNBot</string>
+    <string name="home_report_email">E-mail</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

@@ -19,6 +19,14 @@
     <string name="action_cancel">取消</string>
     <string name="action_connect">連線</string>
     <string name="vpn_home_footer">「連線」會自動選擇伺服器。若要指定伺服器，請開啟「接入」分頁。</string>
+
+    <string name="home_report_issue">回報問題</string>
+    <string name="home_report_issue_title">聯絡支援</string>
+    <string name="home_report_issue_hint">選擇聯絡方式：</string>
+    <string name="home_report_telegram">Telegram 機器人 @DataGateVPNBot</string>
+    <string name="home_report_email">電子郵件</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">篩選</string>
     <string name="stats_overview">概覽</string>
     <string name="stats_chart_hint">點按圖表 · 雙指縮放 · 拖曳捲動</string>

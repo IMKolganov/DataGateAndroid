@@ -19,6 +19,14 @@
     <string name="action_cancel">취소</string>
     <string name="action_connect">연결</string>
     <string name="vpn_home_footer">«연결»은 서버를 자동으로 선택합니다. 특정 서버는 «액세스» 탭에서 선택하세요.</string>
+
+    <string name="home_report_issue">문제 신고</string>
+    <string name="home_report_issue_title">고객 지원 문의</string>
+    <string name="home_report_issue_hint">연락 방법을 선택하세요:</string>
+    <string name="home_report_telegram">Telegram 봇 @DataGateVPNBot</string>
+    <string name="home_report_email">이메일</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">필터</string>
     <string name="stats_overview">개요</string>
     <string name="stats_chart_hint">차트 탭 · 핀치로 확대 · 드래그로 스크롤</string>

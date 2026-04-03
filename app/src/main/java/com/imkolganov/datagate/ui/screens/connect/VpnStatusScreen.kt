@@ -1,5 +1,7 @@
 package com.imkolganov.datagate.ui.screens.connect
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -15,8 +17,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,16 +31,24 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material.icons.outlined.ContactSupport
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -102,6 +114,25 @@ fun VpnStatusScreen(
     }
 
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    var showReportDialog by remember { mutableStateOf(false) }
+
+    fun openUrl(url: String) {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: Exception) {
+        }
+    }
+
+    fun openSupportEmail() {
+        val email = context.getString(R.string.support_contact_email)
+        val subject = Uri.encode(context.getString(R.string.home_report_email_subject))
+        val uri = Uri.parse("mailto:$email?subject=$subject")
+        try {
+            context.startActivity(Intent(Intent.ACTION_SENDTO, uri))
+        } catch (_: Exception) {
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -121,6 +152,21 @@ fun VpnStatusScreen(
                 text = stringResource(R.string.vpn_home_title),
                 style = MaterialTheme.typography.headlineSmall
             )
+
+            TextButton(onClick = { showReportDialog = true }) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ContactSupport,
+                        contentDescription = stringResource(R.string.home_report_issue),
+                        modifier = Modifier.size(22.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(stringResource(R.string.home_report_issue))
+                }
+            }
 
             Card(
                 shape = RoundedCornerShape(24.dp),
@@ -213,6 +259,71 @@ fun VpnStatusScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+
+    if (showReportDialog) {
+        AlertDialog(
+            onDismissRequest = { showReportDialog = false },
+            title = { Text(stringResource(R.string.home_report_issue_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(R.string.home_report_issue_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Start
+                    )
+                    TextButton(
+                        onClick = {
+                            openUrl(context.getString(R.string.support_telegram_bot_url))
+                            showReportDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(R.string.home_report_telegram),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            openSupportEmail()
+                            showReportDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(R.string.home_report_email),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            openUrl(context.getString(R.string.project_github_issues_url))
+                            showReportDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(R.string.home_report_github),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showReportDialog = false }) {
+                    Text(stringResource(R.string.action_ok))
+                }
+            }
+        )
     }
 }
 

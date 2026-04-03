@@ -23,6 +23,14 @@
     <string name="action_connect">Подключить</string>
     <string name="vpn_home_footer">«Подключить» выбирает сервер автоматически. Чтобы указать сервер вручную, откройте вкладку «Доступ».</string>
 
+    <string name="home_report_issue">Сообщить о проблеме</string>
+    <string name="home_report_issue_title">Связь с поддержкой</string>
+    <string name="home_report_issue_hint">Как вам удобнее связаться:</string>
+    <string name="home_report_telegram">Бот в Telegram @DataGateVPNBot</string>
+    <string name="home_report_email">Электронная почта</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
+
     <string name="stats_filters">Фильтры</string>
     <string name="stats_overview">Обзор</string>
     <string name="stats_chart_hint">Нажмите на график для значений · щипок для масштаба · перетаскивание для прокрутки</string>

@@ -19,6 +19,14 @@
     <string name="action_cancel">İptal</string>
     <string name="action_connect">Bağlan</string>
     <string name="vpn_home_footer">«Bağlan» sunucuyu otomatik seçer. Belirli sunucu için Erişim sekmesini açın.</string>
+
+    <string name="home_report_issue">Sorun bildir</string>
+    <string name="home_report_issue_title">Destekle iletişim</string>
+    <string name="home_report_issue_hint">Bize nasıl ulaşmak istersiniz?</string>
+    <string name="home_report_telegram">Telegram botu @DataGateVPNBot</string>
+    <string name="home_report_email">E-posta</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">Filtreler</string>
     <string name="stats_overview">Genel bakış</string>
     <string name="stats_chart_hint">Grafiğe dokunun · yakınlaştırmak için sıkıştırın · kaydırmak için sürükleyin</string>

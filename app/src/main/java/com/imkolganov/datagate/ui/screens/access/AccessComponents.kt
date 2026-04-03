@@ -8,11 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -38,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.imkolganov.datagate.R
 
-private val ServerBadgeWidth = 88.dp
-private val ServerBadgeHeight = 36.dp
+private val ServerBadgeHeight = 32.dp
+private val UsersPillIconSize = 16.dp
 private val ServerBadgeShape = RoundedCornerShape(10.dp)
 /** Material green 800 — readable on light cards; works on tinted cards too */
 private val StatusOnlineGreen = Color(0xFF2E7D32)
@@ -351,26 +352,22 @@ private fun StatusPill(isOnline: Boolean, containerColor: Color) {
 
     Box(
         modifier = Modifier
-            .size(ServerBadgeWidth, ServerBadgeHeight)
+            .height(ServerBadgeHeight)
+            .wrapContentWidth()
             .background(color = containerColor, shape = ServerBadgeShape)
-            .border(width = 0.5.dp, color = borderColor, shape = ServerBadgeShape)
+            .border(width = 0.5.dp, color = borderColor, shape = ServerBadgeShape),
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 6.dp, vertical = 4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    letterSpacing = 0.sp,
-                    lineHeight = 16.sp
-                ),
-                color = textColor,
-                maxLines = 1
-            )
-        }
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            text = text,
+            style = MaterialTheme.typography.labelSmall.copy(
+                letterSpacing = 0.sp,
+                lineHeight = 16.sp
+            ),
+            color = textColor,
+            maxLines = 1
+        )
     }
 }
 
@@ -423,24 +420,23 @@ private fun UsersPill(count: Int, containerColor: Color) {
 
     Box(
         modifier = Modifier
-            .size(ServerBadgeWidth, ServerBadgeHeight)
+            .height(ServerBadgeHeight)
+            .wrapContentWidth()
             .background(color = containerColor, shape = ServerBadgeShape)
-            .border(width = 0.5.dp, color = outline, shape = ServerBadgeShape)
+            .border(width = 0.5.dp, color = outline, shape = ServerBadgeShape),
+        contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Icon(
                 imageVector = Icons.Outlined.Group,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(UsersPillIconSize),
                 tint = fg
             )
-            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = count.toString(),
                 style = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp),

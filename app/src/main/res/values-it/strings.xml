@@ -19,6 +19,14 @@
     <string name="action_cancel">Annulla</string>
     <string name="action_connect">Connetti</string>
     <string name="vpn_home_footer">«Connetti» sceglie un server automaticamente. Per un server specifico apri la scheda Accesso.</string>
+
+    <string name="home_report_issue">Segnala un problema</string>
+    <string name="home_report_issue_title">Contatta il supporto</string>
+    <string name="home_report_issue_hint">Scegli come contattarci:</string>
+    <string name="home_report_telegram">Bot Telegram @DataGateVPNBot</string>
+    <string name="home_report_email">Email</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">Filtri</string>
     <string name="stats_overview">Panoramica</string>
     <string name="stats_chart_hint">Tocca il grafico · pizzica per zoom · trascina per scorrere</string>

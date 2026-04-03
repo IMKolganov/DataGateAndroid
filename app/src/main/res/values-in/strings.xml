@@ -19,6 +19,14 @@
     <string name="action_cancel">Batal</string>
     <string name="action_connect">Hubungkan</string>
     <string name="vpn_home_footer">«Hubungkan» memilih server otomatis. Untuk server tertentu, buka tab Akses.</string>
+
+    <string name="home_report_issue">Laporkan masalah</string>
+    <string name="home_report_issue_title">Hubungi dukungan</string>
+    <string name="home_report_issue_hint">Pilih cara menghubungi kami:</string>
+    <string name="home_report_telegram">Bot Telegram @DataGateVPNBot</string>
+    <string name="home_report_email">Email</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">Filter</string>
     <string name="stats_overview">Ringkasan</string>
     <string name="stats_chart_hint">Ketuk grafik · cubit untuk zoom · seret untuk gulir</string>

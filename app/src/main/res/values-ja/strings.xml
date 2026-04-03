@@ -19,6 +19,14 @@
     <string name="action_cancel">キャンセル</string>
     <string name="action_connect">接続</string>
     <string name="vpn_home_footer">「接続」は自動でサーバーを選びます。特定のサーバーは「アクセス」タブから。</string>
+
+    <string name="home_report_issue">問題を報告</string>
+    <string name="home_report_issue_title">サポートに連絡</string>
+    <string name="home_report_issue_hint">ご連絡方法を選んでください:</string>
+    <string name="home_report_telegram">Telegram ボット @DataGateVPNBot</string>
+    <string name="home_report_email">メール</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">フィルター</string>
     <string name="stats_overview">概要</string>
     <string name="stats_chart_hint">チャートをタップ · ピンチで拡大 · ドラッグでスクロール</string>

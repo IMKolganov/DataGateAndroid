@@ -19,6 +19,14 @@
     <string name="action_cancel">Peruuta</string>
     <string name="action_connect">Yhdistä</string>
     <string name="vpn_home_footer">«Yhdistä» valitsee palvelimen automaattisesti. Valitse tietty palvelin Pääsy-välilehdeltä.</string>
+
+    <string name="home_report_issue">Ilmoita ongelmasta</string>
+    <string name="home_report_issue_title">Ota yhteyttä tukeen</string>
+    <string name="home_report_issue_hint">Valitse, miten haluat ottaa yhteyttä:</string>
+    <string name="home_report_telegram">Telegram-botti @DataGateVPNBot</string>
+    <string name="home_report_email">Sähköposti</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">Suodattimet</string>
     <string name="stats_overview">Yleiskuva</string>
     <string name="stats_chart_hint">Napauta kaaviota · nipistä zoom · vedä vieritys</string>

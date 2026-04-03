@@ -19,6 +19,14 @@
     <string name="action_cancel">إلغاء</string>
     <string name="action_connect">اتصال</string>
     <string name="vpn_home_footer">«اتصال» يختار الخادم تلقائيًا. لخادم محدد افتح تبويب الوصول.</string>
+
+    <string name="home_report_issue">الإبلاغ عن مشكلة</string>
+    <string name="home_report_issue_title">التواصل مع الدعم</string>
+    <string name="home_report_issue_hint">اختر كيف تريد التواصل معنا:</string>
+    <string name="home_report_telegram">بوت Telegram ‎@DataGateVPNBot</string>
+    <string name="home_report_email">البريد الإلكتروني</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">عوامل التصفية</string>
     <string name="stats_overview">نظرة عامة</string>
     <string name="stats_chart_hint">المس الرسم · قرص للتكبير · اسحب للتمرير</string>

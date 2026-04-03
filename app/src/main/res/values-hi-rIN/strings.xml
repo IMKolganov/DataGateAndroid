@@ -19,6 +19,14 @@
     <string name="action_cancel">रद्द करें</string>
     <string name="action_connect">कनेक्ट</string>
     <string name="vpn_home_footer">«कनेक्ट» स्वचालित रूप से सर्वर चुनता है। किसी खास सर्वर के लिए एक्सेस टैब खोलें।</string>
+
+    <string name="home_report_issue">समस्या बताएं</string>
+    <string name="home_report_issue_title">सहायता से संपर्क</string>
+    <string name="home_report_issue_hint">चुनें कि आप कैसे संपर्क करना चाहते हैं:</string>
+    <string name="home_report_telegram">Telegram बॉट @DataGateVPNBot</string>
+    <string name="home_report_email">ईमेल</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
     <string name="stats_filters">फ़िल्टर</string>
     <string name="stats_overview">अवलोकन</string>
     <string name="stats_chart_hint">चार्ट पर टैप करें · ज़ूम के लिए पिंच · स्क्रॉल के लिए खींचें</string>
