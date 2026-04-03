@@ -30,6 +30,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +39,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +57,10 @@ import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import java.util.Locale
+import com.imkolganov.datagate.update.ApkUpdateInstaller
+import com.imkolganov.datagate.update.UpdatePreferences
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -74,6 +79,9 @@ fun SettingsScreen(
     val noErrorLogsLabel = stringResource(R.string.no_error_logs)
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
+    var githubUpdatesEnabled by remember { mutableStateOf(true) }
+    var autoDownloadSuggest by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     var authInfo by remember { mutableStateOf(tokenStore.getAuthInfo()) }
 
@@ -84,6 +92,16 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         crashFilesCount = withContext(Dispatchers.IO) {
             getCrashFiles(context.applicationContext).size
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val appCtx = context.applicationContext
+        githubUpdatesEnabled = withContext(Dispatchers.IO) {
+            UpdatePreferences.isCheckEnabled(appCtx)
+        }
+        autoDownloadSuggest = withContext(Dispatchers.IO) {
+            UpdatePreferences.isAutoDownloadEnabled(appCtx)
         }
     }
 
@@ -164,6 +182,106 @@ fun SettingsScreen(
                     uiLocale = uiLocale,
                     onSelect = onAppLocaleChange
                 )
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(stringResource(R.string.settings_about), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.settings_about_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                KeyValueRow(
+                    stringResource(R.string.settings_app_version_label),
+                    stringResource(R.string.login_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(
+                        onClick = {
+                            ApkUpdateInstaller.openUrl(
+                                context,
+                                context.getString(R.string.project_website_url)
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.settings_link_website))
+                    }
+                    TextButton(
+                        onClick = {
+                            ApkUpdateInstaller.openUrl(
+                                context,
+                                context.getString(R.string.project_telegram_url)
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.settings_link_telegram))
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.settings_updates_github_title),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            stringResource(R.string.settings_updates_github_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = githubUpdatesEnabled,
+                        onCheckedChange = { v ->
+                            githubUpdatesEnabled = v
+                            scope.launch {
+                                UpdatePreferences.setCheckEnabled(context.applicationContext, v)
+                            }
+                        }
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.settings_auto_download_title),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            stringResource(R.string.settings_auto_download_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = autoDownloadSuggest,
+                        onCheckedChange = { v ->
+                            autoDownloadSuggest = v
+                            scope.launch {
+                                UpdatePreferences.setAutoDownloadEnabled(context.applicationContext, v)
+                            }
+                        }
+                    )
+                }
             }
         }
 

@@ -78,6 +78,26 @@
     <string name="no_shareable_files">Нет файлов для отправки.</string>
     <string name="share_failed">Не удалось отправить файлы.</string>
 
+    <string name="settings_about">О проекте</string>
+    <string name="settings_about_subtitle">Ссылки на проект и проверка новых версий на GitHub.</string>
+    <string name="settings_app_version_label">Версия приложения</string>
+    <string name="settings_link_website">Сайт</string>
+    <string name="settings_link_telegram">Канал в Telegram</string>
+    <string name="settings_updates_github_title">Проверять обновления на GitHub</string>
+    <string name="settings_updates_github_subtitle">Периодически запрашивать последний релиз и уведомлять вас.</string>
+    <string name="settings_auto_download_title">Предлагать загрузку APK</string>
+    <string name="settings_auto_download_subtitle">При появлении обновления помнить, что вы хотите варианты загрузки и установки в будущем.</string>
+
+    <string name="update_dialog_title">Новая версия %1$s</string>
+    <string name="update_dialog_body">На GitHub доступна более новая сборка. Последний релиз: %1$s. У вас: %2$s.\n\nМожно открыть страницу релиза или скачать APK. Ниже можно включить предложения обновлений на будущее.</string>
+    <string name="update_no_apk_attached">К этому релизу не прикреплён APK. Откройте страницу релиза на GitHub и скачайте файл вручную.</string>
+    <string name="update_dialog_auto_download_label">Предлагать обновления и загрузку APK в будущем</string>
+    <string name="update_dialog_later">Не сейчас</string>
+    <string name="update_dialog_open_release">Открыть страницу релиза</string>
+    <string name="update_dialog_download">Скачать и установить</string>
+    <string name="update_downloading">Загрузка…</string>
+    <string name="update_download_failed">Не удалось скачать</string>
+
     <string name="account_title">Аккаунт и выход</string>
     <string name="account_subtitle">Вы вошли под профилем ниже. Выход удалит локальные токены на этом устройстве.</string>
     <string name="not_available">Недоступно</string>

@@ -78,6 +78,29 @@
     <string name="no_shareable_files">No shareable files.</string>
     <string name="share_failed">Failed to share files.</string>
 
+    <string name="settings_about">About</string>
+    <string name="settings_about_subtitle">Project links and checking for new versions on GitHub.</string>
+    <string name="settings_app_version_label">App version</string>
+    <string name="settings_link_website">Website</string>
+    <string name="settings_link_telegram">Telegram channel</string>
+    <string name="settings_updates_github_title">Check for updates on GitHub</string>
+    <string name="settings_updates_github_subtitle">Periodically check the latest public release and notify you.</string>
+    <string name="settings_auto_download_title">Suggest APK download</string>
+    <string name="settings_auto_download_subtitle">When offering an update, remember that you want download/install options for future releases.</string>
+
+    <string name="project_website_url" translatable="false">https://datagateapp.com/</string>
+    <string name="project_telegram_url" translatable="false">https://t.me/datagateapp</string>
+
+    <string name="update_dialog_title">New version %1$s</string>
+    <string name="update_dialog_body">A newer build is available on GitHub. Latest release: %1$s. You have: %2$s.\n\nYou can open the release page or download the APK. Use the option below to keep suggesting updates for future releases.</string>
+    <string name="update_no_apk_attached">This release has no APK attached. Open the release page on GitHub to get the file.</string>
+    <string name="update_dialog_auto_download_label">Suggest updates and APK download for future releases</string>
+    <string name="update_dialog_later">Not now</string>
+    <string name="update_dialog_open_release">Open release page</string>
+    <string name="update_dialog_download">Download &amp; install</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_download_failed">Download failed</string>
+
     <string name="account_title">Account &amp; sign out</string>
     <string name="account_subtitle">You are signed in with the profile below. Signing out removes local tokens on this device.</string>
     <string name="not_available">Not available</string>

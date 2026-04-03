@@ -1,10 +1,13 @@
 package com.imkolganov.datagate.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.ui.screens.access.AccessViewModel
@@ -13,7 +16,9 @@ import com.imkolganov.datagate.ui.screens.main.MainScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
+import com.imkolganov.datagate.update.UpdateCheckHost
 import com.imkolganov.datagate.vpn.VpnStatusUiState
+import okhttp3.OkHttpClient
 
 @Composable
 fun AppRoot(
@@ -31,7 +36,8 @@ fun AppRoot(
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     appLocale: AppLocale,
-    onAppLocaleChange: (AppLocale) -> Unit
+    onAppLocaleChange: (AppLocale) -> Unit,
+    http: OkHttpClient
 ) {
     val authState by authViewModel.state.collectAsState()
 
@@ -46,24 +52,27 @@ fun AppRoot(
     }
 
     if (isLoggedIn) {
-        MainScreen(
-            vpnState = vpnState,
-            onConnectFromHome = onConnectFromHome,
-            onConnectFromAccess = onConnectFromAccess,
-            onRequestDisconnect = onRequestDisconnect,
-            onReconnectVpn = onReconnectVpn,
-            onLogout = {
-                authViewModel.logout()
-                onAuthChanged()
-            },
-            tokenStore = tokenStore,
-            accessViewModel = accessViewModel,
-            statsViewModel = statsViewModel,
-            themeMode = themeMode,
-            onThemeModeChange = onThemeModeChange,
-            appLocale = appLocale,
-            onAppLocaleChange = onAppLocaleChange
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            MainScreen(
+                vpnState = vpnState,
+                onConnectFromHome = onConnectFromHome,
+                onConnectFromAccess = onConnectFromAccess,
+                onRequestDisconnect = onRequestDisconnect,
+                onReconnectVpn = onReconnectVpn,
+                onLogout = {
+                    authViewModel.logout()
+                    onAuthChanged()
+                },
+                tokenStore = tokenStore,
+                accessViewModel = accessViewModel,
+                statsViewModel = statsViewModel,
+                themeMode = themeMode,
+                onThemeModeChange = onThemeModeChange,
+                appLocale = appLocale,
+                onAppLocaleChange = onAppLocaleChange
+            )
+            UpdateCheckHost(isLoggedIn = true, http = http)
+        }
     } else {
         LoginScreen(viewModel = authViewModel)
     }

@@ -177,7 +177,8 @@ class MainActivity : AppCompatActivity() {
                     onAppLocaleChange = { next ->
                         appLocale = next
                         LanguagePreferenceStore.setLocale(applicationContext, next)
-                    }
+                    },
+                    http = graph.httpPlain
                 )
             }
         }

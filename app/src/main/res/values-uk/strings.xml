@@ -78,6 +78,26 @@
     <string name="no_shareable_files">Немає файлів для надсилання.</string>
     <string name="share_failed">Не вдалося надіслати файли.</string>
 
+    <string name="settings_about">Про застосунок</string>
+    <string name="settings_about_subtitle">Посилання на проєкт і перевірка нових версій на GitHub.</string>
+    <string name="settings_app_version_label">Версія застосунку</string>
+    <string name="settings_link_website">Сайт</string>
+    <string name="settings_link_telegram">Канал у Telegram</string>
+    <string name="settings_updates_github_title">Перевіряти оновлення на GitHub</string>
+    <string name="settings_updates_github_subtitle">Періодично запитувати останній реліз і сповіщати вас.</string>
+    <string name="settings_auto_download_title">Пропонувати завантаження APK</string>
+    <string name="settings_auto_download_subtitle">Коли є оновлення, пам\'ятати, що ви хочете варіанти завантаження й установки надалі.</string>
+
+    <string name="update_dialog_title">Нова версія %1$s</string>
+    <string name="update_dialog_body">На GitHub доступна новіша збірка. Останній реліз: %1$s. У вас: %2$s.\n\nМожна відкрити сторінку релізу або завантажити APK. Нижче можна увімкнути пропозиції оновлень на майбутнє.</string>
+    <string name="update_no_apk_attached">До цього релізу не додано APK. Відкрийте сторінку релізу на GitHub і завантажте файл вручну.</string>
+    <string name="update_dialog_auto_download_label">Пропонувати оновлення та завантаження APK надалі</string>
+    <string name="update_dialog_later">Не зараз</string>
+    <string name="update_dialog_open_release">Відкрити сторінку релізу</string>
+    <string name="update_dialog_download">Завантажити й установити</string>
+    <string name="update_downloading">Завантаження…</string>
+    <string name="update_download_failed">Не вдалося завантажити</string>
+
     <string name="account_title">Обліковий запис і вихід</string>
     <string name="account_subtitle">Ви увійшли під профілем нижче. Вихід видалить локальні токени на цьому пристрої.</string>
     <string name="not_available">Недоступно</string>
