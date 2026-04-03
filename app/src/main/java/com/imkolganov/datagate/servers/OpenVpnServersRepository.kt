@@ -44,4 +44,31 @@ class OpenVpnServersRepository(
             .minByOrNull { it.countConnectedClients }
             ?: throw IllegalStateException("No online WSS servers available")
     }
+
+    /**
+     * Resolves a specific server by id (must be online and WSS-enabled), or throws.
+     */
+    suspend fun getServerByIdOrThrow(serverId: Int): BestServerResult {
+        val items = getAllWithStatus()
+
+        val match = items.mapNotNull { item ->
+            val server = item.openVpnServerResponses?.openVpnServer ?: return@mapNotNull null
+
+            val id = server.id ?: return@mapNotNull null
+            if (id != serverId) return@mapNotNull null
+            if (server.isOnline != true) return@mapNotNull null
+            if (server.isEnableWss != true) return@mapNotNull null
+
+            BestServerResult(
+                serverId = id,
+                name = server.serverName?.trim().takeUnless { it.isNullOrBlank() } ?: "Server #$id",
+                apiUrl = server.apiUrl,
+                countConnectedClients = (item.countConnectedClients ?: 0).coerceAtLeast(0),
+                isDefault = false
+            )
+        }.firstOrNull()
+
+        return match
+            ?: throw IllegalStateException("Server #$serverId is not available or offline")
+    }
 }

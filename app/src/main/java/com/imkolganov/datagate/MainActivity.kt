@@ -10,6 +10,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,14 +22,17 @@ import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.identity.InstallationIdDataStoreProvider
 import com.imkolganov.datagate.ui.AppRoot
 import com.imkolganov.datagate.ui.screens.access.AccessRepositoryImpl
-import com.imkolganov.datagate.ui. screens.access.AccessViewModel
+import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.access.AccessViewModelFactory
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModelFactory
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
+import com.imkolganov.datagate.ui.theme.ThemeMode
+import com.imkolganov.datagate.ui.theme.ThemePreferenceStore
 import com.imkolganov.datagate.vpn.VpnConnectInteractor
 import com.imkolganov.datagate.vpn.VpnController
 import com.imkolganov.datagate.vpn.VpnStatusUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -41,6 +45,7 @@ class MainActivity : ComponentActivity() {
 
     private var vpnState by mutableStateOf(VpnStatusUiState())
     private var authVersion by mutableStateOf(0)
+    private var themeMode by mutableStateOf(ThemeMode.SYSTEM)
 
     private lateinit var vpnController: VpnController
     private lateinit var graph: AppGraph
@@ -106,7 +111,7 @@ class MainActivity : ComponentActivity() {
             tokenStore = graph.tokenStore
         )
 
-        val accessFactory = AccessViewModelFactory(accessRepo)
+        val accessFactory = AccessViewModelFactory(accessRepo, applicationContext)
         accessViewModel = androidx.lifecycle.ViewModelProvider(this, accessFactory)
             .get(AccessViewModel::class.java)
 
@@ -119,25 +124,43 @@ class MainActivity : ComponentActivity() {
             .get(StatsViewModel::class.java)
 
 
-        connectInteractor = graph.createConnectInteractor(getInstallationId = { installationId })
+        connectInteractor = graph.createConnectInteractor(
+            appContext = applicationContext,
+            getInstallationId = { installationId }
+        )
 
         lifecycleScope.launch {
             installationId = InstallationIdDataStoreProvider.getOrCreate(applicationContext)
             Log.d(TAG, "InstallationId ready: $installationId")
         }
 
+        themeMode = ThemePreferenceStore.get(applicationContext)
+
         setContent {
-            DataGateAndroidTheme {
+            val systemDark = isSystemInDarkTheme()
+            DataGateAndroidTheme(darkTheme = themeMode.resolveDark(systemDark)) {
                 AppRoot(
                     authViewModel = authViewModel,
                     tokenStore = graph.tokenStore,
                     vpnState = vpnState,
                     onRequestConnect = { lifecycleScope.launch { connectInteractor.connect() } },
                     onRequestDisconnect = { vpnController.requestDisconnect() },
+                    onReconnectVpn = {
+                        lifecycleScope.launch {
+                            vpnController.requestDisconnect()
+                            delay(2500)
+                            connectInteractor.connect()
+                        }
+                    },
                     onAuthChanged = { authVersion++ },
                     authVersion = authVersion,
                     accessViewModel = accessViewModel,
-                    statsViewModel = statsViewModel
+                    statsViewModel = statsViewModel,
+                    themeMode = themeMode,
+                    onThemeModeChange = { next ->
+                        themeMode = next
+                        ThemePreferenceStore.save(applicationContext, next)
+                    }
                 )
             }
         }

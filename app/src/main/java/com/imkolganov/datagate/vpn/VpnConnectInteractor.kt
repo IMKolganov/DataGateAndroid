@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.vpn
 
 import OvpnApiClient
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
@@ -10,6 +11,7 @@ import java.nio.ByteBuffer
 import java.util.UUID
 
 class VpnConnectInteractor(
+    private val appContext: Context,
     private val getExternalId: () -> String?,
     private val getInstallationId: () -> String?,
     private val serversRepository: OpenVpnServersRepository,
@@ -18,6 +20,9 @@ class VpnConnectInteractor(
 ) {
     private val isConnecting = AtomicBoolean(false)
 
+    /**
+     * Starts VPN using [VpnServerSelectionStore] (same rules as Home and Access).
+     */
     suspend fun connect() {
         if (!isConnecting.compareAndSet(false, true)) {
             Log.w("OpenVPN3", "Connect ignored: already in progress")
@@ -25,12 +30,25 @@ class VpnConnectInteractor(
         }
 
         try {
-            vpnController.showStatus("SELECTING_SERVER", "Selecting best server")
-            Log.d("OpenVPN3", "Selecting best server...")
-            val best = serversRepository.pickBestServer()
+            val preferredServerId = when (VpnServerSelectionStore.getMode(appContext)) {
+                ServerSelectionMode.AUTO -> null
+                ServerSelectionMode.MANUAL -> VpnServerSelectionStore.getSelectedServerId(appContext)
+            }
+            val best = if (preferredServerId == null) {
+                vpnController.showStatus("SELECTING_SERVER", "Selecting best server")
+                Log.d("OpenVPN3", "Selecting best server...")
+                serversRepository.pickBestServer()
+            } else {
+                vpnController.showStatus("SELECTING_SERVER", "Resolving server")
+                Log.d("OpenVPN3", "Using selected serverId=$preferredServerId")
+                serversRepository.getServerByIdOrThrow(preferredServerId)
+            }
             val serverName = best.name
             Log.d("OpenVPN3", "Selected serverId=${best.serverId}")
-            vpnController.showStatus("SELECTED_SERVER", serverName)
+            vpnController.notifyServerSelectedForConnection(
+                best.serverId,
+                serverName ?: "Server"
+            )
 
             vpnController.showStatus("GETTING_INSTALLATION_ID", "Reading installation id")
             val installationId = getInstallationId()
@@ -61,14 +79,18 @@ class VpnConnectInteractor(
             vpnController.showStatus("CONFIG_RECEIVED", "size=${downloaded.content.size}")
 
             val configText = downloaded.content.toString(Charsets.UTF_8)
-            val patchedConfig = forceWssConfig(configText)
-            Log.d("OpenVPN3", "OVPN FILE RECEIVED, size=${downloaded.content.size}")
+            val linkProtocol = VpnLinkProtocol.fromOvpnConfigContent(configText)
+            Log.d(
+                "OpenVPN3",
+                "OVPN profile transport=$linkProtocol (from proto line in file), size=${downloaded.content.size}"
+            )
+            val patchedConfig = forceWssConfig(configText, linkProtocol)
 
             val apiUrl = best.apiUrl
                 ?: error("Best server apiUrl is null")
 
-            val wssUrl = httpsToWssProxy(apiUrl)
-            vpnController.startWithConfig(patchedConfig, wssUrl)
+            val wssUrl = httpsToWssProxy(apiUrl, linkProtocol)
+            vpnController.startWithConfig(patchedConfig, wssUrl, linkProtocol)
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
             vpnController.showError("Connect failed: ${t.message ?: t.javaClass.simpleName}")
@@ -77,7 +99,8 @@ class VpnConnectInteractor(
         }
     }
     private val BRIDGE_PORT = 41194
-    private fun forceWssConfig(original: String): String {
+    private fun forceWssConfig(original: String, linkProtocol: VpnLinkProtocol): String {
+        val protoLine = linkProtocol.configProtoLine()
         val lines = original
             .replace("\r\n", "\n")
             .split("\n")
@@ -101,7 +124,7 @@ class VpnConnectInteractor(
                 }
 
                 lower.startsWith("proto ") -> {
-                    out.add("proto tcp-client")
+                    out.add(protoLine)
                     protoWritten = true
                 }
 
@@ -109,7 +132,7 @@ class VpnConnectInteractor(
             }
         }
 
-        if (!protoWritten) out.add(0, "proto tcp-client")
+        if (!protoWritten) out.add(0, protoLine)
         if (!remoteWritten) out.add(0, "remote 127.0.0.1 $BRIDGE_PORT")
 
         return out.joinToString("\n").trimEnd() + "\n"
@@ -149,7 +172,11 @@ class VpnConnectInteractor(
     }
 
 
-    fun httpsToWssProxy(baseUrl: String): String {
+    /**
+     * Backend [OpenVpnProxyController] expects `GET /api/proxy?mode=tcp|udp` for WebSocket upgrade;
+     * default without query is TCP.
+     */
+    fun httpsToWssProxy(baseUrl: String, linkProtocol: VpnLinkProtocol): String {
         val uri = Uri.parse(baseUrl)
 
         val scheme = when (uri.scheme) {
@@ -158,10 +185,16 @@ class VpnConnectInteractor(
             else -> throw IllegalArgumentException("Unsupported scheme: ${uri.scheme}")
         }
 
+        val mode = when (linkProtocol) {
+            VpnLinkProtocol.UDP -> "udp"
+            VpnLinkProtocol.TCP -> "tcp"
+        }
+
         return uri.buildUpon()
             .scheme(scheme)
             .path("/api/proxy")
             .clearQuery()
+            .appendQueryParameter("mode", mode)
             .fragment(null)
             .build()
             .toString()

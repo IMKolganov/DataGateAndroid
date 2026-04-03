@@ -11,6 +11,7 @@ import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.login.LoginScreen
 import com.imkolganov.datagate.ui.screens.main.MainScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
+import com.imkolganov.datagate.ui.theme.ThemeMode
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Composable
@@ -20,10 +21,13 @@ fun AppRoot(
     vpnState: VpnStatusUiState,
     onRequestConnect: () -> Unit,
     onRequestDisconnect: () -> Unit,
+    onReconnectVpn: () -> Unit,
     authVersion: Int,
     onAuthChanged: () -> Unit,
     accessViewModel: AccessViewModel,
-    statsViewModel: StatsViewModel
+    statsViewModel: StatsViewModel,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
     val authState by authViewModel.state.collectAsState()
 
@@ -42,13 +46,16 @@ fun AppRoot(
             vpnState = vpnState,
             onRequestConnect = onRequestConnect,
             onRequestDisconnect = onRequestDisconnect,
+            onReconnectVpn = onReconnectVpn,
             onLogout = {
                 authViewModel.logout()
                 onAuthChanged()
             },
             tokenStore = tokenStore,
             accessViewModel = accessViewModel,
-            statsViewModel = statsViewModel
+            statsViewModel = statsViewModel,
+            themeMode = themeMode,
+            onThemeModeChange = onThemeModeChange
         )
     } else {
         LoginScreen(viewModel = authViewModel)

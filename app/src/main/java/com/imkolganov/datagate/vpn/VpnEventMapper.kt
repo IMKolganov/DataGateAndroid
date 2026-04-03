@@ -76,17 +76,21 @@ object VpnEventMapper {
                 val name = previous.selectedServerName?.takeIf { it.isNotBlank() }
                 previous.copy(
                     isConnectRequested = true,
+                    isVpnConnected = true,
                     lastMessage = if (name != null) "Connected to $name" else "Connected"
                 )
             }
 
             "DISCONNECTED" -> previous.copy(
                 isConnectRequested = false,
+                isVpnConnected = false,
+                selectedServerId = null,
                 lastMessage = "Disconnected"
             )
 
             "TUN_SETUP_FAILED" -> previous.copy(
                 isConnectRequested = false,
+                isVpnConnected = false,
                 lastMessage = "Tunnel setup failed"
             )
 

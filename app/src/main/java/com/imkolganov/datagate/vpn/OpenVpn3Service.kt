@@ -33,6 +33,7 @@ class OpenVpn3Service : VpnService() {
     companion object {
         const val EXTRA_OVPN_CONFIG = "com.imkolganov.datagate.vpn.EXTRA_OVPN_CONFIG"
         const val EXTRA_WSS_URL = "com.imkolganov.datagate.vpn.EXTRA_WSS_URL"
+        const val EXTRA_LINK_PROTOCOL = "com.imkolganov.datagate.vpn.EXTRA_LINK_PROTOCOL"
 
         init {
             System.loadLibrary("ovpncli")
@@ -57,7 +58,7 @@ class OpenVpn3Service : VpnService() {
         const val ACTION_RESUME = "com.imkolganov.datagate.vpn.RESUME"
     }
     private val BRIDGE_PORT = 41194
-    private var bridge: TcpToWssBridge? = null
+    private var bridgeStop: (() -> Unit)? = null
     private var bridgeHttp: okhttp3.OkHttpClient? = null
 
     @Volatile private var connectInProgress = false
@@ -168,25 +169,41 @@ class OpenVpn3Service : VpnService() {
         }
     }
 
-    private fun startVpn(configText: String, wssUrl: String) {
+    private fun startVpn(configText: String, wssUrl: String, linkProtocol: VpnLinkProtocol) {
         stopVpnInternal()
 
         val http = buildProtectedOkHttp(this@OpenVpn3Service)
 
         bridgeHttp = http
 
-        bridge = TcpToWssBridge(
-            service = this@OpenVpn3Service,
-            port = BRIDGE_PORT,
-            wssUrl = wssUrl,
-            http = http
-        ).also { it.start() }
+        when (linkProtocol) {
+            VpnLinkProtocol.UDP -> {
+                val b = UdpToWssBridge(
+                    service = this@OpenVpn3Service,
+                    port = BRIDGE_PORT,
+                    wssUrl = wssUrl,
+                    http = http
+                )
+                b.start()
+                bridgeStop = { b.stop() }
+            }
+            VpnLinkProtocol.TCP -> {
+                val b = TcpToWssBridge(
+                    service = this@OpenVpn3Service,
+                    port = BRIDGE_PORT,
+                    wssUrl = wssUrl,
+                    http = http
+                )
+                b.start()
+                bridgeStop = { b.stop() }
+            }
+        }
 
         vpnJob = serviceScope.launch {
             try {
                 Log.d(TAG, "startVpn: building config")
 
-                val patchedConfig = forceRemoteToLocalBridge(configText, BRIDGE_PORT)
+                val patchedConfig = forceRemoteToLocalBridge(configText, BRIDGE_PORT, linkProtocol)
 
                 val cfg = ClientAPI_Config().apply {
                     content = patchedConfig
@@ -274,8 +291,11 @@ class OpenVpn3Service : VpnService() {
         }
         vpnClient = null
 
-        try { bridge?.stop() } catch (_: Throwable) {}
-        bridge = null
+        try {
+            bridgeStop?.invoke()
+        } catch (_: Throwable) {
+        }
+        bridgeStop = null
 
         try { bridgeHttp?.dispatcher?.executorService?.shutdown() } catch (_: Throwable) {}
         try { bridgeHttp?.connectionPool?.evictAll() } catch (_: Throwable) {}
@@ -329,7 +349,9 @@ class OpenVpn3Service : VpnService() {
 
                 connectInProgress = true
                 startForeground(NOTIFICATION_ID, buildNotification("Connecting..."))
-                startVpn(configText, wssUrl)
+                val linkProtocol =
+                    VpnLinkProtocol.fromIntentExtra(intent.getStringExtra(EXTRA_LINK_PROTOCOL))
+                startVpn(configText, wssUrl, linkProtocol)
             }
 
             ACTION_DISCONNECT -> {

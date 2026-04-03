@@ -2,6 +2,7 @@ package com.imkolganov.datagate.ui.screens.access
 
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
+import com.imkolganov.datagate.util.formatBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -26,8 +27,8 @@ class AccessRepositoryImpl(
 
                 uptimeText = status?.upSince,
                 openVpnVersionText = status?.version,
-                totalInText = totalStatus.totalBytesIn.toString(),
-                totalOutText = totalStatus.totalBytesOut.toString(),
+                totalInText = formatBytes(totalStatus.totalBytesIn),
+                totalOutText = formatBytes(totalStatus.totalBytesOut),
 
                 subtitle = null,
                 loadPercent = 0,

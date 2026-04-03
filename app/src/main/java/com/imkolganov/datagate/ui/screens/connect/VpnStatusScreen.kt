@@ -50,9 +50,8 @@ fun VpnStatusScreen(
     onConnectClick: () -> Unit,
     onDisconnectClick: () -> Unit
 ) {
-    val isConnected =
-        state.isConnectRequested && state.lastMessage.startsWith("Connected", ignoreCase = true)
-    val isConnecting = state.isConnectRequested && !isConnected
+    val isConnected = state.isVpnConnected
+    val isConnecting = state.isConnectRequested && !state.isVpnConnected
 
     val statusTitle = when {
         isConnected -> "Connected"
@@ -201,6 +200,17 @@ fun VpnStatusScreen(
                 }
             }
 
+            Text(
+                modifier = Modifier
+                    .widthIn(max = 520.dp)
+                    .padding(horizontal = 8.dp),
+                text =
+                    "Connect chooses a server automatically using the app's selection rules. " +
+                        "To pick a specific server, open the Access tab.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -213,6 +223,7 @@ fun VpnStatusScreenPreview_Connected() {
         VpnStatusScreen(
             state = VpnStatusUiState(
                 isConnectRequested = true,
+                isVpnConnected = true,
                 lastMessage = "Connected to DataGate VPN (10.0.0.2)"
             ),
             onConnectClick = {},
@@ -228,6 +239,7 @@ fun VpnStatusScreenPreview_Connecting() {
         VpnStatusScreen(
             state = VpnStatusUiState(
                 isConnectRequested = true,
+                isVpnConnected = false,
                 lastMessage = "Connecting to server..."
             ),
             onConnectClick = {},

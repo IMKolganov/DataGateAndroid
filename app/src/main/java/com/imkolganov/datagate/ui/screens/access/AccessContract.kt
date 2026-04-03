@@ -1,5 +1,7 @@
 package com.imkolganov.datagate.ui.screens.access
 
+import com.imkolganov.datagate.vpn.ServerSelectionMode
+
 interface AccessContract {
 
     data class UiState(
@@ -9,6 +11,7 @@ interface AccessContract {
         val servers: List<ServerItem> = emptyList(),
         val activeConnections: List<ActiveConnectionItem> = emptyList(),
 
+        val serverSelectionMode: ServerSelectionMode = ServerSelectionMode.AUTO,
         val selectedServerId: Int? = null
     )
 
@@ -38,9 +41,8 @@ interface AccessContract {
 
     sealed interface UiEvent {
         data object Refresh : UiEvent
+        data class SetServerSelectionMode(val mode: ServerSelectionMode) : UiEvent
         data class SelectServer(val serverId: Int) : UiEvent
-        data class ConnectToServer(val serverId: Int) : UiEvent
-        data object Disconnect : UiEvent
         data object ClearError : UiEvent
     }
 }

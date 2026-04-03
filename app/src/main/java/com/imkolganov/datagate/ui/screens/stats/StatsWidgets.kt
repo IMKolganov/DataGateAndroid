@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewSummary
 import com.imkolganov.datagate.model.overview.StatsGrouping
+import com.imkolganov.datagate.util.formatBytes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,8 +119,8 @@ fun MetricDropdown(
 @Composable
 fun SummaryRow(summary: OverviewSummary) {
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        SummaryCard("Traffic In", summary.totalTrafficInBytes.toString())
-        SummaryCard("Traffic Out", summary.totalTrafficOutBytes.toString())
+        SummaryCard("Traffic In", formatBytes(summary.totalTrafficInBytes))
+        SummaryCard("Traffic Out", formatBytes(summary.totalTrafficOutBytes))
 //        SummaryCard("Peak Clients", summary.peakActiveClients.toString())
     }
 }

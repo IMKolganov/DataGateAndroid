@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.auth.TokenStore
@@ -30,6 +31,7 @@ import com.imkolganov.datagate.ui.screens.settings.SettingsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
+import com.imkolganov.datagate.ui.theme.ThemeMode
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 enum class BottomTab {
@@ -41,10 +43,13 @@ fun MainScreen(
     vpnState: VpnStatusUiState,
     onRequestConnect: () -> Unit,
     onRequestDisconnect: () -> Unit,
+    onReconnectVpn: () -> Unit,
     onLogout: () -> Unit,
     tokenStore: TokenStore,
     accessViewModel: AccessViewModel,
-    statsViewModel: StatsViewModel
+    statsViewModel: StatsViewModel,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.Home) }
     val accessState by accessViewModel.state.collectAsState()
@@ -89,25 +94,33 @@ fun MainScreen(
                 BottomTab.Access -> AccessScreen(
                     state = accessState,
                     vpnState = vpnState,
-                    onEvent = accessViewModel::onEvent
+                    onEvent = accessViewModel::onEvent,
+                    onConnectVpn = onRequestConnect,
+                    onDisconnectVpn = onRequestDisconnect,
+                    onReconnectVpn = onReconnectVpn
                 )
                 BottomTab.Statistics -> StatsScreen(
                     viewModel = statsViewModel
                 )
                 BottomTab.Settings -> SettingsScreen(
                     tokenStore = tokenStore,
-                    onLogout = onLogout
+                    onLogout = onLogout,
+                    themeMode = themeMode,
+                    onThemeModeChange = onThemeModeChange
                 )
             }
         }
     }
 }
 
-private class PreviewAccessViewModel : AccessViewModel(
+private class PreviewAccessViewModel(
+    appContext: android.content.Context
+) : AccessViewModel(
     repo = object : com.imkolganov.datagate.ui.screens.access.AccessRepository {
         override suspend fun getServers(): List<AccessContract.ServerItem> = emptyList()
         override suspend fun getMyActiveConnections(): List<AccessContract.ActiveConnectionItem> = emptyList()
-    }
+    },
+    appContext = appContext
 )
 
 private class PreviewStatsViewModel :
@@ -119,15 +132,22 @@ private class PreviewStatsViewModel :
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
+    val context = LocalContext.current
+    val previewVm = remember(context) {
+        PreviewAccessViewModel(context.applicationContext)
+    }
     DataGateAndroidTheme {
         MainScreen(
             vpnState = VpnStatusUiState(),
             onRequestConnect = {},
             onRequestDisconnect = {},
+            onReconnectVpn = {},
             onLogout = {},
             tokenStore = PreviewTokenStore(),
-            accessViewModel = PreviewAccessViewModel(),
-            statsViewModel = PreviewStatsViewModel()
+            accessViewModel = previewVm,
+            statsViewModel = PreviewStatsViewModel(),
+            themeMode = ThemeMode.SYSTEM,
+            onThemeModeChange = {}
         )
     }
 }

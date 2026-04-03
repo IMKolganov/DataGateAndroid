@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +34,7 @@ import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.identity.InstallationIdDataStoreProvider
+import com.imkolganov.datagate.ui.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,7 +43,9 @@ import java.io.File
 @Composable
 fun SettingsScreen(
     tokenStore: TokenStore,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
     val context = LocalContext.current
     var crashFilesCount by remember { mutableStateOf(0) }
@@ -76,6 +81,41 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineSmall)
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text("Appearance", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Light, dark, or match the device setting.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterChip(
+                        selected = themeMode == ThemeMode.LIGHT,
+                        onClick = { onThemeModeChange(ThemeMode.LIGHT) },
+                        label = { Text("Light") }
+                    )
+                    FilterChip(
+                        selected = themeMode == ThemeMode.DARK,
+                        onClick = { onThemeModeChange(ThemeMode.DARK) },
+                        label = { Text("Dark") }
+                    )
+                    FilterChip(
+                        selected = themeMode == ThemeMode.SYSTEM,
+                        onClick = { onThemeModeChange(ThemeMode.SYSTEM) },
+                        label = { Text("System") }
+                    )
+                }
+            }
+        }
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(

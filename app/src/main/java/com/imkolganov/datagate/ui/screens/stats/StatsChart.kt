@@ -3,12 +3,15 @@ package com.imkolganov.datagate.ui.screens.stats
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import kotlin.math.absoluteValue
 import androidx.compose.ui.Modifier
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewRow
+import com.imkolganov.datagate.util.formatBytes
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
@@ -45,10 +48,25 @@ fun StatsChart(
         }
     )
 
+    val trafficMetrics = remember(metric) {
+        metric == Metric.TrafficTotal || metric == Metric.TrafficIn || metric == Metric.TrafficOut
+    }
+    val startAxis = VerticalAxis.rememberStart(
+        valueFormatter = remember(trafficMetrics) {
+            CartesianValueFormatter { _, value, _ ->
+                if (trafficMetrics) {
+                    formatBytes(value.toLong().absoluteValue)
+                } else {
+                    value.roundToInt().toString()
+                }
+            }
+        }
+    )
+
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberLineCartesianLayer(),
-            startAxis = VerticalAxis.rememberStart(),
+            startAxis = startAxis,
             bottomAxis = bottomAxis
         ),
         modelProducer = modelProducer,

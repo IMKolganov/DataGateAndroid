@@ -53,9 +53,11 @@ class AppGraph(
         )
 
     fun createConnectInteractor(
+        appContext: Context,
         getInstallationId: () -> String?
     ): VpnConnectInteractor =
         VpnConnectInteractor(
+            appContext = appContext,
             getExternalId = { tokenStore.getAuthInfo().externalId },
             getInstallationId = getInstallationId,
             serversRepository = serversRepository,

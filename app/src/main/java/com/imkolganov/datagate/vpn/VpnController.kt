@@ -20,13 +20,18 @@ class VpnController(
     private var isReceiverRegistered = false
     private var pendingConfigText: String? = null
     private var pendingWssLink: String? = null
+    private var pendingLinkProtocol: VpnLinkProtocol? = null
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
 
     companion object {
         private const val TAG = "OpenVPN3"
+        private const val KEY_SESSION_SERVER_ID = "vpn_session_server_id"
     }
 
     private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo ->
+        if (eventName == "DISCONNECTED") {
+            prefs.edit { remove(KEY_SESSION_SERVER_ID) }
+        }
         val newState = VpnEventMapper.map(getState(), eventName, eventInfo)
         onStateChange(newState)
         Log.d(TAG, "VPN status updated: $eventName - $eventInfo")
@@ -35,10 +40,19 @@ class VpnController(
     fun onStart() {
         registerReceiver()
 
+        var next = getState()
+        var changed = false
         val cachedName = prefs.getString("selected_server_name", null)
-        if (!cachedName.isNullOrBlank() && getState().selectedServerName.isNullOrBlank()) {
-            onStateChange(getState().copy(selectedServerName = cachedName))
+        if (!cachedName.isNullOrBlank() && next.selectedServerName.isNullOrBlank()) {
+            next = next.copy(selectedServerName = cachedName)
+            changed = true
         }
+        val cachedSessionId = prefs.getInt(KEY_SESSION_SERVER_ID, -1)
+        if (cachedSessionId >= 0 && next.selectedServerId == null) {
+            next = next.copy(selectedServerId = cachedSessionId)
+            changed = true
+        }
+        if (changed) onStateChange(next)
 
         requestCurrentStatus()
     }
@@ -56,7 +70,7 @@ class VpnController(
      * This only updates the message and does not toggle isConnectRequested.
      */
     fun showStatus(eventName: String, eventInfo: String? = null) {
-        val baseMessage = if (!eventInfo.isNullOrBlank()) "$eventName: $eventInfo" else eventName
+        val displayMessage = eventInfo?.takeIf { it.isNotBlank() } ?: eventName
 
         val next = when (eventName) {
             "SELECTED_SERVER" -> {
@@ -66,21 +80,51 @@ class VpnController(
                 }
                 getState().copy(
                     selectedServerName = name,
-                    lastMessage = "Server selected"
+                    lastMessage = "Server selected",
+                    isConnectRequested = true,
+                    isVpnConnected = false
                 )
             }
-            else -> getState().copy(lastMessage = baseMessage)
+            else -> {
+                val newSession = eventName == "SELECTING_SERVER"
+                getState().copy(
+                    lastMessage = displayMessage,
+                    isConnectRequested = true,
+                    isVpnConnected = if (newSession) false else getState().isVpnConnected
+                )
+            }
         }
 
         onStateChange(next)
     }
 
-    fun startWithConfig(configText: String, wssLink: String) {
+    /**
+     * Call when a concrete server has been chosen for the upcoming VPN session (before tunnel is up).
+     * Keeps [VpnStatusUiState.selectedServerId] in sync with Access / switch-server logic.
+     */
+    fun notifyServerSelectedForConnection(serverId: Int, serverName: String) {
+        prefs.edit {
+            putString("selected_server_name", serverName)
+            putInt(KEY_SESSION_SERVER_ID, serverId)
+        }
+        onStateChange(
+            getState().copy(
+                selectedServerName = serverName,
+                selectedServerId = serverId,
+                lastMessage = "Server selected",
+                isConnectRequested = true,
+                isVpnConnected = false
+            )
+        )
+    }
+
+    fun startWithConfig(configText: String, wssLink: String, linkProtocol: VpnLinkProtocol) {
         // Do not block on isConnectRequested here because it may already be set by pre-connect flow.
         // The real connection state will be driven by OpenVPN core events.
 
         pendingConfigText = configText
         pendingWssLink = wssLink
+        pendingLinkProtocol = linkProtocol
 
         Log.d(TAG, "Calling VpnService.prepare()")
         val prepareIntent = VpnService.prepare(activity)
@@ -99,7 +143,7 @@ class VpnController(
         }
 
         Log.d(TAG, "VPN permission already granted, starting service...")
-        startServiceWithConfig(configText, wssLink)
+        startServiceWithConfig(configText, wssLink, linkProtocol)
     }
 
     fun onPermissionGranted() {
@@ -107,25 +151,32 @@ class VpnController(
 
         val cfg = pendingConfigText
         val wss = pendingWssLink
+        val linkProtocol = pendingLinkProtocol
         pendingConfigText = null
         pendingWssLink = null
+        pendingLinkProtocol = null
 
         if (cfg.isNullOrBlank() || wss.isNullOrBlank()) {
             showError("VPN permission granted, but config or WSS link is missing")
             return
         }
 
-        startServiceWithConfig(cfg, wss)
+        startServiceWithConfig(cfg, wss, linkProtocol ?: VpnLinkProtocol.TCP)
     }
 
     fun onPermissionDenied() {
         Log.w(TAG, "VPN permission denied from launcher")
         pendingConfigText = null
+        pendingWssLink = null
+        pendingLinkProtocol = null
         showError("VPN permission denied")
     }
 
     fun requestDisconnect() {
-        prefs.edit { remove("selected_server_name") }
+        prefs.edit {
+            remove("selected_server_name")
+            remove(KEY_SESSION_SERVER_ID)
+        }
 
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_DISCONNECT
@@ -136,7 +187,9 @@ class VpnController(
         onStateChange(
             getState().copy(
                 isConnectRequested = false,
+                isVpnConnected = false,
                 selectedServerName = null,
+                selectedServerId = null,
                 lastMessage = "Disconnecting..."
             )
         )
@@ -152,11 +205,12 @@ class VpnController(
         activity.sendBroadcast(testIntent)
     }
 
-    private fun startServiceWithConfig(configText: String, wssLink: String) {
+    private fun startServiceWithConfig(configText: String, wssLink: String, linkProtocol: VpnLinkProtocol) {
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_CONNECT
             putExtra(OpenVpn3Service.EXTRA_OVPN_CONFIG, configText)
             putExtra(OpenVpn3Service.EXTRA_WSS_URL, wssLink)
+            putExtra(OpenVpn3Service.EXTRA_LINK_PROTOCOL, linkProtocol.intentValue())
         }
 
         startServiceCompat(intent)
@@ -203,12 +257,17 @@ class VpnController(
     }
 
     fun showError(message: String) {
-        prefs.edit { remove("selected_server_name") }
+        prefs.edit {
+            remove("selected_server_name")
+            remove(KEY_SESSION_SERVER_ID)
+        }
 
         onStateChange(
             getState().copy(
                 isConnectRequested = false,
+                isVpnConnected = false,
                 selectedServerName = null,
+                selectedServerId = null,
                 lastMessage = message
             )
         )

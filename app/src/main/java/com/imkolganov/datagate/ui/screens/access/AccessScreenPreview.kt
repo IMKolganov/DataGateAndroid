@@ -3,6 +3,7 @@ package com.imkolganov.datagate.ui.screens.access
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
+import com.imkolganov.datagate.vpn.ServerSelectionMode
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Preview(showBackground = true)
@@ -12,6 +13,7 @@ fun AccessScreenPreview() {
         AccessScreen(
             state = AccessContract.UiState(
                 isLoading = false,
+                serverSelectionMode = ServerSelectionMode.MANUAL,
                 servers = listOf(
                     AccessContract.ServerItem(
                         id = 1,
@@ -51,8 +53,11 @@ fun AccessScreenPreview() {
                 ),
                 selectedServerId = 1
             ),
-            vpnState = VpnStatusUiState(),
-            onEvent = {}
+            vpnState = VpnStatusUiState(isVpnConnected = false),
+            onEvent = {},
+            onConnectVpn = {},
+            onDisconnectVpn = {},
+            onReconnectVpn = {}
         )
     }
 }

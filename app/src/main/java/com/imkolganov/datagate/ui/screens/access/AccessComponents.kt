@@ -1,12 +1,17 @@
 package com.imkolganov.datagate.ui.screens.access
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,19 +25,49 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+private val ServerBadgeWidth = 88.dp
+private val ServerBadgeHeight = 36.dp
+private val ServerBadgeShape = RoundedCornerShape(10.dp)
+/** Material green 800 — readable on light cards; works on tinted cards too */
+private val StatusOnlineGreen = Color(0xFF2E7D32)
+private val StatusOfflineRed = Color(0xFFC62828)
+
+/**
+ * Footer line: total reported users across listed servers and how many servers are online.
+ */
+@Composable
+fun ServersSummaryFooter(
+    totalUsers: Int,
+    onlineServers: Int,
+    totalServers: Int,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        modifier = modifier.fillMaxWidth(),
+        text = buildString {
+            append("$totalUsers users total")
+            append(" · ")
+            append("$onlineServers of $totalServers servers online")
+        },
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
 
 @Composable
 fun ActiveConnectionsBlock(
-    connections: List<AccessContract.ActiveConnectionItem>,
-    onDisconnect: () -> Unit
+    connections: List<AccessContract.ActiveConnectionItem>
 ) {
     Card(
         modifier = Modifier
@@ -47,7 +82,6 @@ fun ActiveConnectionsBlock(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Active connection")
-                OutlinedButton(onClick = onDisconnect) { Text(text = "Disconnect") }
             }
 
             connections.forEach { c ->
@@ -74,8 +108,12 @@ fun ServersList(
             ServerCard(
                 server = server,
                 isSelected = server.id == selectedServerId,
+                isVpnSessionOnThisServer = false,
+                isVpnConnectingToThisServer = false,
+                connectBusy = false,
                 onSelect = { onSelect(server.id) },
-                onConnect = { onConnect(server.id) }
+                onConnect = { onConnect(server.id) },
+                onDisconnect = {}
             )
         }
     }
@@ -85,114 +123,202 @@ fun ServersList(
 fun ServerCard(
     server: AccessContract.ServerItem,
     isSelected: Boolean,
+    isVpnSessionOnThisServer: Boolean,
+    isVpnConnectingToThisServer: Boolean,
+    connectBusy: Boolean,
     onSelect: () -> Unit,
-    onConnect: () -> Unit
+    onConnect: () -> Unit,
+    onDisconnect: () -> Unit
 ) {
-    val container = if (isSelected) CardDefaults.cardColors() else CardDefaults.cardColors()
+    val defaultCardColors = CardDefaults.cardColors()
+    val cardContainerColor = when {
+        isVpnSessionOnThisServer ->
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+        isSelected ->
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
+        else -> defaultCardColors.containerColor
+    }
+    val flatHighlight = isVpnSessionOnThisServer || isSelected
+    val cardShape = RoundedCornerShape(16.dp)
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp)
-            .clickable { onSelect() },
-        shape = RoundedCornerShape(16.dp),
-        colors = container,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    if (flatHighlight) {
+        // Plain layer: M3 Card adds an extra tonal layer on light theme (inner “frame” vs fill).
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp)
+                .clip(cardShape)
+                .background(color = cardContainerColor)
+                .clickable(onClick = onSelect)
+        ) {
+            ServerCardInner(
+                server = server,
+                cardContainerColor = cardContainerColor,
+                isSelected = isSelected,
+                isVpnSessionOnThisServer = isVpnSessionOnThisServer,
+                isVpnConnectingToThisServer = isVpnConnectingToThisServer,
+                connectBusy = connectBusy,
+                onConnect = onConnect,
+                onDisconnect = onDisconnect
+            )
+        }
+    } else {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp)
+                .clickable(onClick = onSelect),
+            shape = cardShape,
+            colors = CardDefaults.cardColors(containerColor = cardContainerColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            ServerCardInner(
+                server = server,
+                cardContainerColor = cardContainerColor,
+                isSelected = isSelected,
+                isVpnSessionOnThisServer = isVpnSessionOnThisServer,
+                isVpnConnectingToThisServer = isVpnConnectingToThisServer,
+                connectBusy = connectBusy,
+                onConnect = onConnect,
+                onDisconnect = onDisconnect
+            )
+        }
+    }
+}
 
+@Composable
+private fun ServerCardInner(
+    server: AccessContract.ServerItem,
+    cardContainerColor: Color,
+    isSelected: Boolean,
+    isVpnSessionOnThisServer: Boolean,
+    isVpnConnectingToThisServer: Boolean,
+    connectBusy: Boolean,
+    onConnect: () -> Unit,
+    onDisconnect: () -> Unit
+) {
+    Column(modifier = Modifier.padding(16.dp)) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = server.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                server.protocol?.let {
+                    Text(text = it.uppercase())
+                }
+            }
+
+            Row {
+                server.activeUsers?.let {
+                    UsersPill(count = it, containerColor = cardContainerColor)
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                StatusPill(isOnline = server.isOnline, containerColor = cardContainerColor)
+            }
+        }
+
+        server.subtitle?.let {
+            Spacer(modifier = Modifier.padding(top = 6.dp))
+            Text(text = it)
+        }
+
+        Spacer(modifier = Modifier.padding(top = 10.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.weight(1f)) {
+                IconKeyValueRow(
+                    icon = Icons.Outlined.Cloud,
+                    label = "OpenVPN",
+                    value = server.openVpnVersionText ?: "-"
+                )
+                server.uptimeText?.let { uptime ->
+                    val parts = uptime.split(", ")
+                    IconKeyValueRow(
+                        icon = Icons.Outlined.Schedule,
+                        label = "Uptime",
+                        value = parts.firstOrNull() ?: uptime
+                    )
+                    if (parts.size > 1) {
+                        Text(
+                            modifier = Modifier.padding(start = 28.dp),
+                            text = parts[1],
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                } ?: run {
+                    IconKeyValueRow(
+                        icon = Icons.Outlined.Schedule,
+                        label = "Uptime",
+                        value = "-"
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                IconKeyValueRow(
+                    icon = Icons.Outlined.SwapVert,
+                    label = "IN",
+                    value = server.totalInText ?: "-"
+                )
+                IconKeyValueRow(
+                    icon = Icons.Outlined.SwapVert,
+                    label = "OUT",
+                    value = server.totalOutText ?: "-"
+                )
+            }
+        }
+
+        val showActionRow = isVpnSessionOnThisServer || isSelected
+        if (showActionRow) {
+            Spacer(modifier = Modifier.padding(top = 12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.End
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = server.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    server.protocol?.let {
-                        Text(text = it.uppercase())
-                    }
-                }
-
-                Row {
-                    server.activeUsers?.let {
-                        UsersPill(count = it)
-                        Spacer(modifier = Modifier.width(6.dp))
-                    }
-                    StatusPill(isOnline = server.isOnline)
-                }
-            }
-
-            server.subtitle?.let {
-                Spacer(modifier = Modifier.padding(top = 6.dp))
-                Text(text = it)
-            }
-
-            Spacer(modifier = Modifier.padding(top = 10.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.weight(1f)) {
-                    IconKeyValueRow(
-                        icon = Icons.Outlined.Cloud,
-                        label = "OpenVPN",
-                        value = server.openVpnVersionText ?: "-"
-                    )
-                    server.uptimeText?.let { uptime ->
-                        val parts = uptime.split(", ")
-                        IconKeyValueRow(
-                            icon = Icons.Outlined.Schedule,
-                            label = "Uptime",
-                            value = parts.firstOrNull() ?: uptime
-                        )
-                        if (parts.size > 1) {
-                            Text(
-                                modifier = Modifier.padding(start = 28.dp),
-                                text = parts[1],
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                when {
+                    isVpnSessionOnThisServer -> {
+                        Button(onClick = onDisconnect) {
+                            Text(text = "Disconnect")
                         }
-                    } ?: run {
-                        IconKeyValueRow(
-                            icon = Icons.Outlined.Schedule,
-                            label = "Uptime",
-                            value = "-"
-                        )
                     }
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    IconKeyValueRow(
-                        icon = Icons.Outlined.SwapVert,
-                        label = "IN",
-                        value = server.totalInText ?: "-"
-                    )
-                    IconKeyValueRow(
-                        icon = Icons.Outlined.SwapVert,
-                        label = "OUT",
-                        value = server.totalOutText ?: "-"
-                    )
-                }
-            }
-
-            if (isSelected) {
-                Spacer(modifier = Modifier.padding(top = 12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Button(
-                        onClick = onConnect,
-                        enabled = server.isOnline
-                    ) {
-                        Text(text = "Connect")
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                            contentDescription = null
-                        )
+                    isSelected -> {
+                        when {
+                            isVpnConnectingToThisServer -> {
+                                Button(onClick = {}, enabled = false) {
+                                    Text(text = "Connecting…")
+                                }
+                            }
+                            !server.isOnline -> {
+                                Button(onClick = {}, enabled = false) {
+                                    Text(text = "Offline")
+                                }
+                            }
+                            connectBusy -> {
+                                Button(onClick = {}, enabled = false) {
+                                    Text(text = "Connect")
+                                }
+                            }
+                            else -> {
+                                Button(
+                                    onClick = onConnect,
+                                    enabled = server.isOnline
+                                ) {
+                                    Text(text = "Connect")
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -201,17 +327,39 @@ fun ServerCard(
 }
 
 @Composable
-private fun StatusPill(isOnline: Boolean) {
+private fun StatusPill(isOnline: Boolean, containerColor: Color) {
     val text = if (isOnline) "Online" else "Offline"
+    val borderColor = when {
+        isOnline -> StatusOnlineGreen.copy(alpha = 0.38f)
+        else -> StatusOfflineRed.copy(alpha = 0.35f)
+    }
+    val textColor = when {
+        isOnline -> StatusOnlineGreen
+        else -> StatusOfflineRed
+    }
 
-    Surface(
-        shape = RoundedCornerShape(999.dp),
-        tonalElevation = 2.dp
+    Box(
+        modifier = Modifier
+            .size(ServerBadgeWidth, ServerBadgeHeight)
+            .background(color = containerColor, shape = ServerBadgeShape)
+            .border(width = 0.5.dp, color = borderColor, shape = ServerBadgeShape)
     ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-            text = text
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 0.sp,
+                    lineHeight = 16.sp
+                ),
+                color = textColor,
+                maxLines = 1
+            )
+        }
     }
 }
 
@@ -258,20 +406,36 @@ private fun IconKeyValueRow(
 }
 
 @Composable
-private fun UsersPill(count: Int) {
-    Surface(
-        shape = RoundedCornerShape(999.dp),
-        tonalElevation = 1.dp
+private fun UsersPill(count: Int, containerColor: Color) {
+    val outline = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+    val fg = MaterialTheme.colorScheme.onSurfaceVariant
+
+    Box(
+        modifier = Modifier
+            .size(ServerBadgeWidth, ServerBadgeHeight)
+            .background(color = containerColor, shape = ServerBadgeShape)
+            .border(width = 0.5.dp, color = outline, shape = ServerBadgeShape)
     ) {
-        Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Icon(
                 imageVector = Icons.Outlined.Group,
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = fg
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = count.toString(),
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall.copy(lineHeight = 16.sp),
+                color = fg,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
