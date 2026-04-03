@@ -34,6 +34,7 @@ import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.identity.InstallationIdDataStoreProvider
+import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,7 +83,12 @@ fun SettingsScreen(
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineSmall)
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -117,7 +123,12 @@ fun SettingsScreen(
             }
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -131,7 +142,12 @@ fun SettingsScreen(
             }
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -194,7 +210,12 @@ fun SettingsScreen(
             Text("Logout")
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)

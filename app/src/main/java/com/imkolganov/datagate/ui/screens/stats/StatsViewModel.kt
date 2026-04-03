@@ -6,7 +6,9 @@ import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewSeriesResponse
 import com.imkolganov.datagate.model.overview.StatsGrouping
 import com.imkolganov.datagate.stats.StatsApiClient
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -53,6 +55,13 @@ open class StatsViewModel(
 
     val state: StateFlow<StatsUiState> = _state
 
+    private var loadJob: Job? = null
+
+    fun cancelLoad() {
+        loadJob?.cancel()
+        _state.update { it.copy(isLoading = false) }
+    }
+
     fun setGrouping(grouping: StatsGrouping) {
         _state.update { it.copy(filters = it.filters.copy(grouping = grouping)) }
     }
@@ -80,20 +89,20 @@ open class StatsViewModel(
     }
 
     fun load() {
-        _state.update { it.copy(isLoading = true, error = null) }
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch(Dispatchers.IO) {
+            _state.update { it.copy(isLoading = true, error = null) }
 
-        val f = _state.value.filters
-        val externalId = externalIdProvider()
+            val f = _state.value.filters
+            val externalId = externalIdProvider()
 
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                api.getOverviewSeries(
+            try {
+                val resp = api.getOverviewSeries(
                     fromIso = f.fromIso,
                     toIso = f.toIso,
                     grouping = f.grouping.apiValue,
                     externalId = externalId
                 )
-            }.onSuccess { resp ->
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -101,7 +110,9 @@ open class StatsViewModel(
                         error = if (resp.success) null else resp.message
                     )
                 }
-            }.onFailure { ex ->
+            } catch (e: CancellationException) {
+                throw e
+            } catch (ex: Exception) {
                 _state.update {
                     it.copy(
                         isLoading = false,

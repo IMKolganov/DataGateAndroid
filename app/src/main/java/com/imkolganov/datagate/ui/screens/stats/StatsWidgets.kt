@@ -3,6 +3,7 @@ package com.imkolganov.datagate.ui.screens.stats
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewSummary
 import com.imkolganov.datagate.model.overview.StatsGrouping
+import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.util.formatBytes
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,16 +120,31 @@ fun MetricDropdown(
 
 @Composable
 fun SummaryRow(summary: OverviewSummary) {
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        SummaryCard("Traffic In", formatBytes(summary.totalTrafficInBytes))
-        SummaryCard("Traffic Out", formatBytes(summary.totalTrafficOutBytes))
-//        SummaryCard("Peak Clients", summary.peakActiveClients.toString())
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        SummaryCard(
+            title = "Traffic In",
+            value = formatBytes(summary.totalTrafficInBytes),
+            modifier = Modifier.weight(1f)
+        )
+        SummaryCard(
+            title = "Traffic Out",
+            value = formatBytes(summary.totalTrafficOutBytes),
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
 @Composable
-fun SummaryCard(title: String, value: String) {
-    Card(Modifier.padding(vertical = 4.dp)) {
+fun SummaryCard(title: String, value: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.padding(vertical = 4.dp),
+        shape = AppCards.shape,
+        colors = AppCards.defaultColors(),
+        elevation = AppCards.defaultElevation()
+    ) {
         Column(Modifier.padding(12.dp)) {
             Text(title)
             Text(value)

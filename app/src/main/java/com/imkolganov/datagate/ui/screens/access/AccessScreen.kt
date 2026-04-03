@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.vpn.ServerSelectionMode
 import com.imkolganov.datagate.vpn.VpnServerSelectionStore
 import com.imkolganov.datagate.vpn.VpnStatusUiState
@@ -213,11 +214,13 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = AppCards.shape,
+        elevation = AppCards.defaultElevation(),
         colors = CardDefaults.cardColors(
             containerColor = when {
                 connected -> MaterialTheme.colorScheme.primaryContainer
                 busy -> MaterialTheme.colorScheme.tertiaryContainer
-                else -> MaterialTheme.colorScheme.surfaceVariant
+                else -> MaterialTheme.colorScheme.surfaceContainerHigh
             }
         )
     ) {

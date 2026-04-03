@@ -22,14 +22,14 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import com.imkolganov.datagate.ui.components.AppCards
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,8 +73,9 @@ fun ActiveConnectionsBlock(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = AppCards.shape,
+        colors = AppCards.defaultColors(),
+        elevation = AppCards.defaultElevation()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -130,58 +131,59 @@ fun ServerCard(
     onConnect: () -> Unit,
     onDisconnect: () -> Unit
 ) {
-    val defaultCardColors = CardDefaults.cardColors()
-    val cardContainerColor = when {
-        isVpnSessionOnThisServer ->
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-        isSelected ->
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
-        else -> defaultCardColors.containerColor
+    val cardShape = AppCards.shape
+    val connectedFill = MaterialTheme.colorScheme.primaryContainer
+    val pillBackground = when {
+        isVpnSessionOnThisServer -> connectedFill
+        else -> MaterialTheme.colorScheme.surface
     }
-    val flatHighlight = isVpnSessionOnThisServer || isSelected
-    val cardShape = RoundedCornerShape(16.dp)
+    val selectionBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.42f)
 
-    if (flatHighlight) {
-        // Plain layer: M3 Card adds an extra tonal layer on light theme (inner “frame” vs fill).
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp)
-                .clip(cardShape)
-                .background(color = cardContainerColor)
-                .clickable(onClick = onSelect)
+    val outerModifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 12.dp)
+        .then(
+            if (isSelected && !isVpnSessionOnThisServer) {
+                Modifier.border(width = 1.5.dp, color = selectionBorder, shape = cardShape)
+            } else {
+                Modifier
+            }
+        )
+        .clickable(onClick = onSelect)
+
+    val inner: @Composable () -> Unit = {
+        ServerCardInner(
+            server = server,
+            cardContainerColor = pillBackground,
+            isSelected = isSelected,
+            isVpnSessionOnThisServer = isVpnSessionOnThisServer,
+            isVpnConnectingToThisServer = isVpnConnectingToThisServer,
+            connectBusy = connectBusy,
+            onConnect = onConnect,
+            onDisconnect = onDisconnect
+        )
+    }
+
+    if (isVpnSessionOnThisServer) {
+        // Opaque fill + tonalElevation 0: avoids the “double frame” from semi-transparent Card layers.
+        Surface(
+            modifier = outerModifier,
+            shape = cardShape,
+            color = connectedFill,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            tonalElevation = 0.dp,
+            shadowElevation = 2.dp
         ) {
-            ServerCardInner(
-                server = server,
-                cardContainerColor = cardContainerColor,
-                isSelected = isSelected,
-                isVpnSessionOnThisServer = isVpnSessionOnThisServer,
-                isVpnConnectingToThisServer = isVpnConnectingToThisServer,
-                connectBusy = connectBusy,
-                onConnect = onConnect,
-                onDisconnect = onDisconnect
-            )
+            inner()
         }
     } else {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp)
-                .clickable(onClick = onSelect),
+            modifier = outerModifier,
             shape = cardShape,
-            colors = CardDefaults.cardColors(containerColor = cardContainerColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
         ) {
-            ServerCardInner(
-                server = server,
-                cardContainerColor = cardContainerColor,
-                isSelected = isSelected,
-                isVpnSessionOnThisServer = isVpnSessionOnThisServer,
-                isVpnConnectingToThisServer = isVpnConnectingToThisServer,
-                connectBusy = connectBusy,
-                onConnect = onConnect,
-                onDisconnect = onDisconnect
-            )
+            inner()
         }
     }
 }
