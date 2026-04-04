@@ -10,6 +10,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
+import com.imkolganov.datagate.R
 
 class VpnController(
     private val activity: Activity,
@@ -20,14 +21,19 @@ class VpnController(
     private var isReceiverRegistered = false
     private var pendingConfigText: String? = null
     private var pendingWssLink: String? = null
+    private var pendingLinkProtocol: VpnLinkProtocol? = null
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
 
     companion object {
         private const val TAG = "OpenVPN3"
+        private const val KEY_SESSION_SERVER_ID = "vpn_session_server_id"
     }
 
     private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo ->
-        val newState = VpnEventMapper.map(getState(), eventName, eventInfo)
+        if (eventName == "DISCONNECTED") {
+            prefs.edit { remove(KEY_SESSION_SERVER_ID) }
+        }
+        val newState = VpnEventMapper.map(activity.resources, getState(), eventName, eventInfo)
         onStateChange(newState)
         Log.d(TAG, "VPN status updated: $eventName - $eventInfo")
     }
@@ -35,10 +41,19 @@ class VpnController(
     fun onStart() {
         registerReceiver()
 
+        var next = getState()
+        var changed = false
         val cachedName = prefs.getString("selected_server_name", null)
-        if (!cachedName.isNullOrBlank() && getState().selectedServerName.isNullOrBlank()) {
-            onStateChange(getState().copy(selectedServerName = cachedName))
+        if (!cachedName.isNullOrBlank() && next.selectedServerName.isNullOrBlank()) {
+            next = next.copy(selectedServerName = cachedName)
+            changed = true
         }
+        val cachedSessionId = prefs.getInt(KEY_SESSION_SERVER_ID, -1)
+        if (cachedSessionId >= 0 && next.selectedServerId == null) {
+            next = next.copy(selectedServerId = cachedSessionId)
+            changed = true
+        }
+        if (changed) onStateChange(next)
 
         requestCurrentStatus()
     }
@@ -56,7 +71,7 @@ class VpnController(
      * This only updates the message and does not toggle isConnectRequested.
      */
     fun showStatus(eventName: String, eventInfo: String? = null) {
-        val baseMessage = if (!eventInfo.isNullOrBlank()) "$eventName: $eventInfo" else eventName
+        val displayMessage = eventInfo?.takeIf { it.isNotBlank() } ?: eventName
 
         val next = when (eventName) {
             "SELECTED_SERVER" -> {
@@ -66,21 +81,51 @@ class VpnController(
                 }
                 getState().copy(
                     selectedServerName = name,
-                    lastMessage = "Server selected"
+                    lastMessage = activity.getString(R.string.vpn_server_selected),
+                    isConnectRequested = true,
+                    isVpnConnected = false
                 )
             }
-            else -> getState().copy(lastMessage = baseMessage)
+            else -> {
+                val newSession = eventName == "SELECTING_SERVER"
+                getState().copy(
+                    lastMessage = displayMessage,
+                    isConnectRequested = true,
+                    isVpnConnected = if (newSession) false else getState().isVpnConnected
+                )
+            }
         }
 
         onStateChange(next)
     }
 
-    fun startWithConfig(configText: String, wssLink: String) {
+    /**
+     * Call when a concrete server has been chosen for the upcoming VPN session (before tunnel is up).
+     * Keeps [VpnStatusUiState.selectedServerId] in sync with Access / switch-server logic.
+     */
+    fun notifyServerSelectedForConnection(serverId: Int, serverName: String) {
+        prefs.edit {
+            putString("selected_server_name", serverName)
+            putInt(KEY_SESSION_SERVER_ID, serverId)
+        }
+        onStateChange(
+            getState().copy(
+                selectedServerName = serverName,
+                selectedServerId = serverId,
+                lastMessage = activity.getString(R.string.vpn_server_selected),
+                isConnectRequested = true,
+                isVpnConnected = false
+            )
+        )
+    }
+
+    fun startWithConfig(configText: String, wssLink: String, linkProtocol: VpnLinkProtocol) {
         // Do not block on isConnectRequested here because it may already be set by pre-connect flow.
         // The real connection state will be driven by OpenVPN core events.
 
         pendingConfigText = configText
         pendingWssLink = wssLink
+        pendingLinkProtocol = linkProtocol
 
         Log.d(TAG, "Calling VpnService.prepare()")
         val prepareIntent = VpnService.prepare(activity)
@@ -92,14 +137,14 @@ class VpnController(
             onStateChange(
                 getState().copy(
                     isConnectRequested = true,
-                    lastMessage = "Waiting for VPN permission..."
+                    lastMessage = activity.getString(R.string.vpn_waiting_permission)
                 )
             )
             return
         }
 
         Log.d(TAG, "VPN permission already granted, starting service...")
-        startServiceWithConfig(configText, wssLink)
+        startServiceWithConfig(configText, wssLink, linkProtocol)
     }
 
     fun onPermissionGranted() {
@@ -107,25 +152,32 @@ class VpnController(
 
         val cfg = pendingConfigText
         val wss = pendingWssLink
+        val linkProtocol = pendingLinkProtocol
         pendingConfigText = null
         pendingWssLink = null
+        pendingLinkProtocol = null
 
         if (cfg.isNullOrBlank() || wss.isNullOrBlank()) {
-            showError("VPN permission granted, but config or WSS link is missing")
+            showError(activity.getString(R.string.vpn_error_permission_missing_config))
             return
         }
 
-        startServiceWithConfig(cfg, wss)
+        startServiceWithConfig(cfg, wss, linkProtocol ?: VpnLinkProtocol.TCP)
     }
 
     fun onPermissionDenied() {
         Log.w(TAG, "VPN permission denied from launcher")
         pendingConfigText = null
-        showError("VPN permission denied")
+        pendingWssLink = null
+        pendingLinkProtocol = null
+        showError(activity.getString(R.string.vpn_error_permission_denied))
     }
 
     fun requestDisconnect() {
-        prefs.edit { remove("selected_server_name") }
+        prefs.edit {
+            remove("selected_server_name")
+            remove(KEY_SESSION_SERVER_ID)
+        }
 
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_DISCONNECT
@@ -136,8 +188,10 @@ class VpnController(
         onStateChange(
             getState().copy(
                 isConnectRequested = false,
+                isVpnConnected = false,
                 selectedServerName = null,
-                lastMessage = "Disconnecting..."
+                selectedServerId = null,
+                lastMessage = activity.getString(R.string.vpn_disconnecting)
             )
         )
     }
@@ -152,11 +206,19 @@ class VpnController(
         activity.sendBroadcast(testIntent)
     }
 
-    private fun startServiceWithConfig(configText: String, wssLink: String) {
+    private fun startServiceWithConfig(configText: String, wssLink: String, linkProtocol: VpnLinkProtocol) {
+        val serverDisplayName =
+            getState().selectedServerName?.takeIf { it.isNotBlank() }
+                ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
+
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_CONNECT
             putExtra(OpenVpn3Service.EXTRA_OVPN_CONFIG, configText)
             putExtra(OpenVpn3Service.EXTRA_WSS_URL, wssLink)
+            putExtra(OpenVpn3Service.EXTRA_LINK_PROTOCOL, linkProtocol.intentValue())
+            if (serverDisplayName != null) {
+                putExtra(OpenVpn3Service.EXTRA_SERVER_DISPLAY_NAME, serverDisplayName)
+            }
         }
 
         startServiceCompat(intent)
@@ -164,7 +226,7 @@ class VpnController(
         onStateChange(
             getState().copy(
                 isConnectRequested = true,
-                lastMessage = "Connecting..."
+                lastMessage = activity.getString(R.string.vpn_connecting_generic)
             )
         )
     }
@@ -203,12 +265,17 @@ class VpnController(
     }
 
     fun showError(message: String) {
-        prefs.edit { remove("selected_server_name") }
+        prefs.edit {
+            remove("selected_server_name")
+            remove(KEY_SESSION_SERVER_ID)
+        }
 
         onStateChange(
             getState().copy(
                 isConnectRequested = false,
+                isVpnConnected = false,
                 selectedServerName = null,
+                selectedServerId = null,
                 lastMessage = message
             )
         )

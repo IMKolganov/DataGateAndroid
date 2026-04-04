@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_system">System default</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_access">Access</string>
+    <string name="nav_statistics">Statistics</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="login_title">DataGate</string>
+    <string name="login_sign_in_google">Sign in with Google</string>
+    <string name="login_welcome">Welcome to the VPN service.\nFor any questions, feel free to contact me at imkolganov@gmail.com.</string>
+    <string name="login_version">v%1$s (%2$d)</string>
+
+    <string name="vpn_status_connected">Connected</string>
+    <string name="vpn_status_connecting">Connecting…</string>
+    <string name="vpn_status_disconnected">Disconnected</string>
+    <string name="vpn_waiting_events">Waiting for VPN events…</string>
+    <string name="vpn_home_title">DataGate</string>
+    <string name="vpn_power">Power</string>
+    <string name="action_disconnect">Disconnect</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_connect">Connect</string>
+    <string name="vpn_home_footer">Connect chooses a server automatically using the app\'s selection rules. To pick a specific server, open the Access tab.</string>
+
+
+    <string name="home_report_issue">Nahlásit problém</string>
+    <string name="home_report_issue_title">Kontaktovat podporu</string>
+    <string name="home_report_issue_hint">Zvolte, jak nás chcete kontaktovat:</string>
+    <string name="home_report_telegram">Telegram bot @DataGateVPNBot</string>
+    <string name="home_report_email">E-mail</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
+    <string name="stats_filters">Filters</string>
+    <string name="stats_overview">Overview</string>
+    <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
+    <string name="stats_loading_message">Loading statistics can take a while.\nPlease wait, or change the date range and try again.</string>
+    <string name="stats_error_prefix">Error: %1$s</string>
+    <string name="chart_no_points">No points in this range — widen the dates or reload.</string>
+
+    <string name="stats_grouping">Grouping</string>
+    <string name="stats_metric">Metric</string>
+    <string name="stats_traffic_in">Traffic In</string>
+    <string name="stats_traffic_out">Traffic Out</string>
+
+    <string name="grouping_auto">Auto</string>
+    <string name="grouping_hours">Hours</string>
+    <string name="grouping_months">Months</string>
+    <string name="grouping_years">Years</string>
+
+    <string name="metric_active_clients">Active clients</string>
+    <string name="metric_traffic_total">Traffic total</string>
+    <string name="metric_traffic_in">Traffic in</string>
+    <string name="metric_traffic_out">Traffic out</string>
+
+    <string name="presets_last_7">Last 7 days</string>
+    <string name="presets_last_30">Last 30 days</string>
+    <string name="action_reload">Reload</string>
+
+    <string name="date_range_label">Date range</string>
+    <string name="date_range_arrow">%1$s → %2$s</string>
+    <string name="action_ok">OK</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_subtitle">Choose a language or follow the device setting.</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_appearance_subtitle">Light, dark, or match the device setting.</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+
+    <string name="settings_device">Device</string>
+    <string name="settings_installation_id">InstallationId</string>
+    <string name="settings_loading">Loading…</string>
+    <string name="settings_copy_installation_id">Copy InstallationId</string>
+    <string name="settings_copy_user_id">Copy UserId</string>
+    <string name="settings_diagnostics">Diagnostics</string>
+    <string name="settings_error_logs">Error logs</string>
+    <string name="settings_error_logs_count">%1$d file(s)</string>
+    <string name="settings_share_logs">Share Error Logs</string>
+    <string name="share_logs_chooser_title">Share error logs</string>
+
+    <string name="copied">Copied</string>
+    <string name="no_error_logs">No error logs found</string>
+    <string name="no_shareable_files">No shareable files.</string>
+    <string name="share_failed">Failed to share files.</string>
+
+    <string name="account_title">Account &amp; sign out</string>
+    <string name="account_subtitle">You are signed in with the profile below. Signing out removes local tokens on this device.</string>
+    <string name="not_available">Not available</string>
+    <string name="em_dash">—</string>
+    <string name="label_role">Role</string>
+    <string name="label_email">Email</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_out_subtitle">End session on this device</string>
+    <string name="sign_out_confirm_title">Odhlásit?</string>
+    <string name="sign_out_confirm_message">Opravdu se chcete odhlásit?</string>
+    <string name="access_no_wss_dialog_title">Cannot connect in this app</string>
+    <string name="access_switch_title">Switch server?</string>
+    <string name="access_switch_message">Disconnect from the current VPN and connect to \"%1$s\"?</string>
+    <string name="access_switch">Switch</string>
+    <string name="access_active_connection">Active connection</string>
+    <string name="access_available_servers">Available servers</string>
+    <string name="label_server">Server</string>
+    <string name="label_ip">IP</string>
+    <string name="label_since">Since</string>
+    <string name="label_openvpn">OpenVPN</string>
+    <string name="label_uptime">Uptime</string>
+    <string name="label_in">IN</string>
+    <string name="label_out">OUT</string>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online</string>
+    <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
+    <string name="access_choose_server">Choose a server</string>
+    <string name="access_refresh">Refresh</string>
+    <string name="access_use_home_hint">Use Home to connect with automatic server selection. Here, pick a server and tap Connect—or Disconnect on the active server.</string>
+    <string name="access_vpn_active">VPN active</string>
+    <string name="access_establishing">Establishing session…</string>
+    <string name="access_connected">Connected</string>
+    <string name="access_not_connected">Not connected</string>
+    <string name="access_connecting">Connecting…</string>
+
+    <string name="error_request_failed">Request failed</string>
+    <string name="error_http_bad_gateway">The server is temporarily unavailable (bad gateway). Try again later.</string>
+    <string name="error_http_service_unavailable">The service is temporarily unavailable. Try again later.</string>
+    <string name="error_http_gateway_timeout">The server took too long to respond. Try again later.</string>
+    <string name="error_http_proxy_html">The server returned an error page instead of data. The service may be restarting.</string>
+
+    <!-- VPN connect flow (VpnConnectInteractor / VpnController) -->
+    <string name="vpn_selecting_best_server">Selecting best server</string>
+    <string name="vpn_resolving_server">Resolving server</string>
+    <string name="vpn_fallback_server_name">Server</string>
+    <string name="vpn_reading_installation_id">Reading installation id</string>
+    <string name="vpn_installation_id_not_ready">InstallationId is not ready yet</string>
+    <string name="vpn_reading_external_id">Reading external id for %1$s</string>
+    <string name="vpn_external_id_unavailable">ExternalId is not available</string>
+    <string name="vpn_preparing_cert_identity">Preparing certificate identity for %1$s</string>
+    <string name="vpn_requesting_profile">Requesting VPN profile for %1$s</string>
+    <string name="vpn_config_received">Config received (%1$d bytes)</string>
+    <string name="vpn_connect_failed">Connect failed: %1$s</string>
+    <string name="vpn_server_selected">Server selected</string>
+    <string name="vpn_waiting_permission">Waiting for VPN permission…</string>
+    <string name="vpn_error_permission_missing_config">VPN permission granted, but config or WSS link is missing</string>
+    <string name="vpn_error_permission_denied">VPN permission denied</string>
+    <string name="vpn_disconnecting">Disconnecting…</string>
+    <string name="vpn_connecting_generic">Connecting…</string>
+    <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
+    <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
+    <string name="vpn_server_quota_blocked">Server "%1$s" is not included in your quota plan.</string>
+    <string name="access_server_quota_blocked">Not in your plan</string>
+    <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_current_plan">Your current plan</string>
+    <string name="access_quota_no_active">No active quota assignment</string>
+    <string name="access_quota_effective_from">Effective from: %1$s</string>
+    <string name="access_quota_all_plans_title">All quota plans</string>
+    <string name="access_quota_plan_default">Default</string>
+    <string name="access_quota_plan_inactive">Inactive</string>
+
+    <!-- VpnEventMapper -->
+    <string name="vpn_msg_selecting_server">Selecting the best server…</string>
+    <string name="vpn_msg_server_selected">Server selected</string>
+    <string name="vpn_msg_preparing_device">Preparing device identity…</string>
+    <string name="vpn_msg_checking_user">Checking user identity…</string>
+    <string name="vpn_msg_creating_cert">Creating certificate request…</string>
+    <string name="vpn_msg_downloading_profile">Downloading VPN profile…</string>
+    <string name="vpn_msg_profile_received">VPN profile received</string>
+    <string name="vpn_msg_resolving_address">Resolving server address…</string>
+    <string name="vpn_msg_waiting_server">Waiting for server response…</string>
+    <string name="vpn_msg_negotiating_config">Negotiating configuration…</string>
+    <string name="vpn_msg_establishing_tunnel">Establishing tunnel…</string>
+    <string name="vpn_msg_reconnecting">Reconnecting…</string>
+    <string name="vpn_msg_connecting">Connecting…</string>
+    <string name="vpn_msg_connected_to">Connected to %1$s</string>
+    <string name="vpn_msg_connected">Connected</string>
+    <string name="vpn_msg_disconnected">Disconnected</string>
+    <string name="vpn_msg_tunnel_failed">Tunnel setup failed</string>
+</resources>

@@ -2,6 +2,12 @@
 
 This module builds OpenVPN 3 Core as a native library for Android and generates a Java/JNI API via SWIG.
 
+After cloning the repo, initialize nested submodules (OpenVPN3 + **fmt** in `openvpn3/external/fmt`):
+
+```
+git submodule update --init --recursive
+```
+
 ## 1. Generate SWIG JNI wrapper
 
 ```

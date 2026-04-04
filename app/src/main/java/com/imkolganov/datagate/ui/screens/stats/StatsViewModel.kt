@@ -1,12 +1,17 @@
 package com.imkolganov.datagate.ui.screens.stats
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewSeriesResponse
 import com.imkolganov.datagate.model.overview.StatsGrouping
 import com.imkolganov.datagate.stats.StatsApiClient
+import com.imkolganov.datagate.util.userFriendlyApiError
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -29,29 +34,42 @@ data class StatsUiState(
     val error: String? = null,
     val filters: StatsFilters,
     val metric: Metric = Metric.TrafficTotal,
-    val response: OverviewSeriesResponse? = null
+    val response: OverviewSeriesResponse? = null,
+    /** Matches "Last 7 days" / "Last 30 days" chips; null after a custom date range. */
+    val selectedPresetDays: Int? = 7
 )
 
 open class StatsViewModel(
+    application: Application,
     private val api: StatsApiClient,
     private val externalIdProvider: () -> String
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val utcTz: TimeZone = TimeZone.getTimeZone("UTC")
-    private val nicosiaTz: TimeZone = TimeZone.getTimeZone("Europe/Nicosia")
 
     private val _state = MutableStateFlow(
-        StatsUiState(
-            filters = StatsFilters(
-                fromIso = isoUtc(truncateToSeconds(System.currentTimeMillis() - daysToMillis(7))),
-                toIso = isoUtc(truncateToSeconds(System.currentTimeMillis())),
-                grouping = StatsGrouping.Auto,
-                externalId = ""
+        run {
+            val (fromIso, toIso) = rangeForLastCalendarDays(7)
+            StatsUiState(
+                filters = StatsFilters(
+                    fromIso = fromIso,
+                    toIso = toIso,
+                    grouping = StatsGrouping.Auto,
+                    externalId = ""
+                ),
+                selectedPresetDays = 7
             )
-        )
+        }
     )
 
     val state: StateFlow<StatsUiState> = _state
+
+    private var loadJob: Job? = null
+
+    fun cancelLoad() {
+        loadJob?.cancel()
+        _state.update { it.copy(isLoading = false) }
+    }
 
     fun setGrouping(grouping: StatsGrouping) {
         _state.update { it.copy(filters = it.filters.copy(grouping = grouping)) }
@@ -62,50 +80,74 @@ open class StatsViewModel(
     }
 
     fun setFromIso(fromIso: String) {
-        _state.update { it.copy(filters = it.filters.copy(fromIso = fromIso)) }
+        _state.update {
+            it.copy(
+                filters = it.filters.copy(fromIso = fromIso),
+                selectedPresetDays = null
+            )
+        }
     }
 
     fun setToIso(toIso: String) {
-        _state.update { it.copy(filters = it.filters.copy(toIso = toIso)) }
+        _state.update {
+            it.copy(
+                filters = it.filters.copy(toIso = toIso),
+                selectedPresetDays = null
+            )
+        }
     }
 
     fun setLastDays(days: Long) {
-        val todayStart = startOfTodayMillis(nicosiaTz)            // 00:00 in Nicosia
-        val from = addDays(todayStart, -days.toInt(), nicosiaTz)  // minus N days (still local day boundaries)
-        val toExclusive = addDays(todayStart, 1, nicosiaTz)       // start of tomorrow
-        val to = toExclusive - 1000L                              // last second of today
+        val (fromIso, toIso) = rangeForLastCalendarDays(days.toInt())
+        _state.update {
+            it.copy(
+                filters = it.filters.copy(fromIso = fromIso, toIso = toIso),
+                selectedPresetDays = days.toInt()
+            )
+        }
+    }
 
-        setFromIso(isoUtc(from))
-        setToIso(isoUtc(to))
+    /** Last [days] calendar days in the device default timezone, through end of “today” there — matches preset chips. */
+    private fun rangeForLastCalendarDays(days: Int): Pair<String, String> {
+        val tz = TimeZone.getDefault()
+        val todayStart = startOfTodayMillis(tz)
+        val from = addDays(todayStart, -days, tz)
+        val toExclusive = addDays(todayStart, 1, tz)
+        val to = toExclusive - 1000L
+        return isoUtc(from) to isoUtc(to)
     }
 
     fun load() {
-        _state.update { it.copy(isLoading = true, error = null) }
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch(Dispatchers.IO) {
+            _state.update { it.copy(isLoading = true, error = null) }
 
-        val f = _state.value.filters
-        val externalId = externalIdProvider()
+            val f = _state.value.filters
+            val externalId = externalIdProvider()
 
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                api.getOverviewSeries(
+            try {
+                val res = getApplication<Application>().resources
+                val resp = api.getOverviewSeries(
                     fromIso = f.fromIso,
                     toIso = f.toIso,
                     grouping = f.grouping.apiValue,
                     externalId = externalId
                 )
-            }.onSuccess { resp ->
                 _state.update {
                     it.copy(
                         isLoading = false,
                         response = resp.data,
-                        error = if (resp.success) null else resp.message
+                        error = if (resp.success) null else res.userFriendlyApiError(resp.message)
                     )
                 }
-            }.onFailure { ex ->
+            } catch (e: CancellationException) {
+                throw e
+            } catch (ex: Exception) {
+                val res = getApplication<Application>().resources
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = ex.message ?: "Request failed"
+                        error = res.userFriendlyApiError(ex.message)
                     )
                 }
             }
@@ -134,11 +176,4 @@ open class StatsViewModel(
         return c.timeInMillis
     }
 
-    private fun truncateToSeconds(millis: Long): Long {
-        return (millis / 1000L) * 1000L
-    }
-
-    private fun daysToMillis(days: Int): Long {
-        return days.toLong() * 24L * 60L * 60L * 1000L
-    }
 }

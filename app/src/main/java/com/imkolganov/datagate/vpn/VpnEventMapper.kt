@@ -1,97 +1,110 @@
 package com.imkolganov.datagate.vpn
 
+import android.content.res.Resources
+import com.imkolganov.datagate.R
+
 object VpnEventMapper {
 
-    fun map(previous: VpnStatusUiState, eventName: String, eventInfo: String): VpnStatusUiState {
+    fun map(
+        res: Resources,
+        previous: VpnStatusUiState,
+        eventName: String,
+        eventInfo: String
+    ): VpnStatusUiState {
         return when (eventName) {
 
-            // Pre-connect flow (friendly)
             "SELECTING_SERVER" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Selecting the best server..."
+                lastMessage = res.getString(R.string.vpn_msg_selecting_server)
             )
 
             "SELECTED_SERVER" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Server selected"
+                lastMessage = res.getString(R.string.vpn_msg_server_selected)
             )
 
             "GETTING_INSTALLATION_ID" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Preparing device identity..."
+                lastMessage = res.getString(R.string.vpn_msg_preparing_device)
             )
 
             "GETTING_EXTERNAL_ID" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Checking user identity..."
+                lastMessage = res.getString(R.string.vpn_msg_checking_user)
             )
 
             "BUILDING_COMMON_NAME" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Creating certificate request..."
+                lastMessage = res.getString(R.string.vpn_msg_creating_cert)
             )
 
             "DOWNLOADING_CONFIG" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Downloading VPN profile..."
+                lastMessage = res.getString(R.string.vpn_msg_downloading_profile)
             )
 
             "CONFIG_RECEIVED" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "VPN profile received"
+                lastMessage = res.getString(R.string.vpn_msg_profile_received)
             )
 
-            // OpenVPN core flow (friendly)
             "RESOLVE" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Resolving server address..."
+                lastMessage = res.getString(R.string.vpn_msg_resolving_address)
             )
 
             "WAIT" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Waiting for server response..."
+                lastMessage = res.getString(R.string.vpn_msg_waiting_server)
             )
 
             "GET_CONFIG" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Negotiating configuration..."
+                lastMessage = res.getString(R.string.vpn_msg_negotiating_config)
             )
 
             "ASSIGN_IP" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Establishing tunnel..."
+                lastMessage = res.getString(R.string.vpn_msg_establishing_tunnel)
             )
 
             "RECONNECTING" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Reconnecting..."
+                lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
             "CONNECTING" -> previous.copy(
                 isConnectRequested = true,
-                lastMessage = "Connecting..."
+                lastMessage = res.getString(R.string.vpn_msg_connecting)
             )
 
             "CONNECTED" -> {
                 val name = previous.selectedServerName?.takeIf { it.isNotBlank() }
                 previous.copy(
                     isConnectRequested = true,
-                    lastMessage = if (name != null) "Connected to $name" else "Connected"
+                    isVpnConnected = true,
+                    lastMessage = if (name != null) {
+                        res.getString(R.string.vpn_msg_connected_to, name)
+                    } else {
+                        res.getString(R.string.vpn_msg_connected)
+                    }
                 )
             }
 
             "DISCONNECTED" -> previous.copy(
                 isConnectRequested = false,
-                lastMessage = "Disconnected"
+                isVpnConnected = false,
+                selectedServerId = null,
+                lastMessage = res.getString(R.string.vpn_msg_disconnected)
             )
 
             "TUN_SETUP_FAILED" -> previous.copy(
                 isConnectRequested = false,
-                lastMessage = "Tunnel setup failed"
+                isVpnConnected = false,
+                lastMessage = res.getString(R.string.vpn_msg_tunnel_failed)
             )
 
             else -> {
-                // Fallback: keep it readable and avoid dumping raw IP blobs
                 val msg = sanitizeFallback(eventName, eventInfo)
                 previous.copy(lastMessage = msg)
             }
@@ -104,11 +117,10 @@ object VpnEventMapper {
 
         if (info.isBlank()) return name
 
-        // Avoid showing raw IP/ports/long technical blobs
         val isLikelyNetworkJunk =
             info.length > 60 ||
-                    info.contains(Regex("""\b\d{1,3}(\.\d{1,3}){3}\b""")) ||
-                    info.contains(":") && info.any { it.isDigit() }
+                info.contains(Regex("""\b\d{1,3}(\.\d{1,3}){3}\b""")) ||
+                info.contains(":") && info.any { it.isDigit() }
 
         return if (isLikelyNetworkJunk) name else "$name: $info"
     }

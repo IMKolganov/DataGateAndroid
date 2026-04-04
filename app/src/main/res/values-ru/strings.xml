@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_system">Как в системе</string>
+
+    <string name="nav_home">Главная</string>
+    <string name="nav_access">Доступ</string>
+    <string name="nav_statistics">Статистика</string>
+    <string name="nav_settings">Настройки</string>
+
+    <string name="login_title">DataGate</string>
+    <string name="login_sign_in_google">Войти через Google</string>
+    <string name="login_welcome">Добро пожаловать в VPN‑сервис.\nПо вопросам пишите на imkolganov@gmail.com.</string>
+    <string name="login_version">v%1$s (%2$d)</string>
+
+    <string name="vpn_status_connected">Подключено</string>
+    <string name="vpn_status_connecting">Подключение…</string>
+    <string name="vpn_status_disconnected">Не подключено</string>
+    <string name="vpn_waiting_events">Ожидание событий VPN…</string>
+    <string name="vpn_home_title">DataGate</string>
+    <string name="vpn_power">Питание</string>
+    <string name="action_disconnect">Отключить</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_connect">Подключить</string>
+    <string name="vpn_home_footer">«Подключить» выбирает сервер автоматически. Чтобы указать сервер вручную, откройте вкладку «Доступ».</string>
+
+    <string name="home_report_issue">Сообщить о проблеме</string>
+    <string name="home_report_issue_title">Связь с поддержкой</string>
+    <string name="home_report_issue_hint">Как вам удобнее связаться:</string>
+    <string name="home_report_telegram">Бот в Telegram @DataGateVPNBot</string>
+    <string name="home_report_email">Электронная почта</string>
+    <string name="home_report_github">GitHub Issues</string>
+    <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="stats_filters">Фильтры</string>
+    <string name="stats_overview">Обзор</string>
+    <string name="stats_chart_hint">Нажмите на график для значений · щипок для масштаба · перетаскивание для прокрутки</string>
+    <string name="stats_loading_message">Загрузка статистики может занять время.\nПодождите или измените диапазон дат и попробуйте снова.</string>
+    <string name="stats_error_prefix">Ошибка: %1$s</string>
+    <string name="chart_no_points">Нет точек в этом диапазоне — расширьте даты или обновите.</string>
+
+    <string name="stats_grouping">Группировка</string>
+    <string name="stats_metric">Метрика</string>
+    <string name="stats_traffic_in">Трафик вход</string>
+    <string name="stats_traffic_out">Трафик выход</string>
+
+    <string name="grouping_auto">Авто</string>
+    <string name="grouping_hours">Часы</string>
+    <string name="grouping_months">Месяцы</string>
+    <string name="grouping_years">Годы</string>
+
+    <string name="metric_active_clients">Активные клиенты</string>
+    <string name="metric_traffic_total">Трафик всего</string>
+    <string name="metric_traffic_in">Трафик вход</string>
+    <string name="metric_traffic_out">Трафик выход</string>
+
+    <string name="presets_last_7">Последние 7 дней</string>
+    <string name="presets_last_30">Последние 30 дней</string>
+    <string name="action_reload">Обновить</string>
+
+    <string name="date_range_label">Диапазон дат</string>
+    <string name="date_range_arrow">%1$s → %2$s</string>
+    <string name="action_ok">OK</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_language_subtitle">Выберите язык или используйте язык устройства.</string>
+    <string name="settings_appearance">Оформление</string>
+    <string name="settings_appearance_subtitle">Светлая, тёмная тема или как в системе.</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_system">Системная</string>
+
+    <string name="settings_device">Устройство</string>
+    <string name="settings_installation_id">InstallationId</string>
+    <string name="settings_loading">Загрузка…</string>
+    <string name="settings_copy_installation_id">Копировать InstallationId</string>
+    <string name="settings_copy_user_id">Копировать UserId</string>
+    <string name="settings_diagnostics">Диагностика</string>
+    <string name="settings_error_logs">Логи ошибок</string>
+    <string name="settings_error_logs_count">%1$d файл(ов)</string>
+    <string name="settings_share_logs">Поделиться логами</string>
+    <string name="share_logs_chooser_title">Поделиться логами ошибок</string>
+
+    <string name="copied">Скопировано</string>
+    <string name="no_error_logs">Логи ошибок не найдены</string>
+    <string name="no_shareable_files">Нет файлов для отправки.</string>
+    <string name="share_failed">Не удалось отправить файлы.</string>
+
+    <string name="settings_about">О проекте</string>
+    <string name="settings_about_subtitle">Ссылки на проект и проверка новых версий на GitHub.</string>
+    <string name="settings_app_version_label">Версия приложения</string>
+    <string name="settings_link_website">Сайт</string>
+    <string name="settings_link_telegram">Канал в Telegram</string>
+    <string name="settings_updates_github_title">Проверять обновления на GitHub</string>
+    <string name="settings_updates_github_subtitle">Периодически запрашивать последний релиз и уведомлять вас.</string>
+    <string name="settings_auto_download_title">Предлагать загрузку APK</string>
+    <string name="settings_auto_download_subtitle">При появлении обновления помнить, что вы хотите варианты загрузки и установки в будущем.</string>
+
+    <string name="update_dialog_title">Новая версия %1$s</string>
+    <string name="update_dialog_body">На GitHub доступна более новая сборка. Последний релиз: %1$s. У вас: %2$s.\n\nМожно открыть страницу релиза или скачать APK. Ниже можно включить предложения обновлений на будущее.</string>
+    <string name="update_no_apk_attached">К этому релизу не прикреплён APK. Откройте страницу релиза на GitHub и скачайте файл вручную.</string>
+    <string name="update_dialog_auto_download_label">Предлагать обновления и загрузку APK в будущем</string>
+    <string name="update_dialog_later">Не сейчас</string>
+    <string name="update_dialog_open_release">Открыть страницу релиза</string>
+    <string name="update_dialog_download">Скачать и установить</string>
+    <string name="update_downloading">Загрузка…</string>
+    <string name="update_download_failed">Не удалось скачать</string>
+
+    <string name="account_title">Аккаунт и выход</string>
+    <string name="account_subtitle">Вы вошли под профилем ниже. Выход удалит локальные токены на этом устройстве.</string>
+    <string name="not_available">Недоступно</string>
+    <string name="em_dash">—</string>
+    <string name="label_role">Роль</string>
+    <string name="label_email">Email</string>
+    <string name="sign_out">Выйти</string>
+    <string name="sign_out_subtitle">Завершить сеанс на этом устройстве</string>
+    <string name="sign_out_confirm_title">Выйти?</string>
+    <string name="sign_out_confirm_message">Вы уверены, что хотите выйти?</string>
+
+    <string name="access_no_wss_dialog_title">Подключение в приложении недоступно</string>
+    <string name="access_switch_title">Сменить сервер?</string>
+    <string name="access_switch_message">Отключить текущий VPN и подключиться к «%1$s»?</string>
+    <string name="access_switch">Сменить</string>
+    <string name="access_active_connection">Активное подключение</string>
+    <string name="access_available_servers">Доступные серверы</string>
+    <string name="label_server">Сервер</string>
+    <string name="label_ip">IP</string>
+    <string name="label_since">С</string>
+    <string name="label_openvpn">OpenVPN</string>
+    <string name="label_uptime">Аптайм</string>
+    <string name="label_in">Вх.</string>
+    <string name="label_out">Исх.</string>
+    <string name="status_offline">Офлайн</string>
+    <string name="status_online">Онлайн</string>
+    <string name="access_users_footer">Всего пользователей: %1$d · онлайн %2$d из %3$d серверов</string>
+    <string name="access_choose_server">Выберите сервер</string>
+    <string name="access_refresh">Обновить</string>
+    <string name="access_use_home_hint">На главной можно подключиться с автовыбором сервера. Здесь выберите сервер и нажмите «Подключить» — или «Отключить» у активного.</string>
+    <string name="access_vpn_active">VPN активен</string>
+    <string name="access_establishing">Установка сессии…</string>
+    <string name="access_connected">Подключено</string>
+    <string name="access_not_connected">Не подключено</string>
+    <string name="access_connecting">Подключение…</string>
+
+    <string name="error_request_failed">Запрос не выполнен</string>
+    <string name="error_http_bad_gateway">Сервер временно недоступен (ошибка шлюза). Попробуйте позже.</string>
+    <string name="error_http_service_unavailable">Сервис временно недоступен. Попробуйте позже.</string>
+    <string name="error_http_gateway_timeout">Сервер слишком долго не отвечал. Попробуйте позже.</string>
+    <string name="error_http_proxy_html">Вместо данных пришла страница ошибки. Возможно, сервис перезапускается.</string>
+
+    <string name="vpn_selecting_best_server">Выбор лучшего сервера</string>
+    <string name="vpn_resolving_server">Поиск сервера</string>
+    <string name="vpn_fallback_server_name">Сервер</string>
+    <string name="vpn_reading_installation_id">Чтение installation id</string>
+    <string name="vpn_installation_id_not_ready">InstallationId ещё не готов</string>
+    <string name="vpn_reading_external_id">Чтение external id для %1$s</string>
+    <string name="vpn_external_id_unavailable">ExternalId недоступен</string>
+    <string name="vpn_preparing_cert_identity">Подготовка сертификата для %1$s</string>
+    <string name="vpn_requesting_profile">Запрос профиля VPN для %1$s</string>
+    <string name="vpn_config_received">Профиль получен (%1$d байт)</string>
+    <string name="vpn_connect_failed">Ошибка подключения: %1$s</string>
+    <string name="vpn_server_selected">Сервер выбран</string>
+    <string name="vpn_waiting_permission">Ожидание разрешения VPN…</string>
+    <string name="vpn_error_permission_missing_config">Разрешение VPN есть, но нет конфигурации или WSS</string>
+    <string name="vpn_error_permission_denied">Разрешение VPN отклонено</string>
+    <string name="vpn_disconnecting">Отключение…</string>
+    <string name="vpn_connecting_generic">Подключение…</string>
+    <string name="vpn_requires_openvpn_connect">Сервер «%1$s» не поддерживает подключение в этом приложении (нужен WSS). Подключайтесь через официальное приложение OpenVPN Connect с профилем этого сервера.\n\nВ странах с жёстким государственным контролем сети (например Россия, Иран) соединение всё равно может не работать.</string>
+    <string name="vpn_server_manual_unavailable">Сервер №%1$d недоступен или не подходит для подключения в приложении.</string>
+    <string name="vpn_server_quota_blocked">Сервер «%1$s» не входит в ваш тарифный план.</string>
+    <string name="access_server_quota_blocked">Нет в вашем плане</string>
+    <string name="access_quota_section_title">Квота</string>
+    <string name="access_quota_current_plan">Ваш текущий план</string>
+    <string name="access_quota_no_active">Нет активного назначения квоты</string>
+    <string name="access_quota_effective_from">Действует с: %1$s</string>
+    <string name="access_quota_all_plans_title">Все тарифные планы</string>
+    <string name="access_quota_plan_default">По умолчанию</string>
+    <string name="access_quota_plan_inactive">Неактивен</string>
+
+    <string name="vpn_msg_selecting_server">Выбор лучшего сервера…</string>
+    <string name="vpn_msg_server_selected">Сервер выбран</string>
+    <string name="vpn_msg_preparing_device">Подготовка идентификатора устройства…</string>
+    <string name="vpn_msg_checking_user">Проверка учётной записи…</string>
+    <string name="vpn_msg_creating_cert">Создание запроса сертификата…</string>
+    <string name="vpn_msg_downloading_profile">Загрузка профиля VPN…</string>
+    <string name="vpn_msg_profile_received">Профиль VPN получен</string>
+    <string name="vpn_msg_resolving_address">Разрешение адреса сервера…</string>
+    <string name="vpn_msg_waiting_server">Ожидание ответа сервера…</string>
+    <string name="vpn_msg_negotiating_config">Согласование конфигурации…</string>
+    <string name="vpn_msg_establishing_tunnel">Установка туннеля…</string>
+    <string name="vpn_msg_reconnecting">Переподключение…</string>
+    <string name="vpn_msg_connecting">Подключение…</string>
+    <string name="vpn_msg_connected_to">Подключено к %1$s</string>
+    <string name="vpn_msg_connected">Подключено</string>
+    <string name="vpn_msg_disconnected">Отключено</string>
+    <string name="vpn_msg_tunnel_failed">Ошибка настройки туннеля</string>
+</resources>

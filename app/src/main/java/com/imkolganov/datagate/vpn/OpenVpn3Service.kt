@@ -33,6 +33,8 @@ class OpenVpn3Service : VpnService() {
     companion object {
         const val EXTRA_OVPN_CONFIG = "com.imkolganov.datagate.vpn.EXTRA_OVPN_CONFIG"
         const val EXTRA_WSS_URL = "com.imkolganov.datagate.vpn.EXTRA_WSS_URL"
+        const val EXTRA_LINK_PROTOCOL = "com.imkolganov.datagate.vpn.EXTRA_LINK_PROTOCOL"
+        const val EXTRA_SERVER_DISPLAY_NAME = "com.imkolganov.datagate.vpn.EXTRA_SERVER_DISPLAY_NAME"
 
         init {
             System.loadLibrary("ovpncli")
@@ -57,13 +59,16 @@ class OpenVpn3Service : VpnService() {
         const val ACTION_RESUME = "com.imkolganov.datagate.vpn.RESUME"
     }
     private val BRIDGE_PORT = 41194
-    private var bridge: TcpToWssBridge? = null
+    private var bridgeStop: (() -> Unit)? = null
     private var bridgeHttp: okhttp3.OkHttpClient? = null
 
     @Volatile private var connectInProgress = false
     @Volatile private var hasActiveSession = false
     @Volatile private var isPaused = false
     @Volatile private var isStopping = false
+
+    /** Shown in the ongoing notification body (title is always app name). */
+    private var sessionServerDisplayName: String? = null
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
@@ -85,7 +90,10 @@ class OpenVpn3Service : VpnService() {
         super.onDestroy()
     }
 
-    private fun buildNotification(text: String): Notification {
+    private fun notificationBody(fallback: String): String =
+        sessionServerDisplayName?.takeIf { it.isNotBlank() } ?: fallback
+
+    private fun buildNotification(fallbackText: String): Notification {
         val disconnectIntent = Intent(this, OpenVpn3Service::class.java).apply {
             action = ACTION_DISCONNECT
         }
@@ -122,8 +130,8 @@ class OpenVpn3Service : VpnService() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("OpenVPN 3")
-            .setContentText(text)
+            .setContentTitle(getString(R.string.login_title))
+            .setContentText(notificationBody(fallbackText))
             .setSmallIcon(R.drawable.ic_stat_vpn)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -139,16 +147,16 @@ class OpenVpn3Service : VpnService() {
             .addAction(
                 NotificationCompat.Action.Builder(
                     0,
-                    "Disconnect",
+                    getString(R.string.action_disconnect),
                     disconnectPending
                 ).build()
             )
             .build()
     }
 
-    private fun updateNotification(text: String) {
+    private fun updateNotification(fallbackText: String) {
         val nm = getSystemService(NotificationManager::class.java)
-        nm.notify(NOTIFICATION_ID, buildNotification(text))
+        nm.notify(NOTIFICATION_ID, buildNotification(fallbackText))
     }
 
     @SuppressLint("ObsoleteSdkInt")
@@ -161,32 +169,48 @@ class OpenVpn3Service : VpnService() {
             val nm = getSystemService(NotificationManager::class.java)
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "OpenVPN 3",
+                getString(R.string.login_title),
                 NotificationManager.IMPORTANCE_LOW
             )
             nm.createNotificationChannel(channel)
         }
     }
 
-    private fun startVpn(configText: String, wssUrl: String) {
+    private fun startVpn(configText: String, wssUrl: String, linkProtocol: VpnLinkProtocol) {
         stopVpnInternal()
 
         val http = buildProtectedOkHttp(this@OpenVpn3Service)
 
         bridgeHttp = http
 
-        bridge = TcpToWssBridge(
-            service = this@OpenVpn3Service,
-            port = BRIDGE_PORT,
-            wssUrl = wssUrl,
-            http = http
-        ).also { it.start() }
+        when (linkProtocol) {
+            VpnLinkProtocol.UDP -> {
+                val b = UdpToWssBridge(
+                    service = this@OpenVpn3Service,
+                    port = BRIDGE_PORT,
+                    wssUrl = wssUrl,
+                    http = http
+                )
+                b.start()
+                bridgeStop = { b.stop() }
+            }
+            VpnLinkProtocol.TCP -> {
+                val b = TcpToWssBridge(
+                    service = this@OpenVpn3Service,
+                    port = BRIDGE_PORT,
+                    wssUrl = wssUrl,
+                    http = http
+                )
+                b.start()
+                bridgeStop = { b.stop() }
+            }
+        }
 
         vpnJob = serviceScope.launch {
             try {
                 Log.d(TAG, "startVpn: building config")
 
-                val patchedConfig = forceRemoteToLocalBridge(configText, BRIDGE_PORT)
+                val patchedConfig = forceRemoteToLocalBridge(configText, BRIDGE_PORT, linkProtocol)
 
                 val cfg = ClientAPI_Config().apply {
                     content = patchedConfig
@@ -274,8 +298,11 @@ class OpenVpn3Service : VpnService() {
         }
         vpnClient = null
 
-        try { bridge?.stop() } catch (_: Throwable) {}
-        bridge = null
+        try {
+            bridgeStop?.invoke()
+        } catch (_: Throwable) {
+        }
+        bridgeStop = null
 
         try { bridgeHttp?.dispatcher?.executorService?.shutdown() } catch (_: Throwable) {}
         try { bridgeHttp?.connectionPool?.evictAll() } catch (_: Throwable) {}
@@ -298,6 +325,11 @@ class OpenVpn3Service : VpnService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
+        if (action == ACTION_CONNECT) {
+            sessionServerDisplayName = intent.getStringExtra(EXTRA_SERVER_DISPLAY_NAME)
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+        }
         val shouldBeForeground = action == ACTION_CONNECT || hasActiveSession || connectInProgress
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && shouldBeForeground) {
@@ -329,7 +361,9 @@ class OpenVpn3Service : VpnService() {
 
                 connectInProgress = true
                 startForeground(NOTIFICATION_ID, buildNotification("Connecting..."))
-                startVpn(configText, wssUrl)
+                val linkProtocol =
+                    VpnLinkProtocol.fromIntentExtra(intent.getStringExtra(EXTRA_LINK_PROTOCOL))
+                startVpn(configText, wssUrl, linkProtocol)
             }
 
             ACTION_DISCONNECT -> {
@@ -341,6 +375,7 @@ class OpenVpn3Service : VpnService() {
                 connectInProgress = false
                 hasActiveSession = false
                 isPaused = false
+                sessionServerDisplayName = null
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     stopForeground(STOP_FOREGROUND_REMOVE)

@@ -1,5 +1,6 @@
 import android.util.Base64
 import com.imkolganov.datagate.configs.ApiConfig
+import com.imkolganov.datagate.json.formatHttpErrorDetail
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -76,11 +77,11 @@ class OvpnApiClient(
                 400 -> {
                     val err = resp.body.string().orEmpty()
                     if (isNotFoundApiMessage(err)) null
-                    else throw IOException("Download failed: ${resp.code} ${resp.message}. Body=$err")
+                    else throw IOException(formatHttpErrorDetail("Download failed", resp.code, err))
                 }
                 else -> {
                     val err = resp.body.string().orEmpty()
-                    throw IOException("Download failed: ${resp.code} ${resp.message}. Body=$err")
+                    throw IOException(formatHttpErrorDetail("Download failed", resp.code, err))
                 }
             }
         }
@@ -123,7 +124,7 @@ class OvpnApiClient(
         http.executeSuspending(request).use { resp ->
             if (resp.code !in 200..299) {
                 val err = resp.body.string().orEmpty()
-                throw IOException("Create failed: ${resp.code} ${resp.message}. Body=$err")
+                throw IOException(formatHttpErrorDetail("Create failed", resp.code, err))
             }
         }
     }

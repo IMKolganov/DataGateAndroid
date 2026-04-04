@@ -18,7 +18,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.imkolganov.datagate.R
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.stats.FakeStatsApiClient
@@ -29,7 +32,9 @@ import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.settings.SettingsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
+import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
+import com.imkolganov.datagate.ui.theme.ThemeMode
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 enum class BottomTab {
@@ -39,12 +44,18 @@ enum class BottomTab {
 @Composable
 fun MainScreen(
     vpnState: VpnStatusUiState,
-    onRequestConnect: () -> Unit,
+    onConnectFromHome: () -> Unit,
+    onConnectFromAccess: () -> Unit,
     onRequestDisconnect: () -> Unit,
+    onReconnectVpn: () -> Unit,
     onLogout: () -> Unit,
     tokenStore: TokenStore,
     accessViewModel: AccessViewModel,
-    statsViewModel: StatsViewModel
+    statsViewModel: StatsViewModel,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    appLocale: AppLocale,
+    onAppLocaleChange: (AppLocale) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.Home) }
     val accessState by accessViewModel.state.collectAsState()
@@ -55,26 +66,33 @@ fun MainScreen(
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Home,
                     onClick = { selectedTab = BottomTab.Home },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                    label = { Text("Home") }
+                    icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.nav_home)) },
+                    label = { Text(stringResource(R.string.nav_home)) }
                 )
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Access,
                     onClick = { selectedTab = BottomTab.Access },
-                    icon = { Icon(Icons.Default.Lock, contentDescription = "Access") },
-                    label = { Text("Access") }
+                    icon = { Icon(Icons.Default.Lock, contentDescription = stringResource(R.string.nav_access)) },
+                    label = { Text(stringResource(R.string.nav_access)) }
                 )
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Statistics,
                     onClick = { selectedTab = BottomTab.Statistics },
-                    icon = { Icon(Icons.Default.AccountBox, contentDescription = "Statistics") },
-                    label = { Text("Statistics") }
+                    icon = {
+                        Icon(
+                            Icons.Default.AccountBox,
+                            contentDescription = stringResource(R.string.nav_statistics)
+                        )
+                    },
+                    label = { Text(stringResource(R.string.nav_statistics)) }
                 )
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Settings,
                     onClick = { selectedTab = BottomTab.Settings },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text("Settings") }
+                    icon = {
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.nav_settings))
+                    },
+                    label = { Text(stringResource(R.string.nav_settings)) }
                 )
             }
         }
@@ -83,51 +101,76 @@ fun MainScreen(
             when (selectedTab) {
                 BottomTab.Home -> VpnStatusScreen(
                     state = vpnState,
-                    onConnectClick = onRequestConnect,
+                    onConnectClick = onConnectFromHome,
                     onDisconnectClick = onRequestDisconnect
                 )
                 BottomTab.Access -> AccessScreen(
                     state = accessState,
                     vpnState = vpnState,
-                    onEvent = accessViewModel::onEvent
+                    onEvent = accessViewModel::onEvent,
+                    onConnectVpn = onConnectFromAccess,
+                    onDisconnectVpn = onRequestDisconnect,
+                    onReconnectVpn = onReconnectVpn
                 )
                 BottomTab.Statistics -> StatsScreen(
                     viewModel = statsViewModel
                 )
                 BottomTab.Settings -> SettingsScreen(
                     tokenStore = tokenStore,
-                    onLogout = onLogout
+                    onLogout = onLogout,
+                    themeMode = themeMode,
+                    onThemeModeChange = onThemeModeChange,
+                    appLocale = appLocale,
+                    onAppLocaleChange = onAppLocaleChange
                 )
             }
         }
     }
 }
 
-private class PreviewAccessViewModel : AccessViewModel(
+private class PreviewAccessViewModel(
+    appContext: android.content.Context
+) : AccessViewModel(
     repo = object : com.imkolganov.datagate.ui.screens.access.AccessRepository {
         override suspend fun getServers(): List<AccessContract.ServerItem> = emptyList()
         override suspend fun getMyActiveConnections(): List<AccessContract.ActiveConnectionItem> = emptyList()
-    }
+        override suspend fun loadQuotaUi(): AccessContract.QuotaUiState = AccessContract.QuotaUiState()
+    },
+    appContext = appContext
 )
 
-private class PreviewStatsViewModel :
-    StatsViewModel(
-        api = FakeStatsApiClient(),
-        externalIdProvider = { "preview-external-id" }
-    )
+private class PreviewStatsViewModel(
+    app: android.app.Application
+) : StatsViewModel(
+    app,
+    api = FakeStatsApiClient(),
+    externalIdProvider = { "preview-external-id" }
+)
 
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
+    val context = LocalContext.current
+    val app = context.applicationContext as android.app.Application
+    val previewVm = remember(context) {
+        PreviewAccessViewModel(context.applicationContext)
+    }
+    val previewStats = remember(app) { PreviewStatsViewModel(app) }
     DataGateAndroidTheme {
         MainScreen(
             vpnState = VpnStatusUiState(),
-            onRequestConnect = {},
+            onConnectFromHome = {},
+            onConnectFromAccess = {},
             onRequestDisconnect = {},
+            onReconnectVpn = {},
             onLogout = {},
             tokenStore = PreviewTokenStore(),
-            accessViewModel = PreviewAccessViewModel(),
-            statsViewModel = PreviewStatsViewModel()
+            accessViewModel = previewVm,
+            statsViewModel = previewStats,
+            themeMode = ThemeMode.SYSTEM,
+            onThemeModeChange = {},
+            appLocale = AppLocale.SYSTEM,
+            onAppLocaleChange = {}
         )
     }
 }

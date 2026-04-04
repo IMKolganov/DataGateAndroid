@@ -37,8 +37,12 @@ android {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.0.4"
+        versionCode = 5
+        versionName = "1.0.5"
+
+        val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
+            ?: "IMKolganov/DataGateAndroid"
+        buildConfigField("String", "GITHUB_RELEASES_REPO", "\"$githubRepo\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -123,6 +127,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

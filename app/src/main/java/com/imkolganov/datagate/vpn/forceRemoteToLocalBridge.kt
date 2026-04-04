@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.vpn
 
-fun forceRemoteToLocalBridge(original: String, port: Int): String {
+fun forceRemoteToLocalBridge(original: String, port: Int, linkProtocol: VpnLinkProtocol): String {
+    val protoLine = linkProtocol.configProtoLine()
     val lines = original.replace("\r\n", "\n").split("\n")
     val out = ArrayList<String>(lines.size)
 
@@ -20,7 +21,7 @@ fun forceRemoteToLocalBridge(original: String, port: Int): String {
         }
 
         if (lower.startsWith("proto ")) {
-            out.add("proto tcp-client")
+            out.add(protoLine)
             protoWritten = true
             continue
         }
@@ -28,7 +29,7 @@ fun forceRemoteToLocalBridge(original: String, port: Int): String {
         out.add(line)
     }
 
-    if (!protoWritten) out.add(0, "proto tcp-client")
+    if (!protoWritten) out.add(0, protoLine)
     if (!remoteWritten) out.add(0, "remote 127.0.0.1 $port")
 
     return out.joinToString("\n").trimEnd() + "\n"

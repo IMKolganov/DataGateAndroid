@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.DataGateAndroid" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- AppCompat parent so AppCompatDelegate.setApplicationLocales applies per-app language. -->
+    <style name="Theme.DataGateAndroid" parent="Theme.AppCompat.Light.NoActionBar" />
 </resources>
