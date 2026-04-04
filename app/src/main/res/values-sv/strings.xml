@@ -122,6 +122,10 @@
     <string name="access_connecting">Connecting…</string>
 
     <string name="error_request_failed">Request failed</string>
+    <string name="error_http_bad_gateway">The server is temporarily unavailable (bad gateway). Try again later.</string>
+    <string name="error_http_service_unavailable">The service is temporarily unavailable. Try again later.</string>
+    <string name="error_http_gateway_timeout">The server took too long to respond. Try again later.</string>
+    <string name="error_http_proxy_html">The server returned an error page instead of data. The service may be restarting.</string>
 
     <!-- VPN connect flow (VpnConnectInteractor / VpnController) -->
     <string name="vpn_selecting_best_server">Selecting best server</string>
@@ -143,6 +147,15 @@
     <string name="vpn_connecting_generic">Connecting…</string>
     <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
+    <string name="vpn_server_quota_blocked">Server "%1$s" is not included in your quota plan.</string>
+    <string name="access_server_quota_blocked">Not in your plan</string>
+    <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_current_plan">Your current plan</string>
+    <string name="access_quota_no_active">No active quota assignment</string>
+    <string name="access_quota_effective_from">Effective from: %1$s</string>
+    <string name="access_quota_all_plans_title">All quota plans</string>
+    <string name="access_quota_plan_default">Default</string>
+    <string name="access_quota_plan_inactive">Inactive</string>
 
     <!-- VpnEventMapper -->
     <string name="vpn_msg_selecting_server">Selecting the best server…</string>

@@ -108,6 +108,10 @@
     <string name="access_not_connected">Nicht verbunden</string>
     <string name="access_connecting">Verbindung…</string>
     <string name="error_request_failed">Anfrage fehlgeschlagen</string>
+    <string name="error_http_bad_gateway">Der Server ist vorübergehend nicht erreichbar (Bad Gateway). Bitte später erneut versuchen.</string>
+    <string name="error_http_service_unavailable">Der Dienst ist vorübergehend nicht verfügbar. Bitte später erneut versuchen.</string>
+    <string name="error_http_gateway_timeout">Der Server hat zu lange gebraucht. Bitte später erneut versuchen.</string>
+    <string name="error_http_proxy_html">Der Server hat eine Fehlerseite statt Daten gesendet. Der Dienst wird möglicherweise neu gestartet.</string>
     <string name="vpn_selecting_best_server">Bester Server wird gewählt</string>
     <string name="vpn_resolving_server">Server wird ermittelt</string>
     <string name="vpn_fallback_server_name">Server</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Verbinden…</string>
     <string name="vpn_requires_openvpn_connect">Dieser Server (%1$s) unterstützt keine In-App-Verbindung über WSS. Nutzen Sie die offizielle OpenVPN Connect-App mit einem Profil dieses Servers.\n\nIn Ländern mit stark staatlicher Netzwerkkontrolle (z. B. Russland, Iran) kann es dennoch unzuverlässig sein.</string>
     <string name="vpn_server_manual_unavailable">Server #%1$d ist offline oder für die In-App-Verbindung nicht verfügbar.</string>
+    <string name="vpn_server_quota_blocked">Server „%1$s“ ist in Ihrem Tarif nicht enthalten.</string>
+    <string name="access_server_quota_blocked">Nicht in Ihrem Tarif</string>
+    <string name="access_quota_section_title">Kontingent</string>
+    <string name="access_quota_current_plan">Ihr aktueller Tarif</string>
+    <string name="access_quota_no_active">Keine aktive Kontingentzuweisung</string>
+    <string name="access_quota_effective_from">Gültig ab: %1$s</string>
+    <string name="access_quota_all_plans_title">Alle Kontingenttarife</string>
+    <string name="access_quota_plan_default">Standard</string>
+    <string name="access_quota_plan_inactive">Inaktiv</string>
     <string name="vpn_msg_selecting_server">Bester Server wird gewählt…</string>
     <string name="vpn_msg_server_selected">Server gewählt</string>
     <string name="vpn_msg_preparing_device">Geräteidentität wird vorbereitet…</string>

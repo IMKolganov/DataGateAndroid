@@ -108,6 +108,10 @@
     <string name="access_not_connected">未連線</string>
     <string name="access_connecting">正在連線…</string>
     <string name="error_request_failed">要求失敗</string>
+    <string name="error_http_bad_gateway">伺服器暫時無法使用（閘道錯誤）。請稍後再試。</string>
+    <string name="error_http_service_unavailable">服務暫時無法使用。請稍後再試。</string>
+    <string name="error_http_gateway_timeout">伺服器回應時間過長。請稍後再試。</string>
+    <string name="error_http_proxy_html">伺服器回傳錯誤頁面而非資料。服務可能正在重新啟動。</string>
     <string name="vpn_selecting_best_server">正在選擇最佳伺服器</string>
     <string name="vpn_resolving_server">正在解析伺服器</string>
     <string name="vpn_fallback_server_name">伺服器</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">正在連線…</string>
     <string name="vpn_requires_openvpn_connect">伺服器（%1$s）不支援透過 WSS 在應用程式內連線。請使用官方 OpenVPN Connect 應用程式並匯入該伺服器的設定檔。\n\n在網路管控嚴格的國家（如俄羅斯、伊朗）仍可能無法連線。</string>
     <string name="vpn_server_manual_unavailable">伺服器 #%1$d 離線或無法在應用程式內連線。</string>
+    <string name="vpn_server_quota_blocked">伺服器「%1$s」不在您的方案內。</string>
+    <string name="access_server_quota_blocked">不在您的方案內</string>
+    <string name="access_quota_section_title">配額</string>
+    <string name="access_quota_current_plan">您目前的方案</string>
+    <string name="access_quota_no_active">沒有有效的配額指派</string>
+    <string name="access_quota_effective_from">生效自：%1$s</string>
+    <string name="access_quota_all_plans_title">所有配額方案</string>
+    <string name="access_quota_plan_default">預設</string>
+    <string name="access_quota_plan_inactive">未啟用</string>
     <string name="vpn_msg_selecting_server">正在選擇最佳伺服器…</string>
     <string name="vpn_msg_server_selected">已選擇伺服器</string>
     <string name="vpn_msg_preparing_device">正在準備裝置身分…</string>

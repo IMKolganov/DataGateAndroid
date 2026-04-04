@@ -108,6 +108,10 @@
     <string name="access_not_connected">जुड़ा नहीं</string>
     <string name="access_connecting">कनेक्ट हो रहा है…</string>
     <string name="error_request_failed">अनुरोध विफल</string>
+    <string name="error_http_bad_gateway">सर्वर अस्थायी रूप से उपलब्ध नहीं है (bad gateway)। बाद में पुनः प्रयास करें।</string>
+    <string name="error_http_service_unavailable">सेवा अस्थायी रूप से उपलब्ध नहीं है। बाद में पुनः प्रयास करें।</string>
+    <string name="error_http_gateway_timeout">सर्वर ने बहुत देर से जवाब दिया। बाद में पुनः प्रयास करें।</string>
+    <string name="error_http_proxy_html">सर्वर ने डेटा के बजाय त्रुटि पृष्ठ लौटाया। सेवा पुनः आरंभ हो सकती है।</string>
     <string name="vpn_selecting_best_server">सर्वश्रेष्ठ सर्वर चुन रहा है</string>
     <string name="vpn_resolving_server">सर्वर हल कर रहा है</string>
     <string name="vpn_fallback_server_name">सर्वर</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">कनेक्ट हो रहा है…</string>
     <string name="vpn_requires_openvpn_connect">यह सर्वर (%1$s) WSS पर ऐप-में कनेक्शन समर्थित नहीं करता। आधिकारिक OpenVPN Connect ऐप इस सर्वर की प्रोफ़ाइल के साथ उपयोग करें।\n\nकड़े नेटवर्क नियंत्रण वाले देशों (जैसे रूस, ईरान) में यह फिर भी काम न करे।</string>
     <string name="vpn_server_manual_unavailable">सर्वर #%1$d ऑफ़लाइन है या ऐप कनेक्शन के लिए उपलब्ध नहीं।</string>
+    <string name="vpn_server_quota_blocked">सर्वर \"%1$s\" आपकी योजना में शामिल नहीं है।</string>
+    <string name="access_server_quota_blocked">आपकी योजना में नहीं</string>
+    <string name="access_quota_section_title">कोटा</string>
+    <string name="access_quota_current_plan">आपकी वर्तमान योजना</string>
+    <string name="access_quota_no_active">कोई सक्रिय कोटा असाइनमेंट नहीं</string>
+    <string name="access_quota_effective_from">प्रभावी: %1$s</string>
+    <string name="access_quota_all_plans_title">सभी कोटा योजनाएँ</string>
+    <string name="access_quota_plan_default">डिफ़ॉल्ट</string>
+    <string name="access_quota_plan_inactive">निष्क्रिय</string>
     <string name="vpn_msg_selecting_server">सर्वश्रेष्ठ सर्वर चुन रहा है…</string>
     <string name="vpn_msg_server_selected">सर्वर चुना गया</string>
     <string name="vpn_msg_preparing_device">डिवाइस पहचान तैयार कर रहा है…</string>

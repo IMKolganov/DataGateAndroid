@@ -108,6 +108,10 @@
     <string name="access_not_connected">Não conectado</string>
     <string name="access_connecting">Conectando…</string>
     <string name="error_request_failed">Falha na solicitação</string>
+    <string name="error_http_bad_gateway">O servidor está temporariamente indisponível (bad gateway). Tente novamente mais tarde.</string>
+    <string name="error_http_service_unavailable">O serviço está temporariamente indisponível. Tente novamente mais tarde.</string>
+    <string name="error_http_gateway_timeout">O servidor demorou demais para responder. Tente novamente mais tarde.</string>
+    <string name="error_http_proxy_html">O servidor retornou uma página de erro em vez de dados. O serviço pode estar reiniciando.</string>
     <string name="vpn_selecting_best_server">Escolhendo o melhor servidor</string>
     <string name="vpn_resolving_server">Resolvendo servidor</string>
     <string name="vpn_fallback_server_name">Servidor</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Conectando…</string>
     <string name="vpn_requires_openvpn_connect">Este servidor (%1$s) não suporta conexão no app via WSS. Use o app oficial OpenVPN Connect com um perfil deste servidor.\n\nEm países com forte controle de rede (ex.: Rússia, Irã) pode ainda falhar.</string>
     <string name="vpn_server_manual_unavailable">O servidor nº %1$d está offline ou indisponível para conexão no app.</string>
+    <string name="vpn_server_quota_blocked">O servidor \"%1$s\" não está incluído no seu plano.</string>
+    <string name="access_server_quota_blocked">Não está no seu plano</string>
+    <string name="access_quota_section_title">Cota</string>
+    <string name="access_quota_current_plan">Seu plano atual</string>
+    <string name="access_quota_no_active">Sem atribuição de cota ativa</string>
+    <string name="access_quota_effective_from">Válido desde: %1$s</string>
+    <string name="access_quota_all_plans_title">Todos os planos de cota</string>
+    <string name="access_quota_plan_default">Padrão</string>
+    <string name="access_quota_plan_inactive">Inativo</string>
     <string name="vpn_msg_selecting_server">Escolhendo o melhor servidor…</string>
     <string name="vpn_msg_server_selected">Servidor selecionado</string>
     <string name="vpn_msg_preparing_device">Preparando identidade do dispositivo…</string>

@@ -108,6 +108,10 @@
     <string name="access_not_connected">Non connecté</string>
     <string name="access_connecting">Connexion…</string>
     <string name="error_request_failed">Échec de la requête</string>
+    <string name="error_http_bad_gateway">Le serveur est temporairement indisponible (passerelle incorrecte). Réessayez plus tard.</string>
+    <string name="error_http_service_unavailable">Le service est temporairement indisponible. Réessayez plus tard.</string>
+    <string name="error_http_gateway_timeout">Le serveur a mis trop longtemps à répondre. Réessayez plus tard.</string>
+    <string name="error_http_proxy_html">Le serveur a renvoyé une page d\'erreur au lieu de données. Le service redémarre peut-être.</string>
     <string name="vpn_selecting_best_server">Choix du meilleur serveur</string>
     <string name="vpn_resolving_server">Résolution du serveur</string>
     <string name="vpn_fallback_server_name">Serveur</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Connexion…</string>
     <string name="vpn_requires_openvpn_connect">Ce serveur (%1$s) ne prend pas en charge la connexion dans l\'app via WSS. Utilisez l\'application officielle OpenVPN Connect avec un profil de ce serveur.\n\nDans les pays à forte surveillance (ex. Russie, Iran), cela peut encore échouer.</string>
     <string name="vpn_server_manual_unavailable">Le serveur n°%1$d est hors ligne ou indisponible pour la connexion dans l\'app.</string>
+    <string name="vpn_server_quota_blocked">Le serveur « %1$s » n\'est pas inclus dans votre forfait.</string>
+    <string name="access_server_quota_blocked">Pas dans votre forfait</string>
+    <string name="access_quota_section_title">Forfait</string>
+    <string name="access_quota_current_plan">Votre forfait actuel</string>
+    <string name="access_quota_no_active">Aucune attribution de forfait active</string>
+    <string name="access_quota_effective_from">En vigueur depuis : %1$s</string>
+    <string name="access_quota_all_plans_title">Tous les forfaits</string>
+    <string name="access_quota_plan_default">Par défaut</string>
+    <string name="access_quota_plan_inactive">Inactif</string>
     <string name="vpn_msg_selecting_server">Choix du meilleur serveur…</string>
     <string name="vpn_msg_server_selected">Serveur sélectionné</string>
     <string name="vpn_msg_preparing_device">Préparation de l\'identité de l\'appareil…</string>

@@ -108,6 +108,10 @@
     <string name="access_not_connected">متصل نیست</string>
     <string name="access_connecting">در حال اتصال…</string>
     <string name="error_request_failed">درخواست ناموفق بود</string>
+    <string name="error_http_bad_gateway">سرور موقتاً در دسترس نیست (bad gateway). بعداً دوباره امتحان کنید.</string>
+    <string name="error_http_service_unavailable">سرویس موقتاً در دسترس نیست. بعداً دوباره امتحان کنید.</string>
+    <string name="error_http_gateway_timeout">سرور خیلی دیر پاسخ داد. بعداً دوباره امتحان کنید.</string>
+    <string name="error_http_proxy_html">سرور به‌جای داده صفحهٔ خطا برگرداند. ممکن است سرویس در حال راه‌اندازی مجدد باشد.</string>
     <string name="vpn_selecting_best_server">انتخاب بهترین سرور</string>
     <string name="vpn_resolving_server">حل سرور</string>
     <string name="vpn_fallback_server_name">سرور</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">در حال اتصال…</string>
     <string name="vpn_requires_openvpn_connect">این سرور (%1$s) اتصال درون‌برنامه‌ای از طریق WSS را پشتیبانی نمی‌کند. از برنامه رسمی OpenVPN Connect با پروفایل این سرور استفاده کنید.\n\nدر کشورهای با کنترش شدید شبکه (مثلاً روسیه، ایران) ممکن است همچنان کار نکند.</string>
     <string name="vpn_server_manual_unavailable">سرور شماره %1$s آفلاین است یا برای اتصال در برنامه در دسترس نیست.</string>
+    <string name="vpn_server_quota_blocked">سرور «%1$s» در پلان شما نیست.</string>
+    <string name="access_server_quota_blocked">در پلان شما نیست</string>
+    <string name="access_quota_section_title">سهمیه</string>
+    <string name="access_quota_current_plan">پلان فعلی شما</string>
+    <string name="access_quota_no_active">سهمیهٔ فعال نیست</string>
+    <string name="access_quota_effective_from">موثر از: %1$s</string>
+    <string name="access_quota_all_plans_title">همهٔ پلان‌های سهمیه</string>
+    <string name="access_quota_plan_default">پیش‌فرض</string>
+    <string name="access_quota_plan_inactive">غیرفعال</string>
     <string name="vpn_msg_selecting_server">در حال انتخاب بهترین سرور…</string>
     <string name="vpn_msg_server_selected">سرور انتخاب شد</string>
     <string name="vpn_msg_preparing_device">در حال آماده‌سازی هویت دستگاه…</string>

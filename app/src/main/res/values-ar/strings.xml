@@ -108,6 +108,10 @@
     <string name="access_not_connected">غير متصل</string>
     <string name="access_connecting">جارٍ الاتصال…</string>
     <string name="error_request_failed">فشل الطلب</string>
+    <string name="error_http_bad_gateway">الخادم غير متاح مؤقتًا (باب خاطئ). أعد المحاولة لاحقًا.</string>
+    <string name="error_http_service_unavailable">الخدمة غير متاحة مؤقتًا. أعد المحاولة لاحقًا.</string>
+    <string name="error_http_gateway_timeout">استجاب الخادم ببطء شديد. أعد المحاولة لاحقًا.</string>
+    <string name="error_http_proxy_html">أعاد الخادم صفحة خطأ بدل البيانات. قد تكون الخدمة تعيد التشغيل.</string>
     <string name="vpn_selecting_best_server">اختيار أفضل خادم</string>
     <string name="vpn_resolving_server">حل الخادم</string>
     <string name="vpn_fallback_server_name">خادم</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">جارٍ الاتصال…</string>
     <string name="vpn_requires_openvpn_connect">هذا الخادم (%1$s) لا يدعم الاتصال داخل التطبيق عبر WSS. استخدم تطبيق OpenVPN Connect الرسمي بملف من هذا الخادم.\n\nفي الدول ذات الرقابة الشديدة (مثل روسيا وإيران) قد لا يعمل بشكل موثوق.</string>
     <string name="vpn_server_manual_unavailable">الخادم رقم %1$d غير متصل أو غير متاح للاتصال من التطبيق.</string>
+    <string name="vpn_server_quota_blocked">الخادم \"%1$s\" غير مضمن في خطتك.</string>
+    <string name="access_server_quota_blocked">ليس في خطتك</string>
+    <string name="access_quota_section_title">الحصة</string>
+    <string name="access_quota_current_plan">خطتك الحالية</string>
+    <string name="access_quota_no_active">لا يوجد تعيين حصة نشط</string>
+    <string name="access_quota_effective_from">ساري من: %1$s</string>
+    <string name="access_quota_all_plans_title">جميع خطط الحصص</string>
+    <string name="access_quota_plan_default">افتراضي</string>
+    <string name="access_quota_plan_inactive">غير نشط</string>
     <string name="vpn_msg_selecting_server">جارٍ اختيار أفضل خادم…</string>
     <string name="vpn_msg_server_selected">تم اختيار الخادم</string>
     <string name="vpn_msg_preparing_device">جارٍ تجهيز هوية الجهاز…</string>

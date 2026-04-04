@@ -108,6 +108,10 @@
     <string name="access_not_connected">Bağlı değil</string>
     <string name="access_connecting">Bağlanıyor…</string>
     <string name="error_request_failed">İstek başarısız</string>
+    <string name="error_http_bad_gateway">Sunucu geçici olarak kullanılamıyor (bad gateway). Daha sonra tekrar deneyin.</string>
+    <string name="error_http_service_unavailable">Hizmet geçici olarak kullanılamıyor. Daha sonra tekrar deneyin.</string>
+    <string name="error_http_gateway_timeout">Sunucu çok geç yanıt verdi. Daha sonra tekrar deneyin.</string>
+    <string name="error_http_proxy_html">Sunucu veri yerine hata sayfası döndürdü. Hizmet yeniden başlatılıyor olabilir.</string>
     <string name="vpn_selecting_best_server">En iyi sunucu seçiliyor</string>
     <string name="vpn_resolving_server">Sunucu çözülüyor</string>
     <string name="vpn_fallback_server_name">Sunucu</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Bağlanıyor…</string>
     <string name="vpn_requires_openvpn_connect">Bu sunucu (%1$s) uygulama içi WSS bağlantısını desteklemiyor. Resmi OpenVPN Connect ile bu sunucunun profilini kullanın.\n\nYoğun denetim ülkelerinde (ör. Rusya, İran) yine de çalışmayabilir.</string>
     <string name="vpn_server_manual_unavailable">Sunucu #%1$d çevrimdışı veya uygulama bağlantısı için uygun değil.</string>
+    <string name="vpn_server_quota_blocked">\"%1$s\" sunucusu planınızda yok.</string>
+    <string name="access_server_quota_blocked">Planınızda yok</string>
+    <string name="access_quota_section_title">Kota</string>
+    <string name="access_quota_current_plan">Mevcut planınız</string>
+    <string name="access_quota_no_active">Aktif kota ataması yok</string>
+    <string name="access_quota_effective_from">Geçerlilik: %1$s</string>
+    <string name="access_quota_all_plans_title">Tüm kota planları</string>
+    <string name="access_quota_plan_default">Varsayılan</string>
+    <string name="access_quota_plan_inactive">Etkin değil</string>
     <string name="vpn_msg_selecting_server">En iyi sunucu seçiliyor…</string>
     <string name="vpn_msg_server_selected">Sunucu seçildi</string>
     <string name="vpn_msg_preparing_device">Cihaz kimliği hazırlanıyor…</string>

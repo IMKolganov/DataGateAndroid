@@ -108,6 +108,10 @@
     <string name="access_not_connected">Chưa kết nối</string>
     <string name="access_connecting">Đang kết nối…</string>
     <string name="error_request_failed">Yêu cầu thất bại</string>
+    <string name="error_http_bad_gateway">Máy chủ tạm thời không khả dụng (bad gateway). Vui lòng thử lại sau.</string>
+    <string name="error_http_service_unavailable">Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.</string>
+    <string name="error_http_gateway_timeout">Máy chủ phản hồi quá lâu. Vui lòng thử lại sau.</string>
+    <string name="error_http_proxy_html">Máy chủ trả về trang lỗi thay vì dữ liệu. Dịch vụ có thể đang khởi động lại.</string>
     <string name="vpn_selecting_best_server">Đang chọn máy chủ tốt nhất</string>
     <string name="vpn_resolving_server">Đang phân giải máy chủ</string>
     <string name="vpn_fallback_server_name">Máy chủ</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Đang kết nối…</string>
     <string name="vpn_requires_openvpn_connect">Máy chủ này (%1$s) không hỗ trợ kết nối trong ứng dụng qua WSS. Dùng ứng dụng OpenVPN Connect chính thức với hồ sơ từ máy chủ này.\n\nỞ các nước kiểm soát mạng mạnh (ví dụ Nga, Iran) vẫn có thể không hoạt động.</string>
     <string name="vpn_server_manual_unavailable">Máy chủ số %1$d ngoại tuyến hoặc không kết nối được trong ứng dụng.</string>
+    <string name="vpn_server_quota_blocked">Máy chủ \"%1$s\" không nằm trong gói của bạn.</string>
+    <string name="access_server_quota_blocked">Không có trong gói</string>
+    <string name="access_quota_section_title">Hạn ngạch</string>
+    <string name="access_quota_current_plan">Gói hiện tại</string>
+    <string name="access_quota_no_active">Không có phân bổ hạn ngạch đang hoạt động</string>
+    <string name="access_quota_effective_from">Có hiệu lực từ: %1$s</string>
+    <string name="access_quota_all_plans_title">Tất cả gói hạn ngạch</string>
+    <string name="access_quota_plan_default">Mặc định</string>
+    <string name="access_quota_plan_inactive">Không hoạt động</string>
     <string name="vpn_msg_selecting_server">Đang chọn máy chủ tốt nhất…</string>
     <string name="vpn_msg_server_selected">Đã chọn máy chủ</string>
     <string name="vpn_msg_preparing_device">Đang chuẩn bị danh tính thiết bị…</string>

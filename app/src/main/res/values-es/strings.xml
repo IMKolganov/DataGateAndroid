@@ -108,6 +108,10 @@
     <string name="access_not_connected">No conectado</string>
     <string name="access_connecting">Conectando…</string>
     <string name="error_request_failed">Error en la solicitud</string>
+    <string name="error_http_bad_gateway">El servidor no está disponible temporalmente (puerta de enlace incorrecta). Inténtelo de nuevo más tarde.</string>
+    <string name="error_http_service_unavailable">El servicio no está disponible temporalmente. Inténtelo de nuevo más tarde.</string>
+    <string name="error_http_gateway_timeout">El servidor tardó demasiado en responder. Inténtelo de nuevo más tarde.</string>
+    <string name="error_http_proxy_html">El servidor devolvió una página de error en lugar de datos. Es posible que el servicio se esté reiniciando.</string>
     <string name="vpn_selecting_best_server">Seleccionando mejor servidor</string>
     <string name="vpn_resolving_server">Resolviendo servidor</string>
     <string name="vpn_fallback_server_name">Servidor</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Conectando…</string>
     <string name="vpn_requires_openvpn_connect">Este servidor (%1$s) no admite conexión en la app por WSS. Usa la app oficial OpenVPN Connect con un perfil de este servidor.\n\nEn países con control fuerte de la red (p. ej. Rusia, Irán) puede seguir sin funcionar bien.</string>
     <string name="vpn_server_manual_unavailable">El servidor n.º %1$d está fuera de línea o no está disponible para conexión en la app.</string>
+    <string name="vpn_server_quota_blocked">El servidor «%1$s» no está incluido en su plan.</string>
+    <string name="access_server_quota_blocked">No está en su plan</string>
+    <string name="access_quota_section_title">Cuota</string>
+    <string name="access_quota_current_plan">Su plan actual</string>
+    <string name="access_quota_no_active">Sin asignación de cuota activa</string>
+    <string name="access_quota_effective_from">Vigente desde: %1$s</string>
+    <string name="access_quota_all_plans_title">Todos los planes de cuota</string>
+    <string name="access_quota_plan_default">Predeterminado</string>
+    <string name="access_quota_plan_inactive">Inactivo</string>
     <string name="vpn_msg_selecting_server">Seleccionando el mejor servidor…</string>
     <string name="vpn_msg_server_selected">Servidor seleccionado</string>
     <string name="vpn_msg_preparing_device">Preparando identidad del dispositivo…</string>

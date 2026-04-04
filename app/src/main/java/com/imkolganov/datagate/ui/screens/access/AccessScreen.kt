@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.util.formatQuotaEffectiveFromForDisplay
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.ServerSelectionMode
 import com.imkolganov.datagate.vpn.VpnServerSelectionStore
@@ -359,7 +360,10 @@ private fun AccessQuotaSection(quota: AccessContract.QuotaUiState) {
                     quota.currentEffectiveFrom?.takeIf { it.isNotBlank() }?.let { from ->
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = stringResource(R.string.access_quota_effective_from, from),
+                            text = stringResource(
+                                R.string.access_quota_effective_from,
+                                formatQuotaEffectiveFromForDisplay(from)
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

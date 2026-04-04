@@ -108,6 +108,10 @@
     <string name="access_not_connected">未接続</string>
     <string name="access_connecting">接続中…</string>
     <string name="error_request_failed">リクエストに失敗しました</string>
+    <string name="error_http_bad_gateway">サーバーが一時的に利用できません（バッドゲートウェイ）。しばらくしてから再試行してください。</string>
+    <string name="error_http_service_unavailable">サービスが一時的に利用できません。しばらくしてから再試行してください。</string>
+    <string name="error_http_gateway_timeout">サーバーの応答に時間がかかりすぎました。しばらくしてから再試行してください。</string>
+    <string name="error_http_proxy_html">サーバーがデータの代わりにエラーページを返しました。サービスが再起動中の可能性があります。</string>
     <string name="vpn_selecting_best_server">最適なサーバーを選択中</string>
     <string name="vpn_resolving_server">サーバーを解決中</string>
     <string name="vpn_fallback_server_name">サーバー</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">接続中…</string>
     <string name="vpn_requires_openvpn_connect">このサーバー（%1$s）はアプリ内 WSS 接続に対応していません。公式 OpenVPN Connect でこのサーバーのプロファイルを使ってください。\n\n検閲が厳しい国（ロシア、イランなど）では依然として失敗する場合があります。</string>
     <string name="vpn_server_manual_unavailable">サーバー #%1$d はオフラインかアプリから接続できません。</string>
+    <string name="vpn_server_quota_blocked">サーバー「%1$s」はご利用プランに含まれていません。</string>
+    <string name="access_server_quota_blocked">プランに含まれていません</string>
+    <string name="access_quota_section_title">クォータ</string>
+    <string name="access_quota_current_plan">現在のプラン</string>
+    <string name="access_quota_no_active">有効なクォータ割り当てがありません</string>
+    <string name="access_quota_effective_from">適用開始：%1$s</string>
+    <string name="access_quota_all_plans_title">すべてのクォータプラン</string>
+    <string name="access_quota_plan_default">既定</string>
+    <string name="access_quota_plan_inactive">無効</string>
     <string name="vpn_msg_selecting_server">最適なサーバーを選択中…</string>
     <string name="vpn_msg_server_selected">サーバーを選択しました</string>
     <string name="vpn_msg_preparing_device">デバイス識別を準備中…</string>

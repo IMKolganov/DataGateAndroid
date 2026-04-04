@@ -108,6 +108,10 @@
     <string name="access_not_connected">Nie połączono</string>
     <string name="access_connecting">Łączenie…</string>
     <string name="error_request_failed">Żądanie nie powiodło się</string>
+    <string name="error_http_bad_gateway">Serwer jest tymczasowo niedostępny (bad gateway). Spróbuj ponownie później.</string>
+    <string name="error_http_service_unavailable">Usługa jest tymczasowo niedostępna. Spróbuj ponownie później.</string>
+    <string name="error_http_gateway_timeout">Serwer odpowiadał zbyt długo. Spróbuj ponownie później.</string>
+    <string name="error_http_proxy_html">Serwer zwrócił stronę błędu zamiast danych. Usługa może się uruchamiać ponownie.</string>
     <string name="vpn_selecting_best_server">Wybór najlepszego serwera</string>
     <string name="vpn_resolving_server">Rozwiązywanie serwera</string>
     <string name="vpn_fallback_server_name">Serwer</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Łączenie…</string>
     <string name="vpn_requires_openvpn_connect">Ten serwer (%1$s) nie obsługuje połączenia w aplikacji przez WSS. Użyj oficjalnej aplikacji OpenVPN Connect z profilem tego serwera.\n\nW krajach z silną kontrolą sieci (np. Rosja, Iran) może nadal nie działać.</string>
     <string name="vpn_server_manual_unavailable">Serwer nr %1$d jest offline lub niedostępny do połączenia w aplikacji.</string>
+    <string name="vpn_server_quota_blocked">Serwer „%1$s” nie jest w Twoim planie.</string>
+    <string name="access_server_quota_blocked">Nie w Twoim planie</string>
+    <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_current_plan">Twój obecny plan</string>
+    <string name="access_quota_no_active">Brak aktywnego przypisania limitu</string>
+    <string name="access_quota_effective_from">Obowiązuje od: %1$s</string>
+    <string name="access_quota_all_plans_title">Wszystkie plany limitów</string>
+    <string name="access_quota_plan_default">Domyślny</string>
+    <string name="access_quota_plan_inactive">Nieaktywny</string>
     <string name="vpn_msg_selecting_server">Wybór najlepszego serwera…</string>
     <string name="vpn_msg_server_selected">Serwer wybrany</string>
     <string name="vpn_msg_preparing_device">Przygotowanie tożsamości urządzenia…</string>

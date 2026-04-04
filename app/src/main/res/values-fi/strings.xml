@@ -108,6 +108,10 @@
     <string name="access_not_connected">Ei yhteyttä</string>
     <string name="access_connecting">Yhdistetään…</string>
     <string name="error_request_failed">Pyyntö epäonnistui</string>
+    <string name="error_http_bad_gateway">Palvelin ei ole tilapäisesti tavoitettavissa (bad gateway). Yritä myöhemmin uudelleen.</string>
+    <string name="error_http_service_unavailable">Palvelu ei ole tilapäisesti saatavilla. Yritä myöhemmin uudelleen.</string>
+    <string name="error_http_gateway_timeout">Palvelin vastasi liian hitaasti. Yritä myöhemmin uudelleen.</string>
+    <string name="error_http_proxy_html">Palvelin palautti virhesivun tietojen sijaan. Palvelu saattaa käynnistyä uudelleen.</string>
     <string name="vpn_selecting_best_server">Valitaan parasta palvelinta</string>
     <string name="vpn_resolving_server">Ratkaistaan palvelinta</string>
     <string name="vpn_fallback_server_name">Palvelin</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Yhdistetään…</string>
     <string name="vpn_requires_openvpn_connect">Tämä palvelin (%1$s) ei tue sovelluksen sisäistä WSS-yhteyttä. Käytä virallista OpenVPN Connect -sovellusta tämän palvelimen profiililla.\n\nValvontamaissa (esim. Venäjä, Iran) yhteys voi silti epäonnistua.</string>
     <string name="vpn_server_manual_unavailable">Palvelin nro %1$d on offline tai ei saatavilla sovelluksen kautta.</string>
+    <string name="vpn_server_quota_blocked">Palvelin \"%1$s\" ei kuulu tilaukseesi.</string>
+    <string name="access_server_quota_blocked">Ei tilauksessasi</string>
+    <string name="access_quota_section_title">Kiintiö</string>
+    <string name="access_quota_current_plan">Nykyinen tilauksesi</string>
+    <string name="access_quota_no_active">Ei aktiivista kiintiöitystä</string>
+    <string name="access_quota_effective_from">Voimassa alkaen: %1$s</string>
+    <string name="access_quota_all_plans_title">Kaikki kiintiötilaukset</string>
+    <string name="access_quota_plan_default">Oletus</string>
+    <string name="access_quota_plan_inactive">Ei aktiivinen</string>
     <string name="vpn_msg_selecting_server">Valitaan parasta palvelinta…</string>
     <string name="vpn_msg_server_selected">Palvelin valittu</string>
     <string name="vpn_msg_preparing_device">Valmistellaan laitteen tunnistetta…</string>

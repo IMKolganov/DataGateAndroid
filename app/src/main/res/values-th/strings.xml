@@ -108,6 +108,10 @@
     <string name="access_not_connected">ไม่ได้เชื่อมต่อ</string>
     <string name="access_connecting">กำลังเชื่อมต่อ…</string>
     <string name="error_request_failed">คำขอล้มเหลว</string>
+    <string name="error_http_bad_gateway">เซิร์ฟเวอร์ใช้งานชั่วคราวไม่ได้ (bad gateway) ลองอีกครั้งภายหลัง</string>
+    <string name="error_http_service_unavailable">บริการใช้งานชั่วคราวไม่ได้ ลองอีกครั้งภายหลัง</string>
+    <string name="error_http_gateway_timeout">เซิร์ฟเวอร์ตอบกลับช้าเกินไป ลองอีกครั้งภายหลัง</string>
+    <string name="error_http_proxy_html">เซิร์ฟเวอร์ส่งหน้าข้อผิดพลาดแทนข้อมูล บริการอาจกำลังรีสตาร์ท</string>
     <string name="vpn_selecting_best_server">กำลังเลือกเซิร์ฟเวอร์ที่ดีที่สุด</string>
     <string name="vpn_resolving_server">กำลังแก้เซิร์ฟเวอร์</string>
     <string name="vpn_fallback_server_name">เซิร์ฟเวอร์</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">กำลังเชื่อมต่อ…</string>
     <string name="vpn_requires_openvpn_connect">เซิร์ฟเวอร์นี้ (%1$s) ไม่รองรับการเชื่อมต่อในแอปผ่าน WSS ใช้แอป OpenVPN Connect อย่างเป็นทางการกับโปรไฟล์จากเซิร์ฟเวอร์นี้\n\nในประเทศที่ควบคุมเครือข่ายเข้มงวด (เช่น รัสเซีย อิหร่าน) อาจยังใช้ไม่ได้</string>
     <string name="vpn_server_manual_unavailable">เซิร์ฟเวอร์ #%1$d ออฟไลน์หรือเชื่อมต่อในแอปไม่ได้</string>
+    <string name="vpn_server_quota_blocked">เซิร์ฟเวอร์ \"%1$s\" ไม่อยู่ในแพ็กเกจของคุณ</string>
+    <string name="access_server_quota_blocked">ไม่อยู่ในแพ็กเกจ</string>
+    <string name="access_quota_section_title">โควตา</string>
+    <string name="access_quota_current_plan">แพ็กเกจปัจจุบัน</string>
+    <string name="access_quota_no_active">ไม่มีการกำหนดโควตาที่ใช้งาน</string>
+    <string name="access_quota_effective_from">มีผลตั้งแต่: %1$s</string>
+    <string name="access_quota_all_plans_title">แพ็กเกจโควตาทั้งหมด</string>
+    <string name="access_quota_plan_default">ค่าเริ่มต้น</string>
+    <string name="access_quota_plan_inactive">ไม่ใช้งาน</string>
     <string name="vpn_msg_selecting_server">กำลังเลือกเซิร์ฟเวอร์ที่ดีที่สุด…</string>
     <string name="vpn_msg_server_selected">เลือกเซิร์ฟเวอร์แล้ว</string>
     <string name="vpn_msg_preparing_device">กำลังเตรียมตัวตนอุปกรณ์…</string>

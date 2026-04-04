@@ -108,6 +108,10 @@
     <string name="access_not_connected">연결 안 됨</string>
     <string name="access_connecting">연결 중…</string>
     <string name="error_request_failed">요청 실패</string>
+    <string name="error_http_bad_gateway">서버를 일시적으로 사용할 수 없습니다(배드 게이트웨이). 나중에 다시 시도하세요.</string>
+    <string name="error_http_service_unavailable">서비스를 일시적으로 사용할 수 없습니다. 나중에 다시 시도하세요.</string>
+    <string name="error_http_gateway_timeout">서버 응답이 너무 오래 걸렸습니다. 나중에 다시 시도하세요.</string>
+    <string name="error_http_proxy_html">서버가 데이터 대신 오류 페이지를 반환했습니다. 서비스가 다시 시작 중일 수 있습니다.</string>
     <string name="vpn_selecting_best_server">최적 서버 선택 중</string>
     <string name="vpn_resolving_server">서버 확인 중</string>
     <string name="vpn_fallback_server_name">서버</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">연결 중…</string>
     <string name="vpn_requires_openvpn_connect">이 서버(%1$s)는 앱 내 WSS 연결을 지원하지 않습니다. 공식 OpenVPN Connect 앱으로 이 서버의 프로필을 사용하세요.\n\n강한 통제 국가(러시아, 이란 등)에서는 여전히 실패할 수 있습니다.</string>
     <string name="vpn_server_manual_unavailable">서버 #%1$d는 오프라인이거나 앱에서 연결할 수 없습니다.</string>
+    <string name="vpn_server_quota_blocked">서버 \"%1$s\"은(는) 요금제에 포함되어 있지 않습니다.</string>
+    <string name="access_server_quota_blocked">요금제에 없음</string>
+    <string name="access_quota_section_title">쿼터</string>
+    <string name="access_quota_current_plan">현재 요금제</string>
+    <string name="access_quota_no_active">활성 쿼터 할당 없음</string>
+    <string name="access_quota_effective_from">적용 시작: %1$s</string>
+    <string name="access_quota_all_plans_title">모든 쿼터 요금제</string>
+    <string name="access_quota_plan_default">기본값</string>
+    <string name="access_quota_plan_inactive">비활성</string>
     <string name="vpn_msg_selecting_server">최적 서버 선택 중…</string>
     <string name="vpn_msg_server_selected">서버 선택됨</string>
     <string name="vpn_msg_preparing_device">기기 식별 준비 중…</string>

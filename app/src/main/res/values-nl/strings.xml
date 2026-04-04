@@ -108,6 +108,10 @@
     <string name="access_not_connected">Niet verbonden</string>
     <string name="access_connecting">Verbinden…</string>
     <string name="error_request_failed">Verzoek mislukt</string>
+    <string name="error_http_bad_gateway">De server is tijdelijk niet bereikbaar (bad gateway). Probeer het later opnieuw.</string>
+    <string name="error_http_service_unavailable">De service is tijdelijk niet beschikbaar. Probeer het later opnieuw.</string>
+    <string name="error_http_gateway_timeout">De server deed er te lang over om te antwoorden. Probeer het later opnieuw.</string>
+    <string name="error_http_proxy_html">De server gaf een foutpagina in plaats van gegevens. De service wordt mogelijk herstart.</string>
     <string name="vpn_selecting_best_server">Beste server kiezen</string>
     <string name="vpn_resolving_server">Server oplossen</string>
     <string name="vpn_fallback_server_name">Server</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Verbinden…</string>
     <string name="vpn_requires_openvpn_connect">Deze server (%1$s) ondersteunt geen in-app verbinding via WSS. Gebruik de officiële OpenVPN Connect-app met een profiel van deze server.\n\nIn landen met zware netwerkcontrole (bijv. Rusland, Iran) kan het nog steeds mislukken.</string>
     <string name="vpn_server_manual_unavailable">Server nr. %1$d is offline of niet beschikbaar voor in-app verbinding.</string>
+    <string name="vpn_server_quota_blocked">Server \"%1$s\" zit niet in uw abonnement.</string>
+    <string name="access_server_quota_blocked">Niet in uw abonnement</string>
+    <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_current_plan">Uw huidige abonnement</string>
+    <string name="access_quota_no_active">Geen actieve quotatoewijzing</string>
+    <string name="access_quota_effective_from">Geldig vanaf: %1$s</string>
+    <string name="access_quota_all_plans_title">Alle quota-abonnementen</string>
+    <string name="access_quota_plan_default">Standaard</string>
+    <string name="access_quota_plan_inactive">Inactief</string>
     <string name="vpn_msg_selecting_server">Beste server kiezen…</string>
     <string name="vpn_msg_server_selected">Server geselecteerd</string>
     <string name="vpn_msg_preparing_device">Apparaatidentiteit voorbereiden…</string>

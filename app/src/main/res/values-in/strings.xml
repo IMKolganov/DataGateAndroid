@@ -108,6 +108,10 @@
     <string name="access_not_connected">Tidak terhubung</string>
     <string name="access_connecting">Menghubungkan…</string>
     <string name="error_request_failed">Permintaan gagal</string>
+    <string name="error_http_bad_gateway">Server untuk sementara tidak tersedia (bad gateway). Coba lagi nanti.</string>
+    <string name="error_http_service_unavailable">Layanan untuk sementara tidak tersedia. Coba lagi nanti.</string>
+    <string name="error_http_gateway_timeout">Server merespons terlalu lama. Coba lagi nanti.</string>
+    <string name="error_http_proxy_html">Server mengembalikan halaman error, bukan data. Layanan mungkin sedang mulai ulang.</string>
     <string name="vpn_selecting_best_server">Memilih server terbaik</string>
     <string name="vpn_resolving_server">Mengurai server</string>
     <string name="vpn_fallback_server_name">Server</string>
@@ -127,6 +131,15 @@
     <string name="vpn_connecting_generic">Menghubungkan…</string>
     <string name="vpn_requires_openvpn_connect">Server ini (%1$s) tidak mendukung koneksi dalam aplikasi lewat WSS. Gunakan aplikasi resmi OpenVPN Connect dengan profil dari server ini.\n\nDi negara dengan kontrol jaringan ketat (mis. Rusia, Iran) mungkin tetap gagal.</string>
     <string name="vpn_server_manual_unavailable">Server #%1$d offline atau tidak tersedia untuk koneksi dalam aplikasi.</string>
+    <string name="vpn_server_quota_blocked">Server \"%1$s\" tidak termasuk paket Anda.</string>
+    <string name="access_server_quota_blocked">Tidak dalam paket Anda</string>
+    <string name="access_quota_section_title">Kuota</string>
+    <string name="access_quota_current_plan">Paket Anda saat ini</string>
+    <string name="access_quota_no_active">Tidak ada penugasan kuota aktif</string>
+    <string name="access_quota_effective_from">Berlaku sejak: %1$s</string>
+    <string name="access_quota_all_plans_title">Semua paket kuota</string>
+    <string name="access_quota_plan_default">Default</string>
+    <string name="access_quota_plan_inactive">Tidak aktif</string>
     <string name="vpn_msg_selecting_server">Memilih server terbaik…</string>
     <string name="vpn_msg_server_selected">Server dipilih</string>
     <string name="vpn_msg_preparing_device">Menyiapkan identitas perangkat…</string>
