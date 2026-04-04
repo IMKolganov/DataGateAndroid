@@ -93,6 +93,8 @@
     <string name="settings_link_telegram">Канал у Telegram</string>
     <string name="settings_updates_github_title">Перевіряти оновлення на GitHub</string>
     <string name="settings_updates_github_subtitle">Періодично запитувати останній реліз і сповіщати вас.</string>
+    <string name="settings_push_updates_title">Сповіщати про нову версію</string>
+    <string name="settings_push_updates_subtitle">Локальне сповіщення після перевірки GitHub (без хмарного push). На Android 13+ потрібен дозвіл на сповіщення.</string>
     <string name="settings_auto_download_title">Пропонувати завантаження APK</string>
     <string name="settings_auto_download_subtitle">Коли є оновлення, пам\'ятати, що ви хочете варіанти завантаження й установки надалі.</string>
 
@@ -105,6 +107,16 @@
     <string name="update_dialog_download">Завантажити й установити</string>
     <string name="update_downloading">Завантаження…</string>
     <string name="update_download_failed">Не вдалося завантажити</string>
+    <string name="update_return_after_allow_install">Дозвольте встановлення з цього застосунку в налаштуваннях і поверніться сюди — установник відкриється автоматично.</string>
+    <string name="update_install_failed">Не вдалося відкрити установник. Спробуйте ще раз або встановіть зі сторінки релізу.</string>
+    <string name="update_notification_channel_name">Оновлення застосунку</string>
+    <string name="update_notification_channel_description">Сповіщення про новішу збірку на GitHub</string>
+    <string name="update_notification_title">Доступна нова версія</string>
+    <string name="update_notification_text">Доступне оновлення %1$s. Торкніться, щоб встановити.</string>
+    <string name="home_update_banner_title">Доступне оновлення</string>
+    <string name="home_update_banner_body">На GitHub є новіша версія (%1$s). Встановити можна будь-коли.</string>
+    <string name="home_update_banner_action">Встановити</string>
+    <string name="home_update_banner_dismiss">Приховати</string>
 
     <string name="account_title">Обліковий запис і вихід</string>
     <string name="account_subtitle">Ви увійшли під профілем нижче. Вихід видалить локальні токени на цьому пристрої.</string>

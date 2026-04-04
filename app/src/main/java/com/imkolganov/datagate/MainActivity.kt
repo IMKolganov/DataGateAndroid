@@ -1,6 +1,7 @@
 package com.imkolganov.datagate
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -34,6 +35,7 @@ import com.imkolganov.datagate.ui.theme.ThemePreferenceStore
 import com.imkolganov.datagate.vpn.VpnConnectInteractor
 import com.imkolganov.datagate.vpn.VpnConnectSource
 import com.imkolganov.datagate.vpn.VpnController
+import com.imkolganov.datagate.update.UpdateNotificationHelper
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -59,6 +61,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var accessViewModel: AccessViewModel
     private lateinit var statsViewModel: StatsViewModel
+
+    private var pendingOpenUpdateFromNotification by mutableStateOf(false)
+
     private val notificationsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             Log.d(TAG, "POST_NOTIFICATIONS granted=$granted")
@@ -90,6 +95,10 @@ class MainActivity : AppCompatActivity() {
         )
 
         requestNotificationsPermissionIfNeeded()
+
+        if (intent.getBooleanExtra(UpdateNotificationHelper.EXTRA_OPEN_UPDATE_FROM_NOTIF, false)) {
+            pendingOpenUpdateFromNotification = true
+        }
 
         vpnController = VpnController(
             activity = this,
@@ -179,9 +188,21 @@ class MainActivity : AppCompatActivity() {
                         appLocale = next
                         LanguagePreferenceStore.setLocale(applicationContext, next)
                     },
-                    http = graph.httpPlain
+                    http = graph.httpPlain,
+                    openUpdateFromNotificationPending = pendingOpenUpdateFromNotification,
+                    onConsumedOpenUpdateFromNotification = {
+                        pendingOpenUpdateFromNotification = false
+                    },
                 )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra(UpdateNotificationHelper.EXTRA_OPEN_UPDATE_FROM_NOTIF, false)) {
+            pendingOpenUpdateFromNotification = true
         }
     }
 

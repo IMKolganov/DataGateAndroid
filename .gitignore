@@ -61,6 +61,7 @@ out/
 captures/
 .externalNativeBuild/
 .cxx/
+.kotlin/
 
 ####################################
 # Lint

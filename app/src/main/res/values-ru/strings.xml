@@ -93,6 +93,8 @@
     <string name="settings_link_telegram">Канал в Telegram</string>
     <string name="settings_updates_github_title">Проверять обновления на GitHub</string>
     <string name="settings_updates_github_subtitle">Периодически запрашивать последний релиз и уведомлять вас.</string>
+    <string name="settings_push_updates_title">Уведомлять о новой версии</string>
+    <string name="settings_push_updates_subtitle">Локальное уведомление после проверки GitHub (без облачного push). На Android 13+ нужно разрешение на уведомления.</string>
     <string name="settings_auto_download_title">Предлагать загрузку APK</string>
     <string name="settings_auto_download_subtitle">При появлении обновления помнить, что вы хотите варианты загрузки и установки в будущем.</string>
 
@@ -105,6 +107,16 @@
     <string name="update_dialog_download">Скачать и установить</string>
     <string name="update_downloading">Загрузка…</string>
     <string name="update_download_failed">Не удалось скачать</string>
+    <string name="update_return_after_allow_install">Разрешите установку из этого приложения в настройках и вернитесь сюда — установщик откроется сам.</string>
+    <string name="update_install_failed">Не удалось открыть установщик. Попробуйте снова или установите со страницы релиза.</string>
+    <string name="update_notification_channel_name">Обновления приложения</string>
+    <string name="update_notification_channel_description">Уведомления о более новой сборке на GitHub</string>
+    <string name="update_notification_title">Доступна новая версия</string>
+    <string name="update_notification_text">Доступно обновление %1$s. Нажмите, чтобы установить.</string>
+    <string name="home_update_banner_title">Доступно обновление</string>
+    <string name="home_update_banner_body">На GitHub есть более новая версия (%1$s). Установить можно в любое время.</string>
+    <string name="home_update_banner_action">Установить</string>
+    <string name="home_update_banner_dismiss">Скрыть</string>
 
     <string name="account_title">Аккаунт и выход</string>
     <string name="account_subtitle">Вы вошли под профилем ниже. Выход удалит локальные токены на этом устройстве.</string>

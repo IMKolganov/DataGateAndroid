@@ -10,12 +10,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,6 +49,38 @@ fun UpdateCheckHost(
     var autoDownloadNext by remember { mutableStateOf(false) }
     var downloadError by remember { mutableStateOf<String?>(null) }
     var downloading by remember { mutableStateOf(false) }
+    var showInstallPermissionHint by remember { mutableStateOf(false) }
+
+    val dismissUpdateDialog = rememberUpdatedState {
+        showInstallPermissionHint = false
+        prompt = null
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, activity) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                ApkUpdateInstaller.tryContinuePendingInstall(activity) {
+                    dismissUpdateDialog.value()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(prompt) {
+        if (prompt == null) showInstallPermissionHint = false
+    }
+
+    val manualDialogRequest by UpdatePromptController.showUpdateDialog.collectAsState()
+
+    LaunchedEffect(manualDialogRequest) {
+        val r = manualDialogRequest ?: return@LaunchedEffect
+        autoDownloadNext = UpdatePreferences.isAutoDownloadEnabled(appContext)
+        prompt = r
+        UpdatePromptController.consumeUpdateDialogRequest()
+    }
 
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
@@ -58,10 +96,15 @@ fun UpdateCheckHost(
             val result = fetcher.fetchLatest(repo)
             UpdatePreferences.markCheckDone(appContext)
             val r = result.getOrNull() ?: return@withContext null
+            val current = BuildConfig.VERSION_NAME
+            if (!SemanticVersionCompare.isRemoteNewer(r.tagName, current)) {
+                UpdatePreferences.clearCachedNewerRelease(appContext)
+                return@withContext null
+            }
             val dismissed = UpdatePreferences.getDismissedTag(appContext)
             if (r.tagName == dismissed) return@withContext null
-            val current = BuildConfig.VERSION_NAME
-            if (!SemanticVersionCompare.isRemoteNewer(r.tagName, current)) return@withContext null
+            UpdatePreferences.saveCachedNewerRelease(appContext, r)
+            UpdateNotificationHelper.showNewVersionAvailableIfEligible(appContext, r)
             r
         }
         if (release != null) {
@@ -92,6 +135,14 @@ fun UpdateCheckHost(
                             stringResource(R.string.update_no_apk_attached),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (showInstallPermissionHint) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.update_return_after_allow_install),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -140,8 +191,21 @@ fun UpdateCheckHost(
                                 downloading = false
                                 file.fold(
                                     onSuccess = { apk ->
-                                        ApkUpdateInstaller.startInstall(activity, apk)
-                                        prompt = null
+                                        downloadError = null
+                                        when (val result = ApkUpdateInstaller.startInstall(activity, apk)) {
+                                            ApkUpdateInstaller.InstallUiResult.InstallerStarted -> {
+                                                showInstallPermissionHint = false
+                                                prompt = null
+                                            }
+                                            ApkUpdateInstaller.InstallUiResult.OpenedInstallPermissionSettings -> {
+                                                showInstallPermissionHint = true
+                                            }
+                                            ApkUpdateInstaller.InstallUiResult.Failed -> {
+                                                showInstallPermissionHint = false
+                                                downloadError =
+                                                    appContext.getString(R.string.update_install_failed)
+                                            }
+                                        }
                                     },
                                     onFailure = { e ->
                                         downloadError =
