@@ -20,6 +20,12 @@ object ApkUpdateInstaller {
 
     private const val TAG = "ApkUpdateInstaller"
 
+    /**
+     * Set when the user must enable "Install unknown apps" first; cleared after install UI starts or file missing.
+     */
+    @Volatile
+    private var pendingApkFile: File? = null
+
     suspend fun downloadApkToCache(
         activity: Activity,
         http: OkHttpClient,
@@ -51,25 +57,73 @@ object ApkUpdateInstaller {
         }
     }
 
+    sealed class InstallUiResult {
+        /** System package installer activity was started. */
+        data object InstallerStarted : InstallUiResult()
+
+        /** Opened app settings so the user can allow installs; [tryContinuePendingInstall] will open the installer when they return. */
+        data object OpenedInstallPermissionSettings : InstallUiResult()
+
+        data object Failed : InstallUiResult()
+    }
+
     /**
-     * Opens package installer. On Android O+, may need [Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES].
+     * Opens package installer. On Android O+, may open [Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES] first;
+     * then [tryContinuePendingInstall] must run (e.g. from [Activity.onResume]) to launch the installer.
      */
-    fun startInstall(activity: Activity, apkFile: File): Boolean {
+    fun startInstall(activity: Activity, apkFile: File): InstallUiResult {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val pm = activity.packageManager
             if (!pm.canRequestPackageInstalls()) {
-                try {
+                pendingApkFile = apkFile
+                return try {
                     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
                         data = Uri.parse("package:${activity.packageName}")
                     }
                     activity.startActivity(intent)
+                    InstallUiResult.OpenedInstallPermissionSettings
                 } catch (e: Exception) {
+                    pendingApkFile = null
                     Log.e(TAG, "Cannot open unknown sources settings", e)
+                    InstallUiResult.Failed
                 }
-                return false
             }
         }
 
+        val result = launchPackageInstallerActivity(activity, apkFile)
+        if (result is InstallUiResult.InstallerStarted) pendingApkFile = null
+        return result
+    }
+
+    /**
+     * Call when the activity becomes visible again after the user may have allowed installs from this app.
+     * [onInstallerStarted] runs on the main thread when the system install UI is shown.
+     */
+    fun tryContinuePendingInstall(
+        activity: Activity,
+        onInstallerStarted: () -> Unit = {},
+    ) {
+        val apk = pendingApkFile ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            !activity.packageManager.canRequestPackageInstalls()
+        ) {
+            return
+        }
+        if (!apk.exists() || apk.length() == 0L) {
+            pendingApkFile = null
+            return
+        }
+        when (val r = launchPackageInstallerActivity(activity, apk)) {
+            is InstallUiResult.InstallerStarted -> {
+                pendingApkFile = null
+                onInstallerStarted()
+            }
+            is InstallUiResult.Failed -> pendingApkFile = null
+            is InstallUiResult.OpenedInstallPermissionSettings -> { /* should not happen from here */ }
+        }
+    }
+
+    private fun launchPackageInstallerActivity(activity: Activity, apkFile: File): InstallUiResult {
         val uri = FileProvider.getUriForFile(
             activity,
             "${activity.packageName}.fileprovider",
@@ -78,14 +132,13 @@ object ApkUpdateInstaller {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         return try {
             activity.startActivity(intent)
-            true
+            InstallUiResult.InstallerStarted
         } catch (e: Exception) {
             Log.e(TAG, "Cannot start installer", e)
-            false
+            InstallUiResult.Failed
         }
     }
 

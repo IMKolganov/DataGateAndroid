@@ -2,6 +2,7 @@ package com.imkolganov.datagate.ui.screens.main
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.collectAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
@@ -13,15 +14,19 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.update.UpdatePreferences
+import com.imkolganov.datagate.update.UpdatePromptController
+import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.stats.FakeStatsApiClient
@@ -57,6 +62,13 @@ fun MainScreen(
     appLocale: AppLocale,
     onAppLocaleChange: (AppLocale) -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val bannerFlow = remember(context) {
+        UpdatePreferences.homeBannerReleaseFlow(context, BuildConfig.VERSION_NAME)
+    }
+    val homeUpdateBanner by bannerFlow.collectAsState(initial = null)
+
     var selectedTab by remember { mutableStateOf(BottomTab.Home) }
     val accessState by accessViewModel.state.collectAsState()
 
@@ -102,7 +114,16 @@ fun MainScreen(
                 BottomTab.Home -> VpnStatusScreen(
                     state = vpnState,
                     onConnectClick = onConnectFromHome,
-                    onDisconnectClick = onRequestDisconnect
+                    onDisconnectClick = onRequestDisconnect,
+                    homeUpdateBanner = homeUpdateBanner,
+                    onHomeUpdateBannerAction = { release ->
+                        UpdatePromptController.requestUpdateDialog(release)
+                    },
+                    onHomeUpdateBannerDismiss = { release ->
+                        scope.launch {
+                            UpdatePreferences.dismissRelease(context, release.tagName)
+                        }
+                    },
                 )
                 BottomTab.Access -> AccessScreen(
                     state = accessState,

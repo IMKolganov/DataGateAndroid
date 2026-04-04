@@ -30,12 +30,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.outlined.ContactSupport
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -56,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.update.GitHubLatestRelease
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
@@ -63,7 +66,10 @@ import com.imkolganov.datagate.vpn.VpnStatusUiState
 fun VpnStatusScreen(
     state: VpnStatusUiState,
     onConnectClick: () -> Unit,
-    onDisconnectClick: () -> Unit
+    onDisconnectClick: () -> Unit,
+    homeUpdateBanner: GitHubLatestRelease? = null,
+    onHomeUpdateBannerAction: (GitHubLatestRelease) -> Unit = {},
+    onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
 ) {
     val context = LocalContext.current
     val isConnected = state.isVpnConnected
@@ -149,6 +155,15 @@ fun VpnStatusScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
+
+            homeUpdateBanner?.let { rel ->
+                HomeUpdateAvailableBanner(
+                    release = rel,
+                    onUpdate = { onHomeUpdateBannerAction(rel) },
+                    onDismiss = { onHomeUpdateBannerDismiss(rel) },
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             Text(
                 text = stringResource(R.string.vpn_home_title),
@@ -326,6 +341,49 @@ fun VpnStatusScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun HomeUpdateAvailableBanner(
+    release: GitHubLatestRelease,
+    onUpdate: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.home_update_banner_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.home_update_banner_dismiss),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.home_update_banner_body, release.tagName),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
+            )
+            TextButton(onClick = onUpdate, modifier = Modifier.align(Alignment.End)) {
+                Text(stringResource(R.string.home_update_banner_action))
+            }
+        }
     }
 }
 

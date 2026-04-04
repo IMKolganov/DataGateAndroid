@@ -80,6 +80,7 @@ fun SettingsScreen(
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
     var githubUpdatesEnabled by remember { mutableStateOf(true) }
+    var pushNotificationsForUpdates by remember { mutableStateOf(true) }
     var autoDownloadSuggest by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -99,6 +100,9 @@ fun SettingsScreen(
         val appCtx = context.applicationContext
         githubUpdatesEnabled = withContext(Dispatchers.IO) {
             UpdatePreferences.isCheckEnabled(appCtx)
+        }
+        pushNotificationsForUpdates = withContext(Dispatchers.IO) {
+            UpdatePreferences.isPushForUpdatesEnabled(appCtx)
         }
         autoDownloadSuggest = withContext(Dispatchers.IO) {
             UpdatePreferences.isAutoDownloadEnabled(appCtx)
@@ -252,6 +256,32 @@ fun SettingsScreen(
                             githubUpdatesEnabled = v
                             scope.launch {
                                 UpdatePreferences.setCheckEnabled(context.applicationContext, v)
+                            }
+                        }
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.settings_push_updates_title),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            stringResource(R.string.settings_push_updates_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = pushNotificationsForUpdates,
+                        onCheckedChange = { v ->
+                            pushNotificationsForUpdates = v
+                            scope.launch {
+                                UpdatePreferences.setPushForUpdatesEnabled(context.applicationContext, v)
                             }
                         }
                     )
