@@ -207,11 +207,18 @@ class VpnController(
     }
 
     private fun startServiceWithConfig(configText: String, wssLink: String, linkProtocol: VpnLinkProtocol) {
+        val serverDisplayName =
+            getState().selectedServerName?.takeIf { it.isNotBlank() }
+                ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
+
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_CONNECT
             putExtra(OpenVpn3Service.EXTRA_OVPN_CONFIG, configText)
             putExtra(OpenVpn3Service.EXTRA_WSS_URL, wssLink)
             putExtra(OpenVpn3Service.EXTRA_LINK_PROTOCOL, linkProtocol.intentValue())
+            if (serverDisplayName != null) {
+                putExtra(OpenVpn3Service.EXTRA_SERVER_DISPLAY_NAME, serverDisplayName)
+            }
         }
 
         startServiceCompat(intent)

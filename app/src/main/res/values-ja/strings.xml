@@ -13,7 +13,7 @@
     <string name="vpn_status_connecting">接続中…</string>
     <string name="vpn_status_disconnected">切断済み</string>
     <string name="vpn_waiting_events">VPN イベントを待機中…</string>
-    <string name="vpn_home_title">DataGate OpenVPN 3</string>
+    <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">電源</string>
     <string name="action_disconnect">切断</string>
     <string name="action_cancel">キャンセル</string>

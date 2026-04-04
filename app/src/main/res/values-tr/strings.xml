@@ -13,7 +13,7 @@
     <string name="vpn_status_connecting">Bağlanıyor…</string>
     <string name="vpn_status_disconnected">Bağlı değil</string>
     <string name="vpn_waiting_events">VPN olayları bekleniyor…</string>
-    <string name="vpn_home_title">DataGate OpenVPN 3</string>
+    <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">Güç</string>
     <string name="action_disconnect">Bağlantıyı kes</string>
     <string name="action_cancel">İptal</string>

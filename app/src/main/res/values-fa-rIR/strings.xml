@@ -13,7 +13,7 @@
     <string name="vpn_status_connecting">در حال اتصال…</string>
     <string name="vpn_status_disconnected">قطع شده</string>
     <string name="vpn_waiting_events">در انتظار رویدادهای VPN…</string>
-    <string name="vpn_home_title">DataGate OpenVPN 3</string>
+    <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">روشن/خاموش</string>
     <string name="action_disconnect">قطع اتصال</string>
     <string name="action_cancel">لغو</string>

@@ -13,7 +13,7 @@
     <string name="vpn_status_connecting">Verbinden…</string>
     <string name="vpn_status_disconnected">Verbroken</string>
     <string name="vpn_waiting_events">Wachten op VPN-gebeurtenissen…</string>
-    <string name="vpn_home_title">DataGate OpenVPN 3</string>
+    <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">Aan/uit</string>
     <string name="action_disconnect">Verbreken</string>
     <string name="action_cancel">Annuleren</string>

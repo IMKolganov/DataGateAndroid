@@ -13,7 +13,7 @@
     <string name="vpn_status_connecting">कनेक्ट हो रहा है…</string>
     <string name="vpn_status_disconnected">डिस्कनेक्ट</string>
     <string name="vpn_waiting_events">VPN इवेंट का इंतज़ार…</string>
-    <string name="vpn_home_title">DataGate OpenVPN 3</string>
+    <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">पावर</string>
     <string name="action_disconnect">डिस्कनेक्ट</string>
     <string name="action_cancel">रद्द करें</string>
