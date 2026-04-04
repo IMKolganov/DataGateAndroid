@@ -2,6 +2,7 @@
 package com.imkolganov.datagate.auth.http
 
 import com.imkolganov.datagate.configs.ApiConfig
+import com.imkolganov.datagate.json.formatHttpErrorDetail
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
 import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
 import com.imkolganov.datagate.model.auth.RefreshRequestDto
@@ -40,7 +41,7 @@ class OkHttpBackendAuthApi(
         resp.use { r ->
             val raw = r.body.string()
             if (r.code !in 200..299) {
-                throw IOException("google-login failed: ${r.code} ${r.message}. Body=$raw")
+                throw IOException(formatHttpErrorDetail("google-login failed", r.code, raw.orEmpty()))
             }
 
             val obj = JSONObject(raw)
@@ -78,7 +79,7 @@ class OkHttpBackendAuthApi(
         resp.use { r ->
             val raw = r.body.string()
             if (r.code !in 200..299) {
-                throw IOException("google-login failed: ${r.code} ${r.message}. Body=$raw")
+                throw IOException(formatHttpErrorDetail("refresh failed", r.code, raw.orEmpty()))
             }
 
             val obj = JSONObject(raw)

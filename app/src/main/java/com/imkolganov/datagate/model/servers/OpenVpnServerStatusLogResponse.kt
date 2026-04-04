@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.model.servers
 
+/** Matches backend status log DTO nested under with-status responses. */
 data class OpenVpnServerStatusLogResponse(
     val vpnServerId: Int?,
     val sessionId: String?,

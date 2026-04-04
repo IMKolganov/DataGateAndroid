@@ -53,7 +53,27 @@ fun AccessScreenPreview() {
                         virtualIpText = "10.8.0.2"
                     )
                 ),
-                selectedServerId = 1
+                selectedServerId = 1,
+                quota = AccessContract.QuotaUiState(
+                    currentPlanName = "Standard",
+                    currentEffectiveFrom = "2025-01-01T00:00:00Z",
+                    allPlans = listOf(
+                        AccessContract.QuotaPlanRow(
+                            id = 1,
+                            name = "Standard",
+                            description = "Daily + monthly limits",
+                            isActive = true,
+                            isDefault = true
+                        ),
+                        AccessContract.QuotaPlanRow(
+                            id = 2,
+                            name = "Lite",
+                            description = null,
+                            isActive = true,
+                            isDefault = false
+                        )
+                    )
+                )
             ),
             vpnState = VpnStatusUiState(isVpnConnected = false),
             onEvent = {},

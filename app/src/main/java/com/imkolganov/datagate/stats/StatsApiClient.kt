@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.stats
 
 import com.imkolganov.datagate.configs.ApiConfig
+import com.imkolganov.datagate.json.formatHttpErrorDetail
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.overview.OverviewMeta
 import com.imkolganov.datagate.model.overview.OverviewRow
@@ -44,7 +45,7 @@ open class StatsApiClient(
         return http.executeSuspending(request).use { resp ->
             val body = resp.body.string().orEmpty()
             if (resp.code !in 200..299) {
-                throw IOException("Request failed: ${resp.code} ${resp.message}. Body=$body")
+                throw IOException(formatHttpErrorDetail("Request failed", resp.code, body))
             }
             parseOverviewSeriesResponse(body)
         }

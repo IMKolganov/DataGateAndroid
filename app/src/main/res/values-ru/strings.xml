@@ -143,6 +143,10 @@
     <string name="access_connecting">Подключение…</string>
 
     <string name="error_request_failed">Запрос не выполнен</string>
+    <string name="error_http_bad_gateway">Сервер временно недоступен (ошибка шлюза). Попробуйте позже.</string>
+    <string name="error_http_service_unavailable">Сервис временно недоступен. Попробуйте позже.</string>
+    <string name="error_http_gateway_timeout">Сервер слишком долго не отвечал. Попробуйте позже.</string>
+    <string name="error_http_proxy_html">Вместо данных пришла страница ошибки. Возможно, сервис перезапускается.</string>
 
     <string name="vpn_selecting_best_server">Выбор лучшего сервера</string>
     <string name="vpn_resolving_server">Поиск сервера</string>
@@ -163,6 +167,15 @@
     <string name="vpn_connecting_generic">Подключение…</string>
     <string name="vpn_requires_openvpn_connect">Сервер «%1$s» не поддерживает подключение в этом приложении (нужен WSS). Подключайтесь через официальное приложение OpenVPN Connect с профилем этого сервера.\n\nВ странах с жёстким государственным контролем сети (например Россия, Иран) соединение всё равно может не работать.</string>
     <string name="vpn_server_manual_unavailable">Сервер №%1$d недоступен или не подходит для подключения в приложении.</string>
+    <string name="vpn_server_quota_blocked">Сервер «%1$s» не входит в ваш тарифный план.</string>
+    <string name="access_server_quota_blocked">Нет в вашем плане</string>
+    <string name="access_quota_section_title">Квота</string>
+    <string name="access_quota_current_plan">Ваш текущий план</string>
+    <string name="access_quota_no_active">Нет активного назначения квоты</string>
+    <string name="access_quota_effective_from">Действует с: %1$s</string>
+    <string name="access_quota_all_plans_title">Все тарифные планы</string>
+    <string name="access_quota_plan_default">По умолчанию</string>
+    <string name="access_quota_plan_inactive">Неактивен</string>
 
     <string name="vpn_msg_selecting_server">Выбор лучшего сервера…</string>
     <string name="vpn_msg_server_selected">Сервер выбран</string>

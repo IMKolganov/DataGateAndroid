@@ -7,6 +7,8 @@ import android.util.Log
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.servers.ManualServerResolve
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
+import com.imkolganov.datagate.util.deepMessageForApiError
+import com.imkolganov.datagate.util.userFriendlyApiError
 import java.util.concurrent.atomic.AtomicBoolean
 import android.util.Base64
 import java.nio.ByteBuffer
@@ -60,6 +62,16 @@ class VpnConnectInteractor(
                         vpnController.showError(
                             res.getString(
                                 R.string.vpn_requires_openvpn_connect,
+                                resolved.serverName
+                                    ?: res.getString(R.string.vpn_fallback_server_name)
+                            )
+                        )
+                        return
+                    }
+                    is ManualServerResolve.QuotaPlanBlocked -> {
+                        vpnController.showError(
+                            res.getString(
+                                R.string.vpn_server_quota_blocked,
                                 resolved.serverName
                                     ?: res.getString(R.string.vpn_fallback_server_name)
                             )
@@ -139,11 +151,11 @@ class VpnConnectInteractor(
             vpnController.startWithConfig(patchedConfig, wssUrl, linkProtocol)
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
+            val raw = t.deepMessageForApiError().ifBlank { t.message.orEmpty() }
+            val detail = appContext.resources.userFriendlyApiError(raw)
+                .ifBlank { t.javaClass.simpleName }
             vpnController.showError(
-                appContext.getString(
-                    R.string.vpn_connect_failed,
-                    t.message ?: t.javaClass.simpleName
-                )
+                appContext.getString(R.string.vpn_connect_failed, detail)
             )
         } finally {
             isConnecting.set(false)

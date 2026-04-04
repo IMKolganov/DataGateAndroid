@@ -8,6 +8,7 @@ import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewSeriesResponse
 import com.imkolganov.datagate.model.overview.StatsGrouping
 import com.imkolganov.datagate.stats.StatsApiClient
+import com.imkolganov.datagate.util.userFriendlyApiError
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -125,6 +126,7 @@ open class StatsViewModel(
             val externalId = externalIdProvider()
 
             try {
+                val res = getApplication<Application>().resources
                 val resp = api.getOverviewSeries(
                     fromIso = f.fromIso,
                     toIso = f.toIso,
@@ -135,16 +137,17 @@ open class StatsViewModel(
                     it.copy(
                         isLoading = false,
                         response = resp.data,
-                        error = if (resp.success) null else resp.message
+                        error = if (resp.success) null else res.userFriendlyApiError(resp.message)
                     )
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (ex: Exception) {
+                val res = getApplication<Application>().resources
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = ex.message ?: getApplication<Application>().getString(R.string.error_request_failed)
+                        error = res.userFriendlyApiError(ex.message)
                     )
                 }
             }

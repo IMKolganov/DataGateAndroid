@@ -14,4 +14,7 @@ sealed class ManualServerResolve {
      * our tunnel requires WSS — user must use external OpenVPN Connect.
      */
     data class RequiresExternalOpenVpn(val serverName: String?) : ManualServerResolve()
+
+    /** Server exists and is online but user's quota plan does not include it. */
+    data class QuotaPlanBlocked(val serverName: String?) : ManualServerResolve()
 }

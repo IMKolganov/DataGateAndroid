@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Composable
@@ -64,6 +65,7 @@ fun VpnStatusScreen(
     onConnectClick: () -> Unit,
     onDisconnectClick: () -> Unit
 ) {
+    val context = LocalContext.current
     val isConnected = state.isVpnConnected
     val isConnecting = state.isConnectRequested && !state.isVpnConnected
 
@@ -73,10 +75,11 @@ fun VpnStatusScreen(
         else -> stringResource(R.string.vpn_status_disconnected)
     }
 
-    val statusSubtitle = if (state.lastMessage.isNotBlank()) {
-        state.lastMessage
-    } else {
-        stringResource(R.string.vpn_waiting_events)
+    val statusSubtitle = when {
+        state.lastMessage.isNotBlank() -> remember(state.lastMessage) {
+            context.resources.userFriendlyApiError(state.lastMessage)
+        }
+        else -> stringResource(R.string.vpn_waiting_events)
     }
 
     val mainColor = when {
@@ -114,7 +117,6 @@ fun VpnStatusScreen(
     }
 
     val scrollState = rememberScrollState()
-    val context = LocalContext.current
     var showReportDialog by remember { mutableStateOf(false) }
 
     fun openUrl(url: String) {

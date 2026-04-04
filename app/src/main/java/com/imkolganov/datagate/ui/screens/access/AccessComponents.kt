@@ -308,6 +308,11 @@ private fun ServerCardInner(
                                     Text(text = stringResource(R.string.status_offline))
                                 }
                             }
+                            !server.isAccessibleForQuotaPlan -> {
+                                Button(onClick = {}, enabled = false) {
+                                    Text(text = stringResource(R.string.access_server_quota_blocked))
+                                }
+                            }
                             connectBusy -> {
                                 Button(onClick = {}, enabled = false) {
                                     Text(text = stringResource(R.string.action_connect))

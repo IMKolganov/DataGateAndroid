@@ -3,6 +3,7 @@ package com.imkolganov.datagate.ui.screens.access
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.imkolganov.datagate.vpn.ServerSelectionMode
+import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.VpnServerSelectionStore
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -66,6 +67,11 @@ open class AccessViewModel(
             try {
                 val servers = repo.getServers()
                 val connections = repo.getMyActiveConnections()
+                val quotaRaw = repo.loadQuotaUi()
+                val res = appContext.resources
+                val quota = quotaRaw.copy(
+                    errorText = quotaRaw.errorText?.let { res.userFriendlyApiError(it) }
+                )
 
                 _state.update { prev ->
                     var selectedId = prev.selectedServerId
@@ -84,6 +90,7 @@ open class AccessViewModel(
                         isLoading = false,
                         servers = servers,
                         activeConnections = connections,
+                        quota = quota,
                         selectedServerId = selectedId
                     )
                 }
@@ -91,7 +98,7 @@ open class AccessViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        errorText = e.message ?: "Request failed"
+                        errorText = appContext.resources.userFriendlyApiError(e.message)
                     )
                 }
             }
