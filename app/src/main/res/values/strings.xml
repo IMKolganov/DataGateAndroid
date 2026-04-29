@@ -21,6 +21,8 @@
     <string name="action_disconnect">Disconnect</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_connect">Connect</string>
+    <string name="action_back">Back</string>
+    <string name="action_save">Save</string>
     <string name="vpn_home_footer">Connect chooses a server automatically using the app\'s selection rules. To pick a specific server, open the Access tab.</string>
 
     <string name="home_report_issue">Report a problem</string>
@@ -101,6 +103,21 @@
     <string name="settings_push_updates_subtitle">Local notification after a GitHub check (no cloud push server). Requires notification permission on Android 13+.</string>
     <string name="settings_auto_download_title">Suggest APK download</string>
     <string name="settings_auto_download_subtitle">When offering an update, remember that you want download/install options for future releases.</string>
+    <string name="settings_ip_lists">IP list routing</string>
+    <string name="settings_ip_lists_subtitle">Configure the CIDR list source used for traffic routing exceptions.</string>
+    <string name="settings_ip_lists_open">Configure IP list</string>
+    <string name="settings_ip_lists_title">IP list routing</string>
+    <string name="settings_ip_lists_source_title">CIDR list source</string>
+    <string name="settings_ip_lists_source_subtitle">Use a plain text URL with one IP range per line. CIDR notation is expected.</string>
+    <string name="settings_ip_lists_url_label">List URL</string>
+    <string name="settings_ip_lists_url_hint">Example: https://example.com/ru-aggregated.zone</string>
+    <string name="settings_ip_lists_url_error">Enter a valid http or https URL.</string>
+    <string name="settings_ip_lists_frequency_label">Update frequency</string>
+    <string name="settings_ip_lists_frequency_6h">Every 6 hours</string>
+    <string name="settings_ip_lists_frequency_daily">Daily</string>
+    <string name="settings_ip_lists_frequency_weekly">Weekly</string>
+    <string name="settings_ip_lists_frequency_manual">Manual only</string>
+    <string name="settings_ip_lists_saved">IP list settings saved.</string>
 
     <string name="project_website_url" translatable="false">https://datagateapp.com/</string>
     <string name="project_telegram_url" translatable="false">https://t.me/datagateapp</string>

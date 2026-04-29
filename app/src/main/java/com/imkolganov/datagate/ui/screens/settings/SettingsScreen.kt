@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -29,6 +31,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.OutlinedTextField
@@ -59,6 +62,8 @@ import com.imkolganov.datagate.ui.theme.ThemeMode
 import java.util.Locale
 import com.imkolganov.datagate.update.ApkUpdateInstaller
 import com.imkolganov.datagate.update.UpdatePreferences
+import com.imkolganov.datagate.vpn.IpListPreferences
+import com.imkolganov.datagate.vpn.IpListUpdateFrequency
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -82,9 +87,15 @@ fun SettingsScreen(
     var githubUpdatesEnabled by remember { mutableStateOf(true) }
     var pushNotificationsForUpdates by remember { mutableStateOf(true) }
     var autoDownloadSuggest by remember { mutableStateOf(false) }
+    var showIpListSettings by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     var authInfo by remember { mutableStateOf(tokenStore.getAuthInfo()) }
+
+    if (showIpListSettings) {
+        IpListSettingsScreen(onBack = { showIpListSettings = false })
+        return
+    }
 
     LaunchedEffect(Unit) {
         authInfo = withContext(Dispatchers.IO) { tokenStore.getAuthInfo() }
@@ -161,6 +172,30 @@ fun SettingsScreen(
                         onClick = { onThemeModeChange(ThemeMode.SYSTEM) },
                         label = { Text(stringResource(R.string.theme_system)) }
                     )
+                }
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(stringResource(R.string.settings_ip_lists), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.settings_ip_lists_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                TextButton(onClick = { showIpListSettings = true }) {
+                    Icon(Icons.Outlined.Route, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.settings_ip_lists_open))
                 }
             }
         }
@@ -354,6 +389,187 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun IpListSettingsScreen(
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var sourceUrl by remember { mutableStateOf(IpListPreferences.DEFAULT_SOURCE_URL) }
+    var updateFrequency by remember { mutableStateOf(IpListUpdateFrequency.DAILY) }
+    var savedMessageVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val settings = withContext(Dispatchers.IO) {
+            IpListPreferences.getSettings(context.applicationContext)
+        }
+        sourceUrl = settings.sourceUrl
+        updateFrequency = settings.updateFrequency
+    }
+
+    val trimmedUrl = sourceUrl.trim()
+    val urlError = remember(trimmedUrl) {
+        trimmedUrl.isNotEmpty() && !isHttpUrl(trimmedUrl)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = stringResource(R.string.action_back)
+                )
+            }
+            Text(
+                stringResource(R.string.settings_ip_lists_title),
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    stringResource(R.string.settings_ip_lists_source_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_ip_lists_source_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = sourceUrl,
+                    onValueChange = {
+                        sourceUrl = it
+                        savedMessageVisible = false
+                    },
+                    label = { Text(stringResource(R.string.settings_ip_lists_url_label)) },
+                    supportingText = {
+                        Text(
+                            if (urlError) {
+                                stringResource(R.string.settings_ip_lists_url_error)
+                            } else {
+                                stringResource(R.string.settings_ip_lists_url_hint)
+                            }
+                        )
+                    },
+                    isError = urlError,
+                    singleLine = true
+                )
+
+                IpListFrequencyDropdown(
+                    current = updateFrequency,
+                    onSelect = {
+                        updateFrequency = it
+                        savedMessageVisible = false
+                    }
+                )
+
+                Button(
+                    onClick = {
+                        scope.launch {
+                            IpListPreferences.saveSettings(
+                                context.applicationContext,
+                                trimmedUrl,
+                                updateFrequency
+                            )
+                            savedMessageVisible = true
+                        }
+                    },
+                    enabled = trimmedUrl.isNotEmpty() && !urlError,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = AppCards.shape
+                ) {
+                    Text(stringResource(R.string.action_save))
+                }
+
+                if (savedMessageVisible) {
+                    Text(
+                        stringResource(R.string.settings_ip_lists_saved),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun IpListFrequencyDropdown(
+    current: IpListUpdateFrequency,
+    onSelect: (IpListUpdateFrequency) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
+                .fillMaxWidth(),
+            readOnly = true,
+            value = ipListFrequencyLabel(current),
+            onValueChange = {},
+            label = { Text(stringResource(R.string.settings_ip_lists_frequency_label)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            singleLine = true
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            for (option in IpListUpdateFrequency.entries) {
+                DropdownMenuItem(
+                    text = { Text(ipListFrequencyLabel(option)) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ipListFrequencyLabel(frequency: IpListUpdateFrequency): String =
+    when (frequency) {
+        IpListUpdateFrequency.SIX_HOURS -> stringResource(R.string.settings_ip_lists_frequency_6h)
+        IpListUpdateFrequency.DAILY -> stringResource(R.string.settings_ip_lists_frequency_daily)
+        IpListUpdateFrequency.WEEKLY -> stringResource(R.string.settings_ip_lists_frequency_weekly)
+        IpListUpdateFrequency.MANUAL -> stringResource(R.string.settings_ip_lists_frequency_manual)
+    }
+
+private fun isHttpUrl(value: String): Boolean {
+    val uri = runCatching { Uri.parse(value) }.getOrNull() ?: return false
+    val scheme = uri.scheme?.lowercase(Locale.US)
+    return (scheme == "https" || scheme == "http") && !uri.host.isNullOrBlank()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

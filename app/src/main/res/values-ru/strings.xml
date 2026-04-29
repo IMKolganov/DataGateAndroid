@@ -21,6 +21,8 @@
     <string name="action_disconnect">Отключить</string>
     <string name="action_cancel">Отмена</string>
     <string name="action_connect">Подключить</string>
+    <string name="action_back">Назад</string>
+    <string name="action_save">Сохранить</string>
     <string name="vpn_home_footer">«Подключить» выбирает сервер автоматически. Чтобы указать сервер вручную, откройте вкладку «Доступ».</string>
 
     <string name="home_report_issue">Сообщить о проблеме</string>
@@ -97,6 +99,21 @@
     <string name="settings_push_updates_subtitle">Локальное уведомление после проверки GitHub (без облачного push). На Android 13+ нужно разрешение на уведомления.</string>
     <string name="settings_auto_download_title">Предлагать загрузку APK</string>
     <string name="settings_auto_download_subtitle">При появлении обновления помнить, что вы хотите варианты загрузки и установки в будущем.</string>
+    <string name="settings_ip_lists">Маршрутизация IP-списков</string>
+    <string name="settings_ip_lists_subtitle">Настройте источник CIDR-списка для исключений маршрутизации трафика.</string>
+    <string name="settings_ip_lists_open">Настроить IP-список</string>
+    <string name="settings_ip_lists_title">Маршрутизация IP-списков</string>
+    <string name="settings_ip_lists_source_title">Источник CIDR-списка</string>
+    <string name="settings_ip_lists_source_subtitle">Используйте URL plain text файла, где в каждой строке один IP-диапазон. Ожидается CIDR-формат.</string>
+    <string name="settings_ip_lists_url_label">URL списка</string>
+    <string name="settings_ip_lists_url_hint">Пример: https://example.com/ru-aggregated.zone</string>
+    <string name="settings_ip_lists_url_error">Введите корректный http или https URL.</string>
+    <string name="settings_ip_lists_frequency_label">Частота обновления</string>
+    <string name="settings_ip_lists_frequency_6h">Каждые 6 часов</string>
+    <string name="settings_ip_lists_frequency_daily">Ежедневно</string>
+    <string name="settings_ip_lists_frequency_weekly">Еженедельно</string>
+    <string name="settings_ip_lists_frequency_manual">Только вручную</string>
+    <string name="settings_ip_lists_saved">Настройки IP-списка сохранены.</string>
 
     <string name="update_dialog_title">Новая версия %1$s</string>
     <string name="update_dialog_body">На GitHub доступна более новая сборка. Последний релиз: %1$s. У вас: %2$s.\n\nМожно открыть страницу релиза или скачать APK. Ниже можно включить предложения обновлений на будущее.</string>
