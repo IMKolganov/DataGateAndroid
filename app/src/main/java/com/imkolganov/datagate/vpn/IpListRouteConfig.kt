@@ -1,17 +1,38 @@
 package com.imkolganov.datagate.vpn
 
+import java.net.Inet6Address
+import java.net.InetAddress
+
+sealed interface IpCidrRoute {
+    val prefixLength: Int
+
+    fun toOpenVpnNetGatewayRoute(): String
+}
+
 data class Ipv4CidrRoute(
     val network: String,
     val netmask: String,
-    val prefixLength: Int
-) {
-    fun toOpenVpnNetGatewayRoute(): String = "route $network $netmask net_gateway"
+    override val prefixLength: Int
+) : IpCidrRoute {
+    override fun toOpenVpnNetGatewayRoute(): String = "route $network $netmask net_gateway"
 }
 
-object IpListRouteConfig {
-    private const val MAX_ROUTES = 12_000
+data class Ipv6CidrRoute(
+    val network: String,
+    override val prefixLength: Int
+) : IpCidrRoute {
+    override fun toOpenVpnNetGatewayRoute(): String = "route-ipv6 $network/$prefixLength net_gateway"
+}
 
-    fun appendBypassRoutes(config: String, routes: List<Ipv4CidrRoute>): String {
+data class IpListParseResult(
+    val routes: List<IpCidrRoute>,
+    val reachedRouteLimit: Boolean
+)
+
+object IpListRouteConfig {
+    const val MAX_ROUTES = 12_000
+
+    fun appendBypassRoutes(config: String, routes: List<IpCidrRoute>): String {
         if (routes.isEmpty()) return config
 
         val out = StringBuilder(config.trimEnd())
@@ -23,8 +44,12 @@ object IpListRouteConfig {
         return out.toString()
     }
 
-    fun parseIpv4CidrRoutes(content: String): List<Ipv4CidrRoute> {
-        val routes = LinkedHashSet<Ipv4CidrRoute>()
+    fun parseIpv4CidrRoutes(content: String): List<Ipv4CidrRoute> =
+        parseCidrRoutesResult(content).routes.filterIsInstance<Ipv4CidrRoute>()
+
+    fun parseCidrRoutesResult(content: String): IpListParseResult {
+        val routes = LinkedHashSet<IpCidrRoute>()
+        var reachedRouteLimit = false
 
         for (rawLine in content.lineSequence()) {
             val token = rawLine
@@ -35,14 +60,27 @@ object IpListRouteConfig {
                 ?.takeIf { it.isNotBlank() }
                 ?: continue
 
-            val route = parseIpv4Cidr(token) ?: continue
+            val route = parseIpCidr(token) ?: continue
             if (route.prefixLength == 0) continue
             routes.add(route)
-            if (routes.size >= MAX_ROUTES) break
+            if (routes.size >= MAX_ROUTES) {
+                reachedRouteLimit = true
+                break
+            }
         }
 
-        return routes.toList()
+        return IpListParseResult(
+            routes = routes.toList(),
+            reachedRouteLimit = reachedRouteLimit
+        )
     }
+
+    private fun parseIpCidr(value: String): IpCidrRoute? =
+        if (value.contains(':')) {
+            parseIpv6Cidr(value)
+        } else {
+            parseIpv4Cidr(value)
+        }
 
     private fun parseIpv4Cidr(value: String): Ipv4CidrRoute? {
         val parts = value.split('/', limit = 2)
@@ -57,6 +95,23 @@ object IpListRouteConfig {
         return Ipv4CidrRoute(
             network = longToIpv4(network),
             netmask = longToIpv4(mask),
+            prefixLength = prefixLength
+        )
+    }
+
+    private fun parseIpv6Cidr(value: String): Ipv6CidrRoute? {
+        val parts = value.split('/', limit = 2)
+        val ip = parts.getOrNull(0)?.takeIf { it.isNotBlank() } ?: return null
+        val prefixLength = parts.getOrNull(1)?.toIntOrNull() ?: 128
+        if (prefixLength !in 0..128) return null
+
+        val address = runCatching { InetAddress.getByName(ip) }.getOrNull() as? Inet6Address
+            ?: return null
+        val network = address.address.copyOf()
+        applyIpv6Prefix(network, prefixLength)
+
+        return Ipv6CidrRoute(
+            network = InetAddress.getByAddress(network).hostAddress ?: return null,
             prefixLength = prefixLength
         )
     }
@@ -86,4 +141,19 @@ object IpListRouteConfig {
             (value shr 8) and 0xff,
             value and 0xff
         ).joinToString(".")
+
+    private fun applyIpv6Prefix(bytes: ByteArray, prefixLength: Int) {
+        var remaining = prefixLength
+        for (i in bytes.indices) {
+            when {
+                remaining >= 8 -> remaining -= 8
+                remaining <= 0 -> bytes[i] = 0
+                else -> {
+                    val mask = (0xff shl (8 - remaining)) and 0xff
+                    bytes[i] = (bytes[i].toInt() and mask).toByte()
+                    remaining = 0
+                }
+            }
+        }
+    }
 }

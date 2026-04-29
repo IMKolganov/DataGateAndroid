@@ -56,18 +56,24 @@ import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
+import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import java.util.Locale
 import com.imkolganov.datagate.update.ApkUpdateInstaller
 import com.imkolganov.datagate.update.UpdatePreferences
+import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.IpListPreferences
+import com.imkolganov.datagate.vpn.IpListRoutesRepository
+import com.imkolganov.datagate.vpn.IpListStatus
 import com.imkolganov.datagate.vpn.IpListUpdateFrequency
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.text.DateFormat
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -401,14 +407,35 @@ private fun IpListSettingsScreen(
 
     var sourceUrl by remember { mutableStateOf(IpListPreferences.DEFAULT_SOURCE_URL) }
     var updateFrequency by remember { mutableStateOf(IpListUpdateFrequency.DAILY) }
+    var status by remember {
+        mutableStateOf(
+            IpListStatus(
+                lastUpdatedEpochMs = null,
+                loadedRouteCount = 0,
+                lastError = null,
+                reachedRouteLimit = false
+            )
+        )
+    }
     var savedMessageVisible by remember { mutableStateOf(false) }
+    var updateMessage by remember { mutableStateOf<String?>(null) }
+    var updateInProgress by remember { mutableStateOf(false) }
+    val repository = remember(context.applicationContext) {
+        IpListRoutesRepository(
+            appContext = context.applicationContext,
+            http = HttpClients.createPlain()
+        )
+    }
 
     LaunchedEffect(Unit) {
-        val settings = withContext(Dispatchers.IO) {
-            IpListPreferences.getSettings(context.applicationContext)
+        val loaded = withContext(Dispatchers.IO) {
+            IpListPreferences.getSettings(context.applicationContext) to
+                IpListPreferences.getStatus(context.applicationContext)
         }
+        val settings = loaded.first
         sourceUrl = settings.sourceUrl
         updateFrequency = settings.updateFrequency
+        status = loaded.second
     }
 
     val trimmedUrl = sourceUrl.trim()
@@ -514,6 +541,107 @@ private fun IpListSettingsScreen(
                 }
             }
         }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    stringResource(R.string.settings_ip_lists_status_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                KeyValueRow(
+                    stringResource(R.string.settings_ip_lists_last_updated),
+                    status.lastUpdatedEpochMs?.let(::formatIpListUpdatedAt)
+                        ?: stringResource(R.string.settings_ip_lists_last_updated_never)
+                )
+                KeyValueRow(
+                    stringResource(R.string.settings_ip_lists_loaded_routes),
+                    stringResource(R.string.settings_ip_lists_loaded_routes_value, status.loadedRouteCount)
+                )
+                KeyValueRow(
+                    stringResource(R.string.settings_ip_lists_last_error),
+                    status.lastError ?: stringResource(R.string.settings_ip_lists_last_error_none)
+                )
+
+                if (status.reachedRouteLimit) {
+                    Text(
+                        stringResource(
+                            R.string.settings_ip_lists_route_limit_warning,
+                            IpListRouteConfig.MAX_ROUTES
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    Text(
+                        stringResource(
+                            R.string.settings_ip_lists_route_limit_notice,
+                            IpListRouteConfig.MAX_ROUTES
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        updateInProgress = true
+                        updateMessage = null
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) {
+                                repository.updateNow()
+                            }
+                            status = withContext(Dispatchers.IO) {
+                                IpListPreferences.getStatus(context.applicationContext)
+                            }
+                            updateMessage = result.error
+                                ?.let {
+                                    if (result.usedFallback) {
+                                        context.getString(R.string.settings_ip_lists_update_failed_fallback, it)
+                                    } else {
+                                        context.getString(R.string.settings_ip_lists_update_failed, it)
+                                    }
+                                }
+                                ?: context.getString(
+                                    R.string.settings_ip_lists_update_ready,
+                                    result.routeCount
+                                )
+                            updateInProgress = false
+                        }
+                    },
+                    enabled = trimmedUrl.isNotEmpty() && !urlError && !updateInProgress,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = AppCards.shape
+                ) {
+                    Text(
+                        if (updateInProgress) {
+                            stringResource(R.string.settings_ip_lists_update_now_loading)
+                        } else {
+                            stringResource(R.string.settings_ip_lists_update_now)
+                        }
+                    )
+                }
+
+                updateMessage?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (it.startsWith(stringResource(R.string.settings_ip_lists_update_failed_prefix))) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -571,6 +699,10 @@ private fun isHttpUrl(value: String): Boolean {
     val scheme = uri.scheme?.lowercase(Locale.US)
     return (scheme == "https" || scheme == "http") && !uri.host.isNullOrBlank()
 }
+
+private fun formatIpListUpdatedAt(epochMs: Long): String =
+    DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
+        .format(Date(epochMs))
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

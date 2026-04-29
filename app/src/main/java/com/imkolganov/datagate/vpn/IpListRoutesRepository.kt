@@ -7,29 +7,97 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
+data class IpListUpdateResult(
+    val routeCount: Int,
+    val reachedRouteLimit: Boolean,
+    val usedFallback: Boolean,
+    val error: String?
+)
+
 class IpListRoutesRepository(
     private val appContext: Context,
     private val http: OkHttpClient
 ) {
-    suspend fun getRoutesForConnection(): List<Ipv4CidrRoute> {
+    suspend fun getRoutesForConnection(): List<IpCidrRoute> {
         val settings = IpListPreferences.getSettings(appContext)
 
         val content = if (IpListPreferences.shouldRefreshCachedList(appContext, settings)) {
-            fetchList(settings.sourceUrl)
-                ?.also { IpListPreferences.saveCachedList(appContext, it) }
-                ?: IpListPreferences.getCachedList(appContext)
+            fetchConfiguredList(settings.sourceUrl).fold(
+                onSuccess = { it.also { saveParsedList(it) } },
+                onFailure = {
+                    IpListPreferences.saveLastError(appContext, it.message ?: "IP list fetch failed")
+                    IpListPreferences.getCachedList(appContext) ?: loadFallbackList()
+                }
+            )
         } else {
             IpListPreferences.getCachedList(appContext)
         }
 
-        if (content.isNullOrBlank()) return emptyList()
+        val resolvedContent = content ?: loadFallbackList()
+        if (resolvedContent.isNullOrBlank()) return emptyList()
 
-        val routes = IpListRouteConfig.parseIpv4CidrRoutes(content)
+        val result = IpListRouteConfig.parseCidrRoutesResult(resolvedContent)
+        IpListPreferences.saveStatus(appContext, result.routes.size, result.reachedRouteLimit)
+        val routes = result.routes
         Log.d("OpenVPN3", "IP list routes loaded: ${routes.size}")
         return routes
     }
 
-    private suspend fun fetchList(url: String): String? = withContext(Dispatchers.IO) {
+    suspend fun updateNow(): IpListUpdateResult {
+        val settings = IpListPreferences.getSettings(appContext)
+        return fetchConfiguredList(settings.sourceUrl).fold(
+            onSuccess = {
+                val result = saveParsedList(it)
+                IpListUpdateResult(
+                    routeCount = result.routes.size,
+                    reachedRouteLimit = result.reachedRouteLimit,
+                    usedFallback = false,
+                    error = null
+                )
+            },
+            onFailure = { error ->
+                val fallback = IpListPreferences.getCachedList(appContext) ?: loadFallbackList()
+                val result = fallback
+                    ?.let { IpListRouteConfig.parseCidrRoutesResult(it) }
+                    ?: IpListParseResult(emptyList(), reachedRouteLimit = false)
+                IpListPreferences.saveStatus(appContext, result.routes.size, result.reachedRouteLimit)
+                val message = error.message ?: "IP list fetch failed"
+                IpListPreferences.saveLastError(appContext, message)
+                IpListUpdateResult(
+                    routeCount = result.routes.size,
+                    reachedRouteLimit = result.reachedRouteLimit,
+                    usedFallback = fallback != null,
+                    error = message
+                )
+            }
+        )
+    }
+
+    private suspend fun saveParsedList(content: String): IpListParseResult {
+        val result = IpListRouteConfig.parseCidrRoutesResult(content)
+        IpListPreferences.saveCachedList(
+            context = appContext,
+            content = content,
+            routeCount = result.routes.size,
+            reachedRouteLimit = result.reachedRouteLimit
+        )
+        return result
+    }
+
+    private suspend fun fetchConfiguredList(url: String): Result<String> {
+        val trimmedUrl = url.trim()
+        if (trimmedUrl != IpListPreferences.DEFAULT_SOURCE_URL) {
+            return fetchList(trimmedUrl)
+        }
+
+        val ipv4 = fetchList(IpListPreferences.DEFAULT_SOURCE_URL).getOrElse {
+            return Result.failure(it)
+        }
+        val ipv6 = fetchList(IpListPreferences.DEFAULT_IPV6_SOURCE_URL).getOrNull()
+        return Result.success(listOfNotNull(ipv4, ipv6).joinToString("\n"))
+    }
+
+    private suspend fun fetchList(url: String): Result<String> = withContext(Dispatchers.IO) {
         try {
             val request = Request.Builder()
                 .url(url)
@@ -38,25 +106,40 @@ class IpListRoutesRepository(
 
             http.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    Log.w("OpenVPN3", "IP list fetch failed: HTTP ${response.code}")
-                    return@withContext null
+                    val message = "IP list fetch failed: HTTP ${response.code}"
+                    Log.w("OpenVPN3", message)
+                    return@withContext Result.failure(IllegalStateException(message))
                 }
 
                 val body = response.body.string()
                 if (body.length > MAX_BODY_CHARS) {
-                    Log.w("OpenVPN3", "IP list ignored: too large (${body.length} chars)")
-                    return@withContext null
+                    val message = "IP list ignored: too large (${body.length} chars)"
+                    Log.w("OpenVPN3", message)
+                    return@withContext Result.failure(IllegalStateException(message))
                 }
 
-                body
+                Result.success(body)
             }
         } catch (t: Throwable) {
             Log.w("OpenVPN3", "IP list fetch failed", t)
-            null
+            Result.failure(t)
         }
     }
 
+    private suspend fun loadFallbackList(): String? = withContext(Dispatchers.IO) {
+        val ipv4 = readAsset(FALLBACK_IPV4_ASSET)
+        val ipv6 = readAsset(FALLBACK_IPV6_ASSET)
+        listOfNotNull(ipv4, ipv6).joinToString("\n").takeIf { it.isNotBlank() }
+    }
+
+    private fun readAsset(path: String): String? =
+        runCatching {
+            appContext.assets.open(path).bufferedReader().use { it.readText() }
+        }.getOrNull()
+
     private companion object {
         const val MAX_BODY_CHARS = 1_000_000
+        const val FALLBACK_IPV4_ASSET = "ip_lists/ru_ipv4_fallback.txt"
+        const val FALLBACK_IPV6_ASSET = "ip_lists/ru_ipv6_fallback.txt"
     }
 }

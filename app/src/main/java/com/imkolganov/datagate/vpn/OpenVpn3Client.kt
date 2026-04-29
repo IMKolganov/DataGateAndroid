@@ -116,8 +116,8 @@ class OpenVpn3Client(
                 builder?.addRoute("128.0.0.0", 1)
             }
             if (ipv6) {
-                builder?.addRoute("2000::", 4)
-                builder?.addRoute("3000::", 4)
+                builder?.addRoute("::", 1)
+                builder?.addRoute("8000::", 1)
             }
             true
         } catch (t: Throwable) {
