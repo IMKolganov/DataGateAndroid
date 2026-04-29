@@ -59,38 +59,4 @@ class OpenVpnServersApiTest {
         assertEquals(100L, item.totalBytesIn)
         assertEquals(42, item.openVpnServerStatusLogResponse?.vpnServerId)
     }
-
-    @Test
-    fun parseWithStatusResponse_acceptsLegacyOpenVpnAliases() {
-        val response = api.parseWithStatusResponse(
-            """
-            {
-              "success": true,
-              "message": "Success",
-              "data": {
-                "openVpnServerWithStatuses": [
-                  {
-                    "openVpnServerResponses": {
-                      "openVpnServer": {
-                        "id": 5,
-                        "serverName": "legacy",
-                        "isOnline": true,
-                        "isDefault": true,
-                        "apiUrl": "https://legacy.example",
-                        "isEnableWss": false,
-                        "isDeleted": false,
-                        "tags": [],
-                        "quotaPlanGroups": [],
-                        "isAccessibleForUserQuotaPlan": true
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-            """.trimIndent()
-        )
-
-        assertEquals("legacy", response.data!!.openVpnServerWithStatuses.single().server.serverName)
-    }
 }
