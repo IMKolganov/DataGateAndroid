@@ -214,6 +214,7 @@ class OpenVpn3Service : VpnService() {
 
                 val cfg = ClientAPI_Config().apply {
                     content = patchedConfig
+                    enableRouteEmulation = true
                 }
 
                 val client = OpenVpn3Client(

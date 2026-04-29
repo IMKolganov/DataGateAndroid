@@ -195,6 +195,8 @@
     <string name="vpn_preparing_cert_identity">Preparing certificate identity for %1$s</string>
     <string name="vpn_requesting_profile">Requesting VPN profile for %1$s</string>
     <string name="vpn_config_received">Config received (%1$d bytes)</string>
+    <string name="vpn_updating_ip_list">Updating IP list…</string>
+    <string name="vpn_ip_list_ready">IP list ready (%1$d routes)</string>
     <string name="vpn_connect_failed">Connect failed: %1$s</string>
     <string name="vpn_server_selected">Server selected</string>
     <string name="vpn_waiting_permission">Waiting for VPN permission…</string>

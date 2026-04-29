@@ -187,6 +187,8 @@
     <string name="vpn_preparing_cert_identity">Подготовка сертификата для %1$s</string>
     <string name="vpn_requesting_profile">Запрос профиля VPN для %1$s</string>
     <string name="vpn_config_received">Профиль получен (%1$d байт)</string>
+    <string name="vpn_updating_ip_list">Обновление IP-списка…</string>
+    <string name="vpn_ip_list_ready">IP-список готов (%1$d маршрутов)</string>
     <string name="vpn_connect_failed">Ошибка подключения: %1$s</string>
     <string name="vpn_server_selected">Сервер выбран</string>
     <string name="vpn_waiting_permission">Ожидание разрешения VPN…</string>

@@ -20,7 +20,8 @@ class VpnConnectInteractor(
     private val getInstallationId: () -> String?,
     private val serversRepository: OpenVpnServersRepository,
     private val vpnController: VpnController,
-    private val api: OvpnApiClient
+    private val api: OvpnApiClient,
+    private val ipListRoutesRepository: IpListRoutesRepository
 ) {
     private val isConnecting = AtomicBoolean(false)
 
@@ -142,7 +143,19 @@ class VpnConnectInteractor(
                 "OpenVPN3",
                 "OVPN profile transport=$linkProtocol (from proto line in file), size=${downloaded.content.size}"
             )
-            val patchedConfig = forceWssConfig(configText, linkProtocol)
+            vpnController.showStatus(
+                "UPDATING_IP_LIST",
+                res.getString(R.string.vpn_updating_ip_list)
+            )
+            val bypassRoutes = ipListRoutesRepository.getRoutesForConnection()
+            val configWithBypass = IpListRouteConfig.appendBypassRoutes(configText, bypassRoutes)
+            val patchedConfig = forceWssConfig(configWithBypass, linkProtocol)
+            if (bypassRoutes.isNotEmpty()) {
+                vpnController.showStatus(
+                    "IP_LIST_READY",
+                    res.getString(R.string.vpn_ip_list_ready, bypassRoutes.size)
+                )
+            }
 
             val apiUrl = best.apiUrl
                 ?: error("Best server apiUrl is null")
