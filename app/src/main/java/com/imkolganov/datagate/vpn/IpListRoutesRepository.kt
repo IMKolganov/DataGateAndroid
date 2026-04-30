@@ -20,6 +20,10 @@ class IpListRoutesRepository(
 ) {
     suspend fun getRoutesForConnection(): List<IpCidrRoute> {
         val settings = IpListPreferences.getSettings(appContext)
+        if (!settings.cidrListsEnabled) {
+            Log.d("OpenVPN3", "CIDR IP lists disabled in settings; no bypass routes")
+            return emptyList()
+        }
 
         val content = if (IpListPreferences.shouldRefreshCachedList(appContext, settings)) {
             fetchConfiguredLists(settings.sourceUrls).fold(
@@ -45,6 +49,14 @@ class IpListRoutesRepository(
 
     suspend fun updateNow(): IpListUpdateResult {
         val settings = IpListPreferences.getSettings(appContext)
+        if (!settings.cidrListsEnabled) {
+            return IpListUpdateResult(
+                routeCount = 0,
+                reachedRouteLimit = false,
+                usedFallback = false,
+                error = null
+            )
+        }
         return fetchConfiguredLists(settings.sourceUrls).fold(
             onSuccess = {
                 val result = saveParsedList(it)

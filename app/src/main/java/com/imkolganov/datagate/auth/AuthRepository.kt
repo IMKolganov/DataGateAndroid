@@ -3,7 +3,12 @@ package com.imkolganov.datagate.auth
 import android.app.Activity
 import android.util.Log
 import com.imkolganov.datagate.auth.http.BackendAuthApi
+import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
+import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
+import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
+import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
+import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -40,6 +45,35 @@ class AuthRepository(
         }
         Log.d(TAG, "Backend google-login succeeded")
 
+        persistSessionOrThrow(result)
+        return result.token
+    }
+
+    suspend fun loginWithPassword(login: String, password: String): String {
+        val result = withContext(Dispatchers.IO) {
+            api.loginWithPassword(LoginPasswordRequestDto(login = login, password = password))
+        }
+        Log.d(TAG, "Backend password login succeeded")
+        persistSessionOrThrow(result)
+        return result.token
+    }
+
+    suspend fun register(request: RegisterUserRequestDto): RegisterUserResponseDto =
+        withContext(Dispatchers.IO) {
+            api.register(request)
+        }
+
+    suspend fun requestEmailConfirmation(email: String): String =
+        withContext(Dispatchers.IO) {
+            api.requestEmailConfirmation(email)
+        }
+
+    suspend fun confirmEmail(email: String, code: String): ConfirmEmailResultDto =
+        withContext(Dispatchers.IO) {
+            api.confirmEmail(email, code)
+        }
+
+    private fun persistSessionOrThrow(result: GoogleLoginResponseDto) {
         tokenStore.saveAccessToken(result.token)
         tokenStore.saveAccessTokenExpiration(result.expiration)
 
@@ -53,6 +87,5 @@ class AuthRepository(
         tokenStore.saveRefreshTokenExpiration(result.refreshExpiration)
 
         autoLoginStore.setEnabled(true)
-        return result.token
     }
 }

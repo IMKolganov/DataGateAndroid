@@ -12,6 +12,35 @@
     <string name="login_welcome">Добро пожаловать в VPN‑сервис.\nПо вопросам пишите на imkolganov@gmail.com.</string>
     <string name="login_version">v%1$s (%2$d)</string>
 
+    <string name="auth_tab_google">Google</string>
+    <string name="auth_tab_email">Почта</string>
+    <string name="auth_email_sign_in">Вход</string>
+    <string name="auth_email_register">Регистрация</string>
+    <string name="auth_field_login">Логин</string>
+    <string name="auth_field_password">Пароль</string>
+    <string name="auth_field_display_name">Отображаемое имя</string>
+    <string name="auth_field_email">Электронная почта</string>
+    <string name="auth_field_confirm_password">Повтор пароля</string>
+    <string name="auth_field_confirmation_code">Код подтверждения</string>
+    <string name="auth_sign_in">Войти</string>
+    <string name="auth_create_account">Создать аккаунт</string>
+    <string name="auth_confirm_email_help">Если на сервере включено подтверждение почты, введите код из письма. Если письма нет, можно сразу перейти к входу.</string>
+    <string name="auth_confirm_email_action">Подтвердить почту</string>
+    <string name="auth_resend_code">Отправить код снова</string>
+    <string name="auth_skip_to_sign_in">Перейти ко входу</string>
+    <string name="auth_dismiss">OK</string>
+    <string name="auth_register_check_email">Аккаунт создан. Если на сервере включено подтверждение почты, проверьте входящие и введите код из письма.</string>
+    <string name="auth_email_confirmed_sign_in">Почта подтверждена. Войдите с логином и паролем.</string>
+    <string name="auth_resend_confirmation_hint">Если такой адрес есть и он ещё не подтверждён, отправлен новый код.</string>
+    <string name="auth_error_login_password_required">Введите логин и пароль.</string>
+    <string name="auth_error_display_name_required">Введите отображаемое имя.</string>
+    <string name="auth_error_email_required">Введите адрес почты.</string>
+    <string name="auth_error_login_required">Придумайте логин.</string>
+    <string name="auth_error_password_short">Пароль не короче 8 символов.</string>
+    <string name="auth_error_password_mismatch">Пароли не совпадают.</string>
+    <string name="auth_error_email_code_required">Введите почту и код.</string>
+    <string name="auth_error_confirm_failed">Не удалось подтвердить почту.</string>
+
     <string name="vpn_status_connected">Подключено</string>
     <string name="vpn_status_connecting">Подключение…</string>
     <string name="vpn_status_disconnected">Не подключено</string>
@@ -101,6 +130,9 @@
     <string name="settings_auto_download_subtitle">При появлении обновления помнить, что вы хотите варианты загрузки и установки в будущем.</string>
     <string name="settings_ip_lists">Маршрутизация IP-списков</string>
     <string name="settings_ip_lists_subtitle">Настройте источники CIDR-списков для исключений маршрутизации трафика.</string>
+    <string name="settings_ip_lists_enable_title">CIDR-списки</string>
+    <string name="settings_ip_lists_enable_subtitle">Если выключено, исключения маршрутизации по спискам не применяются и списки не загружаются — весь трафик идёт через VPN.</string>
+    <string name="settings_ip_lists_detail_disabled_notice">CIDR-списки выключены. Включите переключатель выше, чтобы снова применять исключения маршрутизации.</string>
     <string name="settings_ip_lists_open">Настроить IP-список</string>
     <string name="settings_ip_lists_title">Маршрутизация IP-списков</string>
     <string name="settings_ip_lists_source_title">Источники CIDR-списков</string>
@@ -219,6 +251,15 @@
     <string name="access_quota_all_plans_title">Все тарифные планы</string>
     <string name="access_quota_plan_default">По умолчанию</string>
     <string name="access_quota_plan_inactive">Неактивен</string>
+    <string name="access_quota_traffic_title">Квота трафика</string>
+    <string name="access_quota_period_month">Текущий календарный месяц</string>
+    <string name="access_quota_period_today">Сегодня</string>
+    <string name="access_quota_needs_external_id">Для учёта трафика в JWT нужен внешний идентификатор клиента OpenVPN.</string>
+    <string name="access_quota_no_traffic_cap">Нет дневного или месячного лимита трафика на активном плане за этот период, или план не назначен.</string>
+    <string name="access_quota_usage_unavailable">Данные об использовании недоступны.</string>
+    <string name="access_quota_used_line">Использовано %1$s из %2$s (%3$s%%)</string>
+    <string name="access_quota_remaining">Осталось %1$s</string>
+    <string name="access_quota_over_by">Превышение на %1$s</string>
 
     <string name="vpn_msg_selecting_server">Выбор лучшего сервера…</string>
     <string name="vpn_msg_server_selected">Сервер выбран</string>

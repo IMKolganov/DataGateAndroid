@@ -33,3 +33,45 @@ fun formatHttpErrorDetail(operation: String, httpCode: Int, body: String): Strin
     }
     return "$operation: HTTP $httpCode, body=$body"
 }
+
+/** Backend [ApiResponse] wrapper: `success` / `message` / `data` (camelCase or PascalCase). */
+fun parseBackendApiEnvelopeOrThrow(operation: String, httpCode: Int, body: String): JSONObject {
+    val trimmed = body.trim()
+    if (trimmed.length < 2 || !trimmed.startsWith("{")) {
+        throw java.io.IOException(formatHttpErrorDetail(operation, httpCode, body))
+    }
+    val root = try {
+        JSONObject(trimmed)
+    } catch (_: JSONException) {
+        throw java.io.IOException(formatHttpErrorDetail(operation, httpCode, body))
+    }
+    val ok = when {
+        root.has("success") && !root.isNull("success") -> root.getBoolean("success")
+        root.has("Success") && !root.isNull("Success") -> root.getBoolean("Success")
+        else -> true
+    }
+    if (!ok) {
+        val msg = root.optString("message", root.optString("Message", "Request failed")).trim()
+            .ifEmpty { "Request failed" }
+        throw java.io.IOException("$operation (HTTP $httpCode): $msg")
+    }
+    return root
+}
+
+fun JSONObject.optDataObject(): JSONObject? {
+    if (has("data") && !isNull("data") && get("data") is JSONObject) {
+        return getJSONObject("data")
+    }
+    if (has("Data") && !isNull("Data") && get("Data") is JSONObject) {
+        return getJSONObject("Data")
+    }
+    return null
+}
+
+fun JSONObject.optDataString(): String? {
+    val d = if (has("data") && !isNull("data")) get("data") else if (has("Data") && !isNull("Data")) get("Data") else null
+    return when (d) {
+        is String -> d.trim().takeIf { it.isNotEmpty() }
+        else -> null
+    }
+}

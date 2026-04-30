@@ -19,7 +19,9 @@ private val Context.ipListDataStore: DataStore<Preferences> by preferencesDataSt
 data class IpListSettings(
     val sourceUrls: List<String>,
     val updateFrequency: IpListUpdateFrequency,
-    val coverageMode: IpListCoverageMode
+    val coverageMode: IpListCoverageMode,
+    /** When false, CIDR lists are not loaded or applied (all traffic via VPN). */
+    val cidrListsEnabled: Boolean = true
 )
 
 data class IpListStatus(
@@ -34,6 +36,7 @@ object IpListPreferences {
     private val KEY_SOURCE_URLS = stringPreferencesKey("source_urls")
     private val KEY_UPDATE_FREQUENCY = stringPreferencesKey("update_frequency")
     private val KEY_COVERAGE_MODE = stringPreferencesKey("coverage_mode")
+    private val KEY_CIDR_LISTS_ENABLED = booleanPreferencesKey("cidr_lists_enabled")
     private val KEY_CACHED_LIST = stringPreferencesKey("cached_list")
     private val KEY_CACHED_AT_MS = longPreferencesKey("cached_at_epoch_ms")
     private val KEY_LOADED_ROUTE_COUNT = intPreferencesKey("loaded_route_count")
@@ -55,7 +58,8 @@ object IpListPreferences {
                         prefs[KEY_SOURCE_URLS] ?: prefs[KEY_SOURCE_URL]
                     ),
                     updateFrequency = IpListUpdateFrequency.fromStorageValue(prefs[KEY_UPDATE_FREQUENCY]),
-                    coverageMode = IpListCoverageMode.fromStorageValue(prefs[KEY_COVERAGE_MODE])
+                    coverageMode = IpListCoverageMode.fromStorageValue(prefs[KEY_COVERAGE_MODE]),
+                    cidrListsEnabled = prefs[KEY_CIDR_LISTS_ENABLED] ?: true
                 )
             }
             .distinctUntilChanged()
@@ -67,13 +71,21 @@ object IpListPreferences {
         context: Context,
         sourceUrls: List<String>,
         updateFrequency: IpListUpdateFrequency,
-        coverageMode: IpListCoverageMode
+        coverageMode: IpListCoverageMode,
+        cidrListsEnabled: Boolean
     ) {
         context.ipListDataStore.edit { prefs ->
             prefs[KEY_SOURCE_URLS] = encodeSourceUrls(sourceUrls)
             prefs.remove(KEY_SOURCE_URL)
             prefs[KEY_UPDATE_FREQUENCY] = updateFrequency.storageValue
             prefs[KEY_COVERAGE_MODE] = coverageMode.storageValue
+            prefs[KEY_CIDR_LISTS_ENABLED] = cidrListsEnabled
+        }
+    }
+
+    suspend fun setCidrListsEnabled(context: Context, enabled: Boolean) {
+        context.ipListDataStore.edit { prefs ->
+            prefs[KEY_CIDR_LISTS_ENABLED] = enabled
         }
     }
 

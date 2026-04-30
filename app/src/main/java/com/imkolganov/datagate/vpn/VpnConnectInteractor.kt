@@ -144,16 +144,18 @@ class VpnConnectInteractor(
                 "OpenVPN3",
                 "OVPN profile transport=$linkProtocol (from proto line in file), size=${downloaded.content.size}"
             )
-            vpnController.showStatus(
-                "UPDATING_IP_LIST",
-                res.getString(R.string.vpn_updating_ip_list)
-            )
+            val ipListSettings = IpListPreferences.getSettings(appContext)
+            if (ipListSettings.cidrListsEnabled) {
+                vpnController.showStatus(
+                    "UPDATING_IP_LIST",
+                    res.getString(R.string.vpn_updating_ip_list)
+                )
+            }
             val bypassRoutes = ipListRoutesRepository.getRoutesForConnection()
             if (bypassRoutes.isNotEmpty() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                 vpnController.showError(res.getString(R.string.vpn_ip_list_requires_android_13))
                 return
             }
-            val ipListSettings = IpListPreferences.getSettings(appContext)
             val androidExcludedRoutes = when (ipListSettings.coverageMode) {
                 IpListCoverageMode.FAST -> IpListRouteConfig.selectAndroidExcludedRoutes(bypassRoutes)
                 IpListCoverageMode.FULL -> bypassRoutes

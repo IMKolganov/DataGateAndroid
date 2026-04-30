@@ -110,6 +110,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
 
     var authInfo by remember { mutableStateOf(tokenStore.getAuthInfo()) }
+    var cidrListsEnabledMain by remember { mutableStateOf(true) }
 
     if (showIpListSettings) {
         IpListSettingsScreen(onBack = { showIpListSettings = false })
@@ -118,6 +119,22 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         authInfo = withContext(Dispatchers.IO) { tokenStore.getAuthInfo() }
+    }
+
+    LaunchedEffect(Unit) {
+        val appCtx = context.applicationContext
+        cidrListsEnabledMain = withContext(Dispatchers.IO) {
+            IpListPreferences.getSettings(appCtx).cidrListsEnabled
+        }
+    }
+
+    LaunchedEffect(showIpListSettings) {
+        if (!showIpListSettings) {
+            val appCtx = context.applicationContext
+            cidrListsEnabledMain = withContext(Dispatchers.IO) {
+                IpListPreferences.getSettings(appCtx).cidrListsEnabled
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -212,6 +229,38 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_ip_lists_enable_title),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            stringResource(R.string.settings_ip_lists_enable_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = cidrListsEnabledMain,
+                        onCheckedChange = { v ->
+                            cidrListsEnabledMain = v
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    IpListPreferences.setCidrListsEnabled(context.applicationContext, v)
+                                }
+                            }
+                        }
+                    )
+                }
                 TextButton(onClick = { showIpListSettings = true }) {
                     Icon(Icons.Outlined.Route, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -423,6 +472,7 @@ private fun IpListSettingsScreen(
     var newSourceUrl by remember { mutableStateOf("") }
     var updateFrequency by remember { mutableStateOf(IpListUpdateFrequency.DAILY) }
     var coverageMode by remember { mutableStateOf(IpListCoverageMode.FULL) }
+    var cidrListsEnabled by remember { mutableStateOf(true) }
     var status by remember {
         mutableStateOf(
             IpListStatus(
@@ -452,6 +502,7 @@ private fun IpListSettingsScreen(
         sourceUrls = settings.sourceUrls
         updateFrequency = settings.updateFrequency
         coverageMode = settings.coverageMode
+        cidrListsEnabled = settings.cidrListsEnabled
         status = loaded.second
     }
 
@@ -483,6 +534,59 @@ private fun IpListSettingsScreen(
                 stringResource(R.string.settings_ip_lists_title),
                 style = MaterialTheme.typography.headlineSmall
             )
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_ip_lists_enable_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            stringResource(R.string.settings_ip_lists_enable_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = cidrListsEnabled,
+                        onCheckedChange = { v ->
+                            cidrListsEnabled = v
+                            savedMessageVisible = false
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    IpListPreferences.setCidrListsEnabled(context.applicationContext, v)
+                                }
+                            }
+                        }
+                    )
+                }
+                if (!cidrListsEnabled) {
+                    Text(
+                        stringResource(R.string.settings_ip_lists_detail_disabled_notice),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
         }
 
         Card(
@@ -597,7 +701,8 @@ private fun IpListSettingsScreen(
                                 context.applicationContext,
                                 sourceUrls,
                                 updateFrequency,
-                                coverageMode
+                                coverageMode,
+                                cidrListsEnabled
                             )
                             savedMessageVisible = true
                         }
@@ -700,7 +805,7 @@ private fun IpListSettingsScreen(
                             updateInProgress = false
                         }
                     },
-                    enabled = canSaveSources && !updateInProgress,
+                    enabled = canSaveSources && !updateInProgress && cidrListsEnabled,
                     modifier = Modifier.fillMaxWidth(),
                     shape = AppCards.shape
                 ) {

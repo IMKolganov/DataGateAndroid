@@ -96,7 +96,7 @@ object GoogleCredentialManager {
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(option)
             .build()
-банк
+
         val result = credentialManager.getCredential(
             request = request,
             context = activity

@@ -12,6 +12,35 @@
     <string name="login_welcome">Welcome to the VPN service.\nFor any questions, feel free to contact me at imkolganov@gmail.com.</string>
     <string name="login_version">v%1$s (%2$d)</string>
 
+    <string name="auth_tab_google">Google</string>
+    <string name="auth_tab_email">Email</string>
+    <string name="auth_email_sign_in">Sign in</string>
+    <string name="auth_email_register">Register</string>
+    <string name="auth_field_login">Username</string>
+    <string name="auth_field_password">Password</string>
+    <string name="auth_field_display_name">Display name</string>
+    <string name="auth_field_email">Email</string>
+    <string name="auth_field_confirm_password">Confirm password</string>
+    <string name="auth_field_confirmation_code">Confirmation code</string>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_create_account">Create account</string>
+    <string name="auth_confirm_email_help">If your server sends a confirmation email, enter the code from the message. If you did not receive a code, you can go straight to sign in.</string>
+    <string name="auth_confirm_email_action">Confirm email</string>
+    <string name="auth_resend_code">Resend code</string>
+    <string name="auth_skip_to_sign_in">Continue to sign in</string>
+    <string name="auth_dismiss">OK</string>
+    <string name="auth_register_check_email">Account created. If email confirmation is enabled on the server, check your inbox for the code.</string>
+    <string name="auth_email_confirmed_sign_in">Email confirmed. You can sign in with your username and password.</string>
+    <string name="auth_resend_confirmation_hint">If the address exists and is not yet confirmed, a new code has been sent.</string>
+    <string name="auth_error_login_password_required">Enter username and password.</string>
+    <string name="auth_error_display_name_required">Enter a display name.</string>
+    <string name="auth_error_email_required">Enter your email.</string>
+    <string name="auth_error_login_required">Choose a username.</string>
+    <string name="auth_error_password_short">Password must be at least 8 characters.</string>
+    <string name="auth_error_password_mismatch">Passwords do not match.</string>
+    <string name="auth_error_email_code_required">Enter email and confirmation code.</string>
+    <string name="auth_error_confirm_failed">Could not confirm email.</string>
+
     <string name="vpn_status_connected">Connected</string>
     <string name="vpn_status_connecting">Connecting…</string>
     <string name="vpn_status_disconnected">Disconnected</string>
@@ -105,6 +134,9 @@
     <string name="settings_auto_download_subtitle">When offering an update, remember that you want download/install options for future releases.</string>
     <string name="settings_ip_lists">IP list routing</string>
     <string name="settings_ip_lists_subtitle">Configure CIDR list sources used for traffic routing exceptions.</string>
+    <string name="settings_ip_lists_enable_title">CIDR IP lists</string>
+    <string name="settings_ip_lists_enable_subtitle">When off, list-based routing exceptions are not applied and lists are not downloaded; all traffic goes through the VPN tunnel.</string>
+    <string name="settings_ip_lists_detail_disabled_notice">CIDR lists are off. Enable the switch above to apply routing exceptions again.</string>
     <string name="settings_ip_lists_open">Configure IP list</string>
     <string name="settings_ip_lists_title">IP list routing</string>
     <string name="settings_ip_lists_source_title">CIDR list sources</string>
@@ -242,6 +274,15 @@
     <string name="access_quota_all_plans_title">All quota plans</string>
     <string name="access_quota_plan_default">Default</string>
     <string name="access_quota_plan_inactive">Inactive</string>
+    <string name="access_quota_traffic_title">Traffic quota</string>
+    <string name="access_quota_period_month">This calendar month</string>
+    <string name="access_quota_period_today">Today</string>
+    <string name="access_quota_needs_external_id">Traffic usage needs an OpenVPN client ID (external ID) on your account.</string>
+    <string name="access_quota_no_traffic_cap">No daily or monthly traffic limit on the active quota plan for this period, or no plan is active.</string>
+    <string name="access_quota_usage_unavailable">Usage data unavailable.</string>
+    <string name="access_quota_used_line">Used %1$s / %2$s (%3$s%%)</string>
+    <string name="access_quota_remaining">Remaining %1$s</string>
+    <string name="access_quota_over_by">Over quota by %1$s</string>
 
     <!-- VpnEventMapper -->
     <string name="vpn_msg_selecting_server">Selecting the best server…</string>
