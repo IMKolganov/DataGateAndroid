@@ -104,6 +104,15 @@ object VpnEventMapper {
                 lastMessage = res.getString(R.string.vpn_msg_tunnel_failed)
             )
 
+            "ERROR" -> previous.copy(
+                isConnectRequested = false,
+                isVpnConnected = false,
+                lastMessage = res.getString(
+                    R.string.vpn_connect_failed,
+                    eventInfo.trim().ifBlank { eventName }
+                )
+            )
+
             else -> {
                 val msg = sanitizeFallback(eventName, eventInfo)
                 previous.copy(lastMessage = msg)

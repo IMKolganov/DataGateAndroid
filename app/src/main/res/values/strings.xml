@@ -104,20 +104,29 @@
     <string name="settings_auto_download_title">Suggest APK download</string>
     <string name="settings_auto_download_subtitle">When offering an update, remember that you want download/install options for future releases.</string>
     <string name="settings_ip_lists">IP list routing</string>
-    <string name="settings_ip_lists_subtitle">Configure the CIDR list source used for traffic routing exceptions.</string>
+    <string name="settings_ip_lists_subtitle">Configure CIDR list sources used for traffic routing exceptions.</string>
     <string name="settings_ip_lists_open">Configure IP list</string>
     <string name="settings_ip_lists_title">IP list routing</string>
-    <string name="settings_ip_lists_source_title">CIDR list source</string>
-    <string name="settings_ip_lists_source_subtitle">Use a plain text URL with one IP range per line. CIDR notation is expected.</string>
+    <string name="settings_ip_lists_source_title">CIDR list sources</string>
+    <string name="settings_ip_lists_source_subtitle">Add plain text URLs with one IP range per line. CIDR notation is expected.</string>
     <string name="settings_ip_lists_url_label">List URL</string>
+    <string name="settings_ip_lists_add_url_label">Add list URL</string>
+    <string name="settings_ip_lists_add_url">Add URL</string>
     <string name="settings_ip_lists_url_hint">Example: https://example.com/ru-aggregated.zone</string>
     <string name="settings_ip_lists_url_error">Enter a valid http or https URL.</string>
+    <string name="action_delete">Delete</string>
     <string name="settings_ip_lists_frequency_label">Update frequency</string>
     <string name="settings_ip_lists_frequency_6h">Every 6 hours</string>
     <string name="settings_ip_lists_frequency_daily">Daily</string>
     <string name="settings_ip_lists_frequency_weekly">Weekly</string>
     <string name="settings_ip_lists_frequency_manual">Manual only</string>
+    <string name="settings_ip_lists_coverage_label">Coverage mode</string>
+    <string name="settings_ip_lists_coverage_fast">Fast</string>
+    <string name="settings_ip_lists_coverage_full">Full coverage</string>
+    <string name="settings_ip_lists_coverage_fast_description">Applies up to %1$d broad routes. Tunnel setup is faster, but small IP ranges may still use VPN.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies every loaded route for maximum coverage. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_saved">IP list settings saved.</string>
+    <string name="settings_ip_lists_android_12_warning">IP list bypass requires Android 13 or newer. On Android 12 and older, this routing mode is disabled because the VPN API cannot exclude large route lists safely.</string>
     <string name="settings_ip_lists_status_title">IP list status</string>
     <string name="settings_ip_lists_last_updated">Last updated</string>
     <string name="settings_ip_lists_last_updated_never">Never</string>
@@ -125,7 +134,7 @@
     <string name="settings_ip_lists_loaded_routes_value">%1$d routes</string>
     <string name="settings_ip_lists_last_error">Last load error</string>
     <string name="settings_ip_lists_last_error_none">None</string>
-    <string name="settings_ip_lists_route_limit_notice">Up to %1$d IPv4 or IPv6 routes are applied.</string>
+    <string name="settings_ip_lists_route_limit_notice">Up to %1$d routes are loaded; the broadest routes are applied during VPN setup for faster tunnel establishment.</string>
     <string name="settings_ip_lists_route_limit_warning">The list reached the %1$d route limit. Extra routes were ignored.</string>
     <string name="settings_ip_lists_update_now">Update now</string>
     <string name="settings_ip_lists_update_now_loading">Updating…</string>
@@ -198,6 +207,8 @@
     <string name="error_http_service_unavailable">The service is temporarily unavailable. Try again later.</string>
     <string name="error_http_gateway_timeout">The server took too long to respond. Try again later.</string>
     <string name="error_http_proxy_html">The server returned an error page instead of data. The service may be restarting.</string>
+    <string name="error_google_account_reauth_failed">Google account re-authentication failed. Check the Google account on this device, update Google Play services, then try signing in again.</string>
+    <string name="error_google_account_reauth_fallback_failed">Google sign-in failed before contacting the backend. Both Google Credential Manager flows failed while re-authenticating the account. If a Google account is present on the device, check the OAuth Android client package name and SHA-1/SHA-256 for this build.</string>
 
     <!-- VPN connect flow (VpnConnectInteractor / VpnController) -->
     <string name="vpn_selecting_best_server">Selecting best server</string>
@@ -212,6 +223,7 @@
     <string name="vpn_config_received">Config received (%1$d bytes)</string>
     <string name="vpn_updating_ip_list">Updating IP list…</string>
     <string name="vpn_ip_list_ready">IP list ready (%1$d routes)</string>
+    <string name="vpn_ip_list_requires_android_13">IP list bypass requires Android 13 or newer. Disable IP list routing or update Android to connect with this mode.</string>
     <string name="vpn_connect_failed">Connect failed: %1$s</string>
     <string name="vpn_server_selected">Server selected</string>
     <string name="vpn_waiting_permission">Waiting for VPN permission…</string>

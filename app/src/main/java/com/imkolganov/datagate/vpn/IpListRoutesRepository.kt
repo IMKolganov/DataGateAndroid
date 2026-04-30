@@ -22,7 +22,7 @@ class IpListRoutesRepository(
         val settings = IpListPreferences.getSettings(appContext)
 
         val content = if (IpListPreferences.shouldRefreshCachedList(appContext, settings)) {
-            fetchConfiguredList(settings.sourceUrl).fold(
+            fetchConfiguredLists(settings.sourceUrls).fold(
                 onSuccess = { it.also { saveParsedList(it) } },
                 onFailure = {
                     IpListPreferences.saveLastError(appContext, it.message ?: "IP list fetch failed")
@@ -45,7 +45,7 @@ class IpListRoutesRepository(
 
     suspend fun updateNow(): IpListUpdateResult {
         val settings = IpListPreferences.getSettings(appContext)
-        return fetchConfiguredList(settings.sourceUrl).fold(
+        return fetchConfiguredLists(settings.sourceUrls).fold(
             onSuccess = {
                 val result = saveParsedList(it)
                 IpListUpdateResult(
@@ -84,17 +84,28 @@ class IpListRoutesRepository(
         return result
     }
 
-    private suspend fun fetchConfiguredList(url: String): Result<String> {
-        val trimmedUrl = url.trim()
-        if (trimmedUrl != IpListPreferences.DEFAULT_SOURCE_URL) {
-            return fetchList(trimmedUrl)
+    private suspend fun fetchConfiguredLists(urls: List<String>): Result<String> {
+        val trimmedUrls = urls.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+        if (trimmedUrls.isEmpty()) {
+            return Result.failure(IllegalStateException("No IP list URLs configured"))
         }
 
-        val ipv4 = fetchList(IpListPreferences.DEFAULT_SOURCE_URL).getOrElse {
-            return Result.failure(it)
+        val contents = ArrayList<String>(trimmedUrls.size)
+        val errors = ArrayList<String>(trimmedUrls.size)
+        for (url in trimmedUrls) {
+            fetchList(url).fold(
+                onSuccess = { contents.add(it) },
+                onFailure = { errors.add("${url}: ${it.message ?: it.javaClass.simpleName}") }
+            )
         }
-        val ipv6 = fetchList(IpListPreferences.DEFAULT_IPV6_SOURCE_URL).getOrNull()
-        return Result.success(listOfNotNull(ipv4, ipv6).joinToString("\n"))
+
+        if (contents.isEmpty()) {
+            return Result.failure(IllegalStateException(errors.joinToString("; ")))
+        }
+        if (errors.isNotEmpty()) {
+            Log.w("OpenVPN3", "Some IP lists failed: ${errors.joinToString("; ")}")
+        }
+        return Result.success(contents.joinToString("\n"))
     }
 
     private suspend fun fetchList(url: String): Result<String> = withContext(Dispatchers.IO) {

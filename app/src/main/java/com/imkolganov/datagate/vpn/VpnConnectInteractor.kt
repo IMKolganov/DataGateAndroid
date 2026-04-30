@@ -3,6 +3,7 @@ package com.imkolganov.datagate.vpn
 import OvpnApiClient
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.servers.ManualServerResolve
@@ -148,12 +149,25 @@ class VpnConnectInteractor(
                 res.getString(R.string.vpn_updating_ip_list)
             )
             val bypassRoutes = ipListRoutesRepository.getRoutesForConnection()
-            val configWithBypass = IpListRouteConfig.appendBypassRoutes(configText, bypassRoutes)
-            val patchedConfig = forceWssConfig(configWithBypass, linkProtocol)
+            if (bypassRoutes.isNotEmpty() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                vpnController.showError(res.getString(R.string.vpn_ip_list_requires_android_13))
+                return
+            }
+            val ipListSettings = IpListPreferences.getSettings(appContext)
+            val androidExcludedRoutes = when (ipListSettings.coverageMode) {
+                IpListCoverageMode.FAST -> IpListRouteConfig.selectAndroidExcludedRoutes(bypassRoutes)
+                IpListCoverageMode.FULL -> bypassRoutes
+            }
+            val patchedConfig = forceWssConfig(configText, linkProtocol)
+            Log.d(
+                "OpenVPN3",
+                "IP list routes prepared for Android excludeRoute: " +
+                    "${androidExcludedRoutes.size}/${bypassRoutes.size}, coverage=${ipListSettings.coverageMode}"
+            )
             if (bypassRoutes.isNotEmpty()) {
                 vpnController.showStatus(
                     "IP_LIST_READY",
-                    res.getString(R.string.vpn_ip_list_ready, bypassRoutes.size)
+                    res.getString(R.string.vpn_ip_list_ready, androidExcludedRoutes.size)
                 )
             }
 
@@ -161,7 +175,7 @@ class VpnConnectInteractor(
                 ?: error("Best server apiUrl is null")
 
             val wssUrl = httpsToWssProxy(apiUrl, linkProtocol)
-            vpnController.startWithConfig(patchedConfig, wssUrl, linkProtocol)
+            vpnController.startWithConfig(patchedConfig, wssUrl, linkProtocol, androidExcludedRoutes)
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
             val raw = t.deepMessageForApiError().ifBlank { t.message.orEmpty() }

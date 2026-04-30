@@ -14,6 +14,7 @@ import java.net.InetAddress
 
 class OpenVpn3Client(
     private val service: VpnService,
+    private val excludedRoutes: List<IpCidrRoute>,
     private val onTunChanged: (ParcelFileDescriptor?) -> Unit,
     private val onCoreEvent: (String, String) -> Unit
 ) : ClientAPI_OpenVPNClient() {
@@ -233,6 +234,7 @@ class OpenVpn3Client(
         }
 
         return try {
+            applyExcludedRoutes(b)
             val pfd = b.establish()
             if (pfd == null) {
                 Log.e(TAG, "tun_builder_establish: establish() returned null")
@@ -253,6 +255,31 @@ class OpenVpn3Client(
             Log.e(TAG, "builder.establish() failed", t)
             -1
         }
+    }
+
+    private fun applyExcludedRoutes(b: VpnService.Builder) {
+        if (excludedRoutes.isEmpty()) return
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Log.w(TAG, "Skipping ${excludedRoutes.size} excluded routes: excludeRoute requires Android 13+")
+            return
+        }
+
+        var applied = 0
+        for (route in excludedRoutes) {
+            try {
+                b.excludeRoute(
+                    IpPrefix(
+                        InetAddress.getByName(route.networkAddress),
+                        route.prefixLength
+                    )
+                )
+                applied++
+            } catch (t: Throwable) {
+                Log.w(TAG, "excludeRoute failed for ${route.toCidrString()}", t)
+            }
+        }
+        Log.d(TAG, "Applied excluded routes: $applied/${excludedRoutes.size}")
     }
 
     override fun tun_builder_persist(): Boolean {

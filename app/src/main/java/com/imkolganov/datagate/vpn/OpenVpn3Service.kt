@@ -22,6 +22,7 @@ import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
 import net.openvpn.ovpn3.ClientAPI_ProvideCreds
 import net.openvpn.ovpn3.ClientAPI_Status
+import java.io.File
 import java.security.KeyStore
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory
@@ -32,6 +33,8 @@ class OpenVpn3Service : VpnService() {
 
     companion object {
         const val EXTRA_OVPN_CONFIG = "com.imkolganov.datagate.vpn.EXTRA_OVPN_CONFIG"
+        const val EXTRA_OVPN_CONFIG_PATH = "com.imkolganov.datagate.vpn.EXTRA_OVPN_CONFIG_PATH"
+        const val EXTRA_EXCLUDED_ROUTES_PATH = "com.imkolganov.datagate.vpn.EXTRA_EXCLUDED_ROUTES_PATH"
         const val EXTRA_WSS_URL = "com.imkolganov.datagate.vpn.EXTRA_WSS_URL"
         const val EXTRA_LINK_PROTOCOL = "com.imkolganov.datagate.vpn.EXTRA_LINK_PROTOCOL"
         const val EXTRA_SERVER_DISPLAY_NAME = "com.imkolganov.datagate.vpn.EXTRA_SERVER_DISPLAY_NAME"
@@ -176,7 +179,12 @@ class OpenVpn3Service : VpnService() {
         }
     }
 
-    private fun startVpn(configText: String, wssUrl: String, linkProtocol: VpnLinkProtocol) {
+    private fun startVpn(
+        configText: String,
+        wssUrl: String,
+        linkProtocol: VpnLinkProtocol,
+        excludedRoutes: List<IpCidrRoute>
+    ) {
         stopVpnInternal()
 
         val http = buildProtectedOkHttp(this@OpenVpn3Service)
@@ -219,6 +227,7 @@ class OpenVpn3Service : VpnService() {
 
                 val client = OpenVpn3Client(
                     service = this@OpenVpn3Service,
+                    excludedRoutes = excludedRoutes,
                     onTunChanged = { fd ->
                         Log.d(TAG, "TUN changed (fd=${fd?.fd ?: -1})")
                     },
@@ -250,6 +259,7 @@ class OpenVpn3Service : VpnService() {
                 val eval: ClientAPI_EvalConfig = client.eval_config(cfg)
                 if (eval.error) {
                     Log.e(TAG, "eval_config error: ${eval.message}")
+                    broadcastStatus("ERROR", eval.message ?: "OpenVPN profile validation failed")
                     stopSelf()
                     return@launch
                 }
@@ -262,6 +272,7 @@ class OpenVpn3Service : VpnService() {
                 val credStatus: ClientAPI_Status = client.provide_creds(creds)
                 if (credStatus.error) {
                     Log.e(TAG, "provide_creds error: ${credStatus.message}")
+                    broadcastStatus("ERROR", credStatus.message ?: "OpenVPN credentials failed")
                     stopSelf()
                     return@launch
                 }
@@ -274,6 +285,7 @@ class OpenVpn3Service : VpnService() {
                 stopSelf()
             } catch (t: Throwable) {
                 Log.e(TAG, "startVpn error", t)
+                broadcastStatus("ERROR", t.message ?: t.javaClass.simpleName)
                 crashLogger.logNonFatal("OpenVpn3Service.startVpn", t)
             } finally {
                 connectInProgress = false
@@ -344,7 +356,23 @@ class OpenVpn3Service : VpnService() {
             ACTION_CONNECT -> {
                 isStopping = false
 
+                val configPath = intent.getStringExtra(EXTRA_OVPN_CONFIG_PATH)
+                val excludedRoutesPath = intent.getStringExtra(EXTRA_EXCLUDED_ROUTES_PATH)
                 val configText = intent.getStringExtra(EXTRA_OVPN_CONFIG)
+                    ?: configPath?.let { path ->
+                        runCatching { File(path).readText() }
+                            .onFailure { Log.e(TAG, "Failed to read OVPN config file: $path", it) }
+                            .getOrNull()
+                    }
+                val excludedRoutes = excludedRoutesPath
+                    ?.let { path ->
+                        runCatching {
+                            IpListRouteConfig.parseCidrRoutesResult(File(path).readText()).routes
+                        }
+                            .onFailure { Log.e(TAG, "Failed to read excluded routes file: $path", it) }
+                            .getOrNull()
+                    }
+                    .orEmpty()
                 val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
 
                 if (configText.isNullOrBlank() || wssUrl.isNullOrBlank()) {
@@ -364,7 +392,15 @@ class OpenVpn3Service : VpnService() {
                 startForeground(NOTIFICATION_ID, buildNotification("Connecting..."))
                 val linkProtocol =
                     VpnLinkProtocol.fromIntentExtra(intent.getStringExtra(EXTRA_LINK_PROTOCOL))
-                startVpn(configText, wssUrl, linkProtocol)
+                startVpn(configText, wssUrl, linkProtocol, excludedRoutes)
+                configPath?.let { path ->
+                    runCatching { File(path).delete() }
+                        .onFailure { Log.w(TAG, "Failed to delete OVPN config file: $path", it) }
+                }
+                excludedRoutesPath?.let { path ->
+                    runCatching { File(path).delete() }
+                        .onFailure { Log.w(TAG, "Failed to delete excluded routes file: $path", it) }
+                }
             }
 
             ACTION_DISCONNECT -> {

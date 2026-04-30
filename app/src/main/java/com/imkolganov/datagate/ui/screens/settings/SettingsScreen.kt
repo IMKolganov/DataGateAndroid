@@ -1,15 +1,23 @@
 package com.imkolganov.datagate.ui.screens.settings
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,6 +53,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalConfiguration
@@ -64,6 +75,7 @@ import java.util.Locale
 import com.imkolganov.datagate.update.ApkUpdateInstaller
 import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.vpn.IpListRouteConfig
+import com.imkolganov.datagate.vpn.IpListCoverageMode
 import com.imkolganov.datagate.vpn.IpListPreferences
 import com.imkolganov.datagate.vpn.IpListRoutesRepository
 import com.imkolganov.datagate.vpn.IpListStatus
@@ -72,6 +84,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.net.URL
 import java.text.DateFormat
 import java.util.Date
 
@@ -139,6 +152,7 @@ fun SettingsScreen(
             displayName = authInfo.displayName,
             role = authInfo.role,
             email = authInfo.email,
+            avatarUrl = authInfo.avatarUrl,
             onLogout = onLogout
         )
 
@@ -405,8 +419,10 @@ private fun IpListSettingsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var sourceUrl by remember { mutableStateOf(IpListPreferences.DEFAULT_SOURCE_URL) }
+    var sourceUrls by remember { mutableStateOf(IpListPreferences.DEFAULT_SOURCE_URLS) }
+    var newSourceUrl by remember { mutableStateOf("") }
     var updateFrequency by remember { mutableStateOf(IpListUpdateFrequency.DAILY) }
+    var coverageMode by remember { mutableStateOf(IpListCoverageMode.FULL) }
     var status by remember {
         mutableStateOf(
             IpListStatus(
@@ -433,15 +449,18 @@ private fun IpListSettingsScreen(
                 IpListPreferences.getStatus(context.applicationContext)
         }
         val settings = loaded.first
-        sourceUrl = settings.sourceUrl
+        sourceUrls = settings.sourceUrls
         updateFrequency = settings.updateFrequency
+        coverageMode = settings.coverageMode
         status = loaded.second
     }
 
-    val trimmedUrl = sourceUrl.trim()
-    val urlError = remember(trimmedUrl) {
-        trimmedUrl.isNotEmpty() && !isHttpUrl(trimmedUrl)
+    val trimmedNewSourceUrl = newSourceUrl.trim()
+    val newUrlError = remember(trimmedNewSourceUrl) {
+        trimmedNewSourceUrl.isNotEmpty() && !isHttpUrl(trimmedNewSourceUrl)
     }
+    val hasSourceUrlError = sourceUrls.any { !isHttpUrl(it) }
+    val canSaveSources = sourceUrls.isNotEmpty() && !hasSourceUrlError
 
     Column(
         modifier = Modifier
@@ -485,26 +504,75 @@ private fun IpListSettingsScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    sourceUrls.forEachIndexed { index, url ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier.weight(1f),
+                                value = url,
+                                onValueChange = { value ->
+                                    sourceUrls = sourceUrls.toMutableList().also {
+                                        it[index] = value
+                                    }
+                                    savedMessageVisible = false
+                                },
+                                label = { Text(stringResource(R.string.settings_ip_lists_url_label)) },
+                                isError = url.isNotBlank() && !isHttpUrl(url),
+                                singleLine = true
+                            )
+                            TextButton(
+                                onClick = {
+                                    sourceUrls = sourceUrls.toMutableList().also {
+                                        it.removeAt(index)
+                                    }
+                                    savedMessageVisible = false
+                                },
+                                enabled = sourceUrls.size > 1
+                            ) {
+                                Text(stringResource(R.string.action_delete))
+                            }
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = sourceUrl,
+                    value = newSourceUrl,
                     onValueChange = {
-                        sourceUrl = it
+                        newSourceUrl = it
                         savedMessageVisible = false
                     },
-                    label = { Text(stringResource(R.string.settings_ip_lists_url_label)) },
+                    label = { Text(stringResource(R.string.settings_ip_lists_add_url_label)) },
                     supportingText = {
                         Text(
-                            if (urlError) {
+                            if (newUrlError) {
                                 stringResource(R.string.settings_ip_lists_url_error)
                             } else {
                                 stringResource(R.string.settings_ip_lists_url_hint)
                             }
                         )
                     },
-                    isError = urlError,
+                    isError = newUrlError,
                     singleLine = true
                 )
+                Button(
+                    onClick = {
+                        sourceUrls = (sourceUrls + trimmedNewSourceUrl).map { it.trim() }
+                            .filter { it.isNotEmpty() }
+                            .distinct()
+                        newSourceUrl = ""
+                        savedMessageVisible = false
+                    },
+                    enabled = trimmedNewSourceUrl.isNotEmpty() && !newUrlError,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = AppCards.shape
+                ) {
+                    Text(stringResource(R.string.settings_ip_lists_add_url))
+                }
 
                 IpListFrequencyDropdown(
                     current = updateFrequency,
@@ -514,18 +582,27 @@ private fun IpListSettingsScreen(
                     }
                 )
 
+                IpListCoverageModeSelector(
+                    current = coverageMode,
+                    onSelect = {
+                        coverageMode = it
+                        savedMessageVisible = false
+                    }
+                )
+
                 Button(
                     onClick = {
                         scope.launch {
                             IpListPreferences.saveSettings(
                                 context.applicationContext,
-                                trimmedUrl,
-                                updateFrequency
+                                sourceUrls,
+                                updateFrequency,
+                                coverageMode
                             )
                             savedMessageVisible = true
                         }
                     },
-                    enabled = trimmedUrl.isNotEmpty() && !urlError,
+                    enabled = canSaveSources,
                     modifier = Modifier.fillMaxWidth(),
                     shape = AppCards.shape
                 ) {
@@ -556,6 +633,13 @@ private fun IpListSettingsScreen(
                     stringResource(R.string.settings_ip_lists_status_title),
                     style = MaterialTheme.typography.titleMedium
                 )
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    Text(
+                        stringResource(R.string.settings_ip_lists_android_12_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
                 KeyValueRow(
                     stringResource(R.string.settings_ip_lists_last_updated),
                     status.lastUpdatedEpochMs?.let(::formatIpListUpdatedAt)
@@ -616,7 +700,7 @@ private fun IpListSettingsScreen(
                             updateInProgress = false
                         }
                     },
-                    enabled = trimmedUrl.isNotEmpty() && !urlError && !updateInProgress,
+                    enabled = canSaveSources && !updateInProgress,
                     modifier = Modifier.fillMaxWidth(),
                     shape = AppCards.shape
                 ) {
@@ -694,6 +778,46 @@ private fun ipListFrequencyLabel(frequency: IpListUpdateFrequency): String =
         IpListUpdateFrequency.MANUAL -> stringResource(R.string.settings_ip_lists_frequency_manual)
     }
 
+@Composable
+private fun IpListCoverageModeSelector(
+    current: IpListCoverageMode,
+    onSelect: (IpListCoverageMode) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.settings_ip_lists_coverage_label),
+            style = MaterialTheme.typography.labelLarge
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FilterChip(
+                selected = current == IpListCoverageMode.FAST,
+                onClick = { onSelect(IpListCoverageMode.FAST) },
+                label = { Text(stringResource(R.string.settings_ip_lists_coverage_fast)) }
+            )
+            FilterChip(
+                selected = current == IpListCoverageMode.FULL,
+                onClick = { onSelect(IpListCoverageMode.FULL) },
+                label = { Text(stringResource(R.string.settings_ip_lists_coverage_full)) }
+            )
+        }
+        Text(
+            when (current) {
+                IpListCoverageMode.FAST -> stringResource(
+                    R.string.settings_ip_lists_coverage_fast_description,
+                    IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES
+                )
+                IpListCoverageMode.FULL -> stringResource(R.string.settings_ip_lists_coverage_full_description)
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 private fun isHttpUrl(value: String): Boolean {
     val uri = runCatching { Uri.parse(value) }.getOrNull() ?: return false
     val scheme = uri.scheme?.lowercase(Locale.US)
@@ -759,6 +883,7 @@ private fun SessionLogoutCard(
     displayName: String?,
     role: String?,
     email: String?,
+    avatarUrl: String?,
     onLogout: () -> Unit
 ) {
     var showLogoutConfirm by remember { mutableStateOf(false) }
@@ -807,13 +932,25 @@ private fun SessionLogoutCard(
             )
 
             val name = displayName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.em_dash)
-            Text(
-                text = name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AccountAvatar(
+                    avatarUrl = avatarUrl,
+                    displayName = displayName,
+                    email = email
+                )
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             SessionInfoRow(
                 icon = {
@@ -872,6 +1009,46 @@ private fun SessionLogoutCard(
 }
 
 @Composable
+private fun AccountAvatar(
+    avatarUrl: String?,
+    displayName: String?,
+    email: String?
+) {
+    var bitmap by remember(avatarUrl) { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(avatarUrl) {
+        bitmap = avatarUrl?.let { loadAvatarBitmap(it) }
+    }
+
+    val resolvedBitmap = bitmap
+    if (resolvedBitmap != null) {
+        Image(
+            bitmap = resolvedBitmap.asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = avatarInitials(displayName, email),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
+
+@Composable
 private fun SessionInfoRow(
     icon: @Composable () -> Unit,
     label: String,
@@ -897,6 +1074,36 @@ private fun SessionInfoRow(
             )
         }
     }
+}
+
+private suspend fun loadAvatarBitmap(url: String): Bitmap? = withContext(Dispatchers.IO) {
+    val uri = runCatching { Uri.parse(url) }.getOrNull()
+    if (uri?.scheme?.lowercase(Locale.US) != "https") {
+        return@withContext null
+    }
+
+    runCatching {
+        val connection = URL(url).openConnection().apply {
+            connectTimeout = 4_000
+            readTimeout = 4_000
+        }
+        connection.getInputStream().use { input ->
+            BitmapFactory.decodeStream(input)
+        }
+    }.getOrNull()
+}
+
+private fun avatarInitials(displayName: String?, email: String?): String {
+    val source = displayName?.takeIf { it.isNotBlank() }
+        ?: email?.substringBefore('@')?.takeIf { it.isNotBlank() }
+        ?: return "?"
+    val initials = source
+        .trim()
+        .split(Regex("\\s+"))
+        .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+        .take(2)
+        .joinToString("")
+    return initials.ifBlank { "?" }
 }
 
 @Composable

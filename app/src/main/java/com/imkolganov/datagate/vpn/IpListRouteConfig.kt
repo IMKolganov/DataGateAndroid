@@ -5,23 +5,25 @@ import java.net.InetAddress
 
 sealed interface IpCidrRoute {
     val prefixLength: Int
+    val networkAddress: String
 
     fun toOpenVpnNetGatewayRoute(): String
+    fun toCidrString(): String = "$networkAddress/$prefixLength"
 }
 
 data class Ipv4CidrRoute(
-    val network: String,
+    override val networkAddress: String,
     val netmask: String,
     override val prefixLength: Int
 ) : IpCidrRoute {
-    override fun toOpenVpnNetGatewayRoute(): String = "route $network $netmask net_gateway"
+    override fun toOpenVpnNetGatewayRoute(): String = "route $networkAddress $netmask net_gateway"
 }
 
 data class Ipv6CidrRoute(
-    val network: String,
+    override val networkAddress: String,
     override val prefixLength: Int
 ) : IpCidrRoute {
-    override fun toOpenVpnNetGatewayRoute(): String = "route-ipv6 $network/$prefixLength net_gateway"
+    override fun toOpenVpnNetGatewayRoute(): String = "route-ipv6 $networkAddress/$prefixLength net_gateway"
 }
 
 data class IpListParseResult(
@@ -29,19 +31,66 @@ data class IpListParseResult(
     val reachedRouteLimit: Boolean
 )
 
+data class IpListAppendResult(
+    val config: String,
+    val appliedRouteCount: Int,
+    val reachedProfileSizeLimit: Boolean
+)
+
 object IpListRouteConfig {
     const val MAX_ROUTES = 12_000
+    const val MAX_ANDROID_EXCLUDED_ROUTES = 3_000
+    private const val MAX_OPENVPN_PROFILE_BYTES = 180_000
+
+    fun selectAndroidExcludedRoutes(routes: List<IpCidrRoute>): List<IpCidrRoute> {
+        if (routes.size <= MAX_ANDROID_EXCLUDED_ROUTES) return routes
+        return routes
+            .sortedWith(
+                compareBy<IpCidrRoute> { it is Ipv6CidrRoute }
+                    .thenBy { it.prefixLength }
+                    .thenBy { it.networkAddress }
+            )
+            .take(MAX_ANDROID_EXCLUDED_ROUTES)
+    }
 
     fun appendBypassRoutes(config: String, routes: List<IpCidrRoute>): String {
-        if (routes.isEmpty()) return config
+        return appendBypassRoutesResult(config, routes).config
+    }
+
+    fun appendBypassRoutesResult(config: String, routes: List<IpCidrRoute>): IpListAppendResult {
+        if (routes.isEmpty()) {
+            return IpListAppendResult(
+                config = config,
+                appliedRouteCount = 0,
+                reachedProfileSizeLimit = false
+            )
+        }
 
         val out = StringBuilder(config.trimEnd())
-        out.append("\n\n")
-        out.append("# DataGate IP list bypass routes\n")
+        val header = "\n\n# DataGate IP list bypass routes\n"
+        out.append(header)
+
+        var projectedBytes = out.toString().toByteArray(Charsets.UTF_8).size
+        var appliedRouteCount = 0
+        var reachedProfileSizeLimit = false
+
         for (route in routes) {
-            out.append(route.toOpenVpnNetGatewayRoute()).append('\n')
+            val line = route.toOpenVpnNetGatewayRoute() + '\n'
+            val lineBytes = line.toByteArray(Charsets.UTF_8).size
+            if (projectedBytes + lineBytes > MAX_OPENVPN_PROFILE_BYTES) {
+                reachedProfileSizeLimit = true
+                break
+            }
+            out.append(line)
+            projectedBytes += lineBytes
+            appliedRouteCount++
         }
-        return out.toString()
+
+        return IpListAppendResult(
+            config = out.toString(),
+            appliedRouteCount = appliedRouteCount,
+            reachedProfileSizeLimit = reachedProfileSizeLimit
+        )
     }
 
     fun parseIpv4CidrRoutes(content: String): List<Ipv4CidrRoute> =
@@ -93,7 +142,7 @@ object IpListRouteConfig {
         val network = ipLong and mask
 
         return Ipv4CidrRoute(
-            network = longToIpv4(network),
+            networkAddress = longToIpv4(network),
             netmask = longToIpv4(mask),
             prefixLength = prefixLength
         )
@@ -111,7 +160,7 @@ object IpListRouteConfig {
         applyIpv6Prefix(network, prefixLength)
 
         return Ipv6CidrRoute(
-            network = InetAddress.getByAddress(network).hostAddress ?: return null,
+            networkAddress = InetAddress.getByAddress(network).hostAddress ?: return null,
             prefixLength = prefixLength
         )
     }

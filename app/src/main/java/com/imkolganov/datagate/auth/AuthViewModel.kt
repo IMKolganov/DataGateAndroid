@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
 
 data class AuthUiState(
@@ -32,7 +33,7 @@ class AuthViewModel(
                 repo.loginWithGoogle(activity)
                 _state.update { it.copy(isLoading = false, isLoggedIn = true) }
             } catch (e: Exception) {
-                val msg = activity.resources.userFriendlyApiError(e.message)
+                val msg = activity.resources.userFriendlyApiError(e.deepMessageForApiError())
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }

@@ -100,20 +100,29 @@
     <string name="settings_auto_download_title">Предлагать загрузку APK</string>
     <string name="settings_auto_download_subtitle">При появлении обновления помнить, что вы хотите варианты загрузки и установки в будущем.</string>
     <string name="settings_ip_lists">Маршрутизация IP-списков</string>
-    <string name="settings_ip_lists_subtitle">Настройте источник CIDR-списка для исключений маршрутизации трафика.</string>
+    <string name="settings_ip_lists_subtitle">Настройте источники CIDR-списков для исключений маршрутизации трафика.</string>
     <string name="settings_ip_lists_open">Настроить IP-список</string>
     <string name="settings_ip_lists_title">Маршрутизация IP-списков</string>
-    <string name="settings_ip_lists_source_title">Источник CIDR-списка</string>
-    <string name="settings_ip_lists_source_subtitle">Используйте URL plain text файла, где в каждой строке один IP-диапазон. Ожидается CIDR-формат.</string>
+    <string name="settings_ip_lists_source_title">Источники CIDR-списков</string>
+    <string name="settings_ip_lists_source_subtitle">Добавьте URL plain text файлов, где в каждой строке один IP-диапазон. Ожидается CIDR-формат.</string>
     <string name="settings_ip_lists_url_label">URL списка</string>
+    <string name="settings_ip_lists_add_url_label">Добавить URL списка</string>
+    <string name="settings_ip_lists_add_url">Добавить URL</string>
     <string name="settings_ip_lists_url_hint">Пример: https://example.com/ru-aggregated.zone</string>
     <string name="settings_ip_lists_url_error">Введите корректный http или https URL.</string>
+    <string name="action_delete">Удалить</string>
     <string name="settings_ip_lists_frequency_label">Частота обновления</string>
     <string name="settings_ip_lists_frequency_6h">Каждые 6 часов</string>
     <string name="settings_ip_lists_frequency_daily">Ежедневно</string>
     <string name="settings_ip_lists_frequency_weekly">Еженедельно</string>
     <string name="settings_ip_lists_frequency_manual">Только вручную</string>
+    <string name="settings_ip_lists_coverage_label">Режим покрытия</string>
+    <string name="settings_ip_lists_coverage_fast">Быстро</string>
+    <string name="settings_ip_lists_coverage_full">Полное покрытие</string>
+    <string name="settings_ip_lists_coverage_fast_description">Применяет до %1$d широких маршрутов. Туннель устанавливается быстрее, но мелкие IP-диапазоны могут всё ещё идти через VPN.</string>
+    <string name="settings_ip_lists_coverage_full_description">Применяет все загруженные маршруты для максимального покрытия. На больших списках установка туннеля может занимать несколько секунд.</string>
     <string name="settings_ip_lists_saved">Настройки IP-списка сохранены.</string>
+    <string name="settings_ip_lists_android_12_warning">Обход по IP-списку требует Android 13 или новее. На Android 12 и старше этот режим маршрутизации отключён, потому что VPN API не умеет безопасно исключать большие списки маршрутов.</string>
 
     <string name="update_dialog_title">Новая версия %1$s</string>
     <string name="update_dialog_body">На GitHub доступна более новая сборка. Последний релиз: %1$s. У вас: %2$s.\n\nМожно открыть страницу релиза или скачать APK. Ниже можно включить предложения обновлений на будущее.</string>
@@ -176,6 +185,8 @@
     <string name="error_http_service_unavailable">Сервис временно недоступен. Попробуйте позже.</string>
     <string name="error_http_gateway_timeout">Сервер слишком долго не отвечал. Попробуйте позже.</string>
     <string name="error_http_proxy_html">Вместо данных пришла страница ошибки. Возможно, сервис перезапускается.</string>
+    <string name="error_google_account_reauth_failed">Не удалось повторно авторизовать Google-аккаунт. Проверьте аккаунт Google на устройстве, обновите Google Play services и попробуйте войти снова.</string>
+    <string name="error_google_account_reauth_fallback_failed">Вход через Google не дошёл до backend. Оба варианта Google Credential Manager упали при повторной авторизации аккаунта. Если Google-аккаунт есть на устройстве, проверьте package name и SHA-1/SHA-256 Android OAuth-клиента для этой сборки.</string>
 
     <string name="vpn_selecting_best_server">Выбор лучшего сервера</string>
     <string name="vpn_resolving_server">Поиск сервера</string>
@@ -189,6 +200,7 @@
     <string name="vpn_config_received">Профиль получен (%1$d байт)</string>
     <string name="vpn_updating_ip_list">Обновление IP-списка…</string>
     <string name="vpn_ip_list_ready">IP-список готов (%1$d маршрутов)</string>
+    <string name="vpn_ip_list_requires_android_13">Обход по IP-списку требует Android 13 или новее. Отключите маршрутизацию IP-списков или обновите Android, чтобы подключиться с этим режимом.</string>
     <string name="vpn_connect_failed">Ошибка подключения: %1$s</string>
     <string name="vpn_server_selected">Сервер выбран</string>
     <string name="vpn_waiting_permission">Ожидание разрешения VPN…</string>
@@ -233,7 +245,7 @@
     <string name="settings_ip_lists_loaded_routes_value">%1$d маршрутов</string>
     <string name="settings_ip_lists_last_error">Последняя ошибка загрузки</string>
     <string name="settings_ip_lists_last_error_none">Нет</string>
-    <string name="settings_ip_lists_route_limit_notice">Применяется до %1$d IPv4- или IPv6-маршрутов.</string>
+    <string name="settings_ip_lists_route_limit_notice">Загружается до %1$d маршрутов; при подключении применяются самые широкие маршруты, чтобы туннель устанавливался быстрее.</string>
     <string name="settings_ip_lists_route_limit_warning">Список достиг лимита %1$d маршрутов. Остальные маршруты проигнорированы.</string>
     <string name="settings_ip_lists_update_now">Обновить сейчас</string>
     <string name="settings_ip_lists_update_now_loading">Обновление…</string>

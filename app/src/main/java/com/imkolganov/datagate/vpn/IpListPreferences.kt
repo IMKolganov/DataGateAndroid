@@ -17,8 +17,9 @@ import kotlinx.coroutines.flow.map
 private val Context.ipListDataStore: DataStore<Preferences> by preferencesDataStore(name = "dg_ip_lists")
 
 data class IpListSettings(
-    val sourceUrl: String,
-    val updateFrequency: IpListUpdateFrequency
+    val sourceUrls: List<String>,
+    val updateFrequency: IpListUpdateFrequency,
+    val coverageMode: IpListCoverageMode
 )
 
 data class IpListStatus(
@@ -30,7 +31,9 @@ data class IpListStatus(
 
 object IpListPreferences {
     private val KEY_SOURCE_URL = stringPreferencesKey("source_url")
+    private val KEY_SOURCE_URLS = stringPreferencesKey("source_urls")
     private val KEY_UPDATE_FREQUENCY = stringPreferencesKey("update_frequency")
+    private val KEY_COVERAGE_MODE = stringPreferencesKey("coverage_mode")
     private val KEY_CACHED_LIST = stringPreferencesKey("cached_list")
     private val KEY_CACHED_AT_MS = longPreferencesKey("cached_at_epoch_ms")
     private val KEY_LOADED_ROUTE_COUNT = intPreferencesKey("loaded_route_count")
@@ -41,13 +44,18 @@ object IpListPreferences {
         "https://raw.githubusercontent.com/ipverse/country-ip-blocks/master/country/ru/ipv4-aggregated.txt"
     const val DEFAULT_IPV6_SOURCE_URL =
         "https://raw.githubusercontent.com/ipverse/country-ip-blocks/master/country/ru/ipv6-aggregated.txt"
+    val DEFAULT_SOURCE_URLS: List<String>
+        get() = listOf(DEFAULT_SOURCE_URL, DEFAULT_IPV6_SOURCE_URL)
 
     fun settingsFlow(context: Context): Flow<IpListSettings> =
         context.ipListDataStore.data
             .map { prefs ->
                 IpListSettings(
-                    sourceUrl = prefs[KEY_SOURCE_URL] ?: DEFAULT_SOURCE_URL,
-                    updateFrequency = IpListUpdateFrequency.fromStorageValue(prefs[KEY_UPDATE_FREQUENCY])
+                    sourceUrls = decodeSourceUrls(
+                        prefs[KEY_SOURCE_URLS] ?: prefs[KEY_SOURCE_URL]
+                    ),
+                    updateFrequency = IpListUpdateFrequency.fromStorageValue(prefs[KEY_UPDATE_FREQUENCY]),
+                    coverageMode = IpListCoverageMode.fromStorageValue(prefs[KEY_COVERAGE_MODE])
                 )
             }
             .distinctUntilChanged()
@@ -57,14 +65,35 @@ object IpListPreferences {
 
     suspend fun saveSettings(
         context: Context,
-        sourceUrl: String,
-        updateFrequency: IpListUpdateFrequency
+        sourceUrls: List<String>,
+        updateFrequency: IpListUpdateFrequency,
+        coverageMode: IpListCoverageMode
     ) {
         context.ipListDataStore.edit { prefs ->
-            prefs[KEY_SOURCE_URL] = sourceUrl.trim()
+            prefs[KEY_SOURCE_URLS] = encodeSourceUrls(sourceUrls)
+            prefs.remove(KEY_SOURCE_URL)
             prefs[KEY_UPDATE_FREQUENCY] = updateFrequency.storageValue
+            prefs[KEY_COVERAGE_MODE] = coverageMode.storageValue
         }
     }
+
+    private fun decodeSourceUrls(value: String?): List<String> {
+        val urls = value
+            ?.lineSequence()
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?.distinct()
+            ?.toList()
+            .orEmpty()
+        if (urls == listOf(DEFAULT_SOURCE_URL)) return DEFAULT_SOURCE_URLS
+        return urls.ifEmpty { DEFAULT_SOURCE_URLS }
+    }
+
+    private fun encodeSourceUrls(urls: List<String>): String =
+        urls.map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .joinToString("\n")
 
     suspend fun getCachedList(context: Context): String? =
         context.ipListDataStore.data.map { it[KEY_CACHED_LIST]?.takeIf(String::isNotBlank) }.first()
