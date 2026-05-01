@@ -39,6 +39,14 @@ fun Resources.userFriendlyApiError(raw: String?): String {
         return classifyHttpStatus(lower)
     }
 
+    if (lower.contains("account picker fallback also failed")) {
+        return getString(R.string.error_google_account_reauth_fallback_failed)
+    }
+
+    if (lower.contains("account reauth failed") || lower.contains("[16]")) {
+        return getString(R.string.error_google_account_reauth_failed)
+    }
+
     if (lower.contains("502") || lower.contains("bad gateway")) {
         return getString(R.string.error_http_bad_gateway)
     }

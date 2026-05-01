@@ -3,27 +3,30 @@ package com.imkolganov.datagate.auth.http
 
 import com.imkolganov.datagate.configs.ApiConfig
 import com.imkolganov.datagate.json.formatHttpErrorDetail
+import com.imkolganov.datagate.json.optDataObject
+import com.imkolganov.datagate.json.optDataString
+import com.imkolganov.datagate.json.parseBackendApiEnvelopeOrThrow
+import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
 import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
+import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
 import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RefreshResponseDto
+import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
+import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
+import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
-
 class OkHttpBackendAuthApi(
     private val http: OkHttpClient,
     private val baseUrl: String
 ) : BackendAuthApi {
 
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
-    private val utcTz: TimeZone = TimeZone.getTimeZone("UTC")
 
     override suspend fun googleLogin(request: GoogleLoginRequestDto): GoogleLoginResponseDto {
         val url = joinUrl(baseUrl, ApiConfig.GOOGLE_LOGIN_PATH)
@@ -46,19 +49,111 @@ class OkHttpBackendAuthApi(
 
             val obj = JSONObject(raw)
             val data = obj.getJSONObject("data")
-
-            val token = data.getString("token")
-            val expirationIso = data.getString("expiration")
-            val refreshToken = data.optStringOrNull("refreshToken")
-            val refreshExpirationIso = data.optStringOrNull("refreshExpiration")
-
-            return GoogleLoginResponseDto(
-                token = token,
-                expiration = expirationIso,
-                refreshToken = refreshToken,
-                refreshExpiration = refreshExpirationIso
-            )
+            return parseTokenBundle(data)
         }
+    }
+
+    override suspend fun register(request: RegisterUserRequestDto): RegisterUserResponseDto {
+        val url = joinUrl(baseUrl, ApiConfig.REGISTER_PATH)
+        val body = JSONObject()
+            .put("displayName", request.displayName.trim())
+            .put("login", request.login.trim())
+            .put("password", request.password)
+            .put("confirmPassword", request.confirmPassword)
+        if (!request.email.isNullOrBlank()) {
+            body.put("email", request.email.trim())
+        }
+        val raw = postJson(url, body.toString(), "register")
+        val root = parseBackendApiEnvelopeOrThrow("register", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("register: missing data in response")
+        val userId = when {
+            data.has("userId") && !data.isNull("userId") -> data.getInt("userId")
+            data.has("UserId") && !data.isNull("UserId") -> data.getInt("UserId")
+            else -> throw IOException("register: missing userId in response")
+        }
+        val dashboard = when {
+            data.has("hasDashboardAccess") && !data.isNull("hasDashboardAccess") ->
+                data.getBoolean("hasDashboardAccess")
+            data.has("HasDashboardAccess") && !data.isNull("HasDashboardAccess") ->
+                data.getBoolean("HasDashboardAccess")
+            else -> false
+        }
+        return RegisterUserResponseDto(
+            userId = userId,
+            displayName = data.optString("displayName", data.optString("DisplayName", "")),
+            email = data.optStringOrNull("email") ?: data.optStringOrNull("Email"),
+            hasDashboardAccess = dashboard
+        )
+    }
+
+    override suspend fun loginWithPassword(request: LoginPasswordRequestDto): GoogleLoginResponseDto {
+        val url = joinUrl(baseUrl, ApiConfig.LOGIN_PATH)
+        val bodyJson = JSONObject()
+            .put("login", request.login.trim())
+            .put("password", request.password)
+            .toString()
+        val raw = postJson(url, bodyJson, "login")
+        val root = parseBackendApiEnvelopeOrThrow("login", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("login: missing data in response")
+        return parseTokenBundle(data)
+    }
+
+    override suspend fun requestEmailConfirmation(email: String): String {
+        val url = joinUrl(baseUrl, ApiConfig.EMAIL_REQUEST_CONFIRMATION_PATH)
+        val bodyJson = JSONObject()
+            .put("email", email.trim())
+            .toString()
+        val raw = postJson(url, bodyJson, "request-email-confirmation")
+        val root = parseBackendApiEnvelopeOrThrow("request-email-confirmation", 200, raw)
+        return root.optDataString()
+            ?: root.optString("message", root.optString("Message", "")).trim()
+                .ifEmpty { "OK" }
+    }
+
+    override suspend fun confirmEmail(email: String, code: String): ConfirmEmailResultDto {
+        val url = joinUrl(baseUrl, ApiConfig.EMAIL_CONFIRM_PATH)
+        val bodyJson = JSONObject()
+            .put("email", email.trim())
+            .put("code", code.trim())
+            .toString()
+        val raw = postJson(url, bodyJson, "confirm-email")
+        val root = parseBackendApiEnvelopeOrThrow("confirm-email", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("confirm-email: missing data in response")
+        val innerOk = data.optBoolean("success", data.optBoolean("Success", false))
+        val innerMsg = data.optString("message", data.optString("Message", "")).trim()
+        return ConfirmEmailResultDto(success = innerOk, message = innerMsg)
+    }
+
+    override suspend fun forgotPassword(loginOrEmail: String): String {
+        val url = joinUrl(baseUrl, ApiConfig.FORGOT_PASSWORD_PATH)
+        val bodyJson = JSONObject()
+            .put("loginOrEmail", loginOrEmail.trim())
+            .toString()
+        val raw = postJson(url, bodyJson, "forgot-password")
+        val root = parseBackendApiEnvelopeOrThrow("forgot-password", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("forgot-password: missing data in response")
+        return data.optString("message", data.optString("Message", "")).trim()
+            .ifEmpty { "OK" }
+    }
+
+    override suspend fun resetPassword(code: String, newPassword: String, confirmPassword: String): ResetPasswordResultDto {
+        val url = joinUrl(baseUrl, ApiConfig.RESET_PASSWORD_PATH)
+        val bodyJson = JSONObject()
+            .put("code", code.trim())
+            .put("newPassword", newPassword)
+            .put("confirmPassword", confirmPassword)
+            .toString()
+        val raw = postJson(url, bodyJson, "reset-password")
+        val root = parseBackendApiEnvelopeOrThrow("reset-password", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("reset-password: missing data in response")
+        val innerOk = data.optBoolean("success", data.optBoolean("Success", false))
+        val innerMsg = data.optString("message", data.optString("Message", "")).trim()
+        return ResetPasswordResultDto(success = innerOk, message = innerMsg)
     }
 
     override suspend fun refresh(request: RefreshRequestDto): RefreshResponseDto {
@@ -84,79 +179,50 @@ class OkHttpBackendAuthApi(
 
             val obj = JSONObject(raw)
             val data = obj.getJSONObject("data")
-
-            val token = data.getString("token")
-            val expirationIso = data.getString("expiration")
-            val refreshToken = data.optStringOrNull("refreshToken")
-            val refreshExpirationIso = data.optStringOrNull("refreshExpiration")
-
+            val bundle = parseTokenBundle(data)
             return RefreshResponseDto(
-                token = token,
-                expiration = expirationIso,
-                refreshToken = refreshToken,
-                refreshExpiration = refreshExpirationIso
+                token = bundle.token,
+                expiration = bundle.expiration,
+                refreshToken = bundle.refreshToken,
+                refreshExpiration = bundle.refreshExpiration
             )
         }
+    }
+
+    private fun postJson(url: String, body: String, opLabel: String): String {
+        val req = Request.Builder()
+            .url(url)
+            .post(body.toRequestBody(jsonMediaType))
+            .build()
+        val resp = http.newCall(req).execute()
+        resp.use { r ->
+            val raw = r.body.string().orEmpty()
+            if (r.code !in 200..299) {
+                throw IOException(formatHttpErrorDetail(opLabel, r.code, raw))
+            }
+            return raw
+        }
+    }
+
+    private fun parseTokenBundle(data: JSONObject): GoogleLoginResponseDto {
+        val token = data.optString("token", data.optString("Token", "")).trim()
+            .ifEmpty { throw IOException("auth response: missing token") }
+        val expirationIso = data.optString("expiration", data.optString("Expiration", "")).trim()
+            .ifEmpty { throw IOException("auth response: missing expiration") }
+        val refreshToken = data.optStringOrNull("refreshToken") ?: data.optStringOrNull("RefreshToken")
+        val refreshExpirationIso =
+            data.optStringOrNull("refreshExpiration") ?: data.optStringOrNull("RefreshExpiration")
+        return GoogleLoginResponseDto(
+            token = token,
+            expiration = expirationIso,
+            refreshToken = refreshToken,
+            refreshExpiration = refreshExpirationIso
+        )
     }
 
     private fun JSONObject.optStringOrNull(key: String): String? {
         val v = optString(key, "").trim()
         return v.takeIf { it.isNotEmpty() }
-    }
-
-    private fun parseIsoToEpochSeconds(iso: String): Long? {
-        val millis = parseIsoToMillis(iso) ?: return null
-        return millis / 1000L
-    }
-
-    private fun parseIsoToMillis(iso: String): Long? {
-        val normalized = iso.trim().replace("+00:00", "Z")
-        val fixed = normalizeFractionToMillis(normalized)
-
-        val patterns = arrayOf(
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-            "yyyy-MM-dd'T'HH:mm:ssXXX"
-        )
-
-        for (p in patterns) {
-            try {
-                val df = SimpleDateFormat(p, Locale.US).apply {
-                    timeZone = utcTz
-                }
-                val d = df.parse(fixed)
-                if (d != null) return d.time
-            } catch (_: Throwable) {
-                // try next
-            }
-        }
-        return null
-    }
-
-    private fun normalizeFractionToMillis(input: String): String {
-        val dot = input.indexOf('.')
-        if (dot < 0) return input
-
-        val tzIndex = run {
-            val z = input.indexOf('Z', startIndex = dot)
-            if (z >= 0) return@run z
-            val plus = input.indexOf('+', startIndex = dot)
-            if (plus >= 0) return@run plus
-            val minus = input.indexOf('-', startIndex = dot + 1)
-            if (minus >= 0) return@run minus
-            input.length
-        }
-
-        val fraction = input.substring(dot + 1, tzIndex)
-        val ms = when {
-            fraction.length >= 3 -> fraction.substring(0, 3)
-            fraction.isEmpty() -> "000"
-            fraction.length == 1 -> fraction + "00"
-            else -> fraction + "0"
-        }
-
-        return input.substring(0, dot) + "." + ms + input.substring(tzIndex)
     }
 
     private fun joinUrl(base: String, path: String): String {

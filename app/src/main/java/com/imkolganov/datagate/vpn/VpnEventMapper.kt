@@ -73,6 +73,11 @@ object VpnEventMapper {
                 lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
+            "NETWORK_CHANGED" -> previous.copy(
+                isConnectRequested = true,
+                lastMessage = res.getString(R.string.vpn_msg_reconnecting)
+            )
+
             "CONNECTING" -> previous.copy(
                 isConnectRequested = true,
                 lastMessage = res.getString(R.string.vpn_msg_connecting)
@@ -102,6 +107,15 @@ object VpnEventMapper {
                 isConnectRequested = false,
                 isVpnConnected = false,
                 lastMessage = res.getString(R.string.vpn_msg_tunnel_failed)
+            )
+
+            "ERROR" -> previous.copy(
+                isConnectRequested = false,
+                isVpnConnected = false,
+                lastMessage = res.getString(
+                    R.string.vpn_connect_failed,
+                    eventInfo.trim().ifBlank { eventName }
+                )
             )
 
             else -> {

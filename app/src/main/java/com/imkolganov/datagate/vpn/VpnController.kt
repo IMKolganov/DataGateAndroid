@@ -2,6 +2,7 @@ package com.imkolganov.datagate.vpn
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.BackgroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -10,7 +11,9 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
+import com.imkolganov.datagate.DataGateApp
 import com.imkolganov.datagate.R
+import java.io.File
 
 class VpnController(
     private val activity: Activity,
@@ -22,7 +25,9 @@ class VpnController(
     private var pendingConfigText: String? = null
     private var pendingWssLink: String? = null
     private var pendingLinkProtocol: VpnLinkProtocol? = null
+    private var pendingBypassRoutes: List<IpCidrRoute> = emptyList()
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
+    private val crashLogger get() = (activity.application as? DataGateApp)?.crashLogger
 
     companion object {
         private const val TAG = "OpenVPN3"
@@ -119,13 +124,19 @@ class VpnController(
         )
     }
 
-    fun startWithConfig(configText: String, wssLink: String, linkProtocol: VpnLinkProtocol) {
+    fun startWithConfig(
+        configText: String,
+        wssLink: String,
+        linkProtocol: VpnLinkProtocol,
+        bypassRoutes: List<IpCidrRoute> = emptyList()
+    ) {
         // Do not block on isConnectRequested here because it may already be set by pre-connect flow.
         // The real connection state will be driven by OpenVPN core events.
 
         pendingConfigText = configText
         pendingWssLink = wssLink
         pendingLinkProtocol = linkProtocol
+        pendingBypassRoutes = bypassRoutes
 
         Log.d(TAG, "Calling VpnService.prepare()")
         val prepareIntent = VpnService.prepare(activity)
@@ -144,7 +155,7 @@ class VpnController(
         }
 
         Log.d(TAG, "VPN permission already granted, starting service...")
-        startServiceWithConfig(configText, wssLink, linkProtocol)
+        startServiceWithConfig(configText, wssLink, linkProtocol, bypassRoutes)
     }
 
     fun onPermissionGranted() {
@@ -153,16 +164,18 @@ class VpnController(
         val cfg = pendingConfigText
         val wss = pendingWssLink
         val linkProtocol = pendingLinkProtocol
+        val bypassRoutes = pendingBypassRoutes
         pendingConfigText = null
         pendingWssLink = null
         pendingLinkProtocol = null
+        pendingBypassRoutes = emptyList()
 
         if (cfg.isNullOrBlank() || wss.isNullOrBlank()) {
             showError(activity.getString(R.string.vpn_error_permission_missing_config))
             return
         }
 
-        startServiceWithConfig(cfg, wss, linkProtocol ?: VpnLinkProtocol.TCP)
+        startServiceWithConfig(cfg, wss, linkProtocol ?: VpnLinkProtocol.TCP, bypassRoutes)
     }
 
     fun onPermissionDenied() {
@@ -170,6 +183,7 @@ class VpnController(
         pendingConfigText = null
         pendingWssLink = null
         pendingLinkProtocol = null
+        pendingBypassRoutes = emptyList()
         showError(activity.getString(R.string.vpn_error_permission_denied))
     }
 
@@ -206,14 +220,22 @@ class VpnController(
         activity.sendBroadcast(testIntent)
     }
 
-    private fun startServiceWithConfig(configText: String, wssLink: String, linkProtocol: VpnLinkProtocol) {
+    private fun startServiceWithConfig(
+        configText: String,
+        wssLink: String,
+        linkProtocol: VpnLinkProtocol,
+        bypassRoutes: List<IpCidrRoute>
+    ) {
         val serverDisplayName =
             getState().selectedServerName?.takeIf { it.isNotBlank() }
                 ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
+        val configFile = writeConfigForService(configText)
+        val routesFile = writeRoutesForService(bypassRoutes)
 
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_CONNECT
-            putExtra(OpenVpn3Service.EXTRA_OVPN_CONFIG, configText)
+            putExtra(OpenVpn3Service.EXTRA_OVPN_CONFIG_PATH, configFile.absolutePath)
+            routesFile?.let { putExtra(OpenVpn3Service.EXTRA_EXCLUDED_ROUTES_PATH, it.absolutePath) }
             putExtra(OpenVpn3Service.EXTRA_WSS_URL, wssLink)
             putExtra(OpenVpn3Service.EXTRA_LINK_PROTOCOL, linkProtocol.intentValue())
             if (serverDisplayName != null) {
@@ -221,7 +243,20 @@ class VpnController(
             }
         }
 
-        startServiceCompat(intent)
+        try {
+            startServiceCompat(intent)
+        } catch (t: Throwable) {
+            Log.e(TAG, "Failed to start OpenVPN service", t)
+            runCatching { configFile.delete() }
+            routesFile?.let { runCatching { it.delete() } }
+            showError(
+                activity.getString(
+                    R.string.vpn_connect_failed,
+                    t.message ?: t.javaClass.simpleName
+                )
+            )
+            return
+        }
 
         onStateChange(
             getState().copy(
@@ -229,6 +264,21 @@ class VpnController(
                 lastMessage = activity.getString(R.string.vpn_connecting_generic)
             )
         )
+    }
+
+    private fun writeConfigForService(configText: String): File {
+        val dir = File(activity.cacheDir, "vpn").apply { mkdirs() }
+        return File(dir, "pending-${System.currentTimeMillis()}.ovpn").apply {
+            writeText(configText)
+        }
+    }
+
+    private fun writeRoutesForService(routes: List<IpCidrRoute>): File? {
+        if (routes.isEmpty()) return null
+        val dir = File(activity.cacheDir, "vpn").apply { mkdirs() }
+        return File(dir, "excluded-routes-${System.currentTimeMillis()}.txt").apply {
+            writeText(routes.joinToString(separator = "\n", postfix = "\n") { it.toCidrString() })
+        }
     }
 
     private fun startServiceCompat(intent: Intent) {
@@ -245,7 +295,29 @@ class VpnController(
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_QUERY_STATUS
         }
-        startServiceCompat(intent)
+        try {
+            startServiceCompat(intent)
+        } catch (t: Throwable) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                t is BackgroundServiceStartNotAllowedException
+            ) {
+                Log.w(
+                    TAG,
+                    "Skipped ACTION_QUERY_STATUS: background service start is not allowed now",
+                    t
+                )
+                crashLogger?.logNonFatal(
+                    tag = "VpnController.requestCurrentStatus.background_not_allowed",
+                    throwable = t
+                )
+                return
+            }
+            Log.w(TAG, "Failed to request current VPN status", t)
+            crashLogger?.logNonFatal(
+                tag = "VpnController.requestCurrentStatus.failed",
+                throwable = t
+            )
+        }
     }
 
     private fun registerReceiver() {

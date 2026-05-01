@@ -8,9 +8,57 @@
     <string name="nav_settings">Настройки</string>
 
     <string name="login_title">DataGate</string>
+    <string name="login_tagline">Безопасный VPN-доступ к вашим серверам</string>
+    <string name="login_logo_cd">Логотип DataGate</string>
     <string name="login_sign_in_google">Войти через Google</string>
     <string name="login_welcome">Добро пожаловать в VPN‑сервис.\nПо вопросам пишите на imkolganov@gmail.com.</string>
     <string name="login_version">v%1$s (%2$d)</string>
+
+    <string name="auth_tab_google">Google</string>
+    <string name="auth_tab_email">Почта</string>
+    <string name="auth_email_sign_in">Вход</string>
+    <string name="auth_email_register">Регистрация</string>
+    <string name="auth_field_login">Логин</string>
+    <string name="auth_field_password">Пароль</string>
+    <string name="auth_field_display_name">Отображаемое имя</string>
+    <string name="auth_field_email">Электронная почта</string>
+    <string name="auth_field_confirm_password">Повтор пароля</string>
+    <string name="auth_field_confirmation_code">Код подтверждения</string>
+    <string name="auth_sign_in">Войти</string>
+    <string name="auth_create_account">Создать аккаунт</string>
+    <string name="auth_confirm_email_help">Если на сервере включено подтверждение почты, введите код из письма. Если письма нет, можно сразу перейти к входу.</string>
+    <string name="auth_confirm_email_action">Подтвердить почту</string>
+    <string name="auth_resend_code">Отправить код снова</string>
+    <string name="auth_skip_to_sign_in">Перейти ко входу</string>
+    <string name="auth_dismiss">OK</string>
+    <string name="auth_register_check_email">Аккаунт создан. Если на сервере включено подтверждение почты, проверьте входящие и введите код из письма.</string>
+    <string name="auth_email_confirmed_sign_in">Почта подтверждена. Войдите с логином и паролем.</string>
+    <string name="auth_resend_confirmation_hint">Если такой адрес есть и он ещё не подтверждён, отправлен новый код.</string>
+    <string name="auth_error_login_password_required">Введите логин и пароль.</string>
+    <string name="auth_error_display_name_required">Введите отображаемое имя.</string>
+    <string name="auth_error_email_required">Введите адрес почты.</string>
+    <string name="auth_error_login_required">Придумайте логин.</string>
+    <string name="auth_error_password_short">Пароль не короче 8 символов.</string>
+    <string name="auth_error_password_mismatch">Пароли не совпадают.</string>
+    <string name="auth_error_email_code_required">Введите почту и код.</string>
+    <string name="auth_error_confirm_failed">Не удалось подтвердить почту.</string>
+    <string name="auth_password_show">Показать пароль</string>
+    <string name="auth_password_hide">Скрыть пароль</string>
+    <string name="auth_forgot_password_link">Забыли пароль?</string>
+    <string name="auth_have_reset_code">У меня есть код сброса</string>
+    <string name="auth_forgot_password_intro">Введите логин или почту. Если такая учётная запись есть, код сброса будет отправлен на привязанную почту (если настроена почта на сервере) и может появиться в логе сервера.</string>
+    <string name="auth_forgot_password_submit">Отправить код</string>
+    <string name="auth_forgot_password_done">Если учётная запись найдена, проверьте почту и лог сервера с кодом, затем введите его ниже.</string>
+    <string name="auth_forgot_rate_limited">Слишком много попыток. Попробуйте позже.</string>
+    <string name="auth_reset_password_intro">Введите код из письма или консоли сервера и новый пароль (не короче 8 символов).</string>
+    <string name="auth_reset_password_submit">Сохранить новый пароль</string>
+    <string name="auth_password_reset_done">Пароль обновлён. Можно войти.</string>
+    <string name="auth_field_login_or_email">Логин или почта</string>
+    <string name="auth_field_new_password">Новый пароль</string>
+    <string name="auth_field_reset_code">Код сброса</string>
+    <string name="auth_error_forgot_login_required">Введите логин или почту.</string>
+    <string name="auth_error_reset_code_required">Введите код сброса.</string>
+    <string name="auth_error_reset_failed">Не удалось сменить пароль.</string>
 
     <string name="vpn_status_connected">Подключено</string>
     <string name="vpn_status_connecting">Подключение…</string>
@@ -21,8 +69,11 @@
     <string name="action_disconnect">Отключить</string>
     <string name="action_cancel">Отмена</string>
     <string name="action_connect">Подключить</string>
+    <string name="action_back">Назад</string>
+    <string name="action_save">Сохранить</string>
     <string name="vpn_home_footer">«Подключить» выбирает сервер автоматически. Чтобы указать сервер вручную, откройте вкладку «Доступ».</string>
 
+    <string name="home_quick_actions_title">Помощь и язык</string>
     <string name="home_report_issue">Сообщить о проблеме</string>
     <string name="home_report_issue_title">Связь с поддержкой</string>
     <string name="home_report_issue_hint">Как вам удобнее связаться:</string>
@@ -97,6 +148,33 @@
     <string name="settings_push_updates_subtitle">Локальное уведомление после проверки GitHub (без облачного push). На Android 13+ нужно разрешение на уведомления.</string>
     <string name="settings_auto_download_title">Предлагать загрузку APK</string>
     <string name="settings_auto_download_subtitle">При появлении обновления помнить, что вы хотите варианты загрузки и установки в будущем.</string>
+    <string name="settings_ip_lists">Маршрутизация IP-списков</string>
+    <string name="settings_ip_lists_subtitle">Настройте источники CIDR-списков для исключений маршрутизации трафика.</string>
+    <string name="settings_ip_lists_enable_title">CIDR-списки</string>
+    <string name="settings_ip_lists_enable_subtitle">Если выключено, исключения маршрутизации по спискам не применяются и списки не загружаются — весь трафик идёт через VPN.</string>
+    <string name="settings_ip_lists_detail_disabled_notice">CIDR-списки выключены. Включите переключатель выше, чтобы снова применять исключения маршрутизации.</string>
+    <string name="settings_ip_lists_open">Настроить IP-список</string>
+    <string name="settings_ip_lists_title">Маршрутизация IP-списков</string>
+    <string name="settings_ip_lists_source_title">Источники CIDR-списков</string>
+    <string name="settings_ip_lists_source_subtitle">Добавьте URL plain text файлов, где в каждой строке один IP-диапазон. Ожидается CIDR-формат.</string>
+    <string name="settings_ip_lists_url_label">URL списка</string>
+    <string name="settings_ip_lists_add_url_label">Добавить URL списка</string>
+    <string name="settings_ip_lists_add_url">Добавить URL</string>
+    <string name="settings_ip_lists_url_hint">Пример: https://example.com/ru-aggregated.zone</string>
+    <string name="settings_ip_lists_url_error">Введите корректный http или https URL.</string>
+    <string name="action_delete">Удалить</string>
+    <string name="settings_ip_lists_frequency_label">Частота обновления</string>
+    <string name="settings_ip_lists_frequency_6h">Каждые 6 часов</string>
+    <string name="settings_ip_lists_frequency_daily">Ежедневно</string>
+    <string name="settings_ip_lists_frequency_weekly">Еженедельно</string>
+    <string name="settings_ip_lists_frequency_manual">Только вручную</string>
+    <string name="settings_ip_lists_coverage_label">Режим покрытия</string>
+    <string name="settings_ip_lists_coverage_fast">Быстро</string>
+    <string name="settings_ip_lists_coverage_full">Полное покрытие</string>
+    <string name="settings_ip_lists_coverage_fast_description">Применяет до %1$d широких маршрутов. Туннель устанавливается быстрее, но мелкие IP-диапазоны могут всё ещё идти через VPN.</string>
+    <string name="settings_ip_lists_coverage_full_description">Применяет все загруженные маршруты для максимального покрытия. На больших списках установка туннеля может занимать несколько секунд.</string>
+    <string name="settings_ip_lists_saved">Настройки IP-списка сохранены.</string>
+    <string name="settings_ip_lists_android_12_warning">Обход по IP-списку требует Android 13 или новее. На Android 12 и старше этот режим маршрутизации отключён, потому что VPN API не умеет безопасно исключать большие списки маршрутов.</string>
 
     <string name="update_dialog_title">Новая версия %1$s</string>
     <string name="update_dialog_body">На GitHub доступна более новая сборка. Последний релиз: %1$s. У вас: %2$s.\n\nМожно открыть страницу релиза или скачать APK. Ниже можно включить предложения обновлений на будущее.</string>
@@ -159,6 +237,8 @@
     <string name="error_http_service_unavailable">Сервис временно недоступен. Попробуйте позже.</string>
     <string name="error_http_gateway_timeout">Сервер слишком долго не отвечал. Попробуйте позже.</string>
     <string name="error_http_proxy_html">Вместо данных пришла страница ошибки. Возможно, сервис перезапускается.</string>
+    <string name="error_google_account_reauth_failed">Не удалось повторно авторизовать Google-аккаунт. Проверьте аккаунт Google на устройстве, обновите Google Play services и попробуйте войти снова.</string>
+    <string name="error_google_account_reauth_fallback_failed">Вход через Google не дошёл до backend. Оба варианта Google Credential Manager упали при повторной авторизации аккаунта. Если Google-аккаунт есть на устройстве, проверьте package name и SHA-1/SHA-256 Android OAuth-клиента для этой сборки.</string>
 
     <string name="vpn_selecting_best_server">Выбор лучшего сервера</string>
     <string name="vpn_resolving_server">Поиск сервера</string>
@@ -170,6 +250,9 @@
     <string name="vpn_preparing_cert_identity">Подготовка сертификата для %1$s</string>
     <string name="vpn_requesting_profile">Запрос профиля VPN для %1$s</string>
     <string name="vpn_config_received">Профиль получен (%1$d байт)</string>
+    <string name="vpn_updating_ip_list">Обновление IP-списка…</string>
+    <string name="vpn_ip_list_ready">IP-список готов (%1$d маршрутов)</string>
+    <string name="vpn_ip_list_requires_android_13">Обход по IP-списку требует Android 13 или новее. Отключите маршрутизацию IP-списков или обновите Android, чтобы подключиться с этим режимом.</string>
     <string name="vpn_connect_failed">Ошибка подключения: %1$s</string>
     <string name="vpn_server_selected">Сервер выбран</string>
     <string name="vpn_waiting_permission">Ожидание разрешения VPN…</string>
@@ -188,6 +271,15 @@
     <string name="access_quota_all_plans_title">Все тарифные планы</string>
     <string name="access_quota_plan_default">По умолчанию</string>
     <string name="access_quota_plan_inactive">Неактивен</string>
+    <string name="access_quota_traffic_title">Квота трафика</string>
+    <string name="access_quota_period_month">Текущий календарный месяц</string>
+    <string name="access_quota_period_today">Сегодня</string>
+    <string name="access_quota_needs_external_id">Для учёта трафика в JWT нужен внешний идентификатор клиента OpenVPN.</string>
+    <string name="access_quota_no_traffic_cap">Нет дневного или месячного лимита трафика на активном плане за этот период, или план не назначен.</string>
+    <string name="access_quota_usage_unavailable">Данные об использовании недоступны.</string>
+    <string name="access_quota_used_line">Использовано %1$s из %2$s (%3$s%%)</string>
+    <string name="access_quota_remaining">Осталось %1$s</string>
+    <string name="access_quota_over_by">Превышение на %1$s</string>
 
     <string name="vpn_msg_selecting_server">Выбор лучшего сервера…</string>
     <string name="vpn_msg_server_selected">Сервер выбран</string>
@@ -206,4 +298,20 @@
     <string name="vpn_msg_connected">Подключено</string>
     <string name="vpn_msg_disconnected">Отключено</string>
     <string name="vpn_msg_tunnel_failed">Ошибка настройки туннеля</string>
+
+    <string name="settings_ip_lists_status_title">Статус IP-списка</string>
+    <string name="settings_ip_lists_last_updated">Последнее обновление</string>
+    <string name="settings_ip_lists_last_updated_never">Никогда</string>
+    <string name="settings_ip_lists_loaded_routes">Загружено маршрутов</string>
+    <string name="settings_ip_lists_loaded_routes_value">%1$d маршрутов</string>
+    <string name="settings_ip_lists_last_error">Последняя ошибка загрузки</string>
+    <string name="settings_ip_lists_last_error_none">Нет</string>
+    <string name="settings_ip_lists_route_limit_notice">Загружается до %1$d маршрутов; при подключении применяются самые широкие маршруты, чтобы туннель устанавливался быстрее.</string>
+    <string name="settings_ip_lists_route_limit_warning">Список достиг лимита %1$d маршрутов. Остальные маршруты проигнорированы.</string>
+    <string name="settings_ip_lists_update_now">Обновить сейчас</string>
+    <string name="settings_ip_lists_update_now_loading">Обновление…</string>
+    <string name="settings_ip_lists_update_ready">IP-список обновлен: загружено %1$d маршрутов.</string>
+    <string name="settings_ip_lists_update_failed_prefix">Ошибка обновления</string>
+    <string name="settings_ip_lists_update_failed">Ошибка обновления: %1$s</string>
+    <string name="settings_ip_lists_update_failed_fallback">Ошибка обновления: %1$s. Используется кешированный или встроенный список.</string>
 </resources>

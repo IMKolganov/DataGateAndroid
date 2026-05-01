@@ -5,6 +5,7 @@ import com.imkolganov.datagate.model.overview.OverviewMeta
 import com.imkolganov.datagate.model.overview.OverviewRow
 import com.imkolganov.datagate.model.overview.OverviewSeriesResponse
 import com.imkolganov.datagate.model.overview.OverviewSummary
+import com.imkolganov.datagate.model.overview.OverviewSummaryTotals
 
 public class FakeStatsApiClient : StatsApiClient(
     http = okhttp3.OkHttpClient(),
@@ -54,4 +55,15 @@ public class FakeStatsApiClient : StatsApiClient(
             data = data
         )
     }
+
+    override suspend fun getOverviewSummary(
+        fromIso: String,
+        toIso: String,
+        externalId: String
+    ): ApiResponse<OverviewSummaryTotals> =
+        ApiResponse(
+            success = true,
+            message = "Success",
+            data = OverviewSummaryTotals(trafficTotalBytes = 750_000_000L)
+        )
 }

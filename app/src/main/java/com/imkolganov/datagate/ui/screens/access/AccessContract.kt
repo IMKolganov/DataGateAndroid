@@ -24,7 +24,14 @@ interface AccessContract {
         val currentPlanName: String? = null,
         val currentEffectiveFrom: String? = null,
         val currentNote: String? = null,
-        val allPlans: List<QuotaPlanRow> = emptyList()
+        val allPlans: List<QuotaPlanRow> = emptyList(),
+        /** JWT has no OpenVPN external id — overview summary cannot attribute usage. */
+        val trafficUsageNeedsExternalId: Boolean = false,
+        /** Limit for current period (month or day), bytes; 0 = no cap / none. */
+        val quotaLimitBytes: Long = 0L,
+        /** Traffic for [externalId] in period from overview/summary; -1 = unknown / not loaded. */
+        val trafficUsedBytesForPeriod: Long = -1L,
+        val quotaPeriodIsMonthly: Boolean = true
     )
 
     data class QuotaPlanRow(

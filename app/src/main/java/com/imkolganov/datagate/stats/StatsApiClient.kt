@@ -3,10 +3,12 @@ package com.imkolganov.datagate.stats
 import com.imkolganov.datagate.configs.ApiConfig
 import com.imkolganov.datagate.json.formatHttpErrorDetail
 import com.imkolganov.datagate.model.base.ApiResponse
+import com.imkolganov.datagate.json.optLongOrNull
 import com.imkolganov.datagate.model.overview.OverviewMeta
 import com.imkolganov.datagate.model.overview.OverviewRow
 import com.imkolganov.datagate.model.overview.OverviewSeriesResponse
 import com.imkolganov.datagate.model.overview.OverviewSummary
+import com.imkolganov.datagate.model.overview.OverviewSummaryTotals
 import executeSuspending
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -51,6 +53,32 @@ open class StatsApiClient(
         }
     }
 
+    open suspend fun getOverviewSummary(
+        fromIso: String,
+        toIso: String,
+        externalId: String
+    ): ApiResponse<OverviewSummaryTotals> {
+        val qs = buildQuery(
+            "From" to fromIso,
+            "To" to toIso,
+            "ExternalId" to externalId
+        )
+        val url = joinUrl(baseUrl, "${ApiConfig.API_OPEN_VPN_CLIENTS_OVERVIEW_SUMMARY_PATH}?$qs")
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .applyAuth()
+            .build()
+
+        return http.executeSuspending(request).use { resp ->
+            val body = resp.body.string().orEmpty()
+            if (resp.code !in 200..299) {
+                throw IOException(formatHttpErrorDetail("Overview summary failed", resp.code, body))
+            }
+            parseOverviewSummaryResponse(body)
+        }
+    }
+
     private fun parseOverviewSeriesResponse(body: String): ApiResponse<OverviewSeriesResponse> {
         val obj = JSONObject(body)
         val success = obj.optBoolean("success", false)
@@ -63,6 +91,28 @@ open class StatsApiClient(
             success = success,
             message = message,
             data = data
+        )
+    }
+
+    private fun parseOverviewSummaryResponse(body: String): ApiResponse<OverviewSummaryTotals> {
+        val obj = JSONObject(body)
+        val success = obj.optBoolean("success", false)
+        val message = obj.optString("message", "")
+        val dataObj = obj.optJSONObject("data") ?: JSONObject()
+        val totals = dataObj.optJSONObject("totals") ?: dataObj.optJSONObject("Totals") ?: JSONObject()
+        val direct = totals.optLongOrNull("trafficTotalBytes") ?: totals.optLongOrNull("TrafficTotalBytes")
+        val totalBytes = when {
+            direct != null && direct >= 0L -> direct
+            else -> {
+                val inn = totals.optLong("trafficInBytes", totals.optLong("TrafficInBytes", 0L))
+                val out = totals.optLong("trafficOutBytes", totals.optLong("TrafficOutBytes", 0L))
+                inn + out
+            }
+        }
+        return ApiResponse(
+            success = success,
+            message = message,
+            data = OverviewSummaryTotals(trafficTotalBytes = totalBytes)
         )
     }
 

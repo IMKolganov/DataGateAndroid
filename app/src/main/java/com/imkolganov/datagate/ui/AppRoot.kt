@@ -95,6 +95,10 @@ fun AppRoot(
             UpdateCheckHost(isLoggedIn = true, http = http)
         }
     } else {
-        LoginScreen(viewModel = authViewModel)
+        LoginScreen(
+            viewModel = authViewModel,
+            appLocale = appLocale,
+            onAppLocaleChange = onAppLocaleChange,
+        )
     }
 }

@@ -45,7 +45,7 @@ class OpenVpnServersApi(
         }
     }
 
-    private fun parseWithStatusResponse(body: String): ApiResponse<OpenVpnServersWithStatusV2Data> {
+    internal fun parseWithStatusResponse(body: String): ApiResponse<OpenVpnServersWithStatusV2Data> {
         val root = JSONObject(body)
 
         val success = root.optBoolean("success", false)
@@ -53,8 +53,8 @@ class OpenVpnServersApi(
 
         val dataObj = root.optJSONObject("data")
         val arr = dataObj?.let { o ->
-            o.optJSONArray("openVpnServerWithStatuses")
-                ?: o.optJSONArray("OpenVpnServerWithStatuses")
+            o.optJSONArray("vpnServerWithStatuses")
+                ?: o.optJSONArray("VpnServerWithStatuses")
         } ?: JSONArray()
 
         val list = parseWithStatusItems(arr)
@@ -77,14 +77,14 @@ class OpenVpnServersApi(
     }
 
     private fun parseWithStatusItem(obj: JSONObject): OpenVpnServerWithStatusV2Item? {
-        val serverResponsesObj = obj.optJSONObject("openVpnServerResponses")
-            ?: obj.optJSONObject("OpenVpnServerResponses")
-        val openVpnServerObj = serverResponsesObj?.optJSONObject("openVpnServer")
-            ?: serverResponsesObj?.optJSONObject("OpenVpnServer")
+        val serverResponsesObj = obj.optJSONObject("vpnServerResponses")
+            ?: obj.optJSONObject("VpnServerResponses")
+        val openVpnServerObj = serverResponsesObj?.optJSONObject("vpnServer")
+            ?: serverResponsesObj?.optJSONObject("VpnServer")
         val server = openVpnServerObj?.let { parseServerV2(it) } ?: return null
 
-        val logObj = obj.optJSONObject("openVpnServerStatusLogResponse")
-            ?: obj.optJSONObject("OpenVpnServerStatusLogResponse")
+        val logObj = obj.optJSONObject("vpnServerStatusLogResponse")
+            ?: obj.optJSONObject("VpnServerStatusLogResponse")
         val log = logObj?.let { parseStatusLog(it) }
 
         return OpenVpnServerWithStatusV2Item(

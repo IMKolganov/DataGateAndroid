@@ -123,7 +123,8 @@ class MainActivity : AppCompatActivity() {
         val accessRepo = AccessRepositoryImpl(
             serversRepository = graph.serversRepository,
             tokenStore = graph.tokenStore,
-            quotaPlanApi = graph.quotaPlanApi
+            quotaPlanApi = graph.quotaPlanApi,
+            statsApi = graph.statsApi
         )
 
         val accessFactory = AccessViewModelFactory(accessRepo, applicationContext)

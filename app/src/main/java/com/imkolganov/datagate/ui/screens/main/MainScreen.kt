@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
@@ -69,7 +70,8 @@ fun MainScreen(
     }
     val homeUpdateBanner by bannerFlow.collectAsState(initial = null)
 
-    var selectedTab by remember { mutableStateOf(BottomTab.Home) }
+    var selectedTabKey by rememberSaveable { mutableStateOf(BottomTab.Home.name) }
+    val selectedTab = BottomTab.entries.find { it.name == selectedTabKey } ?: BottomTab.Home
     val accessState by accessViewModel.state.collectAsState()
 
     Scaffold(
@@ -77,19 +79,19 @@ fun MainScreen(
             NavigationBar {
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Home,
-                    onClick = { selectedTab = BottomTab.Home },
+                    onClick = { selectedTabKey = BottomTab.Home.name },
                     icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.nav_home)) },
                     label = { Text(stringResource(R.string.nav_home)) }
                 )
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Access,
-                    onClick = { selectedTab = BottomTab.Access },
+                    onClick = { selectedTabKey = BottomTab.Access.name },
                     icon = { Icon(Icons.Default.Lock, contentDescription = stringResource(R.string.nav_access)) },
                     label = { Text(stringResource(R.string.nav_access)) }
                 )
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Statistics,
-                    onClick = { selectedTab = BottomTab.Statistics },
+                    onClick = { selectedTabKey = BottomTab.Statistics.name },
                     icon = {
                         Icon(
                             Icons.Default.AccountBox,
@@ -100,7 +102,7 @@ fun MainScreen(
                 )
                 NavigationBarItem(
                     selected = selectedTab == BottomTab.Settings,
-                    onClick = { selectedTab = BottomTab.Settings },
+                    onClick = { selectedTabKey = BottomTab.Settings.name },
                     icon = {
                         Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.nav_settings))
                     },

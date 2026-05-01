@@ -24,6 +24,10 @@ fun env(name: String): String =
         ?: System.getenv(name)
         ?: error("Missing env property: $name")
 
+fun envOpt(name: String): String? =
+    envProps.getProperty(name)
+        ?: System.getenv(name)
+
 fun ks(name: String): String =
     keystoreProps.getProperty(name)
         ?: System.getenv(name)
@@ -91,6 +95,7 @@ android {
 
             buildConfigField("String", "BACKEND_BASE_URL", "\"${env("DEV_BACKEND_URL")}\"")
             buildConfigField("String", "WEB_CLIENT_ID", "\"${env("DEV_WEB_CLIENT_ID")}\"")
+            buildConfigField("String", "CRASH_REPORT_TOKEN", "\"${envOpt("DEV_CRASH_REPORT_TOKEN") ?: ""}\"")
         }
 
         create("prod") {
@@ -100,6 +105,7 @@ android {
 
             buildConfigField("String", "BACKEND_BASE_URL", "\"${env("PROD_BACKEND_URL")}\"")
             buildConfigField("String", "WEB_CLIENT_ID", "\"${env("PROD_WEB_CLIENT_ID")}\"")
+            buildConfigField("String", "CRASH_REPORT_TOKEN", "\"${envOpt("PROD_CRASH_REPORT_TOKEN") ?: ""}\"")
         }
     }
 
@@ -139,6 +145,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.junit)
+    testImplementation(libs.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -152,7 +159,9 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.okhttp)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.vico.compose.m3)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    testImplementation(libs.okhttp.mockwebserver)
 }

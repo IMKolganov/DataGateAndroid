@@ -57,6 +57,9 @@ fun AccessScreenPreview() {
                 quota = AccessContract.QuotaUiState(
                     currentPlanName = "Standard",
                     currentEffectiveFrom = "2025-01-01T00:00:00Z",
+                    quotaLimitBytes = 50L * 1024L * 1024L * 1024L,
+                    trafficUsedBytesForPeriod = 18L * 1024L * 1024L * 1024L,
+                    quotaPeriodIsMonthly = true,
                     allPlans = listOf(
                         AccessContract.QuotaPlanRow(
                             id = 1,
