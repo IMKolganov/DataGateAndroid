@@ -24,7 +24,13 @@ class TcpToWssBridge(
         Thread {
             while (running) {
                 val socket = try { ss.accept() } catch (_: Throwable) { break }
-                Thread { handle(socket) }.start()
+                Thread {
+                    try {
+                        handle(socket)
+                    } catch (_: Throwable) {
+                        // Socket can be closed concurrently during shutdown/reconnect.
+                    }
+                }.start()
             }
         }.start()
     }
@@ -64,8 +70,21 @@ class TcpToWssBridge(
             }
         })
 
-        val tcpIn = tcp.getInputStream()
-        val tcpOut = tcp.getOutputStream()
+        val tcpIn = try {
+            tcp.getInputStream()
+        } catch (_: Throwable) {
+            try { ws.cancel() } catch (_: Throwable) {}
+            try { tcp.close() } catch (_: Throwable) {}
+            return
+        }
+
+        val tcpOut = try {
+            tcp.getOutputStream()
+        } catch (_: Throwable) {
+            try { ws.cancel() } catch (_: Throwable) {}
+            try { tcp.close() } catch (_: Throwable) {}
+            return
+        }
 
         val t1 = Thread {
             val buf = ByteArray(16 * 1024)
