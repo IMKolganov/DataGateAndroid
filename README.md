@@ -55,6 +55,36 @@ The project expects optional config files (see `app/build.gradle.kts`):
 
 Add these files as needed; they are typically in `.gitignore`.
 
+#### Crash report upload config
+
+Add crash ingest settings into your local `env.properties` (used by `app/build.gradle.kts`):
+
+```properties
+# Dev flavor
+DEV_BACKEND_URL=https://<host>
+DEV_CRASH_REPORT_TOKEN=
+
+# Prod flavor
+PROD_BACKEND_URL=https://<host>
+PROD_CRASH_REPORT_TOKEN=
+```
+
+- Crash endpoint is derived automatically from backend host:
+  - `<BACKEND_BASE_URL>/api/v1/mobile/crash-ingest`
+- `*_CRASH_REPORT_TOKEN` is optional. If empty, `X-Crash-Token` is not sent.
+- App sends plain text crash files as-is, one file per POST request.
+
+Manual backend check:
+
+```bash
+curl -i -X POST "https://<host>/api/v1/mobile/crash-ingest" \
+  -H "Content-Type: text/plain; charset=utf-8" \
+  -H "X-Crash-Filename: fatal_2026-05-01T00-00-00.000Z.txt" \
+  -H "X-Crash-Process: com.imkolganov.datagate.dev" \
+  -H "X-Crash-Token: <token-if-needed>" \
+  --data-binary @./sample-crash.txt
+```
+
 ### 3. Build
 
 ```bash
