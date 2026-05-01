@@ -43,9 +43,21 @@ class AuthViewModel(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        AuthUiState(isLoggedIn = repo.isLoggedIn())
+        AuthUiState(isLoading = true, isLoggedIn = false)
     )
     val state: StateFlow<AuthUiState> = _state
+
+    init {
+        viewModelScope.launch {
+            val restored = repo.tryRestoreSession()
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isLoggedIn = restored || repo.isLoggedIn()
+                )
+            }
+        }
+    }
 
     fun selectLoginTab(tab: AuthLoginTab) {
         _state.update {

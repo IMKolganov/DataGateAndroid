@@ -2,11 +2,12 @@ package com.imkolganov.datagate.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.imkolganov.datagate.BuildConfig
@@ -57,9 +58,7 @@ fun AppRoot(
         }
     }
 
-    val isLoggedIn = remember(authVersion) {
-        !tokenStore.getAccessToken().isNullOrBlank()
-    }
+    val isLoggedIn = authState.isLoggedIn
 
     LaunchedEffect(openUpdateFromNotificationPending, isLoggedIn) {
         if (!openUpdateFromNotificationPending) return@LaunchedEffect
@@ -70,6 +69,16 @@ fun AppRoot(
             UpdatePreferences.getCachedNewerRelease(appContext, BuildConfig.VERSION_NAME)
         }
         rel?.let { UpdatePromptController.requestUpdateDialog(it) }
+    }
+
+    if (authState.isLoading && !isLoggedIn) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
     }
 
     if (isLoggedIn) {

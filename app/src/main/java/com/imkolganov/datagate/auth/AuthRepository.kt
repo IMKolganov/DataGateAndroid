@@ -7,6 +7,7 @@ import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
 import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
 import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
+import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
 import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
@@ -22,7 +23,42 @@ class AuthRepository(
         const val TAG = "Auth"
     }
 
-    fun isLoggedIn(): Boolean = !tokenStore.getRefreshToken().isNullOrBlank()
+    fun isLoggedIn(): Boolean =
+        !tokenStore.getAccessToken().isNullOrBlank() && !tokenStore.getRefreshToken().isNullOrBlank()
+
+    suspend fun tryRestoreSession(): Boolean {
+        val refresh = tokenStore.getRefreshToken()
+        if (refresh.isNullOrBlank()) return false
+
+        if (!tokenStore.getAccessToken().isNullOrBlank()) {
+            return true
+        }
+
+        return try {
+            val refreshed = withContext(Dispatchers.IO) {
+                api.refresh(
+                    RefreshRequestDto(
+                        refreshToken = refresh,
+                        deviceId = null,
+                        userAgent = null
+                    )
+                )
+            }
+            tokenStore.saveAccessToken(refreshed.token)
+            tokenStore.saveAccessTokenExpiration(refreshed.expiration)
+            if (!refreshed.refreshToken.isNullOrBlank()) {
+                tokenStore.saveRefreshToken(refreshed.refreshToken)
+            }
+            tokenStore.saveRefreshTokenExpiration(refreshed.refreshExpiration)
+            autoLoginStore.setEnabled(true)
+            true
+        } catch (t: Throwable) {
+            Log.w(TAG, "Session restore failed, clearing tokens", t)
+            tokenStore.clear()
+            autoLoginStore.setEnabled(false)
+            false
+        }
+    }
 
     fun logout() {
         Log.d(TAG, "Logout requested. Before clear token=${tokenStore.getAccessToken()?.take(12)}")
