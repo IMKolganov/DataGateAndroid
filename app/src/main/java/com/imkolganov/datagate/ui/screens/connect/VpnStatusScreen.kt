@@ -72,6 +72,10 @@ fun VpnStatusScreen(
     onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
 ) {
     val context = LocalContext.current
+    val supportEmail = stringResource(R.string.support_contact_email)
+    val supportEmailSubject = stringResource(R.string.home_report_email_subject)
+    val telegramBotUrl = stringResource(R.string.support_telegram_bot_url)
+    val githubIssuesUrl = stringResource(R.string.project_github_issues_url)
     val isConnected = state.isVpnConnected
     val isConnecting = state.isConnectRequested && !state.isVpnConnected
 
@@ -133,9 +137,8 @@ fun VpnStatusScreen(
     }
 
     fun openSupportEmail() {
-        val email = context.getString(R.string.support_contact_email)
-        val subject = Uri.encode(context.getString(R.string.home_report_email_subject))
-        val uri = Uri.parse("mailto:$email?subject=$subject")
+        val subject = Uri.encode(supportEmailSubject)
+        val uri = Uri.parse("mailto:$supportEmail?subject=$subject")
         try {
             context.startActivity(Intent(Intent.ACTION_SENDTO, uri))
         } catch (_: Exception) {
@@ -293,7 +296,7 @@ fun VpnStatusScreen(
                     )
                     TextButton(
                         onClick = {
-                            openUrl(context.getString(R.string.support_telegram_bot_url))
+                            openUrl(telegramBotUrl)
                             showReportDialog = false
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -321,7 +324,7 @@ fun VpnStatusScreen(
                     }
                     TextButton(
                         onClick = {
-                            openUrl(context.getString(R.string.project_github_issues_url))
+                            openUrl(githubIssuesUrl)
                             showReportDialog = false
                         },
                         modifier = Modifier.fillMaxWidth()

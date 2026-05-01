@@ -130,7 +130,7 @@
     <string name="vpn_disconnecting">در حال قطع…</string>
     <string name="vpn_connecting_generic">در حال اتصال…</string>
     <string name="vpn_requires_openvpn_connect">این سرور (%1$s) اتصال درون‌برنامه‌ای از طریق WSS را پشتیبانی نمی‌کند. از برنامه رسمی OpenVPN Connect با پروفایل این سرور استفاده کنید.\n\nدر کشورهای با کنترش شدید شبکه (مثلاً روسیه، ایران) ممکن است همچنان کار نکند.</string>
-    <string name="vpn_server_manual_unavailable">سرور شماره %1$s آفلاین است یا برای اتصال در برنامه در دسترس نیست.</string>
+    <string name="vpn_server_manual_unavailable">سرور شماره %1$d آفلاین است یا برای اتصال در برنامه در دسترس نیست.</string>
     <string name="vpn_server_quota_blocked">سرور «%1$s» در پلان شما نیست.</string>
     <string name="access_server_quota_blocked">در پلان شما نیست</string>
     <string name="access_quota_section_title">سهمیه</string>

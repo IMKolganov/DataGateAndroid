@@ -118,6 +118,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlin {
@@ -164,4 +165,5 @@ dependencies {
     implementation(libs.vico.compose.m3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     testImplementation(libs.okhttp.mockwebserver)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -57,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -103,6 +105,8 @@ fun SettingsScreen(
     val context = LocalContext.current
     val uiLocale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
     val noErrorLogsLabel = stringResource(R.string.no_error_logs)
+    val projectWebsiteUrl = stringResource(R.string.project_website_url)
+    val projectTelegramUrl = stringResource(R.string.project_telegram_url)
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
     var githubUpdatesEnabled by remember { mutableStateOf(true) }
@@ -324,7 +328,7 @@ fun SettingsScreen(
                         onClick = {
                             ApkUpdateInstaller.openUrl(
                                 context,
-                                context.getString(R.string.project_website_url)
+                                projectWebsiteUrl
                             )
                         }
                     ) {
@@ -334,7 +338,7 @@ fun SettingsScreen(
                         onClick = {
                             ApkUpdateInstaller.openUrl(
                                 context,
-                                context.getString(R.string.project_telegram_url)
+                                projectTelegramUrl
                             )
                         }
                     ) {
@@ -463,6 +467,11 @@ fun SettingsScreen(
     }
 }
 
+private sealed interface IpListUpdateMessage {
+    data class Failed(val error: String, val usedFallback: Boolean) : IpListUpdateMessage
+    data class Ready(val routeCount: Int) : IpListUpdateMessage
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun IpListSettingsScreen(
@@ -475,6 +484,9 @@ private fun IpListSettingsScreen(
     var newSourceUrl by remember { mutableStateOf("") }
     var updateFrequency by remember { mutableStateOf(IpListUpdateFrequency.DAILY) }
     var coverageMode by remember { mutableStateOf(IpListCoverageMode.FULL) }
+    var android12OvpnRouteLimitText by remember {
+        mutableStateOf(IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT.toString())
+    }
     var cidrListsEnabled by remember { mutableStateOf(true) }
     var status by remember {
         mutableStateOf(
@@ -487,7 +499,7 @@ private fun IpListSettingsScreen(
         )
     }
     var savedMessageVisible by remember { mutableStateOf(false) }
-    var updateMessage by remember { mutableStateOf<String?>(null) }
+    var updateMessage by remember { mutableStateOf<IpListUpdateMessage?>(null) }
     var updateInProgress by remember { mutableStateOf(false) }
     val repository = remember(context.applicationContext) {
         IpListRoutesRepository(
@@ -505,6 +517,7 @@ private fun IpListSettingsScreen(
         sourceUrls = settings.sourceUrls
         updateFrequency = settings.updateFrequency
         coverageMode = settings.coverageMode
+        android12OvpnRouteLimitText = settings.android12OvpnRouteLimit.toString()
         cidrListsEnabled = settings.cidrListsEnabled
         status = loaded.second
     }
@@ -513,8 +526,11 @@ private fun IpListSettingsScreen(
     val newUrlError = remember(trimmedNewSourceUrl) {
         trimmedNewSourceUrl.isNotEmpty() && !isHttpUrl(trimmedNewSourceUrl)
     }
+    val android12OvpnRouteLimit = android12OvpnRouteLimitText.toIntOrNull()
+    val android12OvpnRouteLimitError = android12OvpnRouteLimit == null ||
+        android12OvpnRouteLimit !in IpListRouteConfig.MIN_ANDROID12_OVPN_ROUTE_LIMIT..IpListRouteConfig.MAX_ANDROID12_OVPN_ROUTE_LIMIT
     val hasSourceUrlError = sourceUrls.any { !isHttpUrl(it) }
-    val canSaveSources = sourceUrls.isNotEmpty() && !hasSourceUrlError
+    val canSaveSources = sourceUrls.isNotEmpty() && !hasSourceUrlError && !android12OvpnRouteLimitError
 
     Column(
         modifier = Modifier
@@ -689,13 +705,24 @@ private fun IpListSettingsScreen(
                     }
                 )
 
-                IpListCoverageModeSelector(
-                    current = coverageMode,
-                    onSelect = {
-                        coverageMode = it
-                        savedMessageVisible = false
-                    }
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    IpListCoverageModeSelector(
+                        current = coverageMode,
+                        onSelect = {
+                            coverageMode = it
+                            savedMessageVisible = false
+                        }
+                    )
+                } else {
+                    Android12OvpnRouteLimitField(
+                        value = android12OvpnRouteLimitText,
+                        isError = android12OvpnRouteLimitError,
+                        onValueChange = {
+                            android12OvpnRouteLimitText = it.filter(Char::isDigit).take(4)
+                            savedMessageVisible = false
+                        }
+                    )
+                }
 
                 Button(
                     onClick = {
@@ -705,6 +732,8 @@ private fun IpListSettingsScreen(
                                 sourceUrls,
                                 updateFrequency,
                                 coverageMode,
+                                android12OvpnRouteLimit
+                                    ?: IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
                                 cidrListsEnabled
                             )
                             savedMessageVisible = true
@@ -743,9 +772,9 @@ private fun IpListSettingsScreen(
                 )
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                     Text(
-                        stringResource(R.string.settings_ip_lists_android_12_warning),
+                        stringResource(R.string.settings_ip_lists_android_12_notice),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 KeyValueRow(
@@ -794,17 +823,8 @@ private fun IpListSettingsScreen(
                                 IpListPreferences.getStatus(context.applicationContext)
                             }
                             updateMessage = result.error
-                                ?.let {
-                                    if (result.usedFallback) {
-                                        context.getString(R.string.settings_ip_lists_update_failed_fallback, it)
-                                    } else {
-                                        context.getString(R.string.settings_ip_lists_update_failed, it)
-                                    }
-                                }
-                                ?: context.getString(
-                                    R.string.settings_ip_lists_update_ready,
-                                    result.routeCount
-                                )
+                                ?.let { IpListUpdateMessage.Failed(it, result.usedFallback) }
+                                ?: IpListUpdateMessage.Ready(result.routeCount)
                             updateInProgress = false
                         }
                     },
@@ -821,11 +841,32 @@ private fun IpListSettingsScreen(
                     )
                 }
 
-                updateMessage?.let {
+                updateMessage?.let { message ->
+                    val isError = message is IpListUpdateMessage.Failed
                     Text(
-                        it,
+                        when (message) {
+                            is IpListUpdateMessage.Failed -> {
+                                if (message.usedFallback) {
+                                    stringResource(
+                                        R.string.settings_ip_lists_update_failed_fallback,
+                                        message.error
+                                    )
+                                } else {
+                                    stringResource(
+                                        R.string.settings_ip_lists_update_failed,
+                                        message.error
+                                    )
+                                }
+                            }
+                            is IpListUpdateMessage.Ready -> {
+                                stringResource(
+                                    R.string.settings_ip_lists_update_ready,
+                                    message.routeCount
+                                )
+                            }
+                        },
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (it.startsWith(stringResource(R.string.settings_ip_lists_update_failed_prefix))) {
+                        color = if (isError) {
                             MaterialTheme.colorScheme.error
                         } else {
                             MaterialTheme.colorScheme.primary
@@ -885,6 +926,55 @@ private fun ipListFrequencyLabel(frequency: IpListUpdateFrequency): String =
         IpListUpdateFrequency.WEEKLY -> stringResource(R.string.settings_ip_lists_frequency_weekly)
         IpListUpdateFrequency.MANUAL -> stringResource(R.string.settings_ip_lists_frequency_manual)
     }
+
+@Composable
+private fun Android12OvpnRouteLimitField(
+    value: String,
+    isError: Boolean,
+    onValueChange: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            stringResource(R.string.settings_ip_lists_android_12_title),
+            style = MaterialTheme.typography.labelLarge
+        )
+        Text(
+            stringResource(
+                R.string.settings_ip_lists_android_12_description,
+                IpListRouteConfig.MAX_OPENVPN_PROFILE_BYTES / 1024
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(stringResource(R.string.settings_ip_lists_android_12_route_limit_label)) },
+            supportingText = {
+                Text(
+                    if (isError) {
+                        stringResource(
+                            R.string.settings_ip_lists_android_12_route_limit_error,
+                            IpListRouteConfig.MIN_ANDROID12_OVPN_ROUTE_LIMIT,
+                            IpListRouteConfig.MAX_ANDROID12_OVPN_ROUTE_LIMIT
+                        )
+                    } else {
+                        stringResource(
+                            R.string.settings_ip_lists_android_12_route_limit_hint,
+                            IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+                            IpListRouteConfig.MIN_ANDROID12_OVPN_ROUTE_LIMIT,
+                            IpListRouteConfig.MAX_ANDROID12_OVPN_ROUTE_LIMIT
+                        )
+                    }
+                )
+            },
+            isError = isError,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true
+        )
+    }
+}
 
 @Composable
 private fun IpListCoverageModeSelector(

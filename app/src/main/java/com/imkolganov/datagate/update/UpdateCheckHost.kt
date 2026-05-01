@@ -19,15 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.LocalActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.activity.ComponentActivity
 import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +40,7 @@ fun UpdateCheckHost(
     isLoggedIn: Boolean,
     http: OkHttpClient
 ) {
-    val activity = LocalContext.current as ComponentActivity
+    val activity = LocalActivity.current ?: return
     val appContext = activity.applicationContext
     val scope = rememberCoroutineScope()
 

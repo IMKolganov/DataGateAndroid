@@ -37,20 +37,94 @@ data class IpListAppendResult(
     val reachedProfileSizeLimit: Boolean
 )
 
+enum class IpListRouteDelivery {
+    ANDROID_EXCLUDE_ROUTE,
+    OVPN_PROFILE
+}
+
+data class IpListConnectionRoutePlan(
+    val config: String,
+    val androidExcludedRoutes: List<IpCidrRoute>,
+    val selectedRouteCount: Int,
+    val appliedRouteCount: Int,
+    val reachedProfileSizeLimit: Boolean,
+    val delivery: IpListRouteDelivery
+)
+
 object IpListRouteConfig {
     const val MAX_ROUTES = 12_000
     const val MAX_ANDROID_EXCLUDED_ROUTES = 3_000
-    private const val MAX_OPENVPN_PROFILE_BYTES = 180_000
+    const val DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT = 800
+    const val MIN_ANDROID12_OVPN_ROUTE_LIMIT = 50
+    const val MAX_ANDROID12_OVPN_ROUTE_LIMIT = 3_000
+    const val MAX_OPENVPN_PROFILE_BYTES = 240 * 1024
 
     fun selectAndroidExcludedRoutes(routes: List<IpCidrRoute>): List<IpCidrRoute> {
-        if (routes.size <= MAX_ANDROID_EXCLUDED_ROUTES) return routes
+        return selectBroadestRoutes(routes, MAX_ANDROID_EXCLUDED_ROUTES)
+    }
+
+    fun selectAndroid12OvpnRoutes(routes: List<IpCidrRoute>, limit: Int): List<IpCidrRoute> {
+        return selectBroadestRoutes(
+            routes = routes.filterIsInstance<Ipv4CidrRoute>(),
+            maxRoutes = sanitizeAndroid12OvpnRouteLimit(limit),
+            sortAlways = true
+        )
+    }
+
+    fun sanitizeAndroid12OvpnRouteLimit(value: Int): Int =
+        value.coerceIn(MIN_ANDROID12_OVPN_ROUTE_LIMIT, MAX_ANDROID12_OVPN_ROUTE_LIMIT)
+
+    fun prepareConnectionRoutes(
+        config: String,
+        routes: List<IpCidrRoute>,
+        coverageMode: IpListCoverageMode,
+        android12OvpnRouteLimit: Int,
+        supportsAndroidRouteExclusion: Boolean
+    ): IpListConnectionRoutePlan {
+        val selectedRoutes = if (supportsAndroidRouteExclusion) {
+            when (coverageMode) {
+                IpListCoverageMode.FAST -> selectAndroidExcludedRoutes(routes)
+                IpListCoverageMode.FULL -> routes
+            }
+        } else {
+            selectAndroid12OvpnRoutes(routes, android12OvpnRouteLimit)
+        }
+
+        if (supportsAndroidRouteExclusion) {
+            return IpListConnectionRoutePlan(
+                config = config,
+                androidExcludedRoutes = selectedRoutes,
+                selectedRouteCount = selectedRoutes.size,
+                appliedRouteCount = selectedRoutes.size,
+                reachedProfileSizeLimit = false,
+                delivery = IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
+            )
+        }
+
+        val appendResult = appendBypassRoutesResult(config, selectedRoutes)
+        return IpListConnectionRoutePlan(
+            config = appendResult.config,
+            androidExcludedRoutes = emptyList(),
+            selectedRouteCount = selectedRoutes.size,
+            appliedRouteCount = appendResult.appliedRouteCount,
+            reachedProfileSizeLimit = appendResult.reachedProfileSizeLimit,
+            delivery = IpListRouteDelivery.OVPN_PROFILE
+        )
+    }
+
+    private fun selectBroadestRoutes(
+        routes: List<IpCidrRoute>,
+        maxRoutes: Int,
+        sortAlways: Boolean = false
+    ): List<IpCidrRoute> {
+        if (!sortAlways && routes.size <= maxRoutes) return routes
         return routes
             .sortedWith(
                 compareBy<IpCidrRoute> { it is Ipv6CidrRoute }
                     .thenBy { it.prefixLength }
                     .thenBy { it.networkAddress }
             )
-            .take(MAX_ANDROID_EXCLUDED_ROUTES)
+            .take(maxRoutes)
     }
 
     fun appendBypassRoutes(config: String, routes: List<IpCidrRoute>): String {
@@ -66,11 +140,21 @@ object IpListRouteConfig {
             )
         }
 
-        val out = StringBuilder(config.trimEnd())
+        val baseConfig = config.trimEnd()
+        val out = StringBuilder(baseConfig)
         val header = "\n\n# DataGate IP list bypass routes\n"
+        var projectedBytes = baseConfig.toByteArray(Charsets.UTF_8).size
+        val headerBytes = header.toByteArray(Charsets.UTF_8).size
+        if (projectedBytes + headerBytes > MAX_OPENVPN_PROFILE_BYTES) {
+            return IpListAppendResult(
+                config = config,
+                appliedRouteCount = 0,
+                reachedProfileSizeLimit = true
+            )
+        }
         out.append(header)
 
-        var projectedBytes = out.toString().toByteArray(Charsets.UTF_8).size
+        projectedBytes += headerBytes
         var appliedRouteCount = 0
         var reachedProfileSizeLimit = false
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="language_system">System default</string>
 
     <string name="nav_home">Home</string>
@@ -179,6 +179,12 @@
     <string name="settings_ip_lists_coverage_full_description">Applies every loaded route for maximum coverage. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_saved">IP list settings saved.</string>
     <string name="settings_ip_lists_android_12_warning">IP list bypass requires Android 13 or newer. On Android 12 and older, this routing mode is disabled because the VPN API cannot exclude large route lists safely.</string>
+    <string name="settings_ip_lists_android_12_notice" tools:ignore="MissingTranslation">Android 12 uses compact OVPN profile routes because system route exclusion is only available on Android 13+.</string>
+    <string name="settings_ip_lists_android_12_title" tools:ignore="MissingTranslation">Android 12 compatibility</string>
+    <string name="settings_ip_lists_android_12_description" tools:ignore="MissingTranslation">Broad IPv4 routes are written into the OVPN profile on this device. The app keeps the profile under %1$d KB, so small ranges and IPv6 may still use VPN.</string>
+    <string name="settings_ip_lists_android_12_route_limit_label" tools:ignore="MissingTranslation">Max OVPN routes</string>
+    <string name="settings_ip_lists_android_12_route_limit_hint" tools:ignore="MissingTranslation">Recommended %1$d. Allowed %2$d-%3$d.</string>
+    <string name="settings_ip_lists_android_12_route_limit_error" tools:ignore="MissingTranslation">Enter a value from %1$d to %2$d.</string>
     <string name="settings_ip_lists_status_title">IP list status</string>
     <string name="settings_ip_lists_last_updated">Last updated</string>
     <string name="settings_ip_lists_last_updated_never">Never</string>
@@ -275,6 +281,7 @@
     <string name="vpn_config_received">Config received (%1$d bytes)</string>
     <string name="vpn_updating_ip_list">Updating IP list…</string>
     <string name="vpn_ip_list_ready">IP list ready (%1$d routes)</string>
+    <string name="vpn_ip_list_ready_limited" tools:ignore="MissingTranslation">IP list ready (%1$d routes; profile limit reached)</string>
     <string name="vpn_ip_list_requires_android_13">IP list bypass requires Android 13 or newer. Disable IP list routing or update Android to connect with this mode.</string>
     <string name="vpn_connect_failed">Connect failed: %1$s</string>
     <string name="vpn_server_selected">Server selected</string>
