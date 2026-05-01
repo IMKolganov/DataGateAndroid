@@ -73,6 +73,11 @@ object VpnEventMapper {
                 lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
+            "NETWORK_CHANGED" -> previous.copy(
+                isConnectRequested = true,
+                lastMessage = res.getString(R.string.vpn_msg_reconnecting)
+            )
+
             "CONNECTING" -> previous.copy(
                 isConnectRequested = true,
                 lastMessage = res.getString(R.string.vpn_msg_connecting)

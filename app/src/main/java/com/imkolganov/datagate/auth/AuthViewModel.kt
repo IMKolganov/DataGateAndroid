@@ -22,7 +22,9 @@ enum class AuthLoginTab {
 enum class EmailAuthPane {
     SignIn,
     Register,
-    ConfirmEmail
+    ConfirmEmail,
+    ForgotPassword,
+    ResetPassword
 }
 
 data class AuthUiState(
@@ -50,7 +52,9 @@ class AuthViewModel(
             it.copy(
                 loginTab = tab,
                 errorMessage = null,
-                infoMessage = null
+                infoMessage = null,
+                emailPane = if (tab == AuthLoginTab.Google) EmailAuthPane.SignIn else it.emailPane,
+                pendingVerificationEmail = if (tab == AuthLoginTab.Google) null else it.pendingVerificationEmail
             )
         }
     }
@@ -72,6 +76,25 @@ class AuthViewModel(
                 errorMessage = null,
                 infoMessage = null,
                 pendingVerificationEmail = null
+            )
+        }
+    }
+
+    fun goToForgotPassword() {
+        _state.update {
+            it.copy(
+                emailPane = EmailAuthPane.ForgotPassword,
+                errorMessage = null,
+                infoMessage = null
+            )
+        }
+    }
+
+    fun goToResetPassword() {
+        _state.update {
+            it.copy(
+                emailPane = EmailAuthPane.ResetPassword,
+                errorMessage = null
             )
         }
     }
@@ -192,6 +215,75 @@ class AuthViewModel(
                 } else {
                     val msg = result.message.ifBlank {
                         resources.getString(R.string.auth_error_confirm_failed)
+                    }
+                    _state.update { it.copy(isLoading = false, errorMessage = msg) }
+                }
+            } catch (e: Exception) {
+                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                _state.update { it.copy(isLoading = false, errorMessage = msg) }
+            }
+        }
+    }
+
+    fun requestPasswordReset(resources: Resources, loginOrEmail: String) {
+        val id = loginOrEmail.trim()
+        if (id.isEmpty()) {
+            _state.update { it.copy(errorMessage = resources.getString(R.string.auth_error_forgot_login_required)) }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, errorMessage = null, infoMessage = null) }
+            try {
+                val raw = repo.forgotPassword(id)
+                val rateLimited = raw.contains("Too many", ignoreCase = true)
+                val msg = if (rateLimited) {
+                    resources.getString(R.string.auth_forgot_rate_limited)
+                } else {
+                    resources.getString(R.string.auth_forgot_password_done)
+                }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        emailPane = EmailAuthPane.ResetPassword,
+                        infoMessage = msg
+                    )
+                }
+            } catch (e: Exception) {
+                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                _state.update { it.copy(isLoading = false, errorMessage = msg) }
+            }
+        }
+    }
+
+    fun resetPasswordWithCode(resources: Resources, code: String, newPassword: String, confirmPassword: String) {
+        val c = code.trim()
+        if (c.isEmpty()) {
+            _state.update { it.copy(errorMessage = resources.getString(R.string.auth_error_reset_code_required)) }
+            return
+        }
+        if (newPassword.length < 8) {
+            _state.update { it.copy(errorMessage = resources.getString(R.string.auth_error_password_short)) }
+            return
+        }
+        if (newPassword != confirmPassword) {
+            _state.update { it.copy(errorMessage = resources.getString(R.string.auth_error_password_mismatch)) }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                val result = repo.resetPasswordWithCode(c, newPassword, confirmPassword)
+                if (result.success) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            emailPane = EmailAuthPane.SignIn,
+                            infoMessage = resources.getString(R.string.auth_password_reset_done)
+                        )
+                    }
+                } else {
+                    val msg = result.message.ifBlank {
+                        resources.getString(R.string.auth_error_reset_failed)
                     }
                     _state.update { it.copy(isLoading = false, errorMessage = msg) }
                 }

@@ -14,6 +14,7 @@ import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RefreshResponseDto
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
+import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -124,6 +125,35 @@ class OkHttpBackendAuthApi(
         val innerOk = data.optBoolean("success", data.optBoolean("Success", false))
         val innerMsg = data.optString("message", data.optString("Message", "")).trim()
         return ConfirmEmailResultDto(success = innerOk, message = innerMsg)
+    }
+
+    override suspend fun forgotPassword(loginOrEmail: String): String {
+        val url = joinUrl(baseUrl, ApiConfig.FORGOT_PASSWORD_PATH)
+        val bodyJson = JSONObject()
+            .put("loginOrEmail", loginOrEmail.trim())
+            .toString()
+        val raw = postJson(url, bodyJson, "forgot-password")
+        val root = parseBackendApiEnvelopeOrThrow("forgot-password", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("forgot-password: missing data in response")
+        return data.optString("message", data.optString("Message", "")).trim()
+            .ifEmpty { "OK" }
+    }
+
+    override suspend fun resetPassword(code: String, newPassword: String, confirmPassword: String): ResetPasswordResultDto {
+        val url = joinUrl(baseUrl, ApiConfig.RESET_PASSWORD_PATH)
+        val bodyJson = JSONObject()
+            .put("code", code.trim())
+            .put("newPassword", newPassword)
+            .put("confirmPassword", confirmPassword)
+            .toString()
+        val raw = postJson(url, bodyJson, "reset-password")
+        val root = parseBackendApiEnvelopeOrThrow("reset-password", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("reset-password: missing data in response")
+        val innerOk = data.optBoolean("success", data.optBoolean("Success", false))
+        val innerMsg = data.optString("message", data.optString("Message", "")).trim()
+        return ResetPasswordResultDto(success = innerOk, message = innerMsg)
     }
 
     override suspend fun refresh(request: RefreshRequestDto): RefreshResponseDto {

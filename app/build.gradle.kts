@@ -24,6 +24,10 @@ fun env(name: String): String =
         ?: System.getenv(name)
         ?: error("Missing env property: $name")
 
+fun envOpt(name: String): String? =
+    envProps.getProperty(name)
+        ?: System.getenv(name)
+
 fun ks(name: String): String =
     keystoreProps.getProperty(name)
         ?: System.getenv(name)
@@ -91,6 +95,7 @@ android {
 
             buildConfigField("String", "BACKEND_BASE_URL", "\"${env("DEV_BACKEND_URL")}\"")
             buildConfigField("String", "WEB_CLIENT_ID", "\"${env("DEV_WEB_CLIENT_ID")}\"")
+            buildConfigField("String", "CRASH_REPORT_URL", "\"${envOpt("DEV_CRASH_REPORT_URL") ?: ""}\"")
         }
 
         create("prod") {
@@ -100,6 +105,7 @@ android {
 
             buildConfigField("String", "BACKEND_BASE_URL", "\"${env("PROD_BACKEND_URL")}\"")
             buildConfigField("String", "WEB_CLIENT_ID", "\"${env("PROD_WEB_CLIENT_ID")}\"")
+            buildConfigField("String", "CRASH_REPORT_URL", "\"${envOpt("PROD_CRASH_REPORT_URL") ?: ""}\"")
         }
     }
 

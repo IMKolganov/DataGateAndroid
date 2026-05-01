@@ -14,5 +14,6 @@ class DataGateApp : Application() {
         LanguagePreferenceStore.apply(this)
         crashLogger = CrashLogger(this)
         crashLogger.install()
+        crashLogger.uploadPendingAsync(BuildConfig.CRASH_REPORT_URL)
     }
 }

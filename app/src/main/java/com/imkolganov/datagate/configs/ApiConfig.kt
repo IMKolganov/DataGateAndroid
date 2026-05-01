@@ -7,6 +7,8 @@ object ApiConfig {
     const val LOGIN_PATH = "/api/auth/login"
     const val EMAIL_REQUEST_CONFIRMATION_PATH = "/api/auth/email/request-confirmation"
     const val EMAIL_CONFIRM_PATH = "/api/auth/email/confirm"
+    const val FORGOT_PASSWORD_PATH = "/api/auth/forgot-password"
+    const val RESET_PASSWORD_PATH = "/api/auth/reset-password"
 
     /** GET …/get-all — V2 list without live metrics (optional). */
     const val API_OPEN_VPN_SERVERS_V2_GET_ALL_PATH = "api/v2/open-vpn-servers/get-all"

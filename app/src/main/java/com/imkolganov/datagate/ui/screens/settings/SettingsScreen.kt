@@ -69,6 +69,7 @@ import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.theme.AppLanguageDropdown
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import java.util.Locale
@@ -84,6 +85,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.security.MessageDigest
 import java.net.URL
 import java.text.DateFormat
 import java.util.Date
@@ -285,10 +287,11 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                LanguageDropdown(
+                AppLanguageDropdown(
                     current = appLocale,
                     uiLocale = uiLocale,
-                    onSelect = onAppLocaleChange
+                    onSelect = onAppLocaleChange,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -933,56 +936,6 @@ private fun formatIpListUpdatedAt(epochMs: Long): String =
     DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
         .format(Date(epochMs))
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LanguageDropdown(
-    current: AppLocale,
-    uiLocale: Locale,
-    onSelect: (AppLocale) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    val currentLabel = when (current) {
-        AppLocale.SYSTEM -> stringResource(R.string.language_system)
-        else -> current.displayLabel(uiLocale)
-    }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
-                .fillMaxWidth(),
-            readOnly = true,
-            value = currentLabel,
-            onValueChange = {},
-            label = { Text(stringResource(R.string.settings_language)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            singleLine = true
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            for (option in AppLocale.pickerOrder) {
-                val optionLabel = when (option) {
-                    AppLocale.SYSTEM -> stringResource(R.string.language_system)
-                    else -> option.displayLabel(uiLocale)
-                }
-                DropdownMenuItem(
-                    text = { Text(optionLabel) },
-                    onClick = {
-                        onSelect(option)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun SessionLogoutCard(
     displayName: String?,
@@ -1119,10 +1072,11 @@ private fun AccountAvatar(
     displayName: String?,
     email: String?
 ) {
+    val context = LocalContext.current.applicationContext
     var bitmap by remember(avatarUrl) { mutableStateOf<Bitmap?>(null) }
 
-    LaunchedEffect(avatarUrl) {
-        bitmap = avatarUrl?.let { loadAvatarBitmap(it) }
+    LaunchedEffect(context, avatarUrl) {
+        bitmap = avatarUrl?.let { loadAvatarBitmap(context, it) }
     }
 
     val resolvedBitmap = bitmap
@@ -1181,10 +1135,18 @@ private fun SessionInfoRow(
     }
 }
 
-private suspend fun loadAvatarBitmap(url: String): Bitmap? = withContext(Dispatchers.IO) {
+private const val AVATAR_CACHE_TTL_MS = 12 * 60 * 60 * 1000L // 12h
+
+private suspend fun loadAvatarBitmap(context: android.content.Context, url: String): Bitmap? = withContext(Dispatchers.IO) {
     val uri = runCatching { Uri.parse(url) }.getOrNull()
     if (uri?.scheme?.lowercase(Locale.US) != "https") {
         return@withContext null
+    }
+
+    val cacheFile = avatarCacheFile(context, url)
+    val cached = decodeCachedAvatar(cacheFile)
+    if (cached != null && isAvatarCacheFresh(cacheFile)) {
+        return@withContext cached
     }
 
     runCatching {
@@ -1192,10 +1154,43 @@ private suspend fun loadAvatarBitmap(url: String): Bitmap? = withContext(Dispatc
             connectTimeout = 4_000
             readTimeout = 4_000
         }
-        connection.getInputStream().use { input ->
-            BitmapFactory.decodeStream(input)
+        val bytes = connection.getInputStream().use { input -> input.readBytes() }
+        val downloadedBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        if (downloadedBitmap != null) {
+            runCatching {
+                cacheFile.parentFile?.mkdirs()
+                val tmp = File(cacheFile.parentFile, "${cacheFile.name}.tmp")
+                tmp.writeBytes(bytes)
+                if (!tmp.renameTo(cacheFile)) {
+                    cacheFile.writeBytes(bytes)
+                    tmp.delete()
+                }
+            }
+            downloadedBitmap
+        } else {
+            cached
         }
+    }.getOrElse { cached }
+}
+
+private fun avatarCacheFile(context: android.content.Context, url: String): File {
+    val hash = MessageDigest.getInstance("SHA-256")
+        .digest(url.toByteArray())
+        .joinToString("") { b -> "%02x".format(b) }
+    return File(context.cacheDir, "avatar/$hash.bin")
+}
+
+private fun decodeCachedAvatar(file: File): Bitmap? {
+    if (!file.isFile || file.length() <= 0L) return null
+    return runCatching {
+        BitmapFactory.decodeFile(file.absolutePath)
     }.getOrNull()
+}
+
+private fun isAvatarCacheFresh(file: File): Boolean {
+    if (!file.isFile) return false
+    val ageMs = System.currentTimeMillis() - file.lastModified()
+    return ageMs in 0..AVATAR_CACHE_TTL_MS
 }
 
 private fun avatarInitials(displayName: String?, email: String?): String {

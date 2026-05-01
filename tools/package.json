@@ -1,0 +1,8 @@
+{
+  "name": "datagate-i18n-tools",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vitalets/google-translate-api": "^9.2.1"
+  }
+}

@@ -8,6 +8,7 @@ import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RefreshResponseDto
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
+import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
 
 interface BackendAuthApi {
     suspend fun googleLogin(request: GoogleLoginRequestDto): GoogleLoginResponseDto
@@ -21,4 +22,8 @@ interface BackendAuthApi {
     suspend fun requestEmailConfirmation(email: String): String
 
     suspend fun confirmEmail(email: String, code: String): ConfirmEmailResultDto
+
+    suspend fun forgotPassword(loginOrEmail: String): String
+
+    suspend fun resetPassword(code: String, newPassword: String, confirmPassword: String): ResetPasswordResultDto
 }

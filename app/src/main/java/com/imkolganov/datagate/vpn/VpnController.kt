@@ -2,6 +2,7 @@ package com.imkolganov.datagate.vpn
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.BackgroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -10,6 +11,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
+import com.imkolganov.datagate.DataGateApp
 import com.imkolganov.datagate.R
 import java.io.File
 
@@ -25,6 +27,7 @@ class VpnController(
     private var pendingLinkProtocol: VpnLinkProtocol? = null
     private var pendingBypassRoutes: List<IpCidrRoute> = emptyList()
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
+    private val crashLogger get() = (activity.application as? DataGateApp)?.crashLogger
 
     companion object {
         private const val TAG = "OpenVPN3"
@@ -292,7 +295,29 @@ class VpnController(
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_QUERY_STATUS
         }
-        startServiceCompat(intent)
+        try {
+            startServiceCompat(intent)
+        } catch (t: Throwable) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                t is BackgroundServiceStartNotAllowedException
+            ) {
+                Log.w(
+                    TAG,
+                    "Skipped ACTION_QUERY_STATUS: background service start is not allowed now",
+                    t
+                )
+                crashLogger?.logNonFatal(
+                    tag = "VpnController.requestCurrentStatus.background_not_allowed",
+                    throwable = t
+                )
+                return
+            }
+            Log.w(TAG, "Failed to request current VPN status", t)
+            crashLogger?.logNonFatal(
+                tag = "VpnController.requestCurrentStatus.failed",
+                throwable = t
+            )
+        }
     }
 
     private fun registerReceiver() {

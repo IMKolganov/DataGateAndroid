@@ -8,6 +8,8 @@
     <string name="nav_settings">Settings</string>
 
     <string name="login_title">DataGate</string>
+    <string name="login_tagline">Secure VPN access to your servers</string>
+    <string name="login_logo_cd">DataGate logo</string>
     <string name="login_sign_in_google">Sign in with Google</string>
     <string name="login_welcome">Welcome to the VPN service.\nFor any questions, feel free to contact me at imkolganov@gmail.com.</string>
     <string name="login_version">v%1$s (%2$d)</string>
@@ -40,6 +42,23 @@
     <string name="auth_error_password_mismatch">Passwords do not match.</string>
     <string name="auth_error_email_code_required">Enter email and confirmation code.</string>
     <string name="auth_error_confirm_failed">Could not confirm email.</string>
+    <string name="auth_password_show">Show password</string>
+    <string name="auth_password_hide">Hide password</string>
+    <string name="auth_forgot_password_link">Forgot password?</string>
+    <string name="auth_have_reset_code">I have a reset code</string>
+    <string name="auth_forgot_password_intro">Enter your username or email. If an account exists, a reset code is sent to the email on file (when configured) and may appear in the server log.</string>
+    <string name="auth_forgot_password_submit">Send reset code</string>
+    <string name="auth_forgot_password_done">If the account exists, check your email and server logs for the code, then enter it below.</string>
+    <string name="auth_forgot_rate_limited">Too many attempts. Try again later.</string>
+    <string name="auth_reset_password_intro">Enter the code from your email or server console and choose a new password (at least 8 characters).</string>
+    <string name="auth_reset_password_submit">Set new password</string>
+    <string name="auth_password_reset_done">Password updated. You can sign in.</string>
+    <string name="auth_field_login_or_email">Username or email</string>
+    <string name="auth_field_new_password">New password</string>
+    <string name="auth_field_reset_code">Reset code</string>
+    <string name="auth_error_forgot_login_required">Enter your username or email.</string>
+    <string name="auth_error_reset_code_required">Enter the reset code.</string>
+    <string name="auth_error_reset_failed">Could not reset password.</string>
 
     <string name="vpn_status_connected">Connected</string>
     <string name="vpn_status_connecting">Connecting…</string>
@@ -54,6 +73,7 @@
     <string name="action_save">Save</string>
     <string name="vpn_home_footer">Connect chooses a server automatically using the app\'s selection rules. To pick a specific server, open the Access tab.</string>
 
+    <string name="home_quick_actions_title">Help &amp; language</string>
     <string name="home_report_issue">Report a problem</string>
     <string name="home_report_issue_title">Contact support</string>
     <string name="home_report_issue_hint">Choose how you want to reach us:</string>

@@ -8,6 +8,8 @@
     <string name="nav_settings">Настройки</string>
 
     <string name="login_title">DataGate</string>
+    <string name="login_tagline">Безопасный VPN-доступ к вашим серверам</string>
+    <string name="login_logo_cd">Логотип DataGate</string>
     <string name="login_sign_in_google">Войти через Google</string>
     <string name="login_welcome">Добро пожаловать в VPN‑сервис.\nПо вопросам пишите на imkolganov@gmail.com.</string>
     <string name="login_version">v%1$s (%2$d)</string>
@@ -40,6 +42,23 @@
     <string name="auth_error_password_mismatch">Пароли не совпадают.</string>
     <string name="auth_error_email_code_required">Введите почту и код.</string>
     <string name="auth_error_confirm_failed">Не удалось подтвердить почту.</string>
+    <string name="auth_password_show">Показать пароль</string>
+    <string name="auth_password_hide">Скрыть пароль</string>
+    <string name="auth_forgot_password_link">Забыли пароль?</string>
+    <string name="auth_have_reset_code">У меня есть код сброса</string>
+    <string name="auth_forgot_password_intro">Введите логин или почту. Если такая учётная запись есть, код сброса будет отправлен на привязанную почту (если настроена почта на сервере) и может появиться в логе сервера.</string>
+    <string name="auth_forgot_password_submit">Отправить код</string>
+    <string name="auth_forgot_password_done">Если учётная запись найдена, проверьте почту и лог сервера с кодом, затем введите его ниже.</string>
+    <string name="auth_forgot_rate_limited">Слишком много попыток. Попробуйте позже.</string>
+    <string name="auth_reset_password_intro">Введите код из письма или консоли сервера и новый пароль (не короче 8 символов).</string>
+    <string name="auth_reset_password_submit">Сохранить новый пароль</string>
+    <string name="auth_password_reset_done">Пароль обновлён. Можно войти.</string>
+    <string name="auth_field_login_or_email">Логин или почта</string>
+    <string name="auth_field_new_password">Новый пароль</string>
+    <string name="auth_field_reset_code">Код сброса</string>
+    <string name="auth_error_forgot_login_required">Введите логин или почту.</string>
+    <string name="auth_error_reset_code_required">Введите код сброса.</string>
+    <string name="auth_error_reset_failed">Не удалось сменить пароль.</string>
 
     <string name="vpn_status_connected">Подключено</string>
     <string name="vpn_status_connecting">Подключение…</string>
@@ -54,6 +73,7 @@
     <string name="action_save">Сохранить</string>
     <string name="vpn_home_footer">«Подключить» выбирает сервер автоматически. Чтобы указать сервер вручную, откройте вкладку «Доступ».</string>
 
+    <string name="home_quick_actions_title">Помощь и язык</string>
     <string name="home_report_issue">Сообщить о проблеме</string>
     <string name="home_report_issue_title">Связь с поддержкой</string>
     <string name="home_report_issue_hint">Как вам удобнее связаться:</string>

@@ -9,6 +9,7 @@ import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
 import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
+import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -71,6 +72,16 @@ class AuthRepository(
     suspend fun confirmEmail(email: String, code: String): ConfirmEmailResultDto =
         withContext(Dispatchers.IO) {
             api.confirmEmail(email, code)
+        }
+
+    suspend fun forgotPassword(loginOrEmail: String): String =
+        withContext(Dispatchers.IO) {
+            api.forgotPassword(loginOrEmail)
+        }
+
+    suspend fun resetPasswordWithCode(code: String, newPassword: String, confirmPassword: String): ResetPasswordResultDto =
+        withContext(Dispatchers.IO) {
+            api.resetPassword(code, newPassword, confirmPassword)
         }
 
     private fun persistSessionOrThrow(result: GoogleLoginResponseDto) {
