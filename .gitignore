@@ -112,6 +112,7 @@ obj/
 *.a
 
 # OpenVPN3 Android: CMake output (do not list individual CMakeFiles/* — ignore whole tree)
+/build-*/
 native-openvpn3/build-*/
 
 ####################################
