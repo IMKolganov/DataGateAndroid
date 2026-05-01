@@ -10,9 +10,11 @@ import com.imkolganov.datagate.auth.http.BackendAuthApi
 import com.imkolganov.datagate.auth.http.OkHttpBackendAuthApi
 import com.imkolganov.datagate.configs.AuthConfig
 import com.imkolganov.datagate.network.HttpClients
+import com.imkolganov.datagate.quota.QuotaPlanApi
 import com.imkolganov.datagate.servers.OpenVpnServersApi
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
 import com.imkolganov.datagate.stats.StatsApiClient
+import com.imkolganov.datagate.vpn.IpListRoutesRepository
 import com.imkolganov.datagate.vpn.VpnConnectInteractor
 import com.imkolganov.datagate.vpn.VpnController
 import okhttp3.OkHttpClient
@@ -45,6 +47,8 @@ class AppGraph(
             api = OpenVpnServersApi(http = httpAuth)
         )
 
+    val quotaPlanApi: QuotaPlanApi = QuotaPlanApi(http = httpAuth)
+
     val ovpnApi: OvpnApiClient =
         OvpnApiClient(
             http = httpAuth,
@@ -52,15 +56,24 @@ class AppGraph(
             tokenProvider = { tokenStore.getAccessToken() }
         )
 
+    val ipListRoutesRepository: IpListRoutesRepository =
+        IpListRoutesRepository(
+            appContext = appContext,
+            http = httpPlain
+        )
+
     fun createConnectInteractor(
+        appContext: Context,
         getInstallationId: () -> String?
     ): VpnConnectInteractor =
         VpnConnectInteractor(
+            appContext = appContext,
             getExternalId = { tokenStore.getAuthInfo().externalId },
             getInstallationId = getInstallationId,
             serversRepository = serversRepository,
             vpnController = vpnController,
-            api = ovpnApi
+            api = ovpnApi,
+            ipListRoutesRepository = ipListRoutesRepository
         )
 
     val statsApi: StatsApiClient =

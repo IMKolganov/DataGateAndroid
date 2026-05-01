@@ -1,6 +1,8 @@
 package com.imkolganov.datagate.vpn
 
+import android.net.IpPrefix
 import android.net.VpnService
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import net.openvpn.ovpn3.ClientAPI_Event
@@ -8,9 +10,11 @@ import net.openvpn.ovpn3.ClientAPI_LogInfo
 import net.openvpn.ovpn3.ClientAPI_OpenVPNClient
 import net.openvpn.ovpn3.ClientAPI_StringVec
 import net.openvpn.ovpn3.DnsOptions
+import java.net.InetAddress
 
 class OpenVpn3Client(
     private val service: VpnService,
+    private val excludedRoutes: List<IpCidrRoute>,
     private val onTunChanged: (ParcelFileDescriptor?) -> Unit,
     private val onCoreEvent: (String, String) -> Unit
 ) : ClientAPI_OpenVPNClient() {
@@ -58,9 +62,6 @@ class OpenVpn3Client(
 
         builder = service.Builder().apply {
             setSession("DataGate VPN")
-
-            // Full tunnel
-            addRoute("0.0.0.0", 0)
 
             // DNS
             addDnsServer("8.8.8.8")
@@ -110,7 +111,20 @@ class OpenVpn3Client(
 
     override fun tun_builder_reroute_gw(ipv4: Boolean, ipv6: Boolean, flags: Long): Boolean {
         Log.d(TAG, "tun_builder_reroute_gw(ipv4=$ipv4, ipv6=$ipv6, flags=$flags)")
-        return true
+        return try {
+            if (ipv4) {
+                builder?.addRoute("0.0.0.0", 1)
+                builder?.addRoute("128.0.0.0", 1)
+            }
+            if (ipv6) {
+                builder?.addRoute("::", 1)
+                builder?.addRoute("8000::", 1)
+            }
+            true
+        } catch (t: Throwable) {
+            Log.e(TAG, "reroute gateway failed", t)
+            false
+        }
     }
 
     override fun tun_builder_add_route(
@@ -139,7 +153,17 @@ class OpenVpn3Client(
             TAG,
             "tun_builder_exclude_route($address/$prefix_length, metric=$metric, ipv6=$ipv6)"
         )
-        return true
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                builder?.excludeRoute(IpPrefix(InetAddress.getByName(address), prefix_length))
+            } else {
+                Log.d(TAG, "excludeRoute ignored below Android 13; OpenVPN route emulation should handle it")
+            }
+            true
+        } catch (t: Throwable) {
+            Log.e(TAG, "excludeRoute failed", t)
+            false
+        }
     }
 
     override fun tun_builder_set_dns_options(dns: DnsOptions): Boolean {
@@ -210,6 +234,7 @@ class OpenVpn3Client(
         }
 
         return try {
+            applyExcludedRoutes(b)
             val pfd = b.establish()
             if (pfd == null) {
                 Log.e(TAG, "tun_builder_establish: establish() returned null")
@@ -230,6 +255,31 @@ class OpenVpn3Client(
             Log.e(TAG, "builder.establish() failed", t)
             -1
         }
+    }
+
+    private fun applyExcludedRoutes(b: VpnService.Builder) {
+        if (excludedRoutes.isEmpty()) return
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Log.w(TAG, "Skipping ${excludedRoutes.size} excluded routes: excludeRoute requires Android 13+")
+            return
+        }
+
+        var applied = 0
+        for (route in excludedRoutes) {
+            try {
+                b.excludeRoute(
+                    IpPrefix(
+                        InetAddress.getByName(route.networkAddress),
+                        route.prefixLength
+                    )
+                )
+                applied++
+            } catch (t: Throwable) {
+                Log.w(TAG, "excludeRoute failed for ${route.toCidrString()}", t)
+            }
+        }
+        Log.d(TAG, "Applied excluded routes: $applied/${excludedRoutes.size}")
     }
 
     override fun tun_builder_persist(): Boolean {

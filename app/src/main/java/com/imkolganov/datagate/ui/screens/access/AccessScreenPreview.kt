@@ -3,6 +3,7 @@ package com.imkolganov.datagate.ui.screens.access
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
+import com.imkolganov.datagate.vpn.ServerSelectionMode
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Preview(showBackground = true)
@@ -12,12 +13,14 @@ fun AccessScreenPreview() {
         AccessScreen(
             state = AccessContract.UiState(
                 isLoading = false,
+                serverSelectionMode = ServerSelectionMode.MANUAL,
                 servers = listOf(
                     AccessContract.ServerItem(
                         id = 1,
                         name = "OpenVPN Server (udp)",
                         protocol = "udp",
                         isOnline = true,
+                        isEnableWss = true,
                         uptimeText = "12/17/2025, 5:15:17 PM",
                         openVpnVersionText = "2.6.17",
                         totalInText = "200.01 MB",
@@ -31,6 +34,7 @@ fun AccessScreenPreview() {
                         name = "OpenVPN Server (tcp)",
                         protocol = "tcp",
                         isOnline = false,
+                        isEnableWss = false,
                         uptimeText = "12/16/2025, 11:02:41 AM",
                         openVpnVersionText = "2.6.17",
                         totalInText = "95.4 MB",
@@ -49,10 +53,36 @@ fun AccessScreenPreview() {
                         virtualIpText = "10.8.0.2"
                     )
                 ),
-                selectedServerId = 1
+                selectedServerId = 1,
+                quota = AccessContract.QuotaUiState(
+                    currentPlanName = "Standard",
+                    currentEffectiveFrom = "2025-01-01T00:00:00Z",
+                    quotaLimitBytes = 50L * 1024L * 1024L * 1024L,
+                    trafficUsedBytesForPeriod = 18L * 1024L * 1024L * 1024L,
+                    quotaPeriodIsMonthly = true,
+                    allPlans = listOf(
+                        AccessContract.QuotaPlanRow(
+                            id = 1,
+                            name = "Standard",
+                            description = "Daily + monthly limits",
+                            isActive = true,
+                            isDefault = true
+                        ),
+                        AccessContract.QuotaPlanRow(
+                            id = 2,
+                            name = "Lite",
+                            description = null,
+                            isActive = true,
+                            isDefault = false
+                        )
+                    )
+                )
             ),
-            vpnState = VpnStatusUiState(),
-            onEvent = {}
+            vpnState = VpnStatusUiState(isVpnConnected = false),
+            onEvent = {},
+            onConnectVpn = {},
+            onDisconnectVpn = {},
+            onReconnectVpn = {}
         )
     }
 }

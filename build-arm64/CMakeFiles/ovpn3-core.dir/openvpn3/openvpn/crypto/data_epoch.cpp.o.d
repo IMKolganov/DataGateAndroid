@@ -705,7 +705,6 @@ CMakeFiles/ovpn3-core.dir/openvpn3/openvpn/crypto/data_epoch.cpp.o: \
   /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/common/string.hpp \
   /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/external/fmt/include/fmt/core.h \
   /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/external/fmt/include/fmt/format.h \
-  /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/external/fmt/include/fmt/base.h \
   /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/external/fmt/include/fmt/format-inl.h \
   /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/common/platform.hpp \
   /home/imkolganov/Android/DataGateAndroid/native-openvpn3/openvpn3/openvpn/common/size.hpp \

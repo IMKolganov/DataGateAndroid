@@ -17,7 +17,6 @@ class CrashLogger(private val context: Context) {
     private val dir: File by lazy {
         File(context.noBackupFilesDir, "crash").apply { mkdirs() }
     }
-
     fun install() {
         val previous = Thread.getDefaultUncaughtExceptionHandler()
 
@@ -38,12 +37,39 @@ class CrashLogger(private val context: Context) {
         }
     }
 
-    fun logNonFatal(tag: String, throwable: Throwable, extras: Map<String, String> = emptyMap()) {}
+    fun logNonFatal(tag: String, throwable: Throwable, extras: Map<String, String> = emptyMap()) {
+        val data = linkedMapOf<String, String>()
+        data["tag"] = tag
+        extras.forEach { (k, v) -> data[k] = v }
+        runCatching {
+            writeReport(
+                kind = "nonfatal",
+                thread = Thread.currentThread(),
+                throwable = throwable,
+                extras = data
+            )
+            CrashUploadWorkScheduler.enqueue(context)
+        }
+    }
 
     private fun writeCrashReport(thread: Thread, throwable: Throwable) {
+        writeReport(
+            kind = "fatal",
+            thread = thread,
+            throwable = throwable
+        )
+    }
+
+    @Synchronized
+    private fun writeReport(
+        kind: String,
+        thread: Thread,
+        throwable: Throwable,
+        extras: Map<String, String> = emptyMap()
+    ) {
         val now = Date()
         val ts = isoUtc(now)
-        val file = File(dir, "crash_$ts.txt")
+        val file = File(dir, "${kind}_$ts.txt")
 
         val sw = StringWriter()
         throwable.printStackTrace(PrintWriter(sw))
@@ -57,15 +83,22 @@ class CrashLogger(private val context: Context) {
             appendLine("thread=${thread.name}")
             appendLine("sdk=${Build.VERSION.SDK_INT}")
             appendLine("device=${Build.MANUFACTURER} ${Build.MODEL}")
+            appendLine("kind=$kind")
             appendLine("exception=${throwable::class.java.name}")
             appendLine("message=${throwable.message ?: ""}")
+            if (extras.isNotEmpty()) {
+                extras.forEach { (k, v) -> appendLine("$k=$v") }
+            }
             appendLine()
             appendLine(stack)
         }
 
-        val tmp = File(dir, "tmp_$ts.txt")
+        val tmp = File(dir, "tmp_${kind}_$ts.txt")
         tmp.writeText(text)
-        tmp.renameTo(file)
+        if (!tmp.renameTo(file)) {
+            file.writeText(text)
+            tmp.delete()
+        }
     }
 
     private fun isoUtc(date: Date): String {
@@ -80,4 +113,6 @@ class CrashLogger(private val context: Context) {
         val proc = am?.runningAppProcesses?.firstOrNull { it.pid == pid }
         return proc?.processName ?: "unknown"
     }
+
+    internal fun crashDir(): File = dir
 }

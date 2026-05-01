@@ -9,5 +9,6 @@ data class AuthInfo(
     val externalId: String?,
     val role: String?,
     val displayName: String?,
-    val email: String?
+    val email: String?,
+    val avatarUrl: String?
 )

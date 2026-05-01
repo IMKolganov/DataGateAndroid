@@ -8,32 +8,33 @@ data class JwtClaims(
     val externalId: String?,
     val role: String?,
     val displayName: String?,
-    val email: String?
+    val email: String?,
+    val avatarUrl: String?
 )
 
 object JwtClaimsReader {
 
     fun read(token: String?): JwtClaims {
         if (token.isNullOrBlank()) {
-            return JwtClaims(null, null, null, null, null)
+            return JwtClaims(null, null, null, null, null, null)
         }
 
         val parts = token.split(".")
         if (parts.size < 2) {
-            return JwtClaims(null, null, null, null, null)
+            return JwtClaims(null, null, null, null, null, null)
         }
 
         val payloadJson = try {
             val payloadBytes = base64UrlDecode(parts[1])
             String(payloadBytes, Charsets.UTF_8)
         } catch (_: Throwable) {
-            return JwtClaims(null, null, null, null, null)
+            return JwtClaims(null, null, null, null, null, null)
         }
 
         val obj = try {
             JSONObject(payloadJson)
         } catch (_: Throwable) {
-            return JwtClaims(null, null, null, null, null)
+            return JwtClaims(null, null, null, null, null, null)
         }
 
         val userId = firstNonBlank(
@@ -58,13 +59,21 @@ object JwtClaimsReader {
         )
 
         val email = obj.optStringOrNull("email")
+        val avatarUrl = firstNonBlank(
+            obj.optStringOrNull("avatarUrl"),
+            obj.optStringOrNull("avatar_url"),
+            obj.optStringOrNull("picture"),
+            obj.optStringOrNull("photoUrl"),
+            obj.optStringOrNull("profileImageUrl")
+        )
 
         return JwtClaims(
             userId = userId,
             externalId = externalId,
             role = role,
             displayName = displayName,
-            email = email
+            email = email,
+            avatarUrl = avatarUrl
         )
     }
 

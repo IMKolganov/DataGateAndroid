@@ -1,5 +1,7 @@
 package com.imkolganov.datagate.ui.screens.connect
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.tooling.preview.Preview
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -15,8 +17,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,44 +30,62 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material.icons.automirrored.outlined.ContactSupport
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.imkolganov.datagate.R
+import com.imkolganov.datagate.update.GitHubLatestRelease
+import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Composable
 fun VpnStatusScreen(
     state: VpnStatusUiState,
     onConnectClick: () -> Unit,
-    onDisconnectClick: () -> Unit
+    onDisconnectClick: () -> Unit,
+    homeUpdateBanner: GitHubLatestRelease? = null,
+    onHomeUpdateBannerAction: (GitHubLatestRelease) -> Unit = {},
+    onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
 ) {
-    val isConnected =
-        state.isConnectRequested && state.lastMessage.startsWith("Connected", ignoreCase = true)
-    val isConnecting = state.isConnectRequested && !isConnected
+    val context = LocalContext.current
+    val isConnected = state.isVpnConnected
+    val isConnecting = state.isConnectRequested && !state.isVpnConnected
 
     val statusTitle = when {
-        isConnected -> "Connected"
-        isConnecting -> "Connecting..."
-        else -> "Disconnected"
+        isConnected -> stringResource(R.string.vpn_status_connected)
+        isConnecting -> stringResource(R.string.vpn_status_connecting)
+        else -> stringResource(R.string.vpn_status_disconnected)
     }
 
-    val statusSubtitle = if (state.lastMessage.isNotBlank()) {
-        state.lastMessage
-    } else {
-        "Waiting for VPN events..."
+    val statusSubtitle = when {
+        state.lastMessage.isNotBlank() -> remember(state.lastMessage) {
+            context.resources.userFriendlyApiError(state.lastMessage)
+        }
+        else -> stringResource(R.string.vpn_waiting_events)
     }
 
     val mainColor = when {
@@ -101,6 +123,24 @@ fun VpnStatusScreen(
     }
 
     val scrollState = rememberScrollState()
+    var showReportDialog by remember { mutableStateOf(false) }
+
+    fun openUrl(url: String) {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: Exception) {
+        }
+    }
+
+    fun openSupportEmail() {
+        val email = context.getString(R.string.support_contact_email)
+        val subject = Uri.encode(context.getString(R.string.home_report_email_subject))
+        val uri = Uri.parse("mailto:$email?subject=$subject")
+        try {
+            context.startActivity(Intent(Intent.ACTION_SENDTO, uri))
+        } catch (_: Exception) {
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -116,10 +156,34 @@ fun VpnStatusScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
+            homeUpdateBanner?.let { rel ->
+                HomeUpdateAvailableBanner(
+                    release = rel,
+                    onUpdate = { onHomeUpdateBannerAction(rel) },
+                    onDismiss = { onHomeUpdateBannerDismiss(rel) },
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             Text(
-                text = "DataGate OpenVPN 3",
+                text = stringResource(R.string.vpn_home_title),
                 style = MaterialTheme.typography.headlineSmall
             )
+
+            TextButton(onClick = { showReportDialog = true }) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ContactSupport,
+                        contentDescription = stringResource(R.string.home_report_issue),
+                        modifier = Modifier.size(22.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(stringResource(R.string.home_report_issue))
+                }
+            }
 
             Card(
                 shape = RoundedCornerShape(24.dp),
@@ -184,15 +248,15 @@ fun VpnStatusScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.PowerSettingsNew,
-                            contentDescription = "Power",
+                            contentDescription = stringResource(R.string.vpn_power),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(36.dp)
                         )
                         Text(
                             text = when {
-                                isConnected -> "Disconnect"
-                                isConnecting -> "Cancel"
-                                else -> "Connect"
+                                isConnected -> stringResource(R.string.action_disconnect)
+                                isConnecting -> stringResource(R.string.action_cancel)
+                                else -> stringResource(R.string.action_connect)
                             },
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimary
@@ -201,7 +265,124 @@ fun VpnStatusScreen(
                 }
             }
 
+            Text(
+                modifier = Modifier
+                    .widthIn(max = 520.dp)
+                    .padding(horizontal = 8.dp),
+                text = stringResource(R.string.vpn_home_footer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+
+    if (showReportDialog) {
+        AlertDialog(
+            onDismissRequest = { showReportDialog = false },
+            title = { Text(stringResource(R.string.home_report_issue_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(R.string.home_report_issue_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Start
+                    )
+                    TextButton(
+                        onClick = {
+                            openUrl(context.getString(R.string.support_telegram_bot_url))
+                            showReportDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(R.string.home_report_telegram),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            openSupportEmail()
+                            showReportDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(R.string.home_report_email),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            openUrl(context.getString(R.string.project_github_issues_url))
+                            showReportDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(R.string.home_report_github),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showReportDialog = false }) {
+                    Text(stringResource(R.string.action_ok))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun HomeUpdateAvailableBanner(
+    release: GitHubLatestRelease,
+    onUpdate: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.home_update_banner_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.home_update_banner_dismiss),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.home_update_banner_body, release.tagName),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
+            )
+            TextButton(onClick = onUpdate, modifier = Modifier.align(Alignment.End)) {
+                Text(stringResource(R.string.home_update_banner_action))
+            }
         }
     }
 }
@@ -213,6 +394,7 @@ fun VpnStatusScreenPreview_Connected() {
         VpnStatusScreen(
             state = VpnStatusUiState(
                 isConnectRequested = true,
+                isVpnConnected = true,
                 lastMessage = "Connected to DataGate VPN (10.0.0.2)"
             ),
             onConnectClick = {},
@@ -228,6 +410,7 @@ fun VpnStatusScreenPreview_Connecting() {
         VpnStatusScreen(
             state = VpnStatusUiState(
                 isConnectRequested = true,
+                isVpnConnected = false,
                 lastMessage = "Connecting to server..."
             ),
             onConnectClick = {},

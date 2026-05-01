@@ -1,8 +1,16 @@
 package com.imkolganov.datagate.auth
 
 import android.app.Activity
+import android.util.Log
 import com.imkolganov.datagate.auth.http.BackendAuthApi
+import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
+import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
+import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
+import com.imkolganov.datagate.model.auth.RefreshRequestDto
+import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
+import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
+import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -11,22 +19,108 @@ class AuthRepository(
     private val tokenStore: TokenStore,
     private val autoLoginStore: AutoLoginStore
 ) {
-    fun isLoggedIn(): Boolean = !tokenStore.getRefreshToken().isNullOrBlank()
+    private companion object {
+        const val TAG = "Auth"
+    }
+
+    fun isLoggedIn(): Boolean =
+        !tokenStore.getAccessToken().isNullOrBlank() && !tokenStore.getRefreshToken().isNullOrBlank()
+
+    suspend fun tryRestoreSession(): Boolean {
+        val refresh = tokenStore.getRefreshToken()
+        if (refresh.isNullOrBlank()) return false
+
+        if (!tokenStore.getAccessToken().isNullOrBlank()) {
+            return true
+        }
+
+        return try {
+            val refreshed = withContext(Dispatchers.IO) {
+                api.refresh(
+                    RefreshRequestDto(
+                        refreshToken = refresh,
+                        deviceId = null,
+                        userAgent = null
+                    )
+                )
+            }
+            tokenStore.saveAccessToken(refreshed.token)
+            tokenStore.saveAccessTokenExpiration(refreshed.expiration)
+            if (!refreshed.refreshToken.isNullOrBlank()) {
+                tokenStore.saveRefreshToken(refreshed.refreshToken)
+            }
+            tokenStore.saveRefreshTokenExpiration(refreshed.refreshExpiration)
+            autoLoginStore.setEnabled(true)
+            true
+        } catch (t: Throwable) {
+            Log.w(TAG, "Session restore failed, clearing tokens", t)
+            tokenStore.clear()
+            autoLoginStore.setEnabled(false)
+            false
+        }
+    }
 
     fun logout() {
-        android.util.Log.d("Auth", "Logout requested. Before clear token=${tokenStore.getAccessToken()?.take(12)}")
+        Log.d(TAG, "Logout requested. Before clear token=${tokenStore.getAccessToken()?.take(12)}")
         tokenStore.clear()
         autoLoginStore.setEnabled(false)
-        android.util.Log.d("Auth", "Logout done. After clear token=${tokenStore.getAccessToken()}")
+        Log.d(TAG, "Logout done. After clear token=${tokenStore.getAccessToken()}")
     }
 
     suspend fun loginWithGoogle(activity: Activity): String {
+        Log.d(TAG, "Google credential request started")
         val idToken = GoogleCredentialManager.getGoogleIdTokenOrThrow(activity)
+        Log.d(TAG, "Google ID token received; backend login request started")
 
+        val result = try {
+            withContext(Dispatchers.IO) {
+                api.googleLogin(GoogleLoginRequestDto(idToken))
+            }
+        } catch (t: Throwable) {
+            Log.e(TAG, "Backend google-login failed", t)
+            throw t
+        }
+        Log.d(TAG, "Backend google-login succeeded")
+
+        persistSessionOrThrow(result)
+        return result.token
+    }
+
+    suspend fun loginWithPassword(login: String, password: String): String {
         val result = withContext(Dispatchers.IO) {
-            api.googleLogin(GoogleLoginRequestDto(idToken))
+            api.loginWithPassword(LoginPasswordRequestDto(login = login, password = password))
+        }
+        Log.d(TAG, "Backend password login succeeded")
+        persistSessionOrThrow(result)
+        return result.token
+    }
+
+    suspend fun register(request: RegisterUserRequestDto): RegisterUserResponseDto =
+        withContext(Dispatchers.IO) {
+            api.register(request)
         }
 
+    suspend fun requestEmailConfirmation(email: String): String =
+        withContext(Dispatchers.IO) {
+            api.requestEmailConfirmation(email)
+        }
+
+    suspend fun confirmEmail(email: String, code: String): ConfirmEmailResultDto =
+        withContext(Dispatchers.IO) {
+            api.confirmEmail(email, code)
+        }
+
+    suspend fun forgotPassword(loginOrEmail: String): String =
+        withContext(Dispatchers.IO) {
+            api.forgotPassword(loginOrEmail)
+        }
+
+    suspend fun resetPasswordWithCode(code: String, newPassword: String, confirmPassword: String): ResetPasswordResultDto =
+        withContext(Dispatchers.IO) {
+            api.resetPassword(code, newPassword, confirmPassword)
+        }
+
+    private fun persistSessionOrThrow(result: GoogleLoginResponseDto) {
         tokenStore.saveAccessToken(result.token)
         tokenStore.saveAccessTokenExpiration(result.expiration)
 
@@ -40,6 +134,5 @@ class AuthRepository(
         tokenStore.saveRefreshTokenExpiration(result.refreshExpiration)
 
         autoLoginStore.setEnabled(true)
-        return result.token
     }
 }

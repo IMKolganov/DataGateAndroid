@@ -7,7 +7,8 @@ fun TokenStore.getAuthInfo(): AuthInfo {
         externalId = claims.externalId,
         role = claims.role,
         displayName = claims.displayName,
-        email = claims.email
+        email = claims.email,
+        avatarUrl = claims.avatarUrl
     )
 }
 
