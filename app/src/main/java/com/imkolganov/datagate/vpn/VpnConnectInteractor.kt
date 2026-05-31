@@ -154,9 +154,8 @@ class VpnConnectInteractor(
             }
             val bypassRoutes = ipListRoutesRepository.getRoutesForConnection()
             val supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-            val localBridgeConfig = forceWssConfig(configText, linkProtocol)
             val routePlan = IpListRouteConfig.prepareConnectionRoutes(
-                config = localBridgeConfig,
+                config = configText,
                 routes = bypassRoutes,
                 coverageMode = ipListSettings.coverageMode,
                 android12OvpnRouteLimit = ipListSettings.android12OvpnRouteLimit,
@@ -206,46 +205,6 @@ class VpnConnectInteractor(
             isConnecting.set(false)
         }
     }
-    private val BRIDGE_PORT = 41194
-    private fun forceWssConfig(original: String, linkProtocol: VpnLinkProtocol): String {
-        val protoLine = linkProtocol.configProtoLine()
-        val lines = original
-            .replace("\r\n", "\n")
-            .split("\n")
-
-        val out = ArrayList<String>(lines.size + 2)
-
-        var remoteWritten = false
-        var protoWritten = false
-
-        for (raw in lines) {
-            val line = raw.trimEnd()
-            val lower = line.trimStart().lowercase()
-
-            when {
-                lower.startsWith("remote ") -> {
-                    if (!remoteWritten) {
-                        out.add("remote 127.0.0.1 $BRIDGE_PORT")
-                        remoteWritten = true
-                    }
-                    // drop all other remote lines
-                }
-
-                lower.startsWith("proto ") -> {
-                    out.add(protoLine)
-                    protoWritten = true
-                }
-
-                else -> out.add(line)
-            }
-        }
-
-        if (!protoWritten) out.add(0, protoLine)
-        if (!remoteWritten) out.add(0, "remote 127.0.0.1 $BRIDGE_PORT")
-
-        return out.joinToString("\n").trimEnd() + "\n"
-    }
-
     fun uuidToShort(uuid: String?): String {
         if (uuid.isNullOrBlank()) {
             error("UUID is null or blank")

@@ -73,10 +73,18 @@ object VpnEventMapper {
                 lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
-            "NETWORK_CHANGED" -> previous.copy(
-                isConnectRequested = true,
-                lastMessage = res.getString(R.string.vpn_msg_reconnecting)
-            )
+            "NETWORK_CHANGED" -> {
+                if (!shouldShowReconnectingOnNetworkChange(previous)) {
+                    // Network capability callbacks can fire during a healthy connected session.
+                    // Keep the user-facing status stable and avoid false "reconnecting" messaging.
+                    previous
+                } else {
+                    previous.copy(
+                        isConnectRequested = true,
+                        lastMessage = res.getString(R.string.vpn_msg_reconnecting)
+                    )
+                }
+            }
 
             "CONNECTING" -> previous.copy(
                 isConnectRequested = true,
@@ -123,6 +131,10 @@ object VpnEventMapper {
                 previous.copy(lastMessage = msg)
             }
         }
+    }
+
+    internal fun shouldShowReconnectingOnNetworkChange(previous: VpnStatusUiState): Boolean {
+        return !previous.isVpnConnected
     }
 
     private fun sanitizeFallback(eventName: String, eventInfo: String): String {

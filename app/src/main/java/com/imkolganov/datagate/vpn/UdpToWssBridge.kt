@@ -29,18 +29,19 @@ class UdpToWssBridge(
 
     private var socket: DatagramSocket? = null
 
-    fun start() {
-        if (running) return
+    fun start(): Int {
+        if (running) return socket?.localPort ?: port
         running = true
+
+        val ds = DatagramSocket(null)
+        ds.reuseAddress = true
+        ds.bind(InetSocketAddress("127.0.0.1", port))
+        socket = ds
+        protectDatagramSocket(service, ds)
+        val actualPort = ds.localPort
 
         Thread(
             {
-                val ds = DatagramSocket(null)
-                ds.reuseAddress = true
-                ds.bind(InetSocketAddress("127.0.0.1", port))
-                socket = ds
-                protectDatagramSocket(service, ds)
-
                 val buf = ByteArray(65536)
                 val first = DatagramPacket(buf, buf.size)
                 try {
@@ -65,6 +66,7 @@ class UdpToWssBridge(
             },
             "dg-udp-wss-first"
         ).start()
+        return actualPort
     }
 
     fun stop() {
