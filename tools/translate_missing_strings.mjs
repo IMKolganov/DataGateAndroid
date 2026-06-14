@@ -141,7 +141,7 @@ async function main() {
       const bodyEn = baseMap.get(key);
       const src = decodeAndroidStringBody(bodyEn);
       const out = await translateText(src, lang);
-      await new Promise((r) => setTimeout(r, 65));
+      await new Promise((r) => setTimeout(r, 2500));
       const enc = encodeAndroidStringBody(out);
       additions.push(`    <string name="${key}">${enc}</string>`);
     }

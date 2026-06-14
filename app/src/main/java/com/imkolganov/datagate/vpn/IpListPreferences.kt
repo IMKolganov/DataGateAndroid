@@ -20,6 +20,7 @@ data class IpListSettings(
     val sourceUrls: List<String>,
     val updateFrequency: IpListUpdateFrequency,
     val coverageMode: IpListCoverageMode,
+    val android12OvpnRouteLimit: Int,
     /** When false, CIDR lists are not loaded or applied (all traffic via VPN). */
     val cidrListsEnabled: Boolean = true
 )
@@ -36,6 +37,7 @@ object IpListPreferences {
     private val KEY_SOURCE_URLS = stringPreferencesKey("source_urls")
     private val KEY_UPDATE_FREQUENCY = stringPreferencesKey("update_frequency")
     private val KEY_COVERAGE_MODE = stringPreferencesKey("coverage_mode")
+    private val KEY_ANDROID12_OVPN_ROUTE_LIMIT = intPreferencesKey("android12_ovpn_route_limit")
     private val KEY_CIDR_LISTS_ENABLED = booleanPreferencesKey("cidr_lists_enabled")
     private val KEY_CACHED_LIST = stringPreferencesKey("cached_list")
     private val KEY_CACHED_AT_MS = longPreferencesKey("cached_at_epoch_ms")
@@ -59,6 +61,10 @@ object IpListPreferences {
                     ),
                     updateFrequency = IpListUpdateFrequency.fromStorageValue(prefs[KEY_UPDATE_FREQUENCY]),
                     coverageMode = IpListCoverageMode.fromStorageValue(prefs[KEY_COVERAGE_MODE]),
+                    android12OvpnRouteLimit = IpListRouteConfig.sanitizeAndroid12OvpnRouteLimit(
+                        prefs[KEY_ANDROID12_OVPN_ROUTE_LIMIT]
+                            ?: IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT
+                    ),
                     cidrListsEnabled = prefs[KEY_CIDR_LISTS_ENABLED] ?: true
                 )
             }
@@ -72,6 +78,7 @@ object IpListPreferences {
         sourceUrls: List<String>,
         updateFrequency: IpListUpdateFrequency,
         coverageMode: IpListCoverageMode,
+        android12OvpnRouteLimit: Int,
         cidrListsEnabled: Boolean
     ) {
         context.ipListDataStore.edit { prefs ->
@@ -79,6 +86,8 @@ object IpListPreferences {
             prefs.remove(KEY_SOURCE_URL)
             prefs[KEY_UPDATE_FREQUENCY] = updateFrequency.storageValue
             prefs[KEY_COVERAGE_MODE] = coverageMode.storageValue
+            prefs[KEY_ANDROID12_OVPN_ROUTE_LIMIT] =
+                IpListRouteConfig.sanitizeAndroid12OvpnRouteLimit(android12OvpnRouteLimit)
             prefs[KEY_CIDR_LISTS_ENABLED] = cidrListsEnabled
         }
     }

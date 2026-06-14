@@ -1,10 +1,11 @@
 package com.imkolganov.datagate.model.servers
 
 /**
- * Matches backend [OpenVpnServerV2Dto] (GET api/v2/open-vpn-servers).
+ * Matches backend [VpnServerV2Dto] (GET api/v2/open-vpn-servers).
  */
 data class OpenVpnServerV2Dto(
     val id: Int,
+    val serverType: VpnServerType,
     val serverName: String,
     val isOnline: Boolean,
     val isDefault: Boolean,

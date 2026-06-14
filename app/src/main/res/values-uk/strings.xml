@@ -18,6 +18,11 @@
     <string name="vpn_waiting_events">Очікування подій VPN…</string>
     <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">Живлення</string>
+    <string name="action_pause">Пауза</string>
+    <string name="action_resume">Продовжити</string>
+    <string name="vpn_status_paused">На паузі</string>
+    <string name="vpn_msg_paused">VPN на паузі</string>
+    <string name="vpn_msg_resuming">Відновлення VPN…</string>
     <string name="action_disconnect">Відключити</string>
     <string name="action_cancel">Скасувати</string>
     <string name="action_connect">Підключити</string>
@@ -30,6 +35,9 @@
     <string name="home_report_email">Електронна пошта</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Підпишіться — це важливо</string>
+    <string name="home_telegram_channel_body">Telegram-канал проєкту: актуальні новини та оголошення при проблемах із сервісом.</string>
 
     <string name="stats_filters">Фільтри</string>
     <string name="stats_overview">Огляд</string>
@@ -55,6 +63,18 @@
 
     <string name="presets_last_7">Останні 7 днів</string>
     <string name="presets_last_30">Останні 30 днів</string>
+    <string name="presets_last_2_months">Останні 2 місяці</string>
+    <string name="presets_last_3_months">Останні 3 місяці</string>
+    <string name="presets_last_6_months">Останні 6 місяців</string>
+    <string name="presets_last_1_year">Минулий рік</string>
+    <string name="presets_last_2_years">Останні 2 роки</string>
+    <string name="presets_chip_7">7д</string>
+    <string name="presets_chip_30">30д</string>
+    <string name="presets_chip_2m">2м</string>
+    <string name="presets_chip_3m">3м</string>
+    <string name="presets_chip_6m">6м</string>
+    <string name="presets_chip_1y">1р</string>
+    <string name="presets_chip_2y">2р</string>
     <string name="action_reload">Оновити</string>
 
     <string name="date_range_label">Діапазон дат</string>
@@ -144,6 +164,10 @@
     <string name="label_out">Вих.</string>
     <string name="status_offline">Офлайн</string>
     <string name="status_online">Онлайн</string>
+    <string name="access_your_vpn_ip">IP у VPN</string>
+    <string name="access_your_external_ip">Ваш зовнішній IP</string>
+    <string name="access_your_dns">Ваш DNS</string>
+    <string name="access_network_info_unavailable">Недоступно</string>
     <string name="access_users_footer">Усього користувачів: %1$d · онлайн %2$d із %3$d серверів</string>
     <string name="access_choose_server">Оберіть сервер</string>
     <string name="access_refresh">Оновити</string>
@@ -314,4 +338,43 @@
     <string name="settings_ip_lists_enable_subtitle">Коли вимкнено, винятки маршрутизації на основі списків не застосовуються й списки не завантажуються; увесь трафік проходить через VPN-тунель.</string>
     <string name="settings_ip_lists_enable_title">Списки IP у форматі CIDR</string>
     <string name="vpn_ip_list_requires_android_13">Обхід списку IP потребує Android 13 або новішого. Вимкніть маршрутизацію за списком IP або оновіть Android, щоб підключитися в цьому режимі.</string>
+
+    <string name="totp_challenge_lead">Введіть 6-значний код із застосунку-аутентифікатора, щоб завершити вхід.</string>
+    <string name="totp_challenge_lead_named">Вхід як %1$s. Введіть 6-значний код із застосунку-аутентифікатора.</string>
+    <string name="totp_field_code">Код аутентифікації</string>
+    <string name="totp_verify_sign_in">Підтвердити та увійти</string>
+    <string name="totp_back_to_sign_in">Назад до входу</string>
+    <string name="totp_sign_in_again">Увійти знову</string>
+    <string name="totp_challenge_expired">Термін перевірки минув. Поверніться та увійдіть знову — ви ще не авторизовані.</string>
+    <string name="totp_error_code_required">Введіть 6-значний код із застосунку-аутентифікатора.</string>
+    <string name="totp_setup_title">Двофакторна аутентифікація</string>
+    <string name="totp_setup_required_notice">Перед використанням застосунку потрібно увімкнути 2FA.</string>
+    <string name="totp_setup_intro">Відскануйте QR-код у Google Authenticator, Authy, 1Password або іншому TOTP-застосунку, потім введіть код підтвердження.</string>
+    <string name="totp_setup_begin">Налаштувати аутентифікатор</string>
+    <string name="totp_setup_scan_hint">Відскануйте QR-код або введіть секрет вручну.</string>
+    <string name="totp_setup_issuer">Видавець: %1$s</string>
+    <string name="totp_setup_account">Обліковий запис: %1$s</string>
+    <string name="totp_setup_confirm_code_label">Код із застосунку</string>
+    <string name="totp_setup_confirm_action">Підтвердити та увімкнути</string>
+    <string name="totp_setup_enabled_message">Двофакторну аутентифікацію увімкнено для облікового запису адміністратора.</string>
+    <string name="totp_setup_logout">Вийти</string>
+    <string name="totp_copy_secret">Копіювати секрет</string>
+    <string name="totp_qr_cd">QR-код для налаштування аутентифікатора</string>
+    <string name="totp_disabled_message">2FA вимкнено. Під час наступного входу потрібно налаштувати її знову.</string>
+    <string name="totp_admin_security_title">Безпека адміністратора</string>
+    <string name="totp_admin_security_intro">Для адміністраторів під час входу потрібен код із застосунку-аутентифікатора (TOTP).</string>
+    <string name="totp_admin_security_loading">Завантаження налаштувань безпеки…</string>
+    <string name="totp_admin_status_enabled">Статус: увімкнено. Після кожного входу буде запитуватися код.</string>
+    <string name="totp_admin_status_disabled">Статус: не налаштовано.</string>
+    <string name="totp_disable_title">Вимкнути двофакторну аутентифікацію</string>
+    <string name="totp_disable_password_label">Пароль облікового запису</string>
+    <string name="totp_disable_password_hint">Потрібен лише при вході за паролем. Для входу через Google можна залишити порожнім.</string>
+    <string name="totp_disable_action">Вимкнути 2FA</string>
+    <string name="settings_ip_lists_android_12_notice">На Android 12 використовуються компактні маршрути OVPN-профілю, бо системне виключення маршрутів доступне лише на Android 13+.</string>
+    <string name="settings_ip_lists_android_12_title">Сумісність з Android 12</string>
+    <string name="settings_ip_lists_android_12_description">На цьому пристрої широкі IPv4-маршрути записуються в OVPN-профіль. Застосунок тримає профіль менше %1$d КБ, тому малі діапазони та IPv6 можуть іти через VPN.</string>
+    <string name="settings_ip_lists_android_12_route_limit_label">Максимум OVPN-маршрутів</string>
+    <string name="settings_ip_lists_android_12_route_limit_hint">Рекомендовано %1$d. Допустимо %2$d–%3$d.</string>
+    <string name="settings_ip_lists_android_12_route_limit_error">Введіть значення від %1$d до %2$d.</string>
+    <string name="vpn_ip_list_ready_limited">IP-список готовий (%1$d маршрутів; досягнуто ліміт профілю)</string>
 </resources>

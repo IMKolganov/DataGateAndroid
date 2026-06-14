@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
+import com.imkolganov.datagate.model.auth.TotpSetupDto
+import com.imkolganov.datagate.model.auth.TotpStatusDto
 import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +29,23 @@ enum class EmailAuthPane {
     ResetPassword
 }
 
+enum class AuthLoginScreen {
+    SignIn,
+    TotpChallenge,
+}
+
+enum class AdminTotpGate {
+    Unknown,
+    Allowed,
+    SetupRequired,
+}
+
+data class TotpChallengeUi(
+    val loginChallengeId: String,
+    val displayName: String? = null,
+    val challengeExpired: Boolean = false,
+)
+
 data class AuthUiState(
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
@@ -34,8 +53,14 @@ data class AuthUiState(
     val infoMessage: String? = null,
     val loginTab: AuthLoginTab = AuthLoginTab.Google,
     val emailPane: EmailAuthPane = EmailAuthPane.SignIn,
+    val loginScreen: AuthLoginScreen = AuthLoginScreen.SignIn,
+    val totpChallenge: TotpChallengeUi? = null,
+    val adminTotpGate: AdminTotpGate = AdminTotpGate.Unknown,
     /** After registration, user confirms this address. */
-    val pendingVerificationEmail: String? = null
+    val pendingVerificationEmail: String? = null,
+    val totpSetup: TotpSetupDto? = null,
+    val totpSetupConfirmLoading: Boolean = false,
+    val totpStatus: TotpStatusDto? = null,
 )
 
 class AuthViewModel(
@@ -50,11 +75,70 @@ class AuthViewModel(
     init {
         viewModelScope.launch {
             val restored = repo.tryRestoreSession()
+            val loggedIn = restored || repo.isLoggedIn()
             _state.update {
                 it.copy(
                     isLoading = false,
-                    isLoggedIn = restored || repo.isLoggedIn()
+                    isLoggedIn = loggedIn,
                 )
+            }
+            if (loggedIn) {
+                refreshAdminTotpGate()
+            } else {
+                _state.update { it.copy(adminTotpGate = AdminTotpGate.Allowed) }
+            }
+        }
+    }
+
+    fun refreshAdminTotpGate() {
+        viewModelScope.launch {
+            if (!_state.value.isLoggedIn) {
+                _state.update { it.copy(adminTotpGate = AdminTotpGate.Allowed) }
+                return@launch
+            }
+            _state.update { it.copy(adminTotpGate = AdminTotpGate.Unknown) }
+            val required = repo.adminRequiresTotpSetup()
+            _state.update {
+                it.copy(
+                    adminTotpGate = if (required) AdminTotpGate.SetupRequired else AdminTotpGate.Allowed
+                )
+            }
+        }
+    }
+
+    private fun handleLoginOutcome(outcome: LoginOutcome) {
+        when (outcome) {
+            is LoginOutcome.TotpChallenge -> _state.update {
+                it.copy(
+                    isLoading = false,
+                    isLoggedIn = false,
+                    loginScreen = AuthLoginScreen.TotpChallenge,
+                    totpChallenge = TotpChallengeUi(
+                        loginChallengeId = outcome.loginChallengeId,
+                        displayName = outcome.displayName,
+                    ),
+                    errorMessage = null,
+                )
+            }
+            is LoginOutcome.Authenticated -> {
+                val gate = if (outcome.requiresTotpSetup) {
+                    AdminTotpGate.SetupRequired
+                } else {
+                    AdminTotpGate.Unknown
+                }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isLoggedIn = true,
+                        loginScreen = AuthLoginScreen.SignIn,
+                        totpChallenge = null,
+                        adminTotpGate = gate,
+                        errorMessage = null,
+                    )
+                }
+                if (!outcome.requiresTotpSetup) {
+                    refreshAdminTotpGate()
+                }
             }
         }
     }
@@ -111,6 +195,17 @@ class AuthViewModel(
         }
     }
 
+    fun backFromTotpChallenge() {
+        _state.update {
+            it.copy(
+                loginScreen = AuthLoginScreen.SignIn,
+                totpChallenge = null,
+                errorMessage = null,
+                infoMessage = null,
+            )
+        }
+    }
+
     fun dismissInfo() {
         _state.update { it.copy(infoMessage = null) }
     }
@@ -119,8 +214,7 @@ class AuthViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null, infoMessage = null) }
             try {
-                repo.loginWithGoogle(activity)
-                _state.update { it.copy(isLoading = false, isLoggedIn = true) }
+                handleLoginOutcome(repo.loginWithGoogle(activity))
             } catch (e: Exception) {
                 val msg = activity.resources.userFriendlyApiError(e.deepMessageForApiError())
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
@@ -137,8 +231,121 @@ class AuthViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null, infoMessage = null) }
             try {
-                repo.loginWithPassword(l, password)
-                _state.update { it.copy(isLoading = false, isLoggedIn = true) }
+                handleLoginOutcome(repo.loginWithPassword(l, password))
+            } catch (e: Exception) {
+                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                _state.update { it.copy(isLoading = false, errorMessage = msg) }
+            }
+        }
+    }
+
+    fun verifyTotpLogin(resources: Resources, code: String) {
+        val challenge = _state.value.totpChallenge ?: return
+        val c = code.trim()
+        if (c.length < 6) {
+            _state.update {
+                it.copy(errorMessage = resources.getString(R.string.totp_error_code_required))
+            }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                handleLoginOutcome(repo.verifyTotpLogin(challenge.loginChallengeId, c))
+            } catch (e: Exception) {
+                val raw = e.deepMessageForApiError()
+                val expired = isLoginChallengeExpiredMessage(raw)
+                val msg = if (expired) {
+                    resources.getString(R.string.totp_challenge_expired)
+                } else {
+                    resources.userFriendlyApiError(raw)
+                }
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = msg,
+                        totpChallenge = challenge.copy(challengeExpired = expired),
+                    )
+                }
+            }
+        }
+    }
+
+    fun beginAdminTotpSetup(resources: Resources) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, errorMessage = null, infoMessage = null) }
+            try {
+                val setup = repo.beginTotpSetup()
+                _state.update {
+                    it.copy(isLoading = false, totpSetup = setup, infoMessage = null)
+                }
+            } catch (e: Exception) {
+                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                _state.update { it.copy(isLoading = false, errorMessage = msg) }
+            }
+        }
+    }
+
+    fun cancelAdminTotpSetup() {
+        _state.update { it.copy(totpSetup = null, errorMessage = null) }
+    }
+
+    fun confirmAdminTotpSetup(resources: Resources, code: String) {
+        val c = code.trim()
+        if (c.length < 6) {
+            _state.update {
+                it.copy(errorMessage = resources.getString(R.string.totp_error_code_required))
+            }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(totpSetupConfirmLoading = true, errorMessage = null) }
+            try {
+                repo.confirmTotpSetup(c)
+                _state.update {
+                    it.copy(
+                        totpSetupConfirmLoading = false,
+                        totpSetup = null,
+                        adminTotpGate = AdminTotpGate.Allowed,
+                        infoMessage = resources.getString(R.string.totp_setup_enabled_message),
+                    )
+                }
+            } catch (e: Exception) {
+                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                _state.update {
+                    it.copy(totpSetupConfirmLoading = false, errorMessage = msg)
+                }
+            }
+        }
+    }
+
+    fun loadTotpStatusForSettings() {
+        viewModelScope.launch {
+            val status = repo.fetchTotpStatus()
+            _state.update { it.copy(totpStatus = status) }
+        }
+    }
+
+    fun disableTotp(resources: Resources, code: String, password: String) {
+        val c = code.trim()
+        if (c.length < 6) {
+            _state.update {
+                it.copy(errorMessage = resources.getString(R.string.totp_error_code_required))
+            }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, errorMessage = null, infoMessage = null) }
+            try {
+                repo.disableTotp(c, password)
+                val status = repo.fetchTotpStatus()
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        totpStatus = status,
+                        infoMessage = resources.getString(R.string.totp_disabled_message),
+                    )
+                }
             } catch (e: Exception) {
                 val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
@@ -329,10 +536,14 @@ class AuthViewModel(
         }
     }
 
+    fun clearAuthMessages() {
+        _state.update { it.copy(errorMessage = null, infoMessage = null) }
+    }
+
     fun logout() {
         repo.logout()
         _state.update {
-            AuthUiState(isLoggedIn = false)
+            AuthUiState(isLoggedIn = false, adminTotpGate = AdminTotpGate.Allowed)
         }
     }
 }

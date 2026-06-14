@@ -16,11 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 data class StatsFilters(
     val fromIso: String,
@@ -35,8 +30,8 @@ data class StatsUiState(
     val filters: StatsFilters,
     val metric: Metric = Metric.TrafficTotal,
     val response: OverviewSeriesResponse? = null,
-    /** Matches "Last 7 days" / "Last 30 days" chips; null after a custom date range. */
-    val selectedPresetDays: Int? = 7
+    /** Active quick-range chip; null after a custom date range. */
+    val selectedPreset: StatsDatePreset? = StatsDatePreset.Last7Days
 )
 
 open class StatsViewModel(
@@ -45,11 +40,9 @@ open class StatsViewModel(
     private val externalIdProvider: () -> String
 ) : AndroidViewModel(application) {
 
-    private val utcTz: TimeZone = TimeZone.getTimeZone("UTC")
-
     private val _state = MutableStateFlow(
         run {
-            val (fromIso, toIso) = rangeForLastCalendarDays(7)
+            val (fromIso, toIso) = isoRangeForStatsPreset(StatsDatePreset.Last7Days)
             StatsUiState(
                 filters = StatsFilters(
                     fromIso = fromIso,
@@ -57,7 +50,7 @@ open class StatsViewModel(
                     grouping = StatsGrouping.Auto,
                     externalId = ""
                 ),
-                selectedPresetDays = 7
+                selectedPreset = StatsDatePreset.Last7Days
             )
         }
     )
@@ -83,7 +76,7 @@ open class StatsViewModel(
         _state.update {
             it.copy(
                 filters = it.filters.copy(fromIso = fromIso),
-                selectedPresetDays = null
+                selectedPreset = null
             )
         }
     }
@@ -92,29 +85,19 @@ open class StatsViewModel(
         _state.update {
             it.copy(
                 filters = it.filters.copy(toIso = toIso),
-                selectedPresetDays = null
+                selectedPreset = null
             )
         }
     }
 
-    fun setLastDays(days: Long) {
-        val (fromIso, toIso) = rangeForLastCalendarDays(days.toInt())
+    fun applyPreset(preset: StatsDatePreset) {
+        val (fromIso, toIso) = isoRangeForStatsPreset(preset)
         _state.update {
             it.copy(
                 filters = it.filters.copy(fromIso = fromIso, toIso = toIso),
-                selectedPresetDays = days.toInt()
+                selectedPreset = preset
             )
         }
-    }
-
-    /** Last [days] calendar days in the device default timezone, through end of “today” there — matches preset chips. */
-    private fun rangeForLastCalendarDays(days: Int): Pair<String, String> {
-        val tz = TimeZone.getDefault()
-        val todayStart = startOfTodayMillis(tz)
-        val from = addDays(todayStart, -days, tz)
-        val toExclusive = addDays(todayStart, 1, tz)
-        val to = toExclusive - 1000L
-        return isoUtc(from) to isoUtc(to)
     }
 
     fun load() {
@@ -152,28 +135,6 @@ open class StatsViewModel(
                 }
             }
         }
-    }
-
-    private fun isoUtc(millis: Long): String {
-        val fmt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-        fmt.timeZone = utcTz
-        return fmt.format(Date(millis))
-    }
-
-    private fun startOfTodayMillis(tz: TimeZone): Long {
-        val c = Calendar.getInstance(tz)
-        c.set(Calendar.HOUR_OF_DAY, 0)
-        c.set(Calendar.MINUTE, 0)
-        c.set(Calendar.SECOND, 0)
-        c.set(Calendar.MILLISECOND, 0)
-        return c.timeInMillis
-    }
-
-    private fun addDays(millis: Long, days: Int, tz: TimeZone): Long {
-        val c = Calendar.getInstance(tz)
-        c.timeInMillis = millis
-        c.add(Calendar.DAY_OF_YEAR, days)
-        return c.timeInMillis
     }
 
 }

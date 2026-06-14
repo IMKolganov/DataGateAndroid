@@ -25,6 +25,10 @@ fun ReportIssueDialog(
     if (!visible) return
 
     val context = LocalContext.current
+    val supportEmail = stringResource(R.string.support_contact_email)
+    val supportEmailSubject = stringResource(R.string.home_report_email_subject)
+    val telegramBotUrl = stringResource(R.string.support_telegram_bot_url)
+    val githubIssuesUrl = stringResource(R.string.project_github_issues_url)
 
     fun openUrl(url: String) {
         try {
@@ -34,9 +38,8 @@ fun ReportIssueDialog(
     }
 
     fun openSupportEmail() {
-        val email = context.getString(R.string.support_contact_email)
-        val subject = Uri.encode(context.getString(R.string.home_report_email_subject))
-        val uri = Uri.parse("mailto:$email?subject=$subject")
+        val subject = Uri.encode(supportEmailSubject)
+        val uri = Uri.parse("mailto:$supportEmail?subject=$subject")
         try {
             context.startActivity(Intent(Intent.ACTION_SENDTO, uri))
         } catch (_: Exception) {
@@ -57,7 +60,7 @@ fun ReportIssueDialog(
                 )
                 TextButton(
                     onClick = {
-                        openUrl(context.getString(R.string.support_telegram_bot_url))
+                        openUrl(telegramBotUrl)
                         onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -85,7 +88,7 @@ fun ReportIssueDialog(
                 }
                 TextButton(
                     onClick = {
-                        openUrl(context.getString(R.string.project_github_issues_url))
+                        openUrl(githubIssuesUrl)
                         onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth()

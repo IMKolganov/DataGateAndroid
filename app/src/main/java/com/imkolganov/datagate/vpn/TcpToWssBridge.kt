@@ -12,21 +12,30 @@ class TcpToWssBridge(
     @Volatile private var running = false
     private var server: java.net.ServerSocket? = null
 
-    fun start() {
-        if (running) return
+    fun start(): Int {
+        if (running) return server?.localPort ?: port
         running = true
 
         val ss = java.net.ServerSocket()
         ss.reuseAddress = true
         ss.bind(java.net.InetSocketAddress("127.0.0.1", port))
         server = ss
+        val actualPort = ss.localPort
 
         Thread {
             while (running) {
                 val socket = try { ss.accept() } catch (_: Throwable) { break }
-                Thread { handle(socket) }.start()
+                Thread {
+                    try {
+                        handle(socket)
+                    } catch (_: Throwable) {
+                        // Socket can be closed concurrently during shutdown/reconnect.
+                    }
+                }.start()
             }
         }.start()
+
+        return actualPort
     }
 
     fun stop() {
@@ -36,7 +45,13 @@ class TcpToWssBridge(
     }
 
     private fun handle(tcp: java.net.Socket) {
-        tcp.tcpNoDelay = true
+        if (tcp.isClosed) return
+        try {
+            tcp.tcpNoDelay = true
+        } catch (_: Throwable) {
+            try { tcp.close() } catch (_: Throwable) {}
+            return
+        }
 
         try {
             service.protect(tcp)
@@ -64,8 +79,27 @@ class TcpToWssBridge(
             }
         })
 
-        val tcpIn = tcp.getInputStream()
-        val tcpOut = tcp.getOutputStream()
+        if (tcp.isClosed || tcp.isInputShutdown || tcp.isOutputShutdown) {
+            try { ws.cancel() } catch (_: Throwable) {}
+            try { tcp.close() } catch (_: Throwable) {}
+            return
+        }
+
+        val tcpIn = try {
+            tcp.getInputStream()
+        } catch (_: Throwable) {
+            try { ws.cancel() } catch (_: Throwable) {}
+            try { tcp.close() } catch (_: Throwable) {}
+            return
+        }
+
+        val tcpOut = try {
+            tcp.getOutputStream()
+        } catch (_: Throwable) {
+            try { ws.cancel() } catch (_: Throwable) {}
+            try { tcp.close() } catch (_: Throwable) {}
+            return
+        }
 
         val t1 = Thread {
             val buf = ByteArray(16 * 1024)

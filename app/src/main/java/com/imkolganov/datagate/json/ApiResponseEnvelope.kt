@@ -9,6 +9,20 @@ import org.json.JSONObject
  *
  * When HTTP status is not 2xx but the body is still this JSON, we surface [Message] instead of raw HTML or huge payloads.
  */
+/** Extracts user-facing error from envelope or ASP.NET middleware JSON (`message` / `detail`). */
+fun parseApiErrorMessage(body: String): String? {
+    parseBackendApiMessageOrNull(body)?.let { return it }
+    val trimmed = body.trim()
+    if (trimmed.length < 2 || !trimmed.startsWith("{")) return null
+    return try {
+        val root = JSONObject(trimmed)
+        root.optString("detail", "").trim().takeIf { it.isNotEmpty() }
+            ?: root.optString("Detail", "").trim().takeIf { it.isNotEmpty() }
+    } catch (_: JSONException) {
+        null
+    }
+}
+
 fun parseBackendApiMessageOrNull(body: String): String? {
     val trimmed = body.trim()
     if (trimmed.length < 2 || !trimmed.startsWith("{")) return null
@@ -28,7 +42,7 @@ fun parseBackendApiMessageOrNull(body: String): String? {
  * Builds an [IOException] message: prefers API [Message] when body parses as [ApiResponse]; otherwise keeps body for [userFriendlyApiError].
  */
 fun formatHttpErrorDetail(operation: String, httpCode: Int, body: String): String {
-    parseBackendApiMessageOrNull(body)?.let { msg ->
+    parseApiErrorMessage(body)?.let { msg ->
         return "$operation (HTTP $httpCode): $msg"
     }
     return "$operation: HTTP $httpCode, body=$body"

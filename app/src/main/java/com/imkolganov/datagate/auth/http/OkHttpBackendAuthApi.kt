@@ -8,8 +8,14 @@ import com.imkolganov.datagate.json.optDataString
 import com.imkolganov.datagate.json.parseBackendApiEnvelopeOrThrow
 import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
-import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
 import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
+import com.imkolganov.datagate.model.auth.LoginResponseDto
+import com.imkolganov.datagate.model.auth.TotpConfirmRequestDto
+import com.imkolganov.datagate.model.auth.TotpDisableRequestDto
+import com.imkolganov.datagate.model.auth.TotpSetupDto
+import com.imkolganov.datagate.model.auth.TotpStatusDto
+import com.imkolganov.datagate.model.auth.TotpVerifyLoginRequestDto
+import com.imkolganov.datagate.json.parseApiErrorMessage
 import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RefreshResponseDto
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
@@ -28,29 +34,16 @@ class OkHttpBackendAuthApi(
 
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
-    override suspend fun googleLogin(request: GoogleLoginRequestDto): GoogleLoginResponseDto {
+    override suspend fun googleLogin(request: GoogleLoginRequestDto): LoginResponseDto {
         val url = joinUrl(baseUrl, ApiConfig.GOOGLE_LOGIN_PATH)
-
         val bodyJson = JSONObject()
             .put("idToken", request.idToken)
             .toString()
-
-        val req = Request.Builder()
-            .url(url)
-            .post(bodyJson.toRequestBody(jsonMediaType))
-            .build()
-
-        val resp = http.newCall(req).execute()
-        resp.use { r ->
-            val raw = r.body.string()
-            if (r.code !in 200..299) {
-                throw IOException(formatHttpErrorDetail("google-login failed", r.code, raw.orEmpty()))
-            }
-
-            val obj = JSONObject(raw)
-            val data = obj.getJSONObject("data")
-            return parseTokenBundle(data)
-        }
+        val raw = postJson(url, bodyJson, "google-login")
+        val root = parseBackendApiEnvelopeOrThrow("google-login", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("google-login: missing data in response")
+        return parseLoginResponse(data)
     }
 
     override suspend fun register(request: RegisterUserRequestDto): RegisterUserResponseDto {
@@ -87,7 +80,7 @@ class OkHttpBackendAuthApi(
         )
     }
 
-    override suspend fun loginWithPassword(request: LoginPasswordRequestDto): GoogleLoginResponseDto {
+    override suspend fun loginWithPassword(request: LoginPasswordRequestDto): LoginResponseDto {
         val url = joinUrl(baseUrl, ApiConfig.LOGIN_PATH)
         val bodyJson = JSONObject()
             .put("login", request.login.trim())
@@ -97,7 +90,75 @@ class OkHttpBackendAuthApi(
         val root = parseBackendApiEnvelopeOrThrow("login", 200, raw)
         val data = root.optDataObject()
             ?: throw IOException("login: missing data in response")
-        return parseTokenBundle(data)
+        return parseLoginResponse(data)
+    }
+
+    override suspend fun totpVerifyLogin(request: TotpVerifyLoginRequestDto): LoginResponseDto {
+        val url = joinUrl(baseUrl, ApiConfig.TOTP_VERIFY_LOGIN_PATH)
+        val bodyJson = JSONObject()
+            .put("loginChallengeId", request.loginChallengeId)
+            .put("code", request.code.trim())
+            .toString()
+        val raw = postJson(url, bodyJson, "totp-verify-login")
+        val root = parseBackendApiEnvelopeOrThrow("totp-verify-login", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("totp-verify-login: missing data in response")
+        return parseLoginResponse(data)
+    }
+
+    override suspend fun totpStatus(accessToken: String): TotpStatusDto {
+        val url = joinUrl(baseUrl, ApiConfig.TOTP_STATUS_PATH)
+        val raw = getWithBearer(url, accessToken, "totp-status")
+        val root = parseBackendApiEnvelopeOrThrow("totp-status", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("totp-status: missing data in response")
+        return TotpStatusDto(
+            isAdmin = data.optBoolean("isAdmin", data.optBoolean("IsAdmin", false)),
+            totpEnabled = data.optBoolean("totpEnabled", data.optBoolean("TotpEnabled", false)),
+            requiresTotpSetup = data.optBoolean(
+                "requiresTotpSetup",
+                data.optBoolean("RequiresTotpSetup", false)
+            ),
+        )
+    }
+
+    override suspend fun totpSetup(accessToken: String): TotpSetupDto {
+        val url = joinUrl(baseUrl, ApiConfig.TOTP_SETUP_PATH)
+        val raw = postJsonWithBearer(url, "{}", accessToken, "totp-setup")
+        val root = parseBackendApiEnvelopeOrThrow("totp-setup", 200, raw)
+        val data = root.optDataObject()
+            ?: throw IOException("totp-setup: missing data in response")
+        val secret = data.optString("sharedSecret", data.optString("SharedSecret", "")).trim()
+        val uri = data.optStringOrNull("otpAuthUri") ?: data.optStringOrNull("OtpAuthUri")
+        if (secret.isEmpty() && uri.isNullOrBlank()) {
+            throw IOException("totp-setup: missing secret")
+        }
+        return TotpSetupDto(
+            sharedSecret = secret,
+            otpAuthUri = uri,
+            issuer = data.optStringOrNull("issuer") ?: data.optStringOrNull("Issuer"),
+            accountName = data.optStringOrNull("accountName") ?: data.optStringOrNull("AccountName"),
+        )
+    }
+
+    override suspend fun totpConfirm(accessToken: String, request: TotpConfirmRequestDto) {
+        val url = joinUrl(baseUrl, ApiConfig.TOTP_CONFIRM_PATH)
+        val bodyJson = JSONObject()
+            .put("code", request.code.trim())
+            .toString()
+        val raw = postJsonWithBearer(url, bodyJson, accessToken, "totp-confirm")
+        parseBackendApiEnvelopeOrThrow("totp-confirm", 200, raw)
+    }
+
+    override suspend fun totpDisable(accessToken: String, request: TotpDisableRequestDto) {
+        val url = joinUrl(baseUrl, ApiConfig.TOTP_DISABLE_PATH)
+        val body = JSONObject().put("code", request.code.trim())
+        val pwd = request.password?.trim().orEmpty()
+        if (pwd.isNotEmpty()) {
+            body.put("password", pwd)
+        }
+        val raw = postJsonWithBearer(url, body.toString(), accessToken, "totp-disable")
+        parseBackendApiEnvelopeOrThrow("totp-disable", 200, raw)
     }
 
     override suspend fun requestEmailConfirmation(email: String): String {
@@ -181,8 +242,8 @@ class OkHttpBackendAuthApi(
             val data = obj.getJSONObject("data")
             val bundle = parseTokenBundle(data)
             return RefreshResponseDto(
-                token = bundle.token,
-                expiration = bundle.expiration,
+                token = bundle.token!!,
+                expiration = bundle.expiration!!,
                 refreshToken = bundle.refreshToken,
                 refreshExpiration = bundle.refreshExpiration
             )
@@ -204,20 +265,68 @@ class OkHttpBackendAuthApi(
         }
     }
 
-    private fun parseTokenBundle(data: JSONObject): GoogleLoginResponseDto {
-        val token = data.optString("token", data.optString("Token", "")).trim()
-            .ifEmpty { throw IOException("auth response: missing token") }
-        val expirationIso = data.optString("expiration", data.optString("Expiration", "")).trim()
-            .ifEmpty { throw IOException("auth response: missing expiration") }
-        val refreshToken = data.optStringOrNull("refreshToken") ?: data.optStringOrNull("RefreshToken")
-        val refreshExpirationIso =
-            data.optStringOrNull("refreshExpiration") ?: data.optStringOrNull("RefreshExpiration")
-        return GoogleLoginResponseDto(
-            token = token,
-            expiration = expirationIso,
-            refreshToken = refreshToken,
-            refreshExpiration = refreshExpirationIso
+    private fun parseLoginResponse(data: JSONObject): LoginResponseDto {
+        return LoginResponseDto(
+            token = data.optStringOrNull("token") ?: data.optStringOrNull("Token"),
+            expiration = data.optStringOrNull("expiration") ?: data.optStringOrNull("Expiration"),
+            refreshToken = data.optStringOrNull("refreshToken") ?: data.optStringOrNull("RefreshToken"),
+            refreshExpiration = data.optStringOrNull("refreshExpiration")
+                ?: data.optStringOrNull("RefreshExpiration"),
+            requiresTotp = data.optBoolean("requiresTotp", data.optBoolean("RequiresTotp", false)),
+            loginChallengeId = data.optStringOrNull("loginChallengeId")
+                ?: data.optStringOrNull("LoginChallengeId"),
+            displayName = data.optStringOrNull("displayName") ?: data.optStringOrNull("DisplayName"),
+            requiresTotpSetup = data.optBoolean(
+                "requiresTotpSetup",
+                data.optBoolean("RequiresTotpSetup", false)
+            ),
         )
+    }
+
+    private fun parseTokenBundle(data: JSONObject): LoginResponseDto {
+        val parsed = parseLoginResponse(data)
+        val token = parsed.token?.trim().orEmpty()
+        if (token.isEmpty()) {
+            throw IOException("auth response: missing token")
+        }
+        val expiration = parsed.expiration?.trim().orEmpty()
+        if (expiration.isEmpty()) {
+            throw IOException("auth response: missing expiration")
+        }
+        return parsed.copy(token = token, expiration = expiration)
+    }
+
+    private fun getWithBearer(url: String, accessToken: String, opLabel: String): String {
+        val req = Request.Builder()
+            .url(url)
+            .get()
+            .header("Authorization", "Bearer ${accessToken.trim()}")
+            .build()
+        val resp = http.newCall(req).execute()
+        resp.use { r ->
+            val raw = r.body.string().orEmpty()
+            if (r.code !in 200..299) {
+                throw IOException(formatHttpErrorDetail(opLabel, r.code, raw))
+            }
+            return raw
+        }
+    }
+
+    private fun postJsonWithBearer(url: String, body: String, accessToken: String, opLabel: String): String {
+        val req = Request.Builder()
+            .url(url)
+            .post(body.toRequestBody(jsonMediaType))
+            .header("Authorization", "Bearer ${accessToken.trim()}")
+            .build()
+        val resp = http.newCall(req).execute()
+        resp.use { r ->
+            val raw = r.body.string().orEmpty()
+            if (r.code !in 200..299) {
+                val msg = parseApiErrorMessage(raw) ?: formatHttpErrorDetail(opLabel, r.code, raw)
+                throw IOException(msg)
+            }
+            return raw
+        }
     }
 
     private fun JSONObject.optStringOrNull(key: String): String? {

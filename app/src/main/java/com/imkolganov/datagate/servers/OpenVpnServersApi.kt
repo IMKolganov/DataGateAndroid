@@ -8,6 +8,7 @@ import com.imkolganov.datagate.json.optDoubleOrNull
 import com.imkolganov.datagate.json.optIntOrNull
 import com.imkolganov.datagate.json.optLongOrNull
 import com.imkolganov.datagate.json.optStringOrNull
+import com.imkolganov.datagate.json.optVpnServerType
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.servers.OpenVpnServerStatusLogResponse
 import com.imkolganov.datagate.model.servers.OpenVpnServerV2Dto
@@ -139,6 +140,7 @@ class OpenVpnServersApi(
 
         return OpenVpnServerV2Dto(
             id = id,
+            serverType = o.optVpnServerType(),
             serverName = o.optString("serverName", o.optString("ServerName", "")),
             isOnline = o.optBoolean("isOnline", o.optBoolean("IsOnline", false)),
             isDefault = o.optBoolean("isDefault", o.optBoolean("IsDefault", false)),

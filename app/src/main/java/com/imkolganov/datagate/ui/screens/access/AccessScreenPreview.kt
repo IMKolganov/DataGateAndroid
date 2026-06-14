@@ -2,6 +2,7 @@ package com.imkolganov.datagate.ui.screens.access
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import com.imkolganov.datagate.vpn.ServerSelectionMode
 import com.imkolganov.datagate.vpn.VpnStatusUiState
@@ -21,6 +22,7 @@ fun AccessScreenPreview() {
                         protocol = "udp",
                         isOnline = true,
                         isEnableWss = true,
+                        serverType = VpnServerType.OpenVpn,
                         uptimeText = "12/17/2025, 5:15:17 PM",
                         openVpnVersionText = "2.6.17",
                         totalInText = "200.01 MB",
@@ -31,10 +33,26 @@ fun AccessScreenPreview() {
                     ),
                     AccessContract.ServerItem(
                         id = 2,
+                        name = "Xray VLESS (de)",
+                        protocol = "de",
+                        isOnline = true,
+                        isEnableWss = true,
+                        serverType = VpnServerType.Xray,
+                        uptimeText = "12/16/2025, 11:02:41 AM",
+                        openVpnVersionText = "25.2.21",
+                        totalInText = "95.4 MB",
+                        totalOutText = "1.10 GB",
+                        subtitle = "Premium",
+                        loadPercent = 12,
+                        activeUsers = 8
+                    ),
+                    AccessContract.ServerItem(
+                        id = 3,
                         name = "OpenVPN Server (tcp)",
                         protocol = "tcp",
                         isOnline = false,
                         isEnableWss = false,
+                        serverType = VpnServerType.OpenVpn,
                         uptimeText = "12/16/2025, 11:02:41 AM",
                         openVpnVersionText = "2.6.17",
                         totalInText = "95.4 MB",
