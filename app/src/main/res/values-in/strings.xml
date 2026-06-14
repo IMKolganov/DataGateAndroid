@@ -18,8 +18,6 @@
     <string name="action_pause">Jeda</string>
     <string name="action_resume">Lanjutkan</string>
     <string name="vpn_status_paused">Dijeda</string>
-    <string name="vpn_session_dialog_title">Sesi VPN</string>
-    <string name="vpn_session_dialog_message">Jeda sementara mempertahankan server yang dipilih untuk sambung ulang lebih cepat. Putuskan mengakhiri sesi.</string>
     <string name="vpn_msg_paused">VPN dijeda</string>
     <string name="vpn_msg_resuming">Melanjutkan VPN…</string>
     <string name="action_disconnect">Putuskan</string>

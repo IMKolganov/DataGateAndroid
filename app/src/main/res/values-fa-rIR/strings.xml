@@ -18,8 +18,6 @@
     <string name="action_pause">توقف</string>
     <string name="action_resume">ادامه</string>
     <string name="vpn_status_paused">متوقف</string>
-    <string name="vpn_session_dialog_title">نشست VPN</string>
-    <string name="vpn_session_dialog_message">توقف موقت انتخاب سرور را حفظ می‌کند و اتصال مجدد سریع‌تر است. قطع اتصال نشست را کامل پایان می‌دهد.</string>
     <string name="vpn_msg_paused">VPN متوقف شد</string>
     <string name="vpn_msg_resuming">در حال ادامه VPN…</string>
     <string name="action_disconnect">قطع اتصال</string>

@@ -21,8 +21,6 @@
     <string name="action_pause">Pauza</string>
     <string name="action_resume">Nastavi</string>
     <string name="vpn_status_paused">Pauzirano</string>
-    <string name="vpn_session_dialog_title">VPN sesija</string>
-    <string name="vpn_session_dialog_message">Pauza privremeno zadržava odabrani poslužitelj za brže ponovno spajanje. Odspoji završava sesiju.</string>
     <string name="vpn_msg_paused">VPN pauziran</string>
     <string name="vpn_msg_resuming">Nastavljanje VPN-a…</string>
     <string name="action_disconnect">Disconnect</string>

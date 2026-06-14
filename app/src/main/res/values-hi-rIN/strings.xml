@@ -18,8 +18,6 @@
     <string name="action_pause">रोकें</string>
     <string name="action_resume">जारी रखें</string>
     <string name="vpn_status_paused">रोका गया</string>
-    <string name="vpn_session_dialog_title">VPN सत्र</string>
-    <string name="vpn_session_dialog_message">पॉज़ अस्थायी रूप से सर्वर चुनाव रखता है और तेज़ी से फिर जोड़ता है। डिस्कनेक्ट सत्र समाप्त करता है।</string>
     <string name="vpn_msg_paused">VPN रोका गया</string>
     <string name="vpn_msg_resuming">VPN फिर शुरू…</string>
     <string name="action_disconnect">डिस्कनेक्ट</string>

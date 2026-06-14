@@ -21,8 +21,6 @@
     <string name="action_pause">Pausa</string>
     <string name="action_resume">Kompli</string>
     <string name="vpn_status_paused">Fuq pawża</string>
-    <string name="vpn_session_dialog_title">Sessjoni VPN</string>
-    <string name="vpn_session_dialog_message">Il-pausa żżom il-server magħżul għal ħin biex terġa\' tikkonnettja aktar malajr. Id-disconnect jispiċċa s-sessjoni.</string>
     <string name="vpn_msg_paused">VPN fuq pawża</string>
     <string name="vpn_msg_resuming">Kompli VPN…</string>
     <string name="action_disconnect">Disconnect</string>

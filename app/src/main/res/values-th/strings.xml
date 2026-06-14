@@ -18,8 +18,6 @@
     <string name="action_pause">หยุดชั่วคราว</string>
     <string name="action_resume">ดำเนินการต่อ</string>
     <string name="vpn_status_paused">หยุดชั่วคราว</string>
-    <string name="vpn_session_dialog_title">เซสชัน VPN</string>
-    <string name="vpn_session_dialog_message">การหยุดชั่วคราวจะเก็บเซิร์ฟเวอร์ที่เลือกไว้เพื่อเชื่อมต่อใหม่ได้เร็วขึ้น การตัดการเชื่อมต่อจะจบเซสชัน</string>
     <string name="vpn_msg_paused">VPN หยุดชั่วคราว</string>
     <string name="vpn_msg_resuming">กำลังดำเนินการ VPN ต่อ…</string>
     <string name="action_disconnect">ตัดการเชื่อมต่อ</string>

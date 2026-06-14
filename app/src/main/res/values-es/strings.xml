@@ -18,8 +18,6 @@
     <string name="action_pause">Pausar</string>
     <string name="action_resume">Reanudar</string>
     <string name="vpn_status_paused">En pausa</string>
-    <string name="vpn_session_dialog_title">Sesión VPN</string>
-    <string name="vpn_session_dialog_message">Pausar mantiene temporalmente el servidor elegido y reconecta más rápido. Desconectar finaliza la sesión.</string>
     <string name="vpn_msg_paused">VPN en pausa</string>
     <string name="vpn_msg_resuming">Reanudando VPN…</string>
     <string name="action_disconnect">Desconectar</string>

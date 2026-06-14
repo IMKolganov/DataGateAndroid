@@ -18,8 +18,6 @@
     <string name="action_pause">暫停</string>
     <string name="action_resume">繼續</string>
     <string name="vpn_status_paused">已暫停</string>
-    <string name="vpn_session_dialog_title">VPN 工作階段</string>
-    <string name="vpn_session_dialog_message">暫停會暫時保留所選伺服器以便更快重新連線。中斷連線將結束工作階段。</string>
     <string name="vpn_msg_paused">VPN 已暫停</string>
     <string name="vpn_msg_resuming">正在恢復 VPN…</string>
     <string name="action_disconnect">中斷</string>

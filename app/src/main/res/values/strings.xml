@@ -96,8 +96,6 @@
     <string name="vpn_status_connecting">Connecting…</string>
     <string name="vpn_status_disconnected">Disconnected</string>
     <string name="vpn_status_paused">Paused</string>
-    <string name="vpn_session_dialog_title">VPN session</string>
-    <string name="vpn_session_dialog_message">Pause temporarily keeps your server choice and reconnects faster. Disconnect ends the session completely.</string>
     <string name="vpn_msg_paused">VPN paused</string>
     <string name="vpn_msg_resuming">Resuming VPN…</string>
     <string name="vpn_waiting_events">Waiting for VPN events…</string>

@@ -27,6 +27,8 @@ release/
 # Local Node tools (i18n translator)
 ####################################
 tools/node_modules/
+tools/__pycache__/
+**/__pycache__/
 
 ####################################
 # Gradle

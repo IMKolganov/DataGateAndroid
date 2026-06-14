@@ -21,8 +21,6 @@
     <string name="action_pause">Pausa</string>
     <string name="action_resume">Återuppta</string>
     <string name="vpn_status_paused">Pausad</string>
-    <string name="vpn_session_dialog_title">VPN-session</string>
-    <string name="vpn_session_dialog_message">Paus behåller tillfälligt servervalet för snabbare återanslutning. Koppla från avslutar sessionen.</string>
     <string name="vpn_msg_paused">VPN pausad</string>
     <string name="vpn_msg_resuming">Återupptar VPN…</string>
     <string name="action_disconnect">Disconnect</string>

@@ -21,8 +21,6 @@
     <string name="action_pause">Pause</string>
     <string name="action_resume">Genoptag</string>
     <string name="vpn_status_paused">På pause</string>
-    <string name="vpn_session_dialog_title">VPN-session</string>
-    <string name="vpn_session_dialog_message">Pause bevarer midlertidigt dit servervalg og giver hurtigere genoprettelse. Afbryd afslutter sessionen.</string>
     <string name="vpn_msg_paused">VPN sat på pause</string>
     <string name="vpn_msg_resuming">Genoptager VPN…</string>
     <string name="action_disconnect">Disconnect</string>

@@ -21,8 +21,6 @@
     <string name="action_pause">I-pause</string>
     <string name="action_resume">Ituloy</string>
     <string name="vpn_status_paused">Naka-pause</string>
-    <string name="vpn_session_dialog_title">VPN session</string>
-    <string name="vpn_session_dialog_message">Pansamantalang pinapanatili ng pause ang napiling server para mas mabilis na muling kumonekta. Ang disconnect ay tatapusin ang session.</string>
     <string name="vpn_msg_paused">Naka-pause ang VPN</string>
     <string name="vpn_msg_resuming">Ipinagpapatuloy ang VPN…</string>
     <string name="action_disconnect">Disconnect</string>

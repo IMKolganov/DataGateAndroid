@@ -21,8 +21,6 @@
     <string name="action_pause">Sos</string>
     <string name="action_resume">Atosaigh</string>
     <string name="vpn_status_paused">Ar sos</string>
-    <string name="vpn_session_dialog_title">Seisiún VPN</string>
-    <string name="vpn_session_dialog_message">Coinníonn sos do rogha freastalaí go sealadach le haghaidh athcheangail níos tapúla. Dícheangail críochnaíonn an seisiún.</string>
     <string name="vpn_msg_paused">VPN ar sos</string>
     <string name="vpn_msg_resuming">Ag atosú VPN…</string>
     <string name="action_disconnect">Disconnect</string>

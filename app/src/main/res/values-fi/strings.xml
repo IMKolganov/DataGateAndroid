@@ -18,8 +18,6 @@
     <string name="action_pause">Tauko</string>
     <string name="action_resume">Jatka</string>
     <string name="vpn_status_paused">Tauolla</string>
-    <string name="vpn_session_dialog_title">VPN-istunto</string>
-    <string name="vpn_session_dialog_message">Tauko säilyttää palvelinvalinnan ja nopeuttaa uudelleenyhdistämistä. Katkaisu lopettaa istunnon.</string>
     <string name="vpn_msg_paused">VPN tauolla</string>
     <string name="vpn_msg_resuming">Jatketaan VPN:ää…</string>
     <string name="action_disconnect">Katkaise</string>
