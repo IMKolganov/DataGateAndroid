@@ -55,6 +55,9 @@ interface AccessContract {
         val totalInText: String?,
         val totalOutText: String?,
 
+        /** Public egress IP reported by the VPN server status log. */
+        val serverRemoteIp: String? = null,
+
         val subtitle: String? = null,
         val loadPercent: Int? = null,
         val activeUsers: Int? = null,

@@ -168,6 +168,8 @@ class MainActivity : AppCompatActivity() {
                         lifecycleScope.launch { connectInteractor.connect(VpnConnectSource.Access) }
                     },
                     onRequestDisconnect = { vpnController.requestDisconnect() },
+                    onRequestPause = { vpnController.requestPause() },
+                    onRequestResume = { vpnController.requestResume() },
                     onReconnectVpn = {
                         lifecycleScope.launch {
                             vpnController.requestDisconnect()

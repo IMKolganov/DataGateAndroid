@@ -59,4 +59,50 @@ class OpenVpnServersApiTest {
         assertEquals(100L, item.totalBytesIn)
         assertEquals(42, item.openVpnServerStatusLogResponse?.vpnServerId)
     }
+
+    @Test
+    fun parseWithStatusResponse_readsServerRemoteIpFromStatusLog() {
+        val response = api.parseWithStatusResponse(
+            """
+            {
+              "success": true,
+              "message": "Success",
+              "data": {
+                "vpnServerWithStatuses": [
+                  {
+                    "vpnServerResponses": {
+                      "vpnServer": {
+                        "id": 7,
+                        "serverName": "de-1",
+                        "isOnline": true,
+                        "isDefault": false,
+                        "apiUrl": "https://api.example",
+                        "isEnableWss": true,
+                        "isDeleted": false,
+                        "tags": [],
+                        "quotaPlanGroups": [],
+                        "isAccessibleForUserQuotaPlan": true
+                      }
+                    },
+                    "vpnServerStatusLogResponse": {
+                      "vpnServerId": 7,
+                      "sessionId": "s1",
+                      "bytesIn": 0,
+                      "bytesOut": 0,
+                      "serverRemoteIp": "198.51.100.22"
+                    },
+                    "countConnectedClients": 0,
+                    "countSessions": 0,
+                    "totalBytesIn": 0,
+                    "totalBytesOut": 0
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+
+        val status = response.data!!.openVpnServerWithStatuses.single().openVpnServerStatusLogResponse
+        assertEquals("198.51.100.22", status?.serverRemoteIp)
+    }
 }

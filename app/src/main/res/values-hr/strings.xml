@@ -18,6 +18,13 @@
     <string name="vpn_waiting_events">Waiting for VPN events…</string>
     <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">Power</string>
+    <string name="action_pause">Pauza</string>
+    <string name="action_resume">Nastavi</string>
+    <string name="vpn_status_paused">Pauzirano</string>
+    <string name="vpn_session_dialog_title">VPN sesija</string>
+    <string name="vpn_session_dialog_message">Pauza privremeno zadržava odabrani poslužitelj za brže ponovno spajanje. Odspoji završava sesiju.</string>
+    <string name="vpn_msg_paused">VPN pauziran</string>
+    <string name="vpn_msg_resuming">Nastavljanje VPN-a…</string>
     <string name="action_disconnect">Disconnect</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_connect">Connect</string>
@@ -159,7 +166,7 @@
     <string name="vpn_waiting_permission">Waiting for VPN permission…</string>
     <string name="vpn_error_permission_missing_config">VPN permission granted, but config or WSS link is missing</string>
     <string name="vpn_error_permission_denied">VPN permission denied</string>
-    <string name="vpn_disconnecting">Disconnecting…</string>
+    <string name="vpn_disconnecting">Prekid veze…</string>
     <string name="vpn_connecting_generic">Connecting…</string>
     <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
@@ -185,7 +192,7 @@
     <string name="vpn_msg_waiting_server">Waiting for server response…</string>
     <string name="vpn_msg_negotiating_config">Negotiating configuration…</string>
     <string name="vpn_msg_establishing_tunnel">Establishing tunnel…</string>
-    <string name="vpn_msg_reconnecting">Reconnecting…</string>
+    <string name="vpn_msg_reconnecting">Ponovno povezivanje…</string>
     <string name="vpn_msg_connecting">Connecting…</string>
     <string name="vpn_msg_connected_to">Connected to %1$s</string>
     <string name="vpn_msg_connected">Connected</string>
@@ -332,4 +339,44 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="settings_ip_lists_enable_subtitle">Kad je isključeno, iznimke usmjeravanja iz lista se ne primjenjuju ni se liste ne preuzimaju— sav promet prolazi VPN tunelom.</string>
     <string name="settings_ip_lists_enable_title">CIDR IP liste</string>
     <string name="vpn_ip_list_requires_android_13">Zaobilaženje liste IP‑ova zahtijeva Android 13 ili noviji. Isključite usmjeravanje po listi ili ažurirajte Android za povezivanje ovim načinom.</string>
+
+    <string name="totp_challenge_lead">Dokončete přihlašování zadáním 6místného kódu z aplikace pro ověřování.</string>
+    <string name="totp_challenge_lead_named">Jste přihlášeni jako %1$s. Dokončete přihlašování zadáním 6místného kódu z aplikace pro ověřování.</string>
+    <string name="totp_field_code">Autentizační kód</string>
+    <string name="totp_verify_sign_in">Ověřte a přihlaste se</string>
+    <string name="totp_back_to_sign_in">Zpět k přihlášení</string>
+    <string name="totp_sign_in_again">Znovu se přihlaste</string>
+    <string name="totp_challenge_expired">Platnost tohoto ověřovacího kroku vypršela. Vraťte se a přihlaste se znovu – ještě nejste přihlášeni.</string>
+    <string name="totp_error_code_required">Zadejte 6místný kód z aplikace pro ověřování.</string>
+    <string name="totp_setup_title">Dvoufaktorová autentizace</string>
+    <string name="totp_setup_required_notice">Před použitím aplikace musíte povolit dvoufaktorové ověřování.</string>
+    <string name="totp_setup_intro">Naskenujte QR kód pomocí Google Authenticator, Authy, 1Password nebo jiné TOTP aplikace a poté zadejte ověřovací kód.</string>
+    <string name="totp_setup_begin">Nastavte autentizátor</string>
+    <string name="totp_setup_scan_hint">Naskenujte QR kód nebo zadejte tajemství ručně.</string>
+    <string name="totp_setup_issuer">Vydavatel: %1$s</string>
+    <string name="totp_setup_account">Účet: %1$s</string>
+    <string name="totp_setup_confirm_code_label">Ověřovací kód z aplikace</string>
+    <string name="totp_setup_confirm_action">Potvrďte a povolte</string>
+    <string name="totp_setup_enabled_message">Pro váš účet správce je nyní povoleno dvoufaktorové ověřování.</string>
+    <string name="totp_setup_logout">Odhlaste se</string>
+    <string name="totp_copy_secret">Kopírovat tajemství</string>
+    <string name="totp_qr_cd">QR kód pro nastavení autentizátoru</string>
+    <string name="totp_disabled_message">Dvoufaktorové ověřování bylo zakázáno. Při příštím přihlášení budete vyzváni k jeho opětovnému nastavení.</string>
+    <string name="totp_admin_security_title">Zabezpečení správce</string>
+    <string name="totp_admin_security_intro">Správci musí při přihlašování použít ověřovací aplikaci (TOTP).</string>
+    <string name="totp_admin_security_loading">Načítání nastavení zabezpečení…</string>
+    <string name="totp_admin_status_enabled">Stav: povoleno. Po každém přihlášení budete požádáni o zadání kódu.</string>
+    <string name="totp_admin_status_disabled">Stav: nenakonfigurováno.</string>
+    <string name="totp_disable_title">Zakázat dvoufaktorové ověřování</string>
+    <string name="totp_disable_password_label">Heslo účtu</string>
+    <string name="totp_disable_password_hint">Povinné pouze v případě, že se přihlásíte pomocí hesla. Přihlášení přes Google může toto pole nechat prázdné.</string>
+    <string name="totp_disable_action">Zakázat 2FA</string>
+
+    <string name="settings_ip_lists_android_12_notice">Android 12 verwendet kompakte OVPN-Profilrouten, da System-Routenausschluss nur ab Android 13+ verfügbar ist.</string>
+    <string name="settings_ip_lists_android_12_title">Android-12-Kompatibilität</string>
+    <string name="settings_ip_lists_android_12_description">Breite IPv4-Routen werden auf diesem Gerät in das OVPN-Profil geschrieben. Die App hält das Profil unter %1$d KB, daher können kleine Bereiche und IPv6 weiterhin VPN nutzen.</string>
+    <string name="settings_ip_lists_android_12_route_limit_label">Max. OVPN-Routen</string>
+    <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
+    <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
+    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
 </resources>

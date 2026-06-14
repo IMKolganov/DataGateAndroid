@@ -33,7 +33,13 @@ class VpnController(
 
     private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo, fromQuery ->
         val current = getState()
-        if (fromQuery && eventName == "DISCONNECTED" && current.isConnectRequested && !current.isVpnConnected) {
+        if (OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(
+                fromQuery,
+                eventName,
+                current.isConnectRequested,
+                current.isVpnConnected
+            )
+        ) {
             Log.d(TAG, "Ignoring idle query DISCONNECTED over in-flight connect UI")
             return@VpnStatusBroadcastReceiver
         }
@@ -222,9 +228,40 @@ class VpnController(
             getState().copy(
                 isConnectRequested = false,
                 isVpnConnected = false,
+                isVpnPaused = false,
                 selectedServerName = null,
                 selectedServerId = null,
                 lastMessage = activity.getString(R.string.vpn_disconnecting)
+            )
+        )
+    }
+
+    fun requestPause() {
+        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
+            action = OpenVpn3Service.ACTION_PAUSE
+        }
+        startServiceCompat(intent)
+        onStateChange(
+            getState().copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                isVpnPaused = true,
+                lastMessage = activity.getString(R.string.vpn_msg_paused)
+            )
+        )
+    }
+
+    fun requestResume() {
+        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
+            action = OpenVpn3Service.ACTION_RESUME
+        }
+        startServiceCompat(intent)
+        onStateChange(
+            getState().copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                isVpnPaused = false,
+                lastMessage = activity.getString(R.string.vpn_msg_resuming)
             )
         )
     }
@@ -336,6 +373,7 @@ class VpnController(
             getState().copy(
                 isConnectRequested = false,
                 isVpnConnected = false,
+                isVpnPaused = false,
                 selectedServerName = null,
                 selectedServerId = null,
                 lastMessage = message

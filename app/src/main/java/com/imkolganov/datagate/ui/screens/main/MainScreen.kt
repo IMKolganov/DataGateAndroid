@@ -54,6 +54,8 @@ fun MainScreen(
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
     onRequestDisconnect: () -> Unit,
+    onRequestPause: () -> Unit = {},
+    onRequestResume: () -> Unit = {},
     onReconnectVpn: () -> Unit,
     onLogout: () -> Unit,
     authViewModel: AuthViewModel? = null,
@@ -119,6 +121,8 @@ fun MainScreen(
                     state = vpnState,
                     onConnectClick = onConnectFromHome,
                     onDisconnectClick = onRequestDisconnect,
+                    onPauseClick = onRequestPause,
+                    onResumeClick = onRequestResume,
                     homeUpdateBanner = homeUpdateBanner,
                     onHomeUpdateBannerAction = { release ->
                         UpdatePromptController.requestUpdateDialog(release)
@@ -135,6 +139,8 @@ fun MainScreen(
                     onEvent = accessViewModel::onEvent,
                     onConnectVpn = onConnectFromAccess,
                     onDisconnectVpn = onRequestDisconnect,
+                    onPauseVpn = onRequestPause,
+                    onResumeVpn = onRequestResume,
                     onReconnectVpn = onReconnectVpn
                 )
                 BottomTab.Statistics -> StatsScreen(

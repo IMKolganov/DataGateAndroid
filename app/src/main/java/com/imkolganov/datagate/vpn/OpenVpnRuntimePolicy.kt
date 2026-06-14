@@ -44,4 +44,17 @@ internal object OpenVpnRuntimePolicy {
         if (!enforceBackoff) return true
         return nowMs - lastAttemptAtMs >= backoffMs
     }
+
+    /** Idle service query must not wipe in-flight connect UI with DISCONNECTED. */
+    fun shouldIgnoreIdleQueryDisconnected(
+        fromQuery: Boolean,
+        eventName: String,
+        isConnectRequested: Boolean,
+        isVpnConnected: Boolean
+    ): Boolean {
+        return fromQuery &&
+            eventName.equals("DISCONNECTED", ignoreCase = true) &&
+            isConnectRequested &&
+            !isVpnConnected
+    }
 }

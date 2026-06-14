@@ -61,4 +61,44 @@ class OpenVpnRuntimePolicyTest {
             )
         )
     }
+
+    @Test
+    fun shouldIgnoreIdleQueryDisconnected_trueForInFlightConnect() {
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(
+                fromQuery = true,
+                eventName = "DISCONNECTED",
+                isConnectRequested = true,
+                isVpnConnected = false
+            )
+        )
+    }
+
+    @Test
+    fun shouldIgnoreIdleQueryDisconnected_falseWhenConnectedOrNotFromQuery() {
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(
+                fromQuery = true,
+                eventName = "DISCONNECTED",
+                isConnectRequested = true,
+                isVpnConnected = true
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(
+                fromQuery = false,
+                eventName = "DISCONNECTED",
+                isConnectRequested = true,
+                isVpnConnected = false
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(
+                fromQuery = true,
+                eventName = "CONNECTED",
+                isConnectRequested = true,
+                isVpnConnected = false
+            )
+        )
+    }
 }

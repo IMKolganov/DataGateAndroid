@@ -44,6 +44,7 @@ class AccessRepositoryImpl(
                 openVpnVersionText = status?.version,
                 totalInText = formatBytes(row.totalBytesIn),
                 totalOutText = formatBytes(row.totalBytesOut),
+                serverRemoteIp = status?.serverRemoteIp?.trim()?.takeIf { it.isNotEmpty() },
                 subtitle = quotaPlanSubtitle(s),
                 loadPercent = null,
                 activeUsers = row.countConnectedClients,

@@ -52,6 +52,7 @@ fun ClientNetworkFooter(
     externalIpAddress: String?,
     dnsServers: List<String>,
     isLoading: Boolean,
+    externalIpLoading: Boolean = false,
     showVpnIp: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -60,6 +61,13 @@ fun ClientNetworkFooter(
     fun formatValue(value: String?): String = when {
         isLoading -> "…"
         !value.isNullOrBlank() -> value
+        else -> unavailable
+    }
+
+    val externalText = when {
+        externalIpLoading -> "…"
+        !externalIpAddress.isNullOrBlank() -> externalIpAddress
+        isLoading -> "…"
         else -> unavailable
     }
 
@@ -87,7 +95,7 @@ fun ClientNetworkFooter(
             }
             ClientNetworkInfoRow(
                 label = stringResource(R.string.access_your_external_ip),
-                value = formatValue(externalIpAddress)
+                value = externalText
             )
             ClientNetworkInfoRow(
                 label = stringResource(R.string.access_your_dns),
@@ -99,19 +107,23 @@ fun ClientNetworkFooter(
 
 @Composable
 private fun ClientNetworkInfoRow(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         Text(
+            modifier = Modifier.weight(0.4f),
             text = "$label:",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(modifier = Modifier.width(8.dp))
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(0.6f),
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

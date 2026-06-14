@@ -38,6 +38,8 @@ fun AppRoot(
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
     onRequestDisconnect: () -> Unit,
+    onRequestPause: () -> Unit = {},
+    onRequestResume: () -> Unit = {},
     onReconnectVpn: () -> Unit,
     authVersion: Int,
     onAuthChanged: () -> Unit,
@@ -120,6 +122,8 @@ fun AppRoot(
                 onConnectFromHome = onConnectFromHome,
                 onConnectFromAccess = onConnectFromAccess,
                 onRequestDisconnect = onRequestDisconnect,
+                onRequestPause = onRequestPause,
+                onRequestResume = onRequestResume,
                 onReconnectVpn = onReconnectVpn,
                 onLogout = {
                     authViewModel.logout()

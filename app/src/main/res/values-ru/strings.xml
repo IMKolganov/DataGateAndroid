@@ -98,6 +98,13 @@
     <string name="vpn_waiting_events">Ожидание событий VPN…</string>
     <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">Питание</string>
+    <string name="action_pause">Пауза</string>
+    <string name="action_resume">Продолжить</string>
+    <string name="vpn_status_paused">На паузе</string>
+    <string name="vpn_session_dialog_title">VPN-сессия</string>
+    <string name="vpn_session_dialog_message">Пауза временно сохраняет выбранный сервер для быстрого переподключения. Отключение завершает сессию.</string>
+    <string name="vpn_msg_paused">VPN на паузе</string>
+    <string name="vpn_msg_resuming">Возобновление VPN…</string>
     <string name="action_disconnect">Отключить</string>
     <string name="action_cancel">Отмена</string>
     <string name="action_connect">Подключить</string>

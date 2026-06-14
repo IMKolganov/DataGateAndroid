@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.automirrored.outlined.ContactSupport
+import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -67,6 +69,8 @@ fun VpnStatusScreen(
     state: VpnStatusUiState,
     onConnectClick: () -> Unit,
     onDisconnectClick: () -> Unit,
+    onPauseClick: () -> Unit = {},
+    onResumeClick: () -> Unit = {},
     homeUpdateBanner: GitHubLatestRelease? = null,
     onHomeUpdateBannerAction: (GitHubLatestRelease) -> Unit = {},
     onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
@@ -77,15 +81,18 @@ fun VpnStatusScreen(
     val telegramBotUrl = stringResource(R.string.support_telegram_bot_url)
     val githubIssuesUrl = stringResource(R.string.project_github_issues_url)
     val isConnected = state.isVpnConnected
-    val isConnecting = state.isConnectRequested && !state.isVpnConnected
+    val isPaused = state.isVpnPaused
+    val isConnecting = state.isConnectRequested && !isConnected && !isPaused
 
     val statusTitle = when {
         isConnected -> stringResource(R.string.vpn_status_connected)
+        isPaused -> stringResource(R.string.vpn_status_paused)
         isConnecting -> stringResource(R.string.vpn_status_connecting)
         else -> stringResource(R.string.vpn_status_disconnected)
     }
 
     val statusSubtitle = when {
+        isPaused -> stringResource(R.string.vpn_msg_paused)
         state.lastMessage.isNotBlank() -> remember(state.lastMessage) {
             context.resources.userFriendlyApiError(state.lastMessage)
         }
@@ -94,12 +101,14 @@ fun VpnStatusScreen(
 
     val mainColor = when {
         isConnected -> MaterialTheme.colorScheme.primary
+        isPaused -> MaterialTheme.colorScheme.secondary
         isConnecting -> MaterialTheme.colorScheme.tertiary
         else -> MaterialTheme.colorScheme.error
     }
 
     val backgroundColor: Color = when {
         isConnected -> mainColor.copy(alpha = 0.18f)
+        isPaused -> mainColor.copy(alpha = 0.16f)
         isConnecting -> mainColor.copy(alpha = 0.15f)
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
@@ -122,12 +131,15 @@ fun VpnStatusScreen(
         label = "vpnButtonScale"
     )
 
-    val onClick = {
-        if (isConnected || isConnecting) onDisconnectClick() else onConnectClick()
-    }
-
     val scrollState = rememberScrollState()
     var showReportDialog by remember { mutableStateOf(false) }
+    val onClick = {
+        when {
+            isPaused -> onResumeClick()
+            isConnected || isConnecting -> onDisconnectClick()
+            else -> onConnectClick()
+        }
+    }
 
     fun openUrl(url: String) {
         try {
@@ -188,52 +200,90 @@ fun VpnStatusScreen(
                 }
             }
 
-            Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .widthIn(max = 520.dp)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                Card(
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .widthIn(max = 520.dp)
                 ) {
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .size(14.dp)
-                            .clip(CircleShape)
-                            .background(mainColor)
-                    )
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clip(CircleShape)
+                                .background(mainColor)
+                        )
 
-                    Text(text = statusTitle, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = statusTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                    Text(
-                        text = statusSubtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        Text(
+                            text = statusSubtitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isConnected) {
+                        TextButton(
+                            onClick = onPauseClick,
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Pause,
+                                    contentDescription = stringResource(R.string.action_pause),
+                                    modifier = Modifier.size(22.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Text(stringResource(R.string.action_pause))
+                            }
+                        }
+                    }
+                }
 
-            Box(
-                modifier = Modifier
-                    .size(180.dp)
-                    .scale(animatedScale)
-                    .clip(CircleShape)
-                    .background(color = backgroundColor)
-                    .border(
-                        width = 2.dp,
-                        color = mainColor.copy(alpha = 0.6f),
-                        shape = CircleShape
-                    )
-                    .clickable(onClick = onClick),
-                contentAlignment = Alignment.Center
-            ) {
+                Box(
+                    modifier = Modifier
+                        .size(180.dp)
+                        .scale(animatedScale)
+                        .clip(CircleShape)
+                        .background(color = backgroundColor)
+                        .border(
+                            width = 2.dp,
+                            color = mainColor.copy(alpha = 0.6f),
+                            shape = CircleShape
+                        )
+                        .clickable(onClick = onClick),
+                    contentAlignment = Alignment.Center
+                ) {
                 Box(
                     modifier = Modifier
                         .size(140.dp)
@@ -258,6 +308,7 @@ fun VpnStatusScreen(
                         Text(
                             text = when {
                                 isConnected -> stringResource(R.string.action_disconnect)
+                                isPaused -> stringResource(R.string.action_resume)
                                 isConnecting -> stringResource(R.string.action_cancel)
                                 else -> stringResource(R.string.action_connect)
                             },
@@ -266,6 +317,7 @@ fun VpnStatusScreen(
                         )
                     }
                 }
+            }
             }
 
             Text(

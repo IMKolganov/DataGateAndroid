@@ -63,6 +63,8 @@ fun AccessScreen(
     onEvent: (AccessContract.UiEvent) -> Unit,
     onConnectVpn: () -> Unit,
     onDisconnectVpn: () -> Unit,
+    onPauseVpn: () -> Unit = {},
+    onResumeVpn: () -> Unit = {},
     onReconnectVpn: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -74,7 +76,8 @@ fun AccessScreen(
     val appContext = LocalContext.current.applicationContext
 
     val vpnConnected = vpnState.isVpnConnected
-    val connectBusy = vpnState.isConnectRequested && !vpnConnected
+    val vpnPaused = vpnState.isVpnPaused
+    val connectBusy = vpnState.isConnectRequested && !vpnConnected && !vpnPaused
     val resolvedSessionId =
         vpnState.selectedServerId
             ?: if (vpnConnected) {
@@ -88,6 +91,11 @@ fun AccessScreen(
         } else {
             null
         }
+
+    val sessionServerId =
+        resolvedSessionId ?: state.selectedServerId ?: connectingTargetId
+    val externalIpAddress = AccessSessionNetworkInfo.resolveExternalIp(sessionServerId, state.servers)
+    val externalIpLoading = state.isLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
 
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
     var noWssDialogName by remember { mutableStateOf<String?>(null) }
@@ -105,7 +113,6 @@ fun AccessScreen(
         }
         if (vpnConnected && (
                 snapshot.vpnIpAddress.isNullOrBlank() ||
-                    snapshot.externalIpAddress.isNullOrBlank() ||
                     snapshot.dnsServers.isEmpty()
                 )
         ) {
@@ -232,7 +239,7 @@ fun AccessScreen(
                 ServerCard(
                     server = server,
                     isSelected = isSelected,
-                    isVpnSessionOnThisServer = vpnConnected && onThisServer,
+                    isVpnSessionOnThisServer = (vpnConnected || vpnPaused) && onThisServer,
                     isVpnConnectingToThisServer = connectingHere,
                     connectBusy = connectBusy,
                     onSelect = {
@@ -269,9 +276,10 @@ fun AccessScreen(
             item {
                 ClientNetworkFooter(
                     vpnIpAddress = networkIdentity.vpnIpAddress,
-                    externalIpAddress = networkIdentity.externalIpAddress,
+                    externalIpAddress = externalIpAddress,
                     dnsServers = networkIdentity.dnsServers,
                     isLoading = networkIdentityLoading,
+                    externalIpLoading = externalIpLoading,
                     showVpnIp = vpnConnected,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -294,7 +302,8 @@ fun AccessScreen(
 private fun VpnStatusCard(vpnState: VpnStatusUiState) {
     val context = LocalContext.current
     val connected = vpnState.isVpnConnected
-    val busy = vpnState.isConnectRequested && !connected
+    val paused = vpnState.isVpnPaused
+    val busy = vpnState.isConnectRequested && !connected && !paused
     val lastDisplay = remember(vpnState.lastMessage) {
         if (vpnState.lastMessage.isBlank()) ""
         else context.resources.userFriendlyApiError(vpnState.lastMessage)
@@ -307,6 +316,7 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
         colors = CardDefaults.cardColors(
             containerColor = when {
                 connected -> MaterialTheme.colorScheme.primaryContainer
+                paused -> MaterialTheme.colorScheme.secondaryContainer
                 busy -> MaterialTheme.colorScheme.tertiaryContainer
                 else -> MaterialTheme.colorScheme.surfaceContainerHigh
             }
@@ -316,6 +326,7 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
             Text(
                 text = when {
                     connected -> stringResource(R.string.access_connected)
+                    paused -> stringResource(R.string.vpn_status_paused)
                     busy -> stringResource(R.string.access_connecting)
                     else -> stringResource(R.string.access_not_connected)
                 },
@@ -324,6 +335,20 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
             Spacer(modifier = Modifier.height(4.dp))
             when {
                 connected -> {
+                    val name = vpnState.selectedServerName?.takeIf { it.isNotBlank() }
+                    Text(
+                        text = name ?: stringResource(R.string.access_vpn_active),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    if (lastDisplay.isNotBlank()) {
+                        Text(
+                            text = lastDisplay,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                paused -> {
                     val name = vpnState.selectedServerName?.takeIf { it.isNotBlank() }
                     Text(
                         text = name ?: stringResource(R.string.access_vpn_active),
