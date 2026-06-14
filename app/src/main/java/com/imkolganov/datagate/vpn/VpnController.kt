@@ -2,7 +2,6 @@ package com.imkolganov.datagate.vpn
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.BackgroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -11,7 +10,6 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
-import com.imkolganov.datagate.DataGateApp
 import com.imkolganov.datagate.R
 import java.io.File
 
@@ -27,20 +25,30 @@ class VpnController(
     private var pendingLinkProtocol: VpnLinkProtocol? = null
     private var pendingBypassRoutes: List<IpCidrRoute> = emptyList()
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
-    private val crashLogger get() = (activity.application as? DataGateApp)?.crashLogger
 
     companion object {
         private const val TAG = "OpenVPN3"
         private const val KEY_SESSION_SERVER_ID = "vpn_session_server_id"
     }
 
-    private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo ->
-        if (eventName == "DISCONNECTED") {
+    private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo, fromQuery ->
+        val current = getState()
+        if (OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(
+                fromQuery,
+                eventName,
+                current.isConnectRequested,
+                current.isVpnConnected
+            )
+        ) {
+            Log.d(TAG, "Ignoring idle query DISCONNECTED over in-flight connect UI")
+            return@VpnStatusBroadcastReceiver
+        }
+        if (eventName == "DISCONNECTED" && !fromQuery) {
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
-        val newState = VpnEventMapper.map(activity.resources, getState(), eventName, eventInfo)
+        val newState = VpnEventMapper.map(activity.resources, current, eventName, eventInfo)
         onStateChange(newState)
-        Log.d(TAG, "VPN status updated: $eventName - $eventInfo")
+        Log.d(TAG, "VPN status updated: $eventName - $eventInfo (fromQuery=$fromQuery)")
     }
 
     fun onStart() {
@@ -58,9 +66,26 @@ class VpnController(
             next = next.copy(selectedServerId = cachedSessionId)
             changed = true
         }
+        val cachedEventName = prefs.getString(OpenVpn3Service.PREF_LAST_EVENT_NAME, null)
+        if (!cachedEventName.isNullOrBlank()) {
+            val cachedEventInfo = prefs.getString(OpenVpn3Service.PREF_LAST_EVENT_INFO, "") ?: ""
+            val mapped = VpnEventMapper.map(activity.resources, next, cachedEventName, cachedEventInfo)
+            if (mapped != next) {
+                next = mapped
+                changed = true
+            }
+        }
         if (changed) onStateChange(next)
+        queryServiceStatus()
+    }
 
-        requestCurrentStatus()
+    /** Ask the running VPN service for its authoritative runtime state. */
+    fun queryServiceStatus() {
+        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
+            action = OpenVpn3Service.ACTION_QUERY_STATUS
+        }
+        runCatching { startServiceCompat(intent) }
+            .onFailure { Log.w(TAG, "Failed to query VPN service status", it) }
     }
 
     fun onStop() {
@@ -203,9 +228,40 @@ class VpnController(
             getState().copy(
                 isConnectRequested = false,
                 isVpnConnected = false,
+                isVpnPaused = false,
                 selectedServerName = null,
                 selectedServerId = null,
                 lastMessage = activity.getString(R.string.vpn_disconnecting)
+            )
+        )
+    }
+
+    fun requestPause() {
+        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
+            action = OpenVpn3Service.ACTION_PAUSE
+        }
+        startServiceCompat(intent)
+        onStateChange(
+            getState().copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                isVpnPaused = true,
+                lastMessage = activity.getString(R.string.vpn_msg_paused)
+            )
+        )
+    }
+
+    fun requestResume() {
+        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
+            action = OpenVpn3Service.ACTION_RESUME
+        }
+        startServiceCompat(intent)
+        onStateChange(
+            getState().copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                isVpnPaused = false,
+                lastMessage = activity.getString(R.string.vpn_msg_resuming)
             )
         )
     }
@@ -291,35 +347,6 @@ class VpnController(
         }
     }
 
-    private fun requestCurrentStatus() {
-        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
-            action = OpenVpn3Service.ACTION_QUERY_STATUS
-        }
-        try {
-            startServiceCompat(intent)
-        } catch (t: Throwable) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                t is BackgroundServiceStartNotAllowedException
-            ) {
-                Log.w(
-                    TAG,
-                    "Skipped ACTION_QUERY_STATUS: background service start is not allowed now",
-                    t
-                )
-                crashLogger?.logNonFatal(
-                    tag = "VpnController.requestCurrentStatus.background_not_allowed",
-                    throwable = t
-                )
-                return
-            }
-            Log.w(TAG, "Failed to request current VPN status", t)
-            crashLogger?.logNonFatal(
-                tag = "VpnController.requestCurrentStatus.failed",
-                throwable = t
-            )
-        }
-    }
-
     private fun registerReceiver() {
         if (isReceiverRegistered) return
 
@@ -346,6 +373,7 @@ class VpnController(
             getState().copy(
                 isConnectRequested = false,
                 isVpnConnected = false,
+                isVpnPaused = false,
                 selectedServerName = null,
                 selectedServerId = null,
                 lastMessage = message

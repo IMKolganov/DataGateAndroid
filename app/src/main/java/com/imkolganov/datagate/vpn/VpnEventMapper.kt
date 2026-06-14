@@ -11,6 +11,9 @@ object VpnEventMapper {
         eventName: String,
         eventInfo: String
     ): VpnStatusUiState {
+        if (previous.isVpnPaused && !isAuthoritativeWhilePaused(eventName)) {
+            return previous
+        }
         return when (eventName) {
 
             "SELECTING_SERVER" -> previous.copy(
@@ -70,17 +73,54 @@ object VpnEventMapper {
 
             "RECONNECTING" -> previous.copy(
                 isConnectRequested = true,
+                isVpnConnected = false,
                 lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
-            "NETWORK_CHANGED" -> previous.copy(
-                isConnectRequested = true,
-                lastMessage = res.getString(R.string.vpn_msg_reconnecting)
-            )
+            "NETWORK_CHANGED" -> {
+                if (!shouldShowReconnectingOnNetworkChange(previous)) {
+                    // Network capability callbacks can fire during a healthy connected session.
+                    // Keep the user-facing status stable and avoid false "reconnecting" messaging.
+                    previous
+                } else {
+                    previous.copy(
+                        isConnectRequested = true,
+                        lastMessage = res.getString(R.string.vpn_msg_reconnecting)
+                    )
+                }
+            }
 
             "CONNECTING" -> previous.copy(
                 isConnectRequested = true,
+                isVpnConnected = false,
                 lastMessage = res.getString(R.string.vpn_msg_connecting)
+            )
+
+            "WAITING_NETWORK" -> previous.copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                lastMessage = res.getString(R.string.vpn_msg_reconnecting)
+            )
+
+            "DISCONNECTING" -> previous.copy(
+                isConnectRequested = false,
+                isVpnConnected = false,
+                isVpnPaused = false,
+                lastMessage = res.getString(R.string.vpn_disconnecting)
+            )
+
+            "PAUSED" -> previous.copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                isVpnPaused = true,
+                lastMessage = res.getString(R.string.vpn_msg_paused)
+            )
+
+            "RESUMED" -> previous.copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                isVpnPaused = false,
+                lastMessage = res.getString(R.string.vpn_msg_resuming)
             )
 
             "CONNECTED" -> {
@@ -88,6 +128,7 @@ object VpnEventMapper {
                 previous.copy(
                     isConnectRequested = true,
                     isVpnConnected = true,
+                    isVpnPaused = false,
                     lastMessage = if (name != null) {
                         res.getString(R.string.vpn_msg_connected_to, name)
                     } else {
@@ -99,6 +140,7 @@ object VpnEventMapper {
             "DISCONNECTED" -> previous.copy(
                 isConnectRequested = false,
                 isVpnConnected = false,
+                isVpnPaused = false,
                 selectedServerId = null,
                 lastMessage = res.getString(R.string.vpn_msg_disconnected)
             )
@@ -106,12 +148,14 @@ object VpnEventMapper {
             "TUN_SETUP_FAILED" -> previous.copy(
                 isConnectRequested = false,
                 isVpnConnected = false,
+                isVpnPaused = false,
                 lastMessage = res.getString(R.string.vpn_msg_tunnel_failed)
             )
 
             "ERROR" -> previous.copy(
                 isConnectRequested = false,
                 isVpnConnected = false,
+                isVpnPaused = false,
                 lastMessage = res.getString(
                     R.string.vpn_connect_failed,
                     eventInfo.trim().ifBlank { eventName }
@@ -124,6 +168,26 @@ object VpnEventMapper {
             }
         }
     }
+
+    internal fun shouldShowReconnectingOnNetworkChange(previous: VpnStatusUiState): Boolean {
+        return !previous.isVpnConnected
+    }
+
+    internal fun isAuthoritativeWhilePaused(eventName: String): Boolean {
+        return when (eventName.uppercase()) {
+            "PAUSED",
+            "RESUMED",
+            "CONNECTED",
+            "DISCONNECTED",
+            "DISCONNECTING",
+            "ERROR",
+            "TUN_SETUP_FAILED" -> true
+            else -> false
+        }
+    }
+
+    internal fun sanitizeFallbackMessage(eventName: String, eventInfo: String): String =
+        sanitizeFallback(eventName, eventInfo)
 
     private fun sanitizeFallback(eventName: String, eventInfo: String): String {
         val name = eventName.trim().ifBlank { "STATUS" }

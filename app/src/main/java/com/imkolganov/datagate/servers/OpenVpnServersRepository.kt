@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.servers
 
 import com.imkolganov.datagate.TEMP_IGNORE_QUOTA_PLAN_CLIENT_CHECKS
+import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.model.servers.OpenVpnServerWithStatusV2Item
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,6 +29,7 @@ class OpenVpnServersRepository(
             if (s.isDeleted) return@mapNotNull null
             if (!TEMP_IGNORE_QUOTA_PLAN_CLIENT_CHECKS && !s.isAccessibleForUserQuotaPlan) return@mapNotNull null
             if (!s.isOnline) return@mapNotNull null
+            if (s.serverType != VpnServerType.OpenVpn) return@mapNotNull null
             if (!s.isEnableWss) return@mapNotNull null
 
             BestServerResult(
@@ -58,6 +60,10 @@ class OpenVpnServersRepository(
                 throw IllegalStateException("Server #$serverId is not available or offline")
             is ManualServerResolve.RequiresExternalOpenVpn ->
                 throw IllegalStateException("Server #$serverId does not support WSS in app")
+            is ManualServerResolve.RequiresXrayClient ->
+                throw IllegalStateException("Server #$serverId is XRay and is not supported in this app")
+            is ManualServerResolve.RequiresUnsupportedServerType ->
+                throw IllegalStateException("Server #$serverId has an unsupported type for this app")
             is ManualServerResolve.QuotaPlanBlocked ->
                 throw IllegalStateException("Server #$serverId is not included in your quota plan")
         }
@@ -77,6 +83,13 @@ class OpenVpnServersRepository(
             val name = s.serverName.trim().takeUnless { it.isBlank() } ?: "Server #${s.id}"
             if (!TEMP_IGNORE_QUOTA_PLAN_CLIENT_CHECKS && !s.isAccessibleForUserQuotaPlan) {
                 return ManualServerResolve.QuotaPlanBlocked(name)
+            }
+            if (s.serverType != VpnServerType.OpenVpn) {
+                return when (s.serverType) {
+                    VpnServerType.Xray -> ManualServerResolve.RequiresXrayClient(name)
+                    VpnServerType.OpenVpn -> error("unreachable")
+                    VpnServerType.Unknown -> ManualServerResolve.RequiresUnsupportedServerType(name)
+                }
             }
             if (!s.isEnableWss) {
                 return ManualServerResolve.RequiresExternalOpenVpn(name)

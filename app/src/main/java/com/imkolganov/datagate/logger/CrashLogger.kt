@@ -3,6 +3,7 @@ package com.imkolganov.datagate.logger
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
+import com.imkolganov.datagate.BuildConfig
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -83,6 +84,7 @@ class CrashLogger(private val context: Context) {
             appendLine("thread=${thread.name}")
             appendLine("sdk=${Build.VERSION.SDK_INT}")
             appendLine("device=${Build.MANUFACTURER} ${Build.MODEL}")
+            appendLine("app_version=${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
             appendLine("kind=$kind")
             appendLine("exception=${throwable::class.java.name}")
             appendLine("message=${throwable.message ?: ""}")

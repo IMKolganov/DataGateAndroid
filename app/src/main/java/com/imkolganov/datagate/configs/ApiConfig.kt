@@ -10,6 +10,12 @@ object ApiConfig {
     const val FORGOT_PASSWORD_PATH = "/api/auth/forgot-password"
     const val RESET_PASSWORD_PATH = "/api/auth/reset-password"
 
+    const val TOTP_VERIFY_LOGIN_PATH = "/api/auth/totp/verify-login"
+    const val TOTP_STATUS_PATH = "/api/auth/totp/status"
+    const val TOTP_SETUP_PATH = "/api/auth/totp/setup"
+    const val TOTP_CONFIRM_PATH = "/api/auth/totp/confirm"
+    const val TOTP_DISABLE_PATH = "/api/auth/totp/disable"
+
     /** GET …/get-all — V2 list without live metrics (optional). */
     const val API_OPEN_VPN_SERVERS_V2_GET_ALL_PATH = "api/v2/open-vpn-servers/get-all"
 

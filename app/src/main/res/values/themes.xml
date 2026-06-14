@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- AppCompat parent so AppCompatDelegate.setApplicationLocales applies per-app language. -->
-    <style name="Theme.DataGateAndroid" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme.DataGateAndroid" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
 </resources>

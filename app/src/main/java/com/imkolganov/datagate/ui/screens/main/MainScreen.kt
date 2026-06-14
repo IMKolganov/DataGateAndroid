@@ -29,6 +29,7 @@ import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.update.UpdatePromptController
 import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
+import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.stats.FakeStatsApiClient
 import com.imkolganov.datagate.ui.screens.connect.VpnStatusScreen
@@ -53,8 +54,11 @@ fun MainScreen(
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
     onRequestDisconnect: () -> Unit,
+    onRequestPause: () -> Unit = {},
+    onRequestResume: () -> Unit = {},
     onReconnectVpn: () -> Unit,
     onLogout: () -> Unit,
+    authViewModel: AuthViewModel? = null,
     tokenStore: TokenStore,
     accessViewModel: AccessViewModel,
     statsViewModel: StatsViewModel,
@@ -117,6 +121,8 @@ fun MainScreen(
                     state = vpnState,
                     onConnectClick = onConnectFromHome,
                     onDisconnectClick = onRequestDisconnect,
+                    onPauseClick = onRequestPause,
+                    onResumeClick = onRequestResume,
                     homeUpdateBanner = homeUpdateBanner,
                     onHomeUpdateBannerAction = { release ->
                         UpdatePromptController.requestUpdateDialog(release)
@@ -133,6 +139,8 @@ fun MainScreen(
                     onEvent = accessViewModel::onEvent,
                     onConnectVpn = onConnectFromAccess,
                     onDisconnectVpn = onRequestDisconnect,
+                    onPauseVpn = onRequestPause,
+                    onResumeVpn = onRequestResume,
                     onReconnectVpn = onReconnectVpn
                 )
                 BottomTab.Statistics -> StatsScreen(
@@ -140,6 +148,7 @@ fun MainScreen(
                 )
                 BottomTab.Settings -> SettingsScreen(
                     tokenStore = tokenStore,
+                    authViewModel = authViewModel,
                     onLogout = onLogout,
                     themeMode = themeMode,
                     onThemeModeChange = onThemeModeChange,
@@ -187,6 +196,7 @@ fun MainScreenPreview() {
             onRequestDisconnect = {},
             onReconnectVpn = {},
             onLogout = {},
+            authViewModel = null,
             tokenStore = PreviewTokenStore(),
             accessViewModel = previewVm,
             statsViewModel = previewStats,

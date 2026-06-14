@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         LanguagePreferenceStore.apply(applicationContext)
+        ThemePreferenceStore.apply(applicationContext)
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge(
@@ -134,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         val statsFactory = StatsViewModelFactory(
             application = application,
             api = graph.statsApi,
-            externalIdProvider = { graph.tokenStore.getAuthInfo().externalId.toString() }
+            externalIdProvider = { graph.tokenStore.getAuthInfo().externalId.orEmpty() }
         )
 
         statsViewModel = androidx.lifecycle.ViewModelProvider(this, statsFactory)
@@ -168,6 +169,8 @@ class MainActivity : AppCompatActivity() {
                         lifecycleScope.launch { connectInteractor.connect(VpnConnectSource.Access) }
                     },
                     onRequestDisconnect = { vpnController.requestDisconnect() },
+                    onRequestPause = { vpnController.requestPause() },
+                    onRequestResume = { vpnController.requestResume() },
                     onReconnectVpn = {
                         lifecycleScope.launch {
                             vpnController.requestDisconnect()
@@ -181,8 +184,8 @@ class MainActivity : AppCompatActivity() {
                     statsViewModel = statsViewModel,
                     themeMode = themeMode,
                     onThemeModeChange = { next ->
-                        themeMode = next
                         ThemePreferenceStore.save(applicationContext, next)
+                        ThemePreferenceStore.apply(applicationContext)
                     },
                     appLocale = appLocale,
                     onAppLocaleChange = { next ->

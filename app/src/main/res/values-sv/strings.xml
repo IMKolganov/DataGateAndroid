@@ -18,6 +18,11 @@
     <string name="vpn_waiting_events">Waiting for VPN events…</string>
     <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">Power</string>
+    <string name="action_pause">Pausa</string>
+    <string name="action_resume">Återuppta</string>
+    <string name="vpn_status_paused">Pausad</string>
+    <string name="vpn_msg_paused">VPN pausad</string>
+    <string name="vpn_msg_resuming">Återupptar VPN…</string>
     <string name="action_disconnect">Disconnect</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_connect">Connect</string>
@@ -31,6 +36,9 @@
     <string name="home_report_email">E-post</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Prenumerera — det är viktigt</string>
+    <string name="home_telegram_channel_body">Projektets Telegram-kanal: nyheter och meddelanden vid serviceproblem.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -55,6 +63,18 @@
 
     <string name="presets_last_7">Last 7 days</string>
     <string name="presets_last_30">Last 30 days</string>
+    <string name="presets_last_2_months">Senaste 2 månaderna</string>
+    <string name="presets_last_3_months">Senaste 3 månaderna</string>
+    <string name="presets_last_6_months">Senaste 6 månaderna</string>
+    <string name="presets_last_1_year">Senaste året</string>
+    <string name="presets_last_2_years">Senaste 2 åren</string>
+    <string name="presets_chip_7">7d</string>
+    <string name="presets_chip_30">30d</string>
+    <string name="presets_chip_2m">2m</string>
+    <string name="presets_chip_3m">3m</string>
+    <string name="presets_chip_6m">6m</string>
+    <string name="presets_chip_1y">1å</string>
+    <string name="presets_chip_2y">2å</string>
     <string name="action_reload">Reload</string>
 
     <string name="date_range_label">Date range</string>
@@ -111,6 +131,10 @@
     <string name="label_out">OUT</string>
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
+    <string name="access_your_vpn_ip">VPN IP</string>
+    <string name="access_your_external_ip">Din externa IP</string>
+    <string name="access_your_dns">Din DNS</string>
+    <string name="access_network_info_unavailable">Otillgänglig</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
     <string name="access_refresh">Refresh</string>
@@ -143,7 +167,7 @@
     <string name="vpn_waiting_permission">Waiting for VPN permission…</string>
     <string name="vpn_error_permission_missing_config">VPN permission granted, but config or WSS link is missing</string>
     <string name="vpn_error_permission_denied">VPN permission denied</string>
-    <string name="vpn_disconnecting">Disconnecting…</string>
+    <string name="vpn_disconnecting">Kopplar från…</string>
     <string name="vpn_connecting_generic">Connecting…</string>
     <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
@@ -169,7 +193,7 @@
     <string name="vpn_msg_waiting_server">Waiting for server response…</string>
     <string name="vpn_msg_negotiating_config">Negotiating configuration…</string>
     <string name="vpn_msg_establishing_tunnel">Establishing tunnel…</string>
-    <string name="vpn_msg_reconnecting">Reconnecting…</string>
+    <string name="vpn_msg_reconnecting">Återansluter…</string>
     <string name="vpn_msg_connecting">Connecting…</string>
     <string name="vpn_msg_connected_to">Connected to %1$s</string>
     <string name="vpn_msg_connected">Connected</string>
@@ -316,4 +340,44 @@ Du kan öppna versionssidan eller ladda ner APK:n.</string>
     <string name="settings_ip_lists_enable_subtitle">Av: listbaserade undantag appliceras inte och listor laddas inte ned; all trafik går genom VPN-tunneln.</string>
     <string name="settings_ip_lists_enable_title">CIDR IP-listor</string>
     <string name="vpn_ip_list_requires_android_13">Bypass med IP-listor kräver Android 13 eller nyare. Inaktivera IP-listrouting eller uppdatera Android för att ansluta i detta läge.</string>
+
+    <string name="totp_challenge_lead">Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein, um die Anmeldung abzuschließen.</string>
+    <string name="totp_challenge_lead_named">Angemeldet als %1$s. Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.</string>
+    <string name="totp_field_code">Authentifizierungscode</string>
+    <string name="totp_verify_sign_in">Bestätigen und anmelden</string>
+    <string name="totp_back_to_sign_in">Zurück zur Anmeldung</string>
+    <string name="totp_sign_in_again">Erneut anmelden</string>
+    <string name="totp_challenge_expired">Dieser Verifizierungsschritt ist abgelaufen. Gehen Sie zurück und melden Sie sich erneut an.</string>
+    <string name="totp_error_code_required">Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.</string>
+    <string name="totp_setup_title">Zwei-Faktor-Authentifizierung</string>
+    <string name="totp_setup_required_notice">Sie müssen 2FA aktivieren, bevor Sie die App nutzen können.</string>
+    <string name="totp_setup_intro">Scannen Sie den QR-Code mit Google Authenticator, Authy, 1Password oder einer anderen TOTP-App und geben Sie dann den Bestätigungscode ein.</string>
+    <string name="totp_setup_begin">Authenticator einrichten</string>
+    <string name="totp_setup_scan_hint">QR-Code scannen oder Geheimnis manuell eingeben.</string>
+    <string name="totp_setup_issuer">Aussteller: %1$s</string>
+    <string name="totp_setup_account">Konto: %1$s</string>
+    <string name="totp_setup_confirm_code_label">Code aus der App</string>
+    <string name="totp_setup_confirm_action">Bestätigen und aktivieren</string>
+    <string name="totp_setup_enabled_message">Zwei-Faktor-Authentifizierung ist für Ihr Administratorkonto aktiviert.</string>
+    <string name="totp_setup_logout">Abmelden</string>
+    <string name="totp_copy_secret">Geheimnis kopieren</string>
+    <string name="totp_qr_cd">QR-Code zur Authenticator-Einrichtung</string>
+    <string name="totp_disabled_message">2FA ist deaktiviert. Beim nächsten Anmelden müssen Sie sie erneut einrichten.</string>
+    <string name="totp_admin_security_title">Administrator-Sicherheit</string>
+    <string name="totp_admin_security_intro">Administratoren benötigen beim Anmelden einen Code aus der Authenticator-App (TOTP).</string>
+    <string name="totp_admin_security_loading">Sicherheitseinstellungen werden geladen…</string>
+    <string name="totp_admin_status_enabled">Status: aktiviert. Nach jeder Anmeldung wird ein Code abgefragt.</string>
+    <string name="totp_admin_status_disabled">Status: nicht eingerichtet.</string>
+    <string name="totp_disable_title">Zwei-Faktor-Authentifizierung deaktivieren</string>
+    <string name="totp_disable_password_label">Kontopasswort</string>
+    <string name="totp_disable_password_hint">Nur bei Passwort-Anmeldung erforderlich. Bei Google-Anmeldung leer lassen.</string>
+    <string name="totp_disable_action">2FA deaktivieren</string>
+
+    <string name="settings_ip_lists_android_12_notice">Android 12 verwendet kompakte OVPN-Profilrouten, da System-Routenausschluss nur ab Android 13+ verfügbar ist.</string>
+    <string name="settings_ip_lists_android_12_title">Android-12-Kompatibilität</string>
+    <string name="settings_ip_lists_android_12_description">Breite IPv4-Routen werden auf diesem Gerät in das OVPN-Profil geschrieben. Die App hält das Profil unter %1$d KB, daher können kleine Bereiche und IPv6 weiterhin VPN nutzen.</string>
+    <string name="settings_ip_lists_android_12_route_limit_label">Max. OVPN-Routen</string>
+    <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
+    <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
+    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
 </resources>

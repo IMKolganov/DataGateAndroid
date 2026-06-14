@@ -15,6 +15,11 @@
     <string name="vpn_waiting_events">در انتظار رویدادهای VPN…</string>
     <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">روشن/خاموش</string>
+    <string name="action_pause">توقف</string>
+    <string name="action_resume">ادامه</string>
+    <string name="vpn_status_paused">متوقف</string>
+    <string name="vpn_msg_paused">VPN متوقف شد</string>
+    <string name="vpn_msg_resuming">در حال ادامه VPN…</string>
     <string name="action_disconnect">قطع اتصال</string>
     <string name="action_cancel">لغو</string>
     <string name="action_connect">اتصال</string>
@@ -27,6 +32,9 @@
     <string name="home_report_email">ایمیل</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">عضو شوید — مهم است</string>
+    <string name="home_telegram_channel_body">کانال تلگرام پروژه: اخبار و اعلامیه‌ها در صورت مشکل سرویس.</string>
     <string name="stats_filters">فیلترها</string>
     <string name="stats_overview">نمای کلی</string>
     <string name="stats_chart_hint">نمودار را لمس کنید · برای زوم بکشید · برای اسکرول بکشید</string>
@@ -47,6 +55,18 @@
     <string name="metric_traffic_out">خروجی</string>
     <string name="presets_last_7">۷ روز گذشته</string>
     <string name="presets_last_30">۳۰ روز گذشته</string>
+    <string name="presets_last_2_months">۲ ماه گذشته</string>
+    <string name="presets_last_3_months">۳ ماه گذشته</string>
+    <string name="presets_last_6_months">۶ ماه گذشته</string>
+    <string name="presets_last_1_year">سال گذشته</string>
+    <string name="presets_last_2_years">۲ سال گذشته</string>
+    <string name="presets_chip_7">۷ر</string>
+    <string name="presets_chip_30">۳۰ر</string>
+    <string name="presets_chip_2m">۲م</string>
+    <string name="presets_chip_3m">۳م</string>
+    <string name="presets_chip_6m">۶م</string>
+    <string name="presets_chip_1y">۱س</string>
+    <string name="presets_chip_2y">۲س</string>
     <string name="action_reload">بارگذاری مجدد</string>
     <string name="date_range_label">بازه تاریخ</string>
     <string name="date_range_arrow">%1$s → %2$s</string>
@@ -98,6 +118,10 @@
     <string name="label_out">خروجی</string>
     <string name="status_offline">آفلاین</string>
     <string name="status_online">آنلاین</string>
+    <string name="access_your_vpn_ip">IP VPN</string>
+    <string name="access_your_external_ip">IP خارجی شما</string>
+    <string name="access_your_dns">DNS شما</string>
+    <string name="access_network_info_unavailable">در دسترس نیست</string>
     <string name="access_users_footer">%1$d کاربر در مجموع · %2$d از %3$d سرور آنلاین</string>
     <string name="access_choose_server">انتخاب سرور</string>
     <string name="access_refresh">تازه‌سازی</string>
@@ -130,7 +154,7 @@
     <string name="vpn_disconnecting">در حال قطع…</string>
     <string name="vpn_connecting_generic">در حال اتصال…</string>
     <string name="vpn_requires_openvpn_connect">این سرور (%1$s) اتصال درون‌برنامه‌ای از طریق WSS را پشتیبانی نمی‌کند. از برنامه رسمی OpenVPN Connect با پروفایل این سرور استفاده کنید.\n\nدر کشورهای با کنترش شدید شبکه (مثلاً روسیه، ایران) ممکن است همچنان کار نکند.</string>
-    <string name="vpn_server_manual_unavailable">سرور شماره %1$s آفلاین است یا برای اتصال در برنامه در دسترس نیست.</string>
+    <string name="vpn_server_manual_unavailable">سرور شماره %1$d آفلاین است یا برای اتصال در برنامه در دسترس نیست.</string>
     <string name="vpn_server_quota_blocked">سرور «%1$s» در پلان شما نیست.</string>
     <string name="access_server_quota_blocked">در پلان شما نیست</string>
     <string name="access_quota_section_title">سهمیه</string>
@@ -298,4 +322,44 @@
     <string name="settings_ip_lists_enable_subtitle">وقتی خاموش است، استثنای مسیریابی مبتنی‌بر فهرست اعمال نمی‌شود و فهرست‌ها دانلود نمی‌شوند؛ همهٔ ترافیک از تونل VPN می‌گذرد.</string>
     <string name="settings_ip_lists_enable_title">فهرست‌های IP به‌صورت CIDR</string>
     <string name="vpn_ip_list_requires_android_13">عبور از فهرست IP به Android 13 یا جدیدتر نیاز دارد. مسیریابی فهرست IP را خاموش کنید یا Android را به‌روز کنید تا با این حالت وصل شوید.</string>
+
+    <string name="totp_challenge_lead">أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة الخاص بك لإنهاء تسجيل الدخول.</string>
+    <string name="totp_challenge_lead_named">تم تسجيل الدخول كـ %1$s. أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة الخاص بك لإنهاء تسجيل الدخول.</string>
+    <string name="totp_field_code">رمز المصادقة</string>
+    <string name="totp_verify_sign_in">التحقق وتسجيل الدخول</string>
+    <string name="totp_back_to_sign_in">العودة لتسجيل الدخول</string>
+    <string name="totp_sign_in_again">قم بتسجيل الدخول مرة أخرى</string>
+    <string name="totp_challenge_expired">انتهت صلاحية خطوة التحقق هذه. ارجع وقم بتسجيل الدخول مرة أخرى - لم تقم بتسجيل الدخول بعد.</string>
+    <string name="totp_error_code_required">أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة الخاص بك.</string>
+    <string name="totp_setup_title">المصادقة الثنائية</string>
+    <string name="totp_setup_required_notice">يجب عليك تمكين المصادقة الثنائية قبل استخدام التطبيق.</string>
+    <string name="totp_setup_intro">امسح رمز QR ضوئيًا باستخدام Google Authenticator أو Authy أو 1Password أو تطبيق TOTP آخر، ثم أدخل رمز التحقق.</string>
+    <string name="totp_setup_begin">إعداد المصادقة</string>
+    <string name="totp_setup_scan_hint">امسح رمز الاستجابة السريعة ضوئيًا أو أدخل السر يدويًا.</string>
+    <string name="totp_setup_issuer">جهة الإصدار: %1$s</string>
+    <string name="totp_setup_account">الحساب: %1$s</string>
+    <string name="totp_setup_confirm_code_label">رمز التحقق من التطبيق</string>
+    <string name="totp_setup_confirm_action">تأكيد وتمكين</string>
+    <string name="totp_setup_enabled_message">تم الآن تمكين المصادقة الثنائية لحساب المسؤول الخاص بك.</string>
+    <string name="totp_setup_logout">تسجيل الخروج</string>
+    <string name="totp_copy_secret">نسخ السر</string>
+    <string name="totp_qr_cd">رمز الاستجابة السريعة لإعداد المصادقة</string>
+    <string name="totp_disabled_message">تم تعطيل المصادقة الثنائية. سيُطلب منك إعداده مرة أخرى عند تسجيل الدخول التالي.</string>
+    <string name="totp_admin_security_title">أمن المشرف</string>
+    <string name="totp_admin_security_intro">يجب على المسؤولين استخدام تطبيق المصادقة (TOTP) عند تسجيل الدخول.</string>
+    <string name="totp_admin_security_loading">جارٍ تحميل إعدادات الأمان…</string>
+    <string name="totp_admin_status_enabled">الحالة: ممكّنة. سيُطلب منك رمزًا بعد كل تسجيل دخول.</string>
+    <string name="totp_admin_status_disabled">الحالة: غير محدد.</string>
+    <string name="totp_disable_title">تعطيل المصادقة الثنائية</string>
+    <string name="totp_disable_password_label">كلمة مرور الحساب</string>
+    <string name="totp_disable_password_hint">مطلوب فقط إذا قمت بتسجيل الدخول باستخدام كلمة المرور. يمكن أن يؤدي تسجيل الدخول إلى Google إلى ترك هذا الحقل فارغًا.</string>
+    <string name="totp_disable_action">تعطيل المصادقة الثنائية (2FA).</string>
+
+    <string name="settings_ip_lists_android_12_notice">Android 12 verwendet kompakte OVPN-Profilrouten, da System-Routenausschluss nur ab Android 13+ verfügbar ist.</string>
+    <string name="settings_ip_lists_android_12_title">Android-12-Kompatibilität</string>
+    <string name="settings_ip_lists_android_12_description">Breite IPv4-Routen werden auf diesem Gerät in das OVPN-Profil geschrieben. Die App hält das Profil unter %1$d KB, daher können kleine Bereiche und IPv6 weiterhin VPN nutzen.</string>
+    <string name="settings_ip_lists_android_12_route_limit_label">Max. OVPN-Routen</string>
+    <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
+    <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
+    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
 </resources>

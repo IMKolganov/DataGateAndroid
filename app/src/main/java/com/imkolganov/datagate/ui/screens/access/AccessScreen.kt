@@ -29,10 +29,16 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.imkolganov.datagate.util.NetworkIdentityReader
+import com.imkolganov.datagate.util.NetworkIdentitySnapshot
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.util.formatBytes
 import com.imkolganov.datagate.util.formatQuotaEffectiveFromForDisplay
@@ -57,6 +64,8 @@ fun AccessScreen(
     onEvent: (AccessContract.UiEvent) -> Unit,
     onConnectVpn: () -> Unit,
     onDisconnectVpn: () -> Unit,
+    onPauseVpn: () -> Unit = {},
+    onResumeVpn: () -> Unit = {},
     onReconnectVpn: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -68,7 +77,8 @@ fun AccessScreen(
     val appContext = LocalContext.current.applicationContext
 
     val vpnConnected = vpnState.isVpnConnected
-    val connectBusy = vpnState.isConnectRequested && !vpnConnected
+    val vpnPaused = vpnState.isVpnPaused
+    val connectBusy = vpnState.isConnectRequested && !vpnConnected && !vpnPaused
     val resolvedSessionId =
         vpnState.selectedServerId
             ?: if (vpnConnected) {
@@ -83,8 +93,40 @@ fun AccessScreen(
             null
         }
 
+    val sessionServerId =
+        resolvedSessionId ?: state.selectedServerId ?: connectingTargetId
+    val externalIpAddress = AccessSessionNetworkInfo.resolveExternalIp(sessionServerId, state.servers)
+    val externalIpLoading = state.isLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
+
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
     var noWssDialogName by remember { mutableStateOf<String?>(null) }
+    var xrayDialogName by remember { mutableStateOf<String?>(null) }
+    var unsupportedTypeDialogName by remember { mutableStateOf<String?>(null) }
+    var networkIdentity by remember { mutableStateOf(NetworkIdentitySnapshot()) }
+    var networkIdentityLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(vpnConnected, connectBusy, state.isLoading) {
+        networkIdentityLoading = true
+        if (connectBusy) {
+            networkIdentity = NetworkIdentitySnapshot()
+            return@LaunchedEffect
+        }
+        var snapshot = withContext(Dispatchers.IO) {
+            NetworkIdentityReader.read(appContext)
+        }
+        if (vpnConnected && (
+                snapshot.vpnIpAddress.isNullOrBlank() ||
+                    snapshot.dnsServers.isEmpty()
+                )
+        ) {
+            delay(2_000)
+            snapshot = withContext(Dispatchers.IO) {
+                NetworkIdentityReader.read(appContext)
+            }
+        }
+        networkIdentity = snapshot
+        networkIdentityLoading = false
+    }
 
     fun runConnectToServer(server: AccessContract.ServerItem) {
         val sessionServerId = vpnState.selectedServerId
@@ -105,6 +147,17 @@ fun AccessScreen(
         if (vpnConnected || connectBusy) {
             switchTargetServer = server
         } else {
+            when (server.serverType) {
+                VpnServerType.Xray -> {
+                    xrayDialogName = server.name
+                    return
+                }
+                VpnServerType.Unknown -> {
+                    unsupportedTypeDialogName = server.name
+                    return
+                }
+                VpnServerType.OpenVpn -> Unit
+            }
             if (!server.isEnableWss) {
                 noWssDialogName = server.name
                 return
@@ -127,10 +180,14 @@ fun AccessScreen(
                 TextButton(
                     onClick = {
                         switchTargetServer = null
-                        if (!target.isEnableWss) {
-                            noWssDialogName = target.name
-                        } else {
-                            onReconnectVpn()
+                        when (target.serverType) {
+                            VpnServerType.Xray -> xrayDialogName = target.name
+                            VpnServerType.Unknown -> unsupportedTypeDialogName = target.name
+                            VpnServerType.OpenVpn -> if (!target.isEnableWss) {
+                                noWssDialogName = target.name
+                            } else {
+                                onReconnectVpn()
+                            }
                         }
                     }
                 ) {
@@ -157,6 +214,42 @@ fun AccessScreen(
             },
             confirmButton = {
                 TextButton(onClick = { noWssDialogName = null }) {
+                    Text(stringResource(R.string.action_ok))
+                }
+            }
+        )
+    }
+
+    xrayDialogName?.let { serverName ->
+        AlertDialog(
+            onDismissRequest = { xrayDialogName = null },
+            title = { Text(stringResource(R.string.access_xray_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(R.string.vpn_requires_xray_client, serverName),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { xrayDialogName = null }) {
+                    Text(stringResource(R.string.action_ok))
+                }
+            }
+        )
+    }
+
+    unsupportedTypeDialogName?.let { serverName ->
+        AlertDialog(
+            onDismissRequest = { unsupportedTypeDialogName = null },
+            title = { Text(stringResource(R.string.access_unsupported_server_type_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(R.string.vpn_requires_unsupported_server_type, serverName),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { unsupportedTypeDialogName = null }) {
                     Text(stringResource(R.string.action_ok))
                 }
             }
@@ -200,7 +293,7 @@ fun AccessScreen(
                 ServerCard(
                     server = server,
                     isSelected = isSelected,
-                    isVpnSessionOnThisServer = vpnConnected && onThisServer,
+                    isVpnSessionOnThisServer = (vpnConnected || vpnPaused) && onThisServer,
                     isVpnConnectingToThisServer = connectingHere,
                     connectBusy = connectBusy,
                     onSelect = {
@@ -235,6 +328,18 @@ fun AccessScreen(
             }
 
             item {
+                ClientNetworkFooter(
+                    vpnIpAddress = networkIdentity.vpnIpAddress,
+                    externalIpAddress = externalIpAddress,
+                    dnsServers = networkIdentity.dnsServers,
+                    isLoading = networkIdentityLoading,
+                    externalIpLoading = externalIpLoading,
+                    showVpnIp = vpnConnected,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            item {
                 Box(modifier = Modifier.padding(bottom = 24.dp))
             }
         }
@@ -251,7 +356,8 @@ fun AccessScreen(
 private fun VpnStatusCard(vpnState: VpnStatusUiState) {
     val context = LocalContext.current
     val connected = vpnState.isVpnConnected
-    val busy = vpnState.isConnectRequested && !connected
+    val paused = vpnState.isVpnPaused
+    val busy = vpnState.isConnectRequested && !connected && !paused
     val lastDisplay = remember(vpnState.lastMessage) {
         if (vpnState.lastMessage.isBlank()) ""
         else context.resources.userFriendlyApiError(vpnState.lastMessage)
@@ -264,6 +370,7 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
         colors = CardDefaults.cardColors(
             containerColor = when {
                 connected -> MaterialTheme.colorScheme.primaryContainer
+                paused -> MaterialTheme.colorScheme.secondaryContainer
                 busy -> MaterialTheme.colorScheme.tertiaryContainer
                 else -> MaterialTheme.colorScheme.surfaceContainerHigh
             }
@@ -273,6 +380,7 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
             Text(
                 text = when {
                     connected -> stringResource(R.string.access_connected)
+                    paused -> stringResource(R.string.vpn_status_paused)
                     busy -> stringResource(R.string.access_connecting)
                     else -> stringResource(R.string.access_not_connected)
                 },
@@ -281,6 +389,20 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
             Spacer(modifier = Modifier.height(4.dp))
             when {
                 connected -> {
+                    val name = vpnState.selectedServerName?.takeIf { it.isNotBlank() }
+                    Text(
+                        text = name ?: stringResource(R.string.access_vpn_active),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    if (lastDisplay.isNotBlank()) {
+                        Text(
+                            text = lastDisplay,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                paused -> {
                     val name = vpnState.selectedServerName?.takeIf { it.isNotBlank() }
                     Text(
                         text = name ?: stringResource(R.string.access_vpn_active),

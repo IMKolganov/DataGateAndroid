@@ -15,6 +15,11 @@
     <string name="vpn_waiting_events">VPN olayları bekleniyor…</string>
     <string name="vpn_home_title">DataGate</string>
     <string name="vpn_power">Güç</string>
+    <string name="action_pause">Duraklat</string>
+    <string name="action_resume">Sürdür</string>
+    <string name="vpn_status_paused">Duraklatıldı</string>
+    <string name="vpn_msg_paused">VPN duraklatıldı</string>
+    <string name="vpn_msg_resuming">VPN sürdürülüyor…</string>
     <string name="action_disconnect">Bağlantıyı kes</string>
     <string name="action_cancel">İptal</string>
     <string name="action_connect">Bağlan</string>
@@ -27,6 +32,9 @@
     <string name="home_report_email">E-posta</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Abone olun — önemli</string>
+    <string name="home_telegram_channel_body">Projenin Telegram kanalı: güncel haberler ve hizmet sorunlarında duyurular.</string>
     <string name="stats_filters">Filtreler</string>
     <string name="stats_overview">Genel bakış</string>
     <string name="stats_chart_hint">Grafiğe dokunun · yakınlaştırmak için sıkıştırın · kaydırmak için sürükleyin</string>
@@ -47,6 +55,18 @@
     <string name="metric_traffic_out">Giden trafik</string>
     <string name="presets_last_7">Son 7 gün</string>
     <string name="presets_last_30">Son 30 gün</string>
+    <string name="presets_last_2_months">Son 2 ay</string>
+    <string name="presets_last_3_months">Son 3 ay</string>
+    <string name="presets_last_6_months">Son 6 ay</string>
+    <string name="presets_last_1_year">Son yıl</string>
+    <string name="presets_last_2_years">Son 2 yıl</string>
+    <string name="presets_chip_7">7g</string>
+    <string name="presets_chip_30">30g</string>
+    <string name="presets_chip_2m">2ay</string>
+    <string name="presets_chip_3m">3ay</string>
+    <string name="presets_chip_6m">6ay</string>
+    <string name="presets_chip_1y">1y</string>
+    <string name="presets_chip_2y">2y</string>
     <string name="action_reload">Yenile</string>
     <string name="date_range_label">Tarih aralığı</string>
     <string name="date_range_arrow">%1$s → %2$s</string>
@@ -98,6 +118,10 @@
     <string name="label_out">ÇIK</string>
     <string name="status_offline">Çevrimdışı</string>
     <string name="status_online">Çevrimiçi</string>
+    <string name="access_your_vpn_ip">VPN IP</string>
+    <string name="access_your_external_ip">Harici IP\'niz</string>
+    <string name="access_your_dns">DNS\'iniz</string>
+    <string name="access_network_info_unavailable">Kullanılamıyor</string>
     <string name="access_users_footer">Toplam %1$d kullanıcı · %3$d sunucudan %2$d çevrimiçi</string>
     <string name="access_choose_server">Sunucu seç</string>
     <string name="access_refresh">Yenile</string>
@@ -298,4 +322,44 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="settings_ip_lists_enable_subtitle">Kapalıyken liste tabanlı yönlendirme istisnaları uygulanmaz ve listeler indirilmez; tüm trafik VPN tünelinden geçer.</string>
     <string name="settings_ip_lists_enable_title">CIDR IP listeleri</string>
     <string name="vpn_ip_list_requires_android_13">IP listesi atlama Android 13 veya daha yenisi gerektirir. Bu modla bağlanmak için IP listesi yönlendirmesini kapatın veya Android\'i güncelleyin.</string>
+
+    <string name="totp_challenge_lead">Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein, um die Anmeldung abzuschließen.</string>
+    <string name="totp_challenge_lead_named">Angemeldet als %1$s. Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.</string>
+    <string name="totp_field_code">Authentifizierungscode</string>
+    <string name="totp_verify_sign_in">Bestätigen und anmelden</string>
+    <string name="totp_back_to_sign_in">Zurück zur Anmeldung</string>
+    <string name="totp_sign_in_again">Erneut anmelden</string>
+    <string name="totp_challenge_expired">Dieser Verifizierungsschritt ist abgelaufen. Gehen Sie zurück und melden Sie sich erneut an.</string>
+    <string name="totp_error_code_required">Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.</string>
+    <string name="totp_setup_title">Zwei-Faktor-Authentifizierung</string>
+    <string name="totp_setup_required_notice">Sie müssen 2FA aktivieren, bevor Sie die App nutzen können.</string>
+    <string name="totp_setup_intro">Scannen Sie den QR-Code mit Google Authenticator, Authy, 1Password oder einer anderen TOTP-App und geben Sie dann den Bestätigungscode ein.</string>
+    <string name="totp_setup_begin">Authenticator einrichten</string>
+    <string name="totp_setup_scan_hint">QR-Code scannen oder Geheimnis manuell eingeben.</string>
+    <string name="totp_setup_issuer">Aussteller: %1$s</string>
+    <string name="totp_setup_account">Konto: %1$s</string>
+    <string name="totp_setup_confirm_code_label">Code aus der App</string>
+    <string name="totp_setup_confirm_action">Bestätigen und aktivieren</string>
+    <string name="totp_setup_enabled_message">Zwei-Faktor-Authentifizierung ist für Ihr Administratorkonto aktiviert.</string>
+    <string name="totp_setup_logout">Abmelden</string>
+    <string name="totp_copy_secret">Geheimnis kopieren</string>
+    <string name="totp_qr_cd">QR-Code zur Authenticator-Einrichtung</string>
+    <string name="totp_disabled_message">2FA ist deaktiviert. Beim nächsten Anmelden müssen Sie sie erneut einrichten.</string>
+    <string name="totp_admin_security_title">Administrator-Sicherheit</string>
+    <string name="totp_admin_security_intro">Administratoren benötigen beim Anmelden einen Code aus der Authenticator-App (TOTP).</string>
+    <string name="totp_admin_security_loading">Sicherheitseinstellungen werden geladen…</string>
+    <string name="totp_admin_status_enabled">Status: aktiviert. Nach jeder Anmeldung wird ein Code abgefragt.</string>
+    <string name="totp_admin_status_disabled">Status: nicht eingerichtet.</string>
+    <string name="totp_disable_title">Zwei-Faktor-Authentifizierung deaktivieren</string>
+    <string name="totp_disable_password_label">Kontopasswort</string>
+    <string name="totp_disable_password_hint">Nur bei Passwort-Anmeldung erforderlich. Bei Google-Anmeldung leer lassen.</string>
+    <string name="totp_disable_action">2FA deaktivieren</string>
+
+    <string name="settings_ip_lists_android_12_notice">Android 12 verwendet kompakte OVPN-Profilrouten, da System-Routenausschluss nur ab Android 13+ verfügbar ist.</string>
+    <string name="settings_ip_lists_android_12_title">Android-12-Kompatibilität</string>
+    <string name="settings_ip_lists_android_12_description">Breite IPv4-Routen werden auf diesem Gerät in das OVPN-Profil geschrieben. Die App hält das Profil unter %1$d KB, daher können kleine Bereiche und IPv6 weiterhin VPN nutzen.</string>
+    <string name="settings_ip_lists_android_12_route_limit_label">Max. OVPN-Routen</string>
+    <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
+    <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
+    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
 </resources>

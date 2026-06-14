@@ -1,0 +1,71 @@
+package com.imkolganov.datagate.util
+
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.LinkAddress
+import android.net.NetworkCapabilities
+import java.net.Inet4Address
+
+data class NetworkIdentitySnapshot(
+    /** Virtual IPv4 assigned inside the VPN tunnel (e.g. 10.51.15.x). */
+    val vpnIpAddress: String? = null,
+    val dnsServers: List<String> = emptyList()
+)
+
+object NetworkIdentityReader {
+
+    fun read(context: Context): NetworkIdentitySnapshot {
+        val cm = context.getSystemService(ConnectivityManager::class.java)
+            ?: return NetworkIdentitySnapshot()
+
+        val vpnNetwork = findVpnNetwork(cm) ?: return NetworkIdentitySnapshot()
+        val props = cm.getLinkProperties(vpnNetwork)
+        return NetworkIdentitySnapshot(
+            vpnIpAddress = props?.linkAddresses?.firstIpv4Host(),
+            dnsServers = props?.dnsServers.orEmpty().mapNotNull { formatHost(it.hostAddress) }
+        )
+    }
+
+    private fun findVpnNetwork(cm: ConnectivityManager): android.net.Network? {
+        @Suppress("DEPRECATION")
+        for (network in cm.allNetworks) {
+            val caps = cm.getNetworkCapabilities(network) ?: continue
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+                return network
+            }
+        }
+        return null
+    }
+
+    private fun List<LinkAddress>.firstIpv4Host(): String? {
+        for (linkAddress in this) {
+            val host = linkAddress.address
+            if (host is Inet4Address && !host.isLoopbackAddress) {
+                return formatHost(host.hostAddress)
+            }
+        }
+        return null
+    }
+
+    internal fun formatHostAddress(host: String?): String? = formatHost(host)
+
+    private fun formatHost(host: String?): String? =
+        host?.trim()?.takeIf { it.isNotEmpty() }
+}
+
+internal fun pickFirstIpv4HostAddress(addresses: Iterable<String>): String? {
+    for (raw in addresses) {
+        val host = NetworkIdentityReader.formatHostAddress(raw) ?: continue
+        if (isLikelyIpv4Host(host)) return host
+    }
+    return null
+}
+
+internal fun isLikelyIpv4Host(host: String): Boolean {
+    if (host.isEmpty() || host.contains(':')) return false
+    val parts = host.split('.')
+    if (parts.size != 4) return false
+    return parts.all { part ->
+        part.toIntOrNull()?.let { it in 0..255 } == true
+    }
+}

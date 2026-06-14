@@ -10,6 +10,7 @@ import com.imkolganov.datagate.servers.ManualServerResolve
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
 import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
+import com.imkolganov.datagate.vpn.IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
 import java.util.concurrent.atomic.AtomicBoolean
 import android.util.Base64
 import java.nio.ByteBuffer
@@ -60,6 +61,26 @@ class VpnConnectInteractor(
                 Log.d("OpenVPN3", "Using selected serverId=$preferredServerId")
                 when (val resolved = serversRepository.resolveManualConnection(preferredServerId)) {
                     is ManualServerResolve.Ok -> resolved.result
+                    is ManualServerResolve.RequiresXrayClient -> {
+                        vpnController.showError(
+                            res.getString(
+                                R.string.vpn_requires_xray_client,
+                                resolved.serverName
+                                    ?: res.getString(R.string.vpn_fallback_server_name)
+                            )
+                        )
+                        return
+                    }
+                    is ManualServerResolve.RequiresUnsupportedServerType -> {
+                        vpnController.showError(
+                            res.getString(
+                                R.string.vpn_requires_unsupported_server_type,
+                                resolved.serverName
+                                    ?: res.getString(R.string.vpn_fallback_server_name)
+                            )
+                        )
+                        return
+                    }
                     is ManualServerResolve.RequiresExternalOpenVpn -> {
                         vpnController.showError(
                             res.getString(
@@ -152,24 +173,33 @@ class VpnConnectInteractor(
                 )
             }
             val bypassRoutes = ipListRoutesRepository.getRoutesForConnection()
-            if (bypassRoutes.isNotEmpty() && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                vpnController.showError(res.getString(R.string.vpn_ip_list_requires_android_13))
-                return
-            }
-            val androidExcludedRoutes = when (ipListSettings.coverageMode) {
-                IpListCoverageMode.FAST -> IpListRouteConfig.selectAndroidExcludedRoutes(bypassRoutes)
-                IpListCoverageMode.FULL -> bypassRoutes
-            }
-            val patchedConfig = forceWssConfig(configText, linkProtocol)
+            val supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+            val routePlan = IpListRouteConfig.prepareConnectionRoutes(
+                config = configText,
+                routes = bypassRoutes,
+                coverageMode = ipListSettings.coverageMode,
+                android12OvpnRouteLimit = ipListSettings.android12OvpnRouteLimit,
+                supportsAndroidRouteExclusion = supportsAndroidRouteExclusion
+            )
             Log.d(
                 "OpenVPN3",
-                "IP list routes prepared for Android excludeRoute: " +
-                    "${androidExcludedRoutes.size}/${bypassRoutes.size}, coverage=${ipListSettings.coverageMode}"
+                "IP list routes prepared: applied=${routePlan.appliedRouteCount}/${bypassRoutes.size}, " +
+                    "selected=${routePlan.selectedRouteCount}, mode=" +
+                    if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
+                        "android-excludeRoute/${ipListSettings.coverageMode}"
+                    } else {
+                        "ovpn-route-emulation(limit=${ipListSettings.android12OvpnRouteLimit}, " +
+                            "profileLimit=${routePlan.reachedProfileSizeLimit})"
+                    }
             )
             if (bypassRoutes.isNotEmpty()) {
                 vpnController.showStatus(
                     "IP_LIST_READY",
-                    res.getString(R.string.vpn_ip_list_ready, androidExcludedRoutes.size)
+                    if (routePlan.reachedProfileSizeLimit) {
+                        res.getString(R.string.vpn_ip_list_ready_limited, routePlan.appliedRouteCount)
+                    } else {
+                        res.getString(R.string.vpn_ip_list_ready, routePlan.appliedRouteCount)
+                    }
                 )
             }
 
@@ -177,7 +207,12 @@ class VpnConnectInteractor(
                 ?: error("Best server apiUrl is null")
 
             val wssUrl = httpsToWssProxy(apiUrl, linkProtocol)
-            vpnController.startWithConfig(patchedConfig, wssUrl, linkProtocol, androidExcludedRoutes)
+            vpnController.startWithConfig(
+                routePlan.config,
+                wssUrl,
+                linkProtocol,
+                routePlan.androidExcludedRoutes
+            )
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
             val raw = t.deepMessageForApiError().ifBlank { t.message.orEmpty() }
@@ -190,46 +225,6 @@ class VpnConnectInteractor(
             isConnecting.set(false)
         }
     }
-    private val BRIDGE_PORT = 41194
-    private fun forceWssConfig(original: String, linkProtocol: VpnLinkProtocol): String {
-        val protoLine = linkProtocol.configProtoLine()
-        val lines = original
-            .replace("\r\n", "\n")
-            .split("\n")
-
-        val out = ArrayList<String>(lines.size + 2)
-
-        var remoteWritten = false
-        var protoWritten = false
-
-        for (raw in lines) {
-            val line = raw.trimEnd()
-            val lower = line.trimStart().lowercase()
-
-            when {
-                lower.startsWith("remote ") -> {
-                    if (!remoteWritten) {
-                        out.add("remote 127.0.0.1 $BRIDGE_PORT")
-                        remoteWritten = true
-                    }
-                    // drop all other remote lines
-                }
-
-                lower.startsWith("proto ") -> {
-                    out.add(protoLine)
-                    protoWritten = true
-                }
-
-                else -> out.add(line)
-            }
-        }
-
-        if (!protoWritten) out.add(0, protoLine)
-        if (!remoteWritten) out.add(0, "remote 127.0.0.1 $BRIDGE_PORT")
-
-        return out.joinToString("\n").trimEnd() + "\n"
-    }
-
     fun uuidToShort(uuid: String?): String {
         if (uuid.isNullOrBlank()) {
             error("UUID is null or blank")

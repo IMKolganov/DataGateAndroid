@@ -11,8 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.imkolganov.datagate.BuildConfig
+import com.imkolganov.datagate.auth.AdminTotpGate
 import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.TokenStore
+import com.imkolganov.datagate.ui.screens.auth.AdminTotpSetupScreen
 import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.login.LoginScreen
 import com.imkolganov.datagate.ui.screens.main.MainScreen
@@ -36,6 +38,8 @@ fun AppRoot(
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
     onRequestDisconnect: () -> Unit,
+    onRequestPause: () -> Unit = {},
+    onRequestResume: () -> Unit = {},
     onReconnectVpn: () -> Unit,
     authVersion: Int,
     onAuthChanged: () -> Unit,
@@ -82,17 +86,50 @@ fun AppRoot(
     }
 
     if (isLoggedIn) {
+        when (authState.adminTotpGate) {
+            AdminTotpGate.Unknown -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+                return
+            }
+            AdminTotpGate.SetupRequired -> {
+                AdminTotpSetupScreen(
+                    isLoading = authState.isLoading,
+                    totpSetupConfirmLoading = authState.totpSetupConfirmLoading,
+                    setup = authState.totpSetup,
+                    errorMessage = authState.errorMessage,
+                    infoMessage = authState.infoMessage,
+                    onBeginSetup = { authViewModel.beginAdminTotpSetup(appContext.resources) },
+                    onCancelSetup = { authViewModel.cancelAdminTotpSetup() },
+                    onConfirm = { authViewModel.confirmAdminTotpSetup(appContext.resources, it) },
+                    onLogout = {
+                        authViewModel.logout()
+                        onAuthChanged()
+                    },
+                )
+                return
+            }
+            AdminTotpGate.Allowed -> Unit
+        }
+
         Box(modifier = Modifier.fillMaxSize()) {
             MainScreen(
                 vpnState = vpnState,
                 onConnectFromHome = onConnectFromHome,
                 onConnectFromAccess = onConnectFromAccess,
                 onRequestDisconnect = onRequestDisconnect,
+                onRequestPause = onRequestPause,
+                onRequestResume = onRequestResume,
                 onReconnectVpn = onReconnectVpn,
                 onLogout = {
                     authViewModel.logout()
                     onAuthChanged()
                 },
+                authViewModel = authViewModel,
                 tokenStore = tokenStore,
                 accessViewModel = accessViewModel,
                 statsViewModel = statsViewModel,

@@ -31,6 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.VpnServerTypeIcon
+import com.imkolganov.datagate.ui.components.VpnServerTypeLabel
+import com.imkolganov.datagate.ui.components.labelRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +48,88 @@ private val ServerBadgeShape = RoundedCornerShape(10.dp)
 /** Material green 800 — readable on light cards; works on tinted cards too */
 private val StatusOnlineGreen = Color(0xFF2E7D32)
 private val StatusOfflineRed = Color(0xFFC62828)
+
+@Composable
+fun ClientNetworkFooter(
+    vpnIpAddress: String?,
+    externalIpAddress: String?,
+    dnsServers: List<String>,
+    isLoading: Boolean,
+    externalIpLoading: Boolean = false,
+    showVpnIp: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val unavailable = stringResource(R.string.access_network_info_unavailable)
+
+    fun formatValue(value: String?): String = when {
+        isLoading -> "…"
+        !value.isNullOrBlank() -> value
+        else -> unavailable
+    }
+
+    val externalText = when {
+        externalIpLoading -> "…"
+        !externalIpAddress.isNullOrBlank() -> externalIpAddress
+        isLoading -> "…"
+        else -> unavailable
+    }
+
+    val dnsText = when {
+        isLoading -> "…"
+        dnsServers.isNotEmpty() -> dnsServers.joinToString(separator = ", ")
+        else -> unavailable
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = AppCards.shape,
+        colors = AppCards.defaultColors(),
+        elevation = AppCards.defaultElevation()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (showVpnIp) {
+                ClientNetworkInfoRow(
+                    label = stringResource(R.string.access_your_vpn_ip),
+                    value = formatValue(vpnIpAddress)
+                )
+            }
+            ClientNetworkInfoRow(
+                label = stringResource(R.string.access_your_external_ip),
+                value = externalText
+            )
+            ClientNetworkInfoRow(
+                label = stringResource(R.string.access_your_dns),
+                value = dnsText
+            )
+        }
+    }
+}
+
+@Composable
+private fun ClientNetworkInfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            modifier = Modifier.weight(0.4f),
+            text = "$label:",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            modifier = Modifier.weight(0.6f),
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
 
 /**
  * Footer line: total reported users across listed servers and how many servers are online.
@@ -209,17 +294,35 @@ private fun ServerCardInner(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = server.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                server.protocol?.let {
-                    Text(text = it.uppercase())
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                VpnServerTypeIcon(serverType = server.serverType)
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = server.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        VpnServerTypeLabel(serverType = server.serverType)
+                        server.protocol?.let {
+                            Text(
+                                text = it.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
 
@@ -243,7 +346,7 @@ private fun ServerCardInner(
             Column(modifier = Modifier.weight(1f)) {
                 IconKeyValueRow(
                     icon = Icons.Outlined.Cloud,
-                    label = stringResource(R.string.label_openvpn),
+                    label = stringResource(server.serverType.labelRes()),
                     value = server.openVpnVersionText ?: "-"
                 )
                 server.uptimeText?.let { uptime ->

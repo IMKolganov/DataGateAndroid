@@ -8,6 +8,7 @@ import androidx.core.content.edit
 import com.imkolganov.datagate.logger.CrashLogger
 import com.imkolganov.datagate.logger.CrashUploadWorkScheduler
 import com.imkolganov.datagate.ui.theme.LanguagePreferenceStore
+import com.imkolganov.datagate.ui.theme.ThemePreferenceStore
 
 class DataGateApp : Application() {
 
@@ -15,9 +16,10 @@ class DataGateApp : Application() {
         private set
 
     override fun onCreate() {
+        ThemePreferenceStore.apply(this)
+        LanguagePreferenceStore.apply(this)
         super.onCreate()
         migrateLegacyAuthSessionIfNeeded()
-        LanguagePreferenceStore.apply(this)
         crashLogger = CrashLogger(this)
         crashLogger.install()
         CrashUploadWorkScheduler.enqueue(this)

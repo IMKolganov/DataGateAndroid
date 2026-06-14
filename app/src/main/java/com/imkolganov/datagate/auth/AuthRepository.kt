@@ -5,14 +5,28 @@ import android.util.Log
 import com.imkolganov.datagate.auth.http.BackendAuthApi
 import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
-import com.imkolganov.datagate.model.auth.GoogleLoginResponseDto
 import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
+import com.imkolganov.datagate.model.auth.LoginResponseDto
 import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
 import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
+import com.imkolganov.datagate.model.auth.TotpConfirmRequestDto
+import com.imkolganov.datagate.model.auth.TotpDisableRequestDto
+import com.imkolganov.datagate.model.auth.TotpSetupDto
+import com.imkolganov.datagate.model.auth.TotpStatusDto
+import com.imkolganov.datagate.model.auth.TotpVerifyLoginRequestDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+sealed class LoginOutcome {
+    data class TotpChallenge(
+        val loginChallengeId: String,
+        val displayName: String?,
+    ) : LoginOutcome()
+
+    data class Authenticated(val requiresTotpSetup: Boolean) : LoginOutcome()
+}
 
 class AuthRepository(
     private val api: BackendAuthApi,
@@ -67,32 +81,81 @@ class AuthRepository(
         Log.d(TAG, "Logout done. After clear token=${tokenStore.getAccessToken()}")
     }
 
-    suspend fun loginWithGoogle(activity: Activity): String {
-        Log.d(TAG, "Google credential request started")
-        val idToken = GoogleCredentialManager.getGoogleIdTokenOrThrow(activity)
-        Log.d(TAG, "Google ID token received; backend login request started")
-
-        val result = try {
-            withContext(Dispatchers.IO) {
-                api.googleLogin(GoogleLoginRequestDto(idToken))
-            }
-        } catch (t: Throwable) {
-            Log.e(TAG, "Backend google-login failed", t)
-            throw t
+    suspend fun loginWithGoogle(activity: Activity): LoginOutcome =
+        withContext(Dispatchers.IO) {
+            Log.d(TAG, "Google credential request started")
+            val idToken = GoogleCredentialManager.getGoogleIdTokenOrThrow(activity)
+            Log.d(TAG, "Google ID token received; backend login request started")
+            val result = api.googleLogin(GoogleLoginRequestDto(idToken))
+            Log.d(TAG, "Backend google-login succeeded")
+            applyLoginResponse(result)
         }
-        Log.d(TAG, "Backend google-login succeeded")
 
-        persistSessionOrThrow(result)
-        return result.token
+    suspend fun loginWithPassword(login: String, password: String): LoginOutcome =
+        withContext(Dispatchers.IO) {
+            val result = api.loginWithPassword(LoginPasswordRequestDto(login = login, password = password))
+            Log.d(TAG, "Backend password login succeeded")
+            applyLoginResponse(result)
+        }
+
+    suspend fun verifyTotpLogin(loginChallengeId: String, code: String): LoginOutcome =
+        withContext(Dispatchers.IO) {
+            val result = api.totpVerifyLogin(
+                TotpVerifyLoginRequestDto(loginChallengeId = loginChallengeId, code = code)
+            )
+            applyLoginResponse(result)
+        }
+
+    /**
+     * Returns true when admin must complete TOTP enrollment before using the app.
+     * On status API failure, returns false (same as web RequireAdminTotpSetup).
+     */
+    suspend fun adminRequiresTotpSetup(): Boolean = withContext(Dispatchers.IO) {
+        val token = tokenStore.getAccessToken()
+        if (token.isNullOrBlank() || !JwtClaimsReader.isAdmin(token)) {
+            return@withContext false
+        }
+        try {
+            val status = api.totpStatus(token)
+            status.isAdmin && status.requiresTotpSetup
+        } catch (t: Throwable) {
+            Log.w(TAG, "TOTP status check failed", t)
+            false
+        }
     }
 
-    suspend fun loginWithPassword(login: String, password: String): String {
-        val result = withContext(Dispatchers.IO) {
-            api.loginWithPassword(LoginPasswordRequestDto(login = login, password = password))
+    suspend fun fetchTotpStatus(): TotpStatusDto? = withContext(Dispatchers.IO) {
+        val token = tokenStore.getAccessToken() ?: return@withContext null
+        try {
+            api.totpStatus(token)
+        } catch (t: Throwable) {
+            Log.w(TAG, "fetchTotpStatus failed", t)
+            null
         }
-        Log.d(TAG, "Backend password login succeeded")
-        persistSessionOrThrow(result)
-        return result.token
+    }
+
+    suspend fun beginTotpSetup(): TotpSetupDto = withContext(Dispatchers.IO) {
+        val token = tokenStore.getAccessToken()
+            ?: throw IllegalStateException("Not signed in.")
+        api.totpSetup(token)
+    }
+
+    suspend fun confirmTotpSetup(code: String) = withContext(Dispatchers.IO) {
+        val token = tokenStore.getAccessToken()
+            ?: throw IllegalStateException("Not signed in.")
+        api.totpConfirm(token, TotpConfirmRequestDto(code = code))
+    }
+
+    suspend fun disableTotp(code: String, password: String?) = withContext(Dispatchers.IO) {
+        val token = tokenStore.getAccessToken()
+            ?: throw IllegalStateException("Not signed in.")
+        api.totpDisable(
+            token,
+            TotpDisableRequestDto(
+                code = code,
+                password = password?.trim()?.takeIf { it.isNotEmpty() }
+            )
+        )
     }
 
     suspend fun register(request: RegisterUserRequestDto): RegisterUserResponseDto =
@@ -120,9 +183,28 @@ class AuthRepository(
             api.resetPassword(code, newPassword, confirmPassword)
         }
 
-    private fun persistSessionOrThrow(result: GoogleLoginResponseDto) {
-        tokenStore.saveAccessToken(result.token)
-        tokenStore.saveAccessTokenExpiration(result.expiration)
+    private fun applyLoginResponse(result: LoginResponseDto): LoginOutcome {
+        return when (val flow = resolveLoginFlow(result)) {
+            is ResolvedLoginFlow.TotpChallenge -> LoginOutcome.TotpChallenge(
+                loginChallengeId = flow.loginChallengeId,
+                displayName = flow.displayName,
+            )
+            is ResolvedLoginFlow.Tokens -> {
+                persistSessionOrThrow(flow.response)
+                LoginOutcome.Authenticated(requiresTotpSetup = flow.requiresTotpSetup)
+            }
+        }
+    }
+
+    private fun persistSessionOrThrow(result: LoginResponseDto) {
+        val token = result.token?.trim().orEmpty()
+        val expiration = result.expiration?.trim().orEmpty()
+        if (token.isEmpty() || expiration.isEmpty()) {
+            throw IllegalStateException("Missing token in login response.")
+        }
+
+        tokenStore.saveAccessToken(token)
+        tokenStore.saveAccessTokenExpiration(expiration)
 
         if (result.refreshToken.isNullOrBlank()) {
             tokenStore.clear()
