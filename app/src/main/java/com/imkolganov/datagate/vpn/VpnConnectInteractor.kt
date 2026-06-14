@@ -61,6 +61,26 @@ class VpnConnectInteractor(
                 Log.d("OpenVPN3", "Using selected serverId=$preferredServerId")
                 when (val resolved = serversRepository.resolveManualConnection(preferredServerId)) {
                     is ManualServerResolve.Ok -> resolved.result
+                    is ManualServerResolve.RequiresXrayClient -> {
+                        vpnController.showError(
+                            res.getString(
+                                R.string.vpn_requires_xray_client,
+                                resolved.serverName
+                                    ?: res.getString(R.string.vpn_fallback_server_name)
+                            )
+                        )
+                        return
+                    }
+                    is ManualServerResolve.RequiresUnsupportedServerType -> {
+                        vpnController.showError(
+                            res.getString(
+                                R.string.vpn_requires_unsupported_server_type,
+                                resolved.serverName
+                                    ?: res.getString(R.string.vpn_fallback_server_name)
+                            )
+                        )
+                        return
+                    }
                     is ManualServerResolve.RequiresExternalOpenVpn -> {
                         vpnController.showError(
                             res.getString(

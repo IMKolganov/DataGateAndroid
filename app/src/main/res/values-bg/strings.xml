@@ -36,6 +36,9 @@
     <string name="home_report_email">Имейл</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Абонирайте се — важно е</string>
+    <string name="home_telegram_channel_body">Telegram каналът на проекта: актуални новини и съобщения при проблеми с услугата.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

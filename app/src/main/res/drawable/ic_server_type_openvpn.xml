@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- From DataGateMonitorFrontend/public/logos/openvpn-icon.svg (OpenVPN padlock mark). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="33"
+    android:viewportHeight="32">
+    <path
+        android:fillColor="#1a3967"
+        android:pathData="M21.692,16.371c0,-2.7994 -2.2857,-5.0693 -5.1762,-5.0693 -2.8915,0 -5.1752,2.2611 -5.1752,5.0693 0,1.0374 0.32326,2.0493 0.92503,2.8925a4.9424,4.8722 0,0 0,2.4309 1.8071l-2.0341,10.41h7.636l-1.9634,-10.41c1.9625,-0.75304 3.356,-2.5121 3.356,-4.7006z" />
+    <path
+        android:fillColor="#ea7d1f"
+        android:pathData="M32.897,16.295c0,-8.7561 -7.3137,-15.868 -16.308,-15.868 -8.9947,0 -16.311,7.1049 -16.311,15.868 0,5.8155 3.2107,10.876 7.995,13.602l1.0265,-6.7833a9.5298,9.3944 0,0 1,-2.4986,-6.2793c0,-5.2046 4.3546,-9.4385 9.7068,-9.4385 5.3512,0 9.7078,4.2339 9.7078,9.4395a9.5765,9.4405 0,0 1,-2.4886,6.3538l1.0344,6.7833c4.8887,-2.7288 8.1363,-7.8599 8.1363,-13.675" />
+</vector>

@@ -32,6 +32,9 @@
     <string name="home_report_email">Email</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Đăng ký theo dõi — rất quan trọng</string>
+    <string name="home_telegram_channel_body">Kênh Telegram của dự án: tin mới và thông báo khi dịch vụ gặp sự cố.</string>
     <string name="stats_filters">Bộ lọc</string>
     <string name="stats_overview">Tổng quan</string>
     <string name="stats_chart_hint">Chạm biểu đồ · chụm để phóng to · kéo để cuộn</string>

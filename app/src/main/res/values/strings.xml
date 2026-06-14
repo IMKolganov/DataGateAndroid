@@ -119,6 +119,9 @@
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
 
+    <string name="home_telegram_channel_title">Subscribe — it\'s important</string>
+    <string name="home_telegram_channel_body">Join our Telegram channel for the latest news and service outage announcements.</string>
+
     <string name="support_contact_email" translatable="false">imkolganov@gmail.com</string>
     <string name="support_telegram_bot_url" translatable="false">https://t.me/DataGateVPNBot</string>
     <string name="project_github_issues_url" translatable="false">https://github.com/IMKolganov/DataGateAndroid/issues</string>
@@ -285,6 +288,8 @@
     <string name="sign_out_confirm_message">Are you sure you want to sign out?</string>
 
     <string name="access_no_wss_dialog_title">Cannot connect in this app</string>
+    <string name="access_xray_dialog_title">XRay not supported</string>
+    <string name="access_unsupported_server_type_dialog_title">Server type not supported</string>
     <string name="access_switch_title">Switch server?</string>
     <string name="access_switch_message">Disconnect from the current VPN and connect to \"%1$s\"?</string>
     <string name="access_switch">Switch</string>
@@ -294,6 +299,8 @@
     <string name="label_ip">IP</string>
     <string name="label_since">Since</string>
     <string name="label_openvpn">OpenVPN</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Other</string>
     <string name="label_uptime">Uptime</string>
     <string name="label_in">IN</string>
     <string name="label_out">OUT</string>
@@ -344,6 +351,8 @@
     <string name="vpn_disconnecting">Disconnecting…</string>
     <string name="vpn_connecting_generic">Connecting…</string>
     <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
+    <string name="vpn_requires_xray_client">This app cannot connect to XRay servers. Server: %1$s.\n\nPlease use a different client.</string>
+    <string name="vpn_requires_unsupported_server_type">This app does not support this server type. Server: %1$s.\n\nPlease use a different client.</string>
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
     <string name="vpn_server_quota_blocked">Server \"%1$s\" is not included in your quota plan.</string>
     <string name="access_server_quota_blocked">Not in your plan</string>

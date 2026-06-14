@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.ui.screens.access
 
+import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.vpn.ServerSelectionMode
 
 interface AccessContract {
@@ -49,6 +50,8 @@ interface AccessContract {
         val isOnline: Boolean,
         /** In-app VPN requires WSS; if false, show dialog and use OpenVPN Connect instead. */
         val isEnableWss: Boolean,
+        /** Backend server stack; only [com.imkolganov.datagate.model.servers.VpnServerType.OpenVpn] connects in-app. */
+        val serverType: VpnServerType = VpnServerType.OpenVpn,
 
         val uptimeText: String?,
         val openVpnVersionText: String?,

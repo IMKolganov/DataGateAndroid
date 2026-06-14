@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.util.formatBytes
 import com.imkolganov.datagate.util.formatQuotaEffectiveFromForDisplay
@@ -99,6 +100,8 @@ fun AccessScreen(
 
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
     var noWssDialogName by remember { mutableStateOf<String?>(null) }
+    var xrayDialogName by remember { mutableStateOf<String?>(null) }
+    var unsupportedTypeDialogName by remember { mutableStateOf<String?>(null) }
     var networkIdentity by remember { mutableStateOf(NetworkIdentitySnapshot()) }
     var networkIdentityLoading by remember { mutableStateOf(true) }
 
@@ -144,6 +147,17 @@ fun AccessScreen(
         if (vpnConnected || connectBusy) {
             switchTargetServer = server
         } else {
+            when (server.serverType) {
+                VpnServerType.Xray -> {
+                    xrayDialogName = server.name
+                    return
+                }
+                VpnServerType.Unknown -> {
+                    unsupportedTypeDialogName = server.name
+                    return
+                }
+                VpnServerType.OpenVpn -> Unit
+            }
             if (!server.isEnableWss) {
                 noWssDialogName = server.name
                 return
@@ -166,10 +180,14 @@ fun AccessScreen(
                 TextButton(
                     onClick = {
                         switchTargetServer = null
-                        if (!target.isEnableWss) {
-                            noWssDialogName = target.name
-                        } else {
-                            onReconnectVpn()
+                        when (target.serverType) {
+                            VpnServerType.Xray -> xrayDialogName = target.name
+                            VpnServerType.Unknown -> unsupportedTypeDialogName = target.name
+                            VpnServerType.OpenVpn -> if (!target.isEnableWss) {
+                                noWssDialogName = target.name
+                            } else {
+                                onReconnectVpn()
+                            }
                         }
                     }
                 ) {
@@ -196,6 +214,42 @@ fun AccessScreen(
             },
             confirmButton = {
                 TextButton(onClick = { noWssDialogName = null }) {
+                    Text(stringResource(R.string.action_ok))
+                }
+            }
+        )
+    }
+
+    xrayDialogName?.let { serverName ->
+        AlertDialog(
+            onDismissRequest = { xrayDialogName = null },
+            title = { Text(stringResource(R.string.access_xray_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(R.string.vpn_requires_xray_client, serverName),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { xrayDialogName = null }) {
+                    Text(stringResource(R.string.action_ok))
+                }
+            }
+        )
+    }
+
+    unsupportedTypeDialogName?.let { serverName ->
+        AlertDialog(
+            onDismissRequest = { unsupportedTypeDialogName = null },
+            title = { Text(stringResource(R.string.access_unsupported_server_type_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(R.string.vpn_requires_unsupported_server_type, serverName),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { unsupportedTypeDialogName = null }) {
                     Text(stringResource(R.string.action_ok))
                 }
             }

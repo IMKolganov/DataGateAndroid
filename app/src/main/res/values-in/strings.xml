@@ -32,6 +32,9 @@
     <string name="home_report_email">Email</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Berlangganan — ini penting</string>
+    <string name="home_telegram_channel_body">Saluran Telegram proyek: berita terbaru dan pengumuman jika layanan bermasalah.</string>
     <string name="stats_filters">Filter</string>
     <string name="stats_overview">Ringkasan</string>
     <string name="stats_chart_hint">Ketuk grafik · cubit untuk zoom · seret untuk gulir</string>

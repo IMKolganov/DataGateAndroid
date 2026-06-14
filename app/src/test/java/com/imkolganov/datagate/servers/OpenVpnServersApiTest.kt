@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.servers
 
+import com.imkolganov.datagate.model.servers.VpnServerType
 import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -58,6 +59,7 @@ class OpenVpnServersApiTest {
         assertEquals(3, item.countConnectedClients)
         assertEquals(100L, item.totalBytesIn)
         assertEquals(42, item.openVpnServerStatusLogResponse?.vpnServerId)
+        assertEquals(VpnServerType.OpenVpn, item.server.serverType)
     }
 
     @Test
@@ -104,5 +106,37 @@ class OpenVpnServersApiTest {
 
         val status = response.data!!.openVpnServerWithStatuses.single().openVpnServerStatusLogResponse
         assertEquals("198.51.100.22", status?.serverRemoteIp)
+    }
+
+    @Test
+    fun parseWithStatusResponse_readsServerTypeFromBackend() {
+        val xray = api.parseWithStatusResponse(
+            """
+            {
+              "success": true,
+              "data": {
+                "vpnServerWithStatuses": [{
+                  "vpnServerResponses": {
+                    "vpnServer": {
+                      "id": 2,
+                      "serverType": 1,
+                      "serverName": "xray-1",
+                      "isOnline": true,
+                      "isDefault": false,
+                      "apiUrl": "https://xray.example",
+                      "isEnableWss": true,
+                      "isDeleted": false,
+                      "tags": [],
+                      "quotaPlanGroups": [],
+                      "isAccessibleForUserQuotaPlan": true
+                    }
+                  }
+                }]
+              }
+            }
+            """.trimIndent()
+        ).data!!.openVpnServerWithStatuses.single().server
+
+        assertEquals(VpnServerType.Xray, xray.serverType)
     }
 }

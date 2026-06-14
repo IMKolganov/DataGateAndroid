@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         LanguagePreferenceStore.apply(applicationContext)
+        ThemePreferenceStore.apply(applicationContext)
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge(
@@ -183,8 +184,8 @@ class MainActivity : AppCompatActivity() {
                     statsViewModel = statsViewModel,
                     themeMode = themeMode,
                     onThemeModeChange = { next ->
-                        themeMode = next
                         ThemePreferenceStore.save(applicationContext, next)
+                        ThemePreferenceStore.apply(applicationContext)
                     },
                     appLocale = appLocale,
                     onAppLocaleChange = { next ->

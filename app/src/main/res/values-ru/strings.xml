@@ -119,6 +119,9 @@
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
 
+    <string name="home_telegram_channel_title">Подпишитесь — это важно</string>
+    <string name="home_telegram_channel_body">Telegram-канал проекта: актуальные новости и объявления при проблемах с сервисом.</string>
+
     <string name="stats_filters">Фильтры</string>
     <string name="stats_overview">Обзор</string>
     <string name="stats_chart_hint">Нажмите на график для значений · щипок для масштаба · перетаскивание для прокрутки</string>
@@ -263,6 +266,8 @@
     <string name="sign_out_confirm_message">Вы уверены, что хотите выйти?</string>
 
     <string name="access_no_wss_dialog_title">Подключение в приложении недоступно</string>
+    <string name="access_xray_dialog_title">XRay не поддерживается</string>
+    <string name="access_unsupported_server_type_dialog_title">Тип сервера не поддерживается</string>
     <string name="access_switch_title">Сменить сервер?</string>
     <string name="access_switch_message">Отключить текущий VPN и подключиться к «%1$s»?</string>
     <string name="access_switch">Сменить</string>
@@ -272,6 +277,8 @@
     <string name="label_ip">IP</string>
     <string name="label_since">С</string>
     <string name="label_openvpn">OpenVPN</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Другой</string>
     <string name="label_uptime">Аптайм</string>
     <string name="label_in">Вх.</string>
     <string name="label_out">Исх.</string>
@@ -321,6 +328,8 @@
     <string name="vpn_disconnecting">Отключение…</string>
     <string name="vpn_connecting_generic">Подключение…</string>
     <string name="vpn_requires_openvpn_connect">Сервер «%1$s» не поддерживает подключение в этом приложении (нужен WSS). Подключайтесь через официальное приложение OpenVPN Connect с профилем этого сервера.\n\nВ странах с жёстким государственным контролем сети (например Россия, Иран) соединение всё равно может не работать.</string>
+    <string name="vpn_requires_xray_client">Это приложение не позволяет подключаться к серверам типа XRay. Сервер: %1$s.\n\nПожалуйста, используйте другой клиент.</string>
+    <string name="vpn_requires_unsupported_server_type">Это приложение не поддерживает данный тип сервера. Сервер: %1$s.\n\nПожалуйста, используйте другой клиент.</string>
     <string name="vpn_server_manual_unavailable">Сервер №%1$d недоступен или не подходит для подключения в приложении.</string>
     <string name="vpn_server_quota_blocked">Сервер «%1$s» не входит в ваш тарифный план.</string>
     <string name="access_server_quota_blocked">Нет в вашем плане</string>

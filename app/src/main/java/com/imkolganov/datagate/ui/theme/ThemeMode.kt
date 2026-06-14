@@ -15,11 +15,21 @@ enum class ThemeMode {
         DARK -> true
         SYSTEM -> systemIsDark
     }
+
+    fun toAppCompatNightMode(): Int = when (this) {
+        LIGHT -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        DARK -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+        SYSTEM -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    }
 }
 
 object ThemePreferenceStore {
     private const val PREFS_NAME = "datagate_ui"
     private const val KEY_THEME_MODE = "theme_mode"
+
+    fun apply(context: Context) {
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(get(context).toAppCompatNightMode())
+    }
 
     fun get(context: Context): ThemeMode {
         val raw = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

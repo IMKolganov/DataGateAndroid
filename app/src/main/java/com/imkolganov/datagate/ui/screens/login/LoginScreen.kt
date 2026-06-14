@@ -1,7 +1,7 @@
 package com.imkolganov.datagate.ui.screens.login
 
 import android.app.Activity
-import androidx.compose.foundation.Image
+import com.imkolganov.datagate.ui.components.BrandLogo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,7 +60,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -325,11 +324,7 @@ private fun LoginBrandBlock(
             modifier = Modifier.size(imageSize),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(R.drawable.ic_launcher_foreground),
-                contentDescription = stringResource(R.string.login_logo_cd),
-                modifier = Modifier.size(imageSize)
-            )
+            BrandLogo(modifier = Modifier.size(imageSize))
         }
         Text(
             text = stringResource(R.string.login_title),

@@ -31,6 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.VpnServerTypeIcon
+import com.imkolganov.datagate.ui.components.VpnServerTypeLabel
+import com.imkolganov.datagate.ui.components.labelRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -291,17 +294,35 @@ private fun ServerCardInner(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = server.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                server.protocol?.let {
-                    Text(text = it.uppercase())
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                VpnServerTypeIcon(serverType = server.serverType)
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = server.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        VpnServerTypeLabel(serverType = server.serverType)
+                        server.protocol?.let {
+                            Text(
+                                text = it.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
 
@@ -325,7 +346,7 @@ private fun ServerCardInner(
             Column(modifier = Modifier.weight(1f)) {
                 IconKeyValueRow(
                     icon = Icons.Outlined.Cloud,
-                    label = stringResource(R.string.label_openvpn),
+                    label = stringResource(server.serverType.labelRes()),
                     value = server.openVpnVersionText ?: "-"
                 )
                 server.uptimeText?.let { uptime ->

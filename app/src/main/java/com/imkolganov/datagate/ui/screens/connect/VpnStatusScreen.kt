@@ -3,6 +3,7 @@ package com.imkolganov.datagate.ui.screens.connect
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.tooling.preview.Preview
+import com.imkolganov.datagate.ui.components.BrandLogo
 import com.imkolganov.datagate.ui.theme.DataGateAndroidTheme
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -57,6 +58,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
@@ -79,6 +81,7 @@ fun VpnStatusScreen(
     val supportEmail = stringResource(R.string.support_contact_email)
     val supportEmailSubject = stringResource(R.string.home_report_email_subject)
     val telegramBotUrl = stringResource(R.string.support_telegram_bot_url)
+    val projectTelegramUrl = stringResource(R.string.project_telegram_url)
     val githubIssuesUrl = stringResource(R.string.project_github_issues_url)
     val isConnected = state.isVpnConnected
     val isPaused = state.isVpnPaused
@@ -180,10 +183,7 @@ fun VpnStatusScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Text(
-                text = stringResource(R.string.vpn_home_title),
-                style = MaterialTheme.typography.headlineSmall
-            )
+            HomeBrandHeader()
 
             TextButton(onClick = { showReportDialog = true }) {
                 Row(
@@ -329,6 +329,10 @@ fun VpnStatusScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
+            HomeTelegramChannelBanner(
+                onOpenChannel = { openUrl(projectTelegramUrl) },
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -396,6 +400,51 @@ fun VpnStatusScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun HomeBrandHeader() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BrandLogo(modifier = Modifier.size(56.dp))
+        Text(
+            modifier = Modifier.padding(start = 6.dp),
+            text = stringResource(R.string.vpn_home_title),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+@Composable
+private fun HomeTelegramChannelBanner(
+    onOpenChannel: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 520.dp)
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                text = stringResource(R.string.home_telegram_channel_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.home_telegram_channel_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.9f),
+            )
+            TextButton(onClick = onOpenChannel, modifier = Modifier.align(Alignment.End)) {
+                Text(stringResource(R.string.settings_link_telegram))
+            }
+        }
     }
 }
 

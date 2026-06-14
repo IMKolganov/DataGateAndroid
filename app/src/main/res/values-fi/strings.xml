@@ -32,6 +32,9 @@
     <string name="home_report_email">Sähköposti</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Tilaa — se on tärkeää</string>
+    <string name="home_telegram_channel_body">Projektin Telegram-kanava: uutiset ja ilmoitukset palveluhäiriöistä.</string>
     <string name="stats_filters">Suodattimet</string>
     <string name="stats_overview">Yleiskuva</string>
     <string name="stats_chart_hint">Napauta kaaviota · nipistä zoom · vedä vieritys</string>

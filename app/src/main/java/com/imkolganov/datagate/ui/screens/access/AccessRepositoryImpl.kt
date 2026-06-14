@@ -40,6 +40,7 @@ class AccessRepositoryImpl(
                 protocol = s.tags.firstOrNull(),
                 isOnline = s.isOnline,
                 isEnableWss = s.isEnableWss,
+                serverType = s.serverType,
                 uptimeText = status?.upSince,
                 openVpnVersionText = status?.version,
                 totalInText = formatBytes(row.totalBytesIn),

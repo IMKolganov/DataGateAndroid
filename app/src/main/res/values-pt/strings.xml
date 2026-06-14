@@ -32,6 +32,9 @@
     <string name="home_report_email">E-mail</string>
     <string name="home_report_github">GitHub Issues</string>
     <string name="home_report_email_subject">DataGate Android</string>
+
+    <string name="home_telegram_channel_title">Inscreva-se — é importante</string>
+    <string name="home_telegram_channel_body">Canal Telegram do projeto: notícias e avisos em caso de problemas no serviço.</string>
     <string name="stats_filters">Filtros</string>
     <string name="stats_overview">Resumo</string>
     <string name="stats_chart_hint">Toque no gráfico · belisque para zoom · arraste para deslocar</string>
