@@ -60,6 +60,38 @@
     <string name="auth_error_reset_code_required">Enter the reset code.</string>
     <string name="auth_error_reset_failed">Could not reset password.</string>
 
+    <string name="totp_challenge_lead">Enter the 6-digit code from your authenticator app to finish signing in.</string>
+    <string name="totp_challenge_lead_named">Signed in as %1$s. Enter the 6-digit code from your authenticator app to finish signing in.</string>
+    <string name="totp_field_code">Authentication code</string>
+    <string name="totp_verify_sign_in">Verify and sign in</string>
+    <string name="totp_back_to_sign_in">Back to sign in</string>
+    <string name="totp_sign_in_again">Sign in again</string>
+    <string name="totp_challenge_expired">This verification step expired. Go back and sign in again — you are not logged in yet.</string>
+    <string name="totp_error_code_required">Enter the 6-digit code from your authenticator app.</string>
+    <string name="totp_setup_title">Two-factor authentication</string>
+    <string name="totp_setup_required_notice">You must enable two-factor authentication before using the app.</string>
+    <string name="totp_setup_intro">Scan the QR code with Google Authenticator, Authy, 1Password, or another TOTP app, then enter a verification code.</string>
+    <string name="totp_setup_begin">Set up authenticator</string>
+    <string name="totp_setup_scan_hint">Scan the QR code or enter the secret manually.</string>
+    <string name="totp_setup_issuer">Issuer: %1$s</string>
+    <string name="totp_setup_account">Account: %1$s</string>
+    <string name="totp_setup_confirm_code_label">Verification code from app</string>
+    <string name="totp_setup_confirm_action">Confirm and enable</string>
+    <string name="totp_setup_enabled_message">Two-factor authentication is now enabled for your admin account.</string>
+    <string name="totp_setup_logout">Sign out</string>
+    <string name="totp_copy_secret">Copy secret</string>
+    <string name="totp_qr_cd">QR code for authenticator setup</string>
+    <string name="totp_disabled_message">Two-factor authentication has been disabled. You will be prompted to set it up again on next sign-in.</string>
+    <string name="totp_admin_security_title">Admin security</string>
+    <string name="totp_admin_security_intro">Administrators must use an authenticator app (TOTP) when signing in.</string>
+    <string name="totp_admin_security_loading">Loading security settings…</string>
+    <string name="totp_admin_status_enabled">Status: enabled. You will be asked for a code after each sign-in.</string>
+    <string name="totp_admin_status_disabled">Status: not configured.</string>
+    <string name="totp_disable_title">Disable two-factor authentication</string>
+    <string name="totp_disable_password_label">Account password</string>
+    <string name="totp_disable_password_hint">Required only if you sign in with a password. Google sign-in can leave this empty.</string>
+    <string name="totp_disable_action">Disable 2FA</string>
+
     <string name="vpn_status_connected">Connected</string>
     <string name="vpn_status_connecting">Connecting…</string>
     <string name="vpn_status_disconnected">Disconnected</string>
@@ -110,6 +142,18 @@
 
     <string name="presets_last_7">Last 7 days</string>
     <string name="presets_last_30">Last 30 days</string>
+    <string name="presets_last_2_months">Last 2 months</string>
+    <string name="presets_last_3_months">Last 3 months</string>
+    <string name="presets_last_6_months">Last 6 months</string>
+    <string name="presets_last_1_year">Last year</string>
+    <string name="presets_last_2_years">Last 2 years</string>
+    <string name="presets_chip_7">7d</string>
+    <string name="presets_chip_30">30d</string>
+    <string name="presets_chip_2m">2m</string>
+    <string name="presets_chip_3m">3m</string>
+    <string name="presets_chip_6m">6m</string>
+    <string name="presets_chip_1y">1y</string>
+    <string name="presets_chip_2y">2y</string>
     <string name="action_reload">Reload</string>
 
     <string name="date_range_label">Date range</string>
@@ -250,6 +294,10 @@
     <string name="label_out">OUT</string>
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
+    <string name="access_your_vpn_ip">VPN IP</string>
+    <string name="access_your_external_ip">External IP</string>
+    <string name="access_your_dns">Your DNS</string>
+    <string name="access_network_info_unavailable">Unavailable</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
     <string name="access_refresh">Refresh</string>

@@ -29,10 +29,16 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.imkolganov.datagate.util.NetworkIdentityReader
+import com.imkolganov.datagate.util.NetworkIdentitySnapshot
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -85,6 +91,28 @@ fun AccessScreen(
 
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
     var noWssDialogName by remember { mutableStateOf<String?>(null) }
+    var networkIdentity by remember { mutableStateOf(NetworkIdentitySnapshot()) }
+    var networkIdentityLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(vpnConnected, connectBusy, state.isLoading) {
+        networkIdentityLoading = true
+        var snapshot = withContext(Dispatchers.IO) {
+            NetworkIdentityReader.read(appContext)
+        }
+        if (vpnConnected && (
+                snapshot.vpnIpAddress.isNullOrBlank() ||
+                    snapshot.externalIpAddress.isNullOrBlank() ||
+                    snapshot.dnsServers.isEmpty()
+                )
+        ) {
+            delay(2_000)
+            snapshot = withContext(Dispatchers.IO) {
+                NetworkIdentityReader.read(appContext)
+            }
+        }
+        networkIdentity = snapshot
+        networkIdentityLoading = false
+    }
 
     fun runConnectToServer(server: AccessContract.ServerItem) {
         val sessionServerId = vpnState.selectedServerId
@@ -231,6 +259,17 @@ fun AccessScreen(
                     onlineServers = onlineServers,
                     totalServers = servers.size,
                     modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            item {
+                ClientNetworkFooter(
+                    vpnIpAddress = networkIdentity.vpnIpAddress,
+                    externalIpAddress = networkIdentity.externalIpAddress,
+                    dnsServers = networkIdentity.dnsServers,
+                    isLoading = networkIdentityLoading,
+                    showVpnIp = vpnConnected,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
 

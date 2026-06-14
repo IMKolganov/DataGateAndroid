@@ -55,6 +55,18 @@
 
     <string name="presets_last_7">Останні 7 днів</string>
     <string name="presets_last_30">Останні 30 днів</string>
+    <string name="presets_last_2_months">Останні 2 місяці</string>
+    <string name="presets_last_3_months">Останні 3 місяці</string>
+    <string name="presets_last_6_months">Останні 6 місяців</string>
+    <string name="presets_last_1_year">Минулий рік</string>
+    <string name="presets_last_2_years">Останні 2 роки</string>
+    <string name="presets_chip_7">7д</string>
+    <string name="presets_chip_30">30д</string>
+    <string name="presets_chip_2m">2м</string>
+    <string name="presets_chip_3m">3м</string>
+    <string name="presets_chip_6m">6м</string>
+    <string name="presets_chip_1y">1р</string>
+    <string name="presets_chip_2y">2р</string>
     <string name="action_reload">Оновити</string>
 
     <string name="date_range_label">Діапазон дат</string>
@@ -144,6 +156,10 @@
     <string name="label_out">Вих.</string>
     <string name="status_offline">Офлайн</string>
     <string name="status_online">Онлайн</string>
+    <string name="access_your_vpn_ip">IP у VPN</string>
+    <string name="access_your_external_ip">Ваш зовнішній IP</string>
+    <string name="access_your_dns">Ваш DNS</string>
+    <string name="access_network_info_unavailable">Недоступно</string>
     <string name="access_users_footer">Усього користувачів: %1$d · онлайн %2$d із %3$d серверів</string>
     <string name="access_choose_server">Оберіть сервер</string>
     <string name="access_refresh">Оновити</string>

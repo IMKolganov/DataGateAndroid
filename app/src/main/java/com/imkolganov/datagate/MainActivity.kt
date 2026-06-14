@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
         val statsFactory = StatsViewModelFactory(
             application = application,
             api = graph.statsApi,
-            externalIdProvider = { graph.tokenStore.getAuthInfo().externalId.toString() }
+            externalIdProvider = { graph.tokenStore.getAuthInfo().externalId.orEmpty() }
         )
 
         statsViewModel = androidx.lifecycle.ViewModelProvider(this, statsFactory)

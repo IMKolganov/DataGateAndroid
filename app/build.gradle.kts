@@ -3,7 +3,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
@@ -56,7 +55,6 @@ android {
         }
     }
 
-    // ---------- Signing (for ANY release variant: devRelease + prodRelease) ----------
     signingConfigs {
         create("release") {
             storeFile = file(ks("storeFile"))
@@ -82,7 +80,6 @@ android {
         }
     }
 
-    // ---------- Flavors ----------
     flavorDimensions += "env"
 
     productFlavors {
@@ -109,27 +106,22 @@ android {
         }
     }
 
-    sourceSets {
-        getByName("main") {
-            jniLibs.srcDirs("src/main/jniLibs")
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-        }
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
 
@@ -160,6 +152,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.okhttp)
+    implementation(libs.zxing.core)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.vico.compose.m3)

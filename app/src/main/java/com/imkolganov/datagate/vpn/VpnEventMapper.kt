@@ -70,6 +70,7 @@ object VpnEventMapper {
 
             "RECONNECTING" -> previous.copy(
                 isConnectRequested = true,
+                isVpnConnected = false,
                 lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
@@ -88,7 +89,20 @@ object VpnEventMapper {
 
             "CONNECTING" -> previous.copy(
                 isConnectRequested = true,
+                isVpnConnected = false,
                 lastMessage = res.getString(R.string.vpn_msg_connecting)
+            )
+
+            "WAITING_NETWORK" -> previous.copy(
+                isConnectRequested = true,
+                isVpnConnected = false,
+                lastMessage = res.getString(R.string.vpn_msg_reconnecting)
+            )
+
+            "DISCONNECTING" -> previous.copy(
+                isConnectRequested = false,
+                isVpnConnected = false,
+                lastMessage = res.getString(R.string.vpn_disconnecting)
             )
 
             "CONNECTED" -> {

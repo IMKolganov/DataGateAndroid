@@ -65,6 +65,16 @@ class VpnController(
             }
         }
         if (changed) onStateChange(next)
+        queryServiceStatus()
+    }
+
+    /** Ask the running VPN service for its authoritative runtime state. */
+    fun queryServiceStatus() {
+        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
+            action = OpenVpn3Service.ACTION_QUERY_STATUS
+        }
+        runCatching { startServiceCompat(intent) }
+            .onFailure { Log.w(TAG, "Failed to query VPN service status", it) }
     }
 
     fun onStop() {

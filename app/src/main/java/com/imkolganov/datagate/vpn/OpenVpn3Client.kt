@@ -10,6 +10,7 @@ import net.openvpn.ovpn3.ClientAPI_LogInfo
 import net.openvpn.ovpn3.ClientAPI_OpenVPNClient
 import net.openvpn.ovpn3.ClientAPI_StringVec
 import net.openvpn.ovpn3.DnsOptions
+import net.openvpn.ovpn3.DnsServer
 import java.net.InetAddress
 
 class OpenVpn3Client(
@@ -33,18 +34,7 @@ class OpenVpn3Client(
 
     override fun event(ev: ClientAPI_Event) {
         Log.d(TAG, "core event: name=${ev.name} info=${ev.info}")
-
-        val info = ev.info ?: ""
-        onCoreEvent(ev.name, info)
-
-        val intent = android.content.Intent(OpenVpn3Service.ACTION_STATUS)
-            .setPackage(service.packageName)
-            .apply {
-                putExtra(OpenVpn3Service.EXTRA_EVENT_NAME, ev.name)
-                putExtra(OpenVpn3Service.EXTRA_EVENT_INFO, info)
-            }
-
-        service.sendBroadcast(intent)
+        onCoreEvent(ev.name, ev.info ?: "")
     }
 
     // -------- Socket protect ----------
@@ -62,12 +52,6 @@ class OpenVpn3Client(
 
         builder = service.Builder().apply {
             setSession("DataGate VPN")
-
-            // DNS
-            addDnsServer("8.8.8.8")
-            addDnsServer("1.1.1.1")
-
-            // Important on many devices
             setBlocking(true)
         }
 
@@ -167,14 +151,65 @@ class OpenVpn3Client(
     }
 
     override fun tun_builder_set_dns_options(dns: DnsOptions): Boolean {
+        Log.d(TAG, "tun_builder_set_dns_options()")
+        val b = builder ?: run {
+            Log.e(TAG, "tun_builder_set_dns_options: builder is null")
+            return false
+        }
         return try {
-            builder?.addDnsServer("8.8.8.8")
-            builder?.addDnsServer("1.1.1.1")
+            applyDnsOptions(b, dns)
             true
         } catch (t: Throwable) {
-            Log.e(TAG, "addDnsServer failed", t)
+            Log.e(TAG, "tun_builder_set_dns_options failed", t)
             false
         }
+    }
+
+    private fun applyDnsOptions(b: VpnService.Builder, dns: DnsOptions) {
+        val appliedServers = mutableListOf<String>()
+
+        val servers = dns.servers
+        if (servers != null && !servers.isEmpty()) {
+            for ((_, server) in servers) {
+                val transport = server.transport
+                if (transport == DnsServer.Transport.HTTPS || transport == DnsServer.Transport.TLS) {
+                    Log.w(TAG, "Skipping DoH/DoT DNS server (transport=$transport): ${server.to_string()}")
+                    continue
+                }
+                val addresses = server.addresses ?: continue
+                for (i in 0 until addresses.size) {
+                    val addr = addresses[i].address?.trim()
+                    if (!addr.isNullOrEmpty()) {
+                        b.addDnsServer(addr)
+                        appliedServers.add(addr)
+                    }
+                }
+            }
+        }
+
+        val searchDomains = dns.search_domains
+        if (searchDomains != null && !searchDomains.isEmpty()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                for (i in 0 until searchDomains.size) {
+                    val domain = searchDomains[i].domain?.trim()
+                    if (!domain.isNullOrEmpty()) {
+                        b.addSearchDomain(domain)
+                        Log.d(TAG, "DNS search domain: $domain")
+                    }
+                }
+            } else {
+                Log.d(TAG, "Search domains ignored below Android 10")
+            }
+        }
+
+        if (appliedServers.isEmpty()) {
+            Log.w(TAG, "No DNS servers from push; falling back to 8.8.8.8 and 1.1.1.1")
+            b.addDnsServer("8.8.8.8")
+            b.addDnsServer("1.1.1.1")
+            appliedServers.addAll(listOf("8.8.8.8", "1.1.1.1"))
+        }
+
+        Log.d(TAG, "Applied DNS servers: ${appliedServers.joinToString(", ")}")
     }
 
     override fun tun_builder_set_mtu(mtu: Int): Boolean {

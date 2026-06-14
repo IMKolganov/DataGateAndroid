@@ -55,6 +55,18 @@
 
     <string name="presets_last_7">Last 7 days</string>
     <string name="presets_last_30">Last 30 days</string>
+    <string name="presets_last_2_months">Elmúlt 2 hónap</string>
+    <string name="presets_last_3_months">Elmúlt 3 hónap</string>
+    <string name="presets_last_6_months">Elmúlt 6 hónap</string>
+    <string name="presets_last_1_year">Elmúlt év</string>
+    <string name="presets_last_2_years">Elmúlt 2 év</string>
+    <string name="presets_chip_7">7n</string>
+    <string name="presets_chip_30">30n</string>
+    <string name="presets_chip_2m">2h</string>
+    <string name="presets_chip_3m">3h</string>
+    <string name="presets_chip_6m">6h</string>
+    <string name="presets_chip_1y">1é</string>
+    <string name="presets_chip_2y">2é</string>
     <string name="action_reload">Reload</string>
 
     <string name="date_range_label">Date range</string>
@@ -111,6 +123,10 @@
     <string name="label_out">OUT</string>
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
+    <string name="access_your_vpn_ip">VPN IP</string>
+    <string name="access_your_external_ip">Külső IP-címe</string>
+    <string name="access_your_dns">DNS-e</string>
+    <string name="access_network_info_unavailable">Nem elérhető</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
     <string name="access_refresh">Refresh</string>

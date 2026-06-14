@@ -73,15 +73,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.AuthLoginTab
+import com.imkolganov.datagate.auth.AuthLoginScreen
 import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.EmailAuthPane
+import com.imkolganov.datagate.ui.screens.auth.TotpChallengeScreen
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.support.ReportIssueDialog
 import com.imkolganov.datagate.ui.theme.AppLocale
 import java.util.Locale
 
 @Composable
-private fun AuthPasswordField(
+internal fun AuthPasswordField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -126,7 +128,7 @@ private fun AuthPasswordField(
 }
 
 @Composable
-private fun AuthTextField(
+internal fun AuthTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -156,7 +158,7 @@ private fun AuthTextField(
 }
 
 @Composable
-private fun AuthActionButton(
+internal fun AuthActionButton(
     text: String,
     isLoading: Boolean,
     enabled: Boolean,
@@ -347,7 +349,7 @@ private fun LoginBrandBlock(
 }
 
 @Composable
-private fun AuthMessage(
+internal fun AuthMessage(
     text: String,
     isError: Boolean,
     onDismiss: (() -> Unit)? = null,
@@ -823,6 +825,18 @@ fun LoginScreen(
     val context = LocalContext.current
     val activity = context as? Activity
     val resources = LocalResources.current
+
+    val challenge = state.totpChallenge
+    if (state.loginScreen == AuthLoginScreen.TotpChallenge && challenge != null) {
+        TotpChallengeScreen(
+            challenge = challenge,
+            isLoading = state.isLoading,
+            errorMessage = state.errorMessage,
+            onVerify = { viewModel.verifyTotpLogin(resources, it) },
+            onBack = { viewModel.backFromTotpChallenge() },
+        )
+        return
+    }
 
     LoginScreenContent(
         isLoading = state.isLoading,

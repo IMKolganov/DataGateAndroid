@@ -55,6 +55,18 @@
 
     <string name="presets_last_7">Last 7 days</string>
     <string name="presets_last_30">Last 30 days</string>
+    <string name="presets_last_2_months">Zadnja 2 mjeseca</string>
+    <string name="presets_last_3_months">Zadnja 3 mjeseca</string>
+    <string name="presets_last_6_months">Zadnjih 6 mjeseci</string>
+    <string name="presets_last_1_year">Prošla godina</string>
+    <string name="presets_last_2_years">Zadnje 2 godine</string>
+    <string name="presets_chip_7">7d</string>
+    <string name="presets_chip_30">30d</string>
+    <string name="presets_chip_2m">2mj</string>
+    <string name="presets_chip_3m">3mj</string>
+    <string name="presets_chip_6m">6mj</string>
+    <string name="presets_chip_1y">1g</string>
+    <string name="presets_chip_2y">2g</string>
     <string name="action_reload">Reload</string>
 
     <string name="date_range_label">Date range</string>
@@ -111,6 +123,10 @@
     <string name="label_out">OUT</string>
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
+    <string name="access_your_vpn_ip">VPN IP</string>
+    <string name="access_your_external_ip">Vaš vanjski IP</string>
+    <string name="access_your_dns">Vaš DNS</string>
+    <string name="access_network_info_unavailable">Nedostupno</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
     <string name="access_refresh">Refresh</string>

@@ -46,6 +46,76 @@ private val ServerBadgeShape = RoundedCornerShape(10.dp)
 private val StatusOnlineGreen = Color(0xFF2E7D32)
 private val StatusOfflineRed = Color(0xFFC62828)
 
+@Composable
+fun ClientNetworkFooter(
+    vpnIpAddress: String?,
+    externalIpAddress: String?,
+    dnsServers: List<String>,
+    isLoading: Boolean,
+    showVpnIp: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val unavailable = stringResource(R.string.access_network_info_unavailable)
+
+    fun formatValue(value: String?): String = when {
+        isLoading -> "…"
+        !value.isNullOrBlank() -> value
+        else -> unavailable
+    }
+
+    val dnsText = when {
+        isLoading -> "…"
+        dnsServers.isNotEmpty() -> dnsServers.joinToString(separator = ", ")
+        else -> unavailable
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = AppCards.shape,
+        colors = AppCards.defaultColors(),
+        elevation = AppCards.defaultElevation()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (showVpnIp) {
+                ClientNetworkInfoRow(
+                    label = stringResource(R.string.access_your_vpn_ip),
+                    value = formatValue(vpnIpAddress)
+                )
+            }
+            ClientNetworkInfoRow(
+                label = stringResource(R.string.access_your_external_ip),
+                value = formatValue(externalIpAddress)
+            )
+            ClientNetworkInfoRow(
+                label = stringResource(R.string.access_your_dns),
+                value = dnsText
+            )
+        }
+    }
+}
+
+@Composable
+private fun ClientNetworkInfoRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "$label:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            modifier = Modifier.weight(1f),
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
 /**
  * Footer line: total reported users across listed servers and how many servers are online.
  */

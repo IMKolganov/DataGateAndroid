@@ -55,6 +55,18 @@
 
     <string name="presets_last_7">Last 7 days</string>
     <string name="presets_last_30">Last 30 days</string>
+    <string name="presets_last_2_months">L-aħħar 2 xhur</string>
+    <string name="presets_last_3_months">L-aħħar 3 xhur</string>
+    <string name="presets_last_6_months">L-aħħar 6 xhur</string>
+    <string name="presets_last_1_year">Is-sena li għaddiet</string>
+    <string name="presets_last_2_years">L-aħħar 2 snin</string>
+    <string name="presets_chip_7">7j</string>
+    <string name="presets_chip_30">30j</string>
+    <string name="presets_chip_2m">2x</string>
+    <string name="presets_chip_3m">3x</string>
+    <string name="presets_chip_6m">6x</string>
+    <string name="presets_chip_1y">1s</string>
+    <string name="presets_chip_2y">2s</string>
     <string name="action_reload">Reload</string>
 
     <string name="date_range_label">Date range</string>
@@ -111,6 +123,10 @@
     <string name="label_out">OUT</string>
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
+    <string name="access_your_vpn_ip">IP VPN</string>
+    <string name="access_your_external_ip">IP estern tiegħek</string>
+    <string name="access_your_dns">DNS tiegħek</string>
+    <string name="access_network_info_unavailable">Mhux disponibbli</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
     <string name="access_refresh">Refresh</string>

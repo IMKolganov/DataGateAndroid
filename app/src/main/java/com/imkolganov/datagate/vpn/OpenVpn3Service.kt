@@ -397,7 +397,9 @@ class OpenVpn3Service : VpnService() {
 
         runSystemVpnHealthCheck("query_status")
         broadcastStatus(name, info)
-        stopSelf()
+        if (runtimeState == VpnRuntimeState.IDLE && !connectInProgress && !hasActiveSession && !desiredConnection) {
+            stopSelf()
+        }
     }
 
     private fun processPause() {
@@ -428,8 +430,6 @@ class OpenVpn3Service : VpnService() {
                 hasActiveSession = false
                 connectInProgress = false
                 isPaused = false
-                transitionState(VpnRuntimeState.IDLE, "core_disconnected")
-                broadcastStatus(name, info)
 
                 val sinceNetworkChangeMs = SystemClock.elapsedRealtime() - lastNetworkChangeAtMs
                 if (lastNetworkChangeAtMs > 0L && sinceNetworkChangeMs in 0..20_000L) {
@@ -446,11 +446,16 @@ class OpenVpn3Service : VpnService() {
 
                 if (!isStopping && desiredConnection) {
                     if (networkAvailable) {
+                        transitionState(VpnRuntimeState.CONNECTING, "core_disconnected_reconnect")
+                        broadcastStatus("RECONNECTING", info.ifBlank { "Connection lost, reconnecting..." })
                         startPendingConnectIfPossible("core_disconnected_reconnect", enforceBackoff = true)
                     } else {
                         transitionState(VpnRuntimeState.WAITING_NETWORK, "core_disconnected_wait_network")
                         broadcastStatus("WAITING_NETWORK", "Waiting for network...")
                     }
+                } else {
+                    transitionState(VpnRuntimeState.IDLE, "core_disconnected")
+                    broadcastStatus(name, info)
                 }
             }
             else -> {

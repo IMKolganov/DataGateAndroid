@@ -33,6 +33,7 @@ fun PrettyDateRangePicker(
     toIso: String,
     onFromIsoChange: (String) -> Unit,
     onToIsoChange: (String) -> Unit,
+    onApply: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var open by remember { mutableStateOf(false) }
@@ -76,6 +77,7 @@ fun PrettyDateRangePicker(
                         if (start != null && end != null) {
                             onFromIsoChange(isoUtc(startOfDayUtcMillis(start)))
                             onToIsoChange(isoUtc(endOfDayUtcMillis(end)))
+                            onApply()
                         }
                         open = false
                     }

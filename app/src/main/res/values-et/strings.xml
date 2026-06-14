@@ -55,6 +55,18 @@
 
     <string name="presets_last_7">Last 7 days</string>
     <string name="presets_last_30">Last 30 days</string>
+    <string name="presets_last_2_months">Viimased 2 kuud</string>
+    <string name="presets_last_3_months">Viimased 3 kuud</string>
+    <string name="presets_last_6_months">Viimased 6 kuud</string>
+    <string name="presets_last_1_year">Viimane aasta</string>
+    <string name="presets_last_2_years">Viimased 2 aastat</string>
+    <string name="presets_chip_7">7p</string>
+    <string name="presets_chip_30">30p</string>
+    <string name="presets_chip_2m">2k</string>
+    <string name="presets_chip_3m">3k</string>
+    <string name="presets_chip_6m">6k</string>
+    <string name="presets_chip_1y">1a</string>
+    <string name="presets_chip_2y">2a</string>
     <string name="action_reload">Reload</string>
 
     <string name="date_range_label">Date range</string>
@@ -111,6 +123,10 @@
     <string name="label_out">OUT</string>
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
+    <string name="access_your_vpn_ip">VPN IP</string>
+    <string name="access_your_external_ip">Teie väline IP</string>
+    <string name="access_your_dns">Teie DNS</string>
+    <string name="access_network_info_unavailable">Pole saadaval</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
     <string name="access_refresh">Refresh</string>

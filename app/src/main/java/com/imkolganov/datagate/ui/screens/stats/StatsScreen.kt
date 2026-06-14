@@ -86,11 +86,11 @@ fun StatsScreen(viewModel: StatsViewModel) {
                             )
                         }
 
-                    PresetsRow(
-                        selectedDays = state.selectedPresetDays,
-                        isLoading = state.isLoading,
-                            onSelectDays = { days ->
-                                viewModel.setLastDays(days.toLong())
+                        PresetsRow(
+                            selectedPreset = state.selectedPreset,
+                            isLoading = state.isLoading,
+                            onSelectPreset = { preset ->
+                                viewModel.applyPreset(preset)
                                 viewModel.load()
                             },
                             onReload = viewModel::load
@@ -101,6 +101,7 @@ fun StatsScreen(viewModel: StatsViewModel) {
                             toIso = state.filters.toIso,
                             onFromIsoChange = viewModel::setFromIso,
                             onToIsoChange = viewModel::setToIso,
+                            onApply = viewModel::load,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

@@ -67,6 +67,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.auth.AuthViewModel
+import com.imkolganov.datagate.auth.JwtClaimsReader
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
 import com.imkolganov.datagate.network.HttpClients
@@ -96,6 +98,7 @@ import java.util.Date
 @Composable
 fun SettingsScreen(
     tokenStore: TokenStore,
+    authViewModel: AuthViewModel? = null,
     onLogout: () -> Unit,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
@@ -178,6 +181,26 @@ fun SettingsScreen(
             avatarUrl = authInfo.avatarUrl,
             onLogout = onLogout
         )
+
+        val isAdmin = remember(authInfo.role, tokenStore) {
+            JwtClaimsReader.isAdmin(tokenStore.getAccessToken())
+        }
+
+        if (authViewModel != null && isAdmin) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = AppCards.shape,
+                colors = AppCards.defaultColors(),
+                elevation = AppCards.defaultElevation()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    AdminSecuritySection(
+                        tokenStore = tokenStore,
+                        authViewModel = authViewModel,
+                    )
+                }
+            }
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),

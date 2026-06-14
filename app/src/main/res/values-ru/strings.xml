@@ -60,6 +60,38 @@
     <string name="auth_error_reset_code_required">Введите код сброса.</string>
     <string name="auth_error_reset_failed">Не удалось сменить пароль.</string>
 
+    <string name="totp_challenge_lead">Введите 6-значный код из приложения-аутентификатора, чтобы завершить вход.</string>
+    <string name="totp_challenge_lead_named">Вход как %1$s. Введите 6-значный код из приложения-аутентификатора.</string>
+    <string name="totp_field_code">Код аутентификации</string>
+    <string name="totp_verify_sign_in">Подтвердить и войти</string>
+    <string name="totp_back_to_sign_in">Назад ко входу</string>
+    <string name="totp_sign_in_again">Войти снова</string>
+    <string name="totp_challenge_expired">Срок проверки истёк. Вернитесь и войдите заново — вы ещё не авторизованы.</string>
+    <string name="totp_error_code_required">Введите 6-значный код из приложения-аутентификатора.</string>
+    <string name="totp_setup_title">Двухфакторная аутентификация</string>
+    <string name="totp_setup_required_notice">Перед использованием приложения нужно включить 2FA.</string>
+    <string name="totp_setup_intro">Отсканируйте QR-код в Google Authenticator, Authy, 1Password или другом TOTP-приложении, затем введите код подтверждения.</string>
+    <string name="totp_setup_begin">Настроить аутентификатор</string>
+    <string name="totp_setup_scan_hint">Отсканируйте QR-код или введите секрет вручную.</string>
+    <string name="totp_setup_issuer">Издатель: %1$s</string>
+    <string name="totp_setup_account">Аккаунт: %1$s</string>
+    <string name="totp_setup_confirm_code_label">Код из приложения</string>
+    <string name="totp_setup_confirm_action">Подтвердить и включить</string>
+    <string name="totp_setup_enabled_message">Двухфакторная аутентификация включена для учётной записи администратора.</string>
+    <string name="totp_setup_logout">Выйти</string>
+    <string name="totp_copy_secret">Копировать секрет</string>
+    <string name="totp_qr_cd">QR-код для настройки аутентификатора</string>
+    <string name="totp_disabled_message">2FA отключена. При следующем входе потребуется настроить её снова.</string>
+    <string name="totp_admin_security_title">Безопасность администратора</string>
+    <string name="totp_admin_security_intro">Для администраторов при входе требуется код из приложения-аутентификатора (TOTP).</string>
+    <string name="totp_admin_security_loading">Загрузка настроек безопасности…</string>
+    <string name="totp_admin_status_enabled">Статус: включено. После каждого входа будет запрашиваться код.</string>
+    <string name="totp_admin_status_disabled">Статус: не настроено.</string>
+    <string name="totp_disable_title">Отключить двухфакторную аутентификацию</string>
+    <string name="totp_disable_password_label">Пароль учётной записи</string>
+    <string name="totp_disable_password_hint">Нужен только при входе по паролю. При входе через Google можно оставить пустым.</string>
+    <string name="totp_disable_action">Отключить 2FA</string>
+
     <string name="vpn_status_connected">Подключено</string>
     <string name="vpn_status_connecting">Подключение…</string>
     <string name="vpn_status_disconnected">Не подключено</string>
@@ -106,6 +138,18 @@
 
     <string name="presets_last_7">Последние 7 дней</string>
     <string name="presets_last_30">Последние 30 дней</string>
+    <string name="presets_last_2_months">Последние 2 месяца</string>
+    <string name="presets_last_3_months">Последние 3 месяца</string>
+    <string name="presets_last_6_months">Последние 6 месяцев</string>
+    <string name="presets_last_1_year">Последний год</string>
+    <string name="presets_last_2_years">Последние 2 года</string>
+    <string name="presets_chip_7">7д</string>
+    <string name="presets_chip_30">30д</string>
+    <string name="presets_chip_2m">2м</string>
+    <string name="presets_chip_3m">3м</string>
+    <string name="presets_chip_6m">6м</string>
+    <string name="presets_chip_1y">1г</string>
+    <string name="presets_chip_2y">2г</string>
     <string name="action_reload">Обновить</string>
 
     <string name="date_range_label">Диапазон дат</string>
@@ -228,6 +272,10 @@
     <string name="label_out">Исх.</string>
     <string name="status_offline">Офлайн</string>
     <string name="status_online">Онлайн</string>
+    <string name="access_your_vpn_ip">IP в VPN</string>
+    <string name="access_your_external_ip">Ваш внешний IP</string>
+    <string name="access_your_dns">Ваш DNS</string>
+    <string name="access_network_info_unavailable">Недоступно</string>
     <string name="access_users_footer">Всего пользователей: %1$d · онлайн %2$d из %3$d серверов</string>
     <string name="access_choose_server">Выберите сервер</string>
     <string name="access_refresh">Обновить</string>

@@ -79,7 +79,7 @@ open class StatsApiClient(
         }
     }
 
-    private fun parseOverviewSeriesResponse(body: String): ApiResponse<OverviewSeriesResponse> {
+    internal fun parseOverviewSeriesResponse(body: String): ApiResponse<OverviewSeriesResponse> {
         val obj = JSONObject(body)
         val success = obj.optBoolean("success", false)
         val message = obj.optString("message", "")
@@ -94,7 +94,7 @@ open class StatsApiClient(
         )
     }
 
-    private fun parseOverviewSummaryResponse(body: String): ApiResponse<OverviewSummaryTotals> {
+    internal fun parseOverviewSummaryResponse(body: String): ApiResponse<OverviewSummaryTotals> {
         val obj = JSONObject(body)
         val success = obj.optBoolean("success", false)
         val message = obj.optString("message", "")
@@ -117,22 +117,25 @@ open class StatsApiClient(
     }
 
     private fun parseData(dataObj: JSONObject): OverviewSeriesResponse {
-        val metaObj = dataObj.getJSONObject("meta")
-        val summaryObj = dataObj.getJSONObject("summary")
-        val rowsArr = dataObj.getJSONArray("overviewSeriesRows")
+        val metaObj = dataObj.optJSONObject("meta") ?: JSONObject()
+        val summaryObj = dataObj.optJSONObject("summary") ?: JSONObject()
+        val rowsArr = dataObj.optJSONArray("rows")
+            ?: dataObj.optJSONArray("overviewSeriesRows")
+            ?: JSONArray()
 
         val meta = OverviewMeta(
-            from = metaObj.getString("from"),
-            to = metaObj.getString("to"),
-            grouping = metaObj.getString("grouping"),
-            timezone = metaObj.getString("timezone"),
-            trafficUnit = metaObj.getString("trafficUnit"),
+            from = metaObj.optString("from", metaObj.optString("From", "")),
+            to = metaObj.optString("to", metaObj.optString("To", "")),
+            grouping = metaObj.optString("grouping", metaObj.optString("Grouping", "")),
+            timezone = metaObj.optString("timezone", metaObj.optString("Timezone", "")),
+            trafficUnit = metaObj.optString("trafficUnit", metaObj.optString("TrafficUnit", "")),
         )
 
+        val peakFromSummary = summaryObj.optInt("peakActiveClients", summaryObj.optInt("PeakActiveClients", Int.MIN_VALUE))
         val summary = OverviewSummary(
-            totalTrafficInBytes = summaryObj.getLong("totalTrafficInBytes"),
-            totalTrafficOutBytes = summaryObj.getLong("totalTrafficOutBytes"),
-            peakActiveClients = summaryObj.getInt("peakActiveClients")
+            totalTrafficInBytes = summaryObj.optLong("totalTrafficInBytes", summaryObj.optLong("TotalTrafficInBytes", 0L)),
+            totalTrafficOutBytes = summaryObj.optLong("totalTrafficOutBytes", summaryObj.optLong("TotalTrafficOutBytes", 0L)),
+            peakActiveClients = if (peakFromSummary != Int.MIN_VALUE) peakFromSummary else 0
         )
 
         val rows = parseRows(rowsArr)
@@ -148,13 +151,16 @@ open class StatsApiClient(
         val out = ArrayList<OverviewRow>(arr.length())
         for (i in 0 until arr.length()) {
             val r = arr.getJSONObject(i)
+            val inBytes = r.optLong("trafficInBytes", r.optLong("TrafficInBytes", 0L))
+            val outBytes = r.optLong("trafficOutBytes", r.optLong("TrafficOutBytes", 0L))
+            val total = r.optLong("trafficTotalBytes", r.optLong("TrafficTotalBytes", inBytes + outBytes))
             out.add(
                 OverviewRow(
-                    ts = r.getString("ts"),
-                    activeClients = r.getInt("activeClients"),
-                    trafficInBytes = r.getLong("trafficInBytes"),
-                    trafficOutBytes = r.getLong("trafficOutBytes"),
-                    trafficTotalBytes = r.getLong("trafficTotalBytes")
+                    ts = r.optString("ts", r.optString("Ts", "")),
+                    activeClients = r.optInt("activeClients", r.optInt("ActiveClients", 0)),
+                    trafficInBytes = inBytes,
+                    trafficOutBytes = outBytes,
+                    trafficTotalBytes = total
                 )
             )
         }

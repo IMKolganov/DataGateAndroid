@@ -55,6 +55,18 @@
 
     <string name="presets_last_7">Last 7 days</string>
     <string name="presets_last_30">Last 30 days</string>
+    <string name="presets_last_2_months">Huling 2 buwan</string>
+    <string name="presets_last_3_months">Huling 3 buwan</string>
+    <string name="presets_last_6_months">Huling 6 na buwan</string>
+    <string name="presets_last_1_year">Nakaraang taon</string>
+    <string name="presets_last_2_years">Huling 2 taon</string>
+    <string name="presets_chip_7">7a</string>
+    <string name="presets_chip_30">30a</string>
+    <string name="presets_chip_2m">2bu</string>
+    <string name="presets_chip_3m">3bu</string>
+    <string name="presets_chip_6m">6bu</string>
+    <string name="presets_chip_1y">1ta</string>
+    <string name="presets_chip_2y">2ta</string>
     <string name="action_reload">Reload</string>
 
     <string name="date_range_label">Date range</string>
@@ -111,6 +123,10 @@
     <string name="label_out">OUT</string>
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
+    <string name="access_your_vpn_ip">VPN IP</string>
+    <string name="access_your_external_ip">Iyong external IP</string>
+    <string name="access_your_dns">Iyong DNS</string>
+    <string name="access_network_info_unavailable">Hindi available</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
     <string name="access_refresh">Refresh</string>

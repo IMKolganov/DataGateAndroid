@@ -43,8 +43,8 @@ object JwtClaimsReader {
         )
 
         val role = firstNonBlank(
-            obj.optStringOrNull("role"),
-            obj.optStringOrNull("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+            obj.optRoleClaim("role"),
+            obj.optRoleClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
         )
 
         val displayName = firstNonBlank(
@@ -89,6 +89,27 @@ object JwtClaimsReader {
     private fun JSONObject.optStringOrNull(key: String): String? {
         val v = optString(key, "").trim()
         return v.takeIf { it.isNotEmpty() }
+    }
+
+    /** Role claim may be a string or JSON array (ASP.NET). */
+    private fun JSONObject.optRoleClaim(key: String): String? {
+        if (!has(key) || isNull(key)) return null
+        return when (val v = get(key)) {
+            is String -> v.trim().takeIf { it.isNotEmpty() }
+            is org.json.JSONArray -> {
+                for (i in 0 until v.length()) {
+                    val item = v.optString(i, "").trim()
+                    if (item.isNotEmpty()) return item
+                }
+                null
+            }
+            else -> null
+        }
+    }
+
+    fun isAdmin(token: String?): Boolean {
+        val role = read(token).role ?: return false
+        return role.equals("Admin", ignoreCase = true)
     }
 
     private fun firstNonBlank(vararg values: String?): String? {
