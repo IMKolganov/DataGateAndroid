@@ -96,6 +96,10 @@ fun AccessScreen(
 
     LaunchedEffect(vpnConnected, connectBusy, state.isLoading) {
         networkIdentityLoading = true
+        if (connectBusy) {
+            networkIdentity = NetworkIdentitySnapshot()
+            return@LaunchedEffect
+        }
         var snapshot = withContext(Dispatchers.IO) {
             NetworkIdentityReader.read(appContext)
         }

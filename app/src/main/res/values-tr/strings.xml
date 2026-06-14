@@ -111,8 +111,8 @@
     <string name="status_offline">Çevrimdışı</string>
     <string name="status_online">Çevrimiçi</string>
     <string name="access_your_vpn_ip">VPN IP</string>
-    <string name="access_your_external_ip">Harici IP'niz</string>
-    <string name="access_your_dns">DNS'iniz</string>
+    <string name="access_your_external_ip">Harici IP\'niz</string>
+    <string name="access_your_dns">DNS\'iniz</string>
     <string name="access_network_info_unavailable">Kullanılamıyor</string>
     <string name="access_users_footer">Toplam %1$d kullanıcı · %3$d sunucudan %2$d çevrimiçi</string>
     <string name="access_choose_server">Sunucu seç</string>

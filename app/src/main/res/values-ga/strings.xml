@@ -124,7 +124,7 @@
     <string name="status_offline">Offline</string>
     <string name="status_online">Online</string>
     <string name="access_your_vpn_ip">IP VPN</string>
-    <string name="access_your_external_ip">D'IP sheachtrach</string>
+    <string name="access_your_external_ip">D\'IP sheachtrach</string>
     <string name="access_your_dns">Do DNS</string>
     <string name="access_network_info_unavailable">Níl ar fáil</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>

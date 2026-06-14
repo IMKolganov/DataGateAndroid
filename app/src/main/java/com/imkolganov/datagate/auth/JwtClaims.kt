@@ -97,11 +97,14 @@ object JwtClaimsReader {
         return when (val v = get(key)) {
             is String -> v.trim().takeIf { it.isNotEmpty() }
             is org.json.JSONArray -> {
+                var fallback: String? = null
                 for (i in 0 until v.length()) {
                     val item = v.optString(i, "").trim()
-                    if (item.isNotEmpty()) return item
+                    if (item.isEmpty()) continue
+                    if (item.equals("Admin", ignoreCase = true)) return item
+                    if (fallback == null) fallback = item
                 }
-                null
+                fallback
             }
             else -> null
         }

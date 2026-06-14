@@ -31,13 +31,18 @@ class VpnController(
         private const val KEY_SESSION_SERVER_ID = "vpn_session_server_id"
     }
 
-    private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo ->
-        if (eventName == "DISCONNECTED") {
+    private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo, fromQuery ->
+        val current = getState()
+        if (fromQuery && eventName == "DISCONNECTED" && current.isConnectRequested && !current.isVpnConnected) {
+            Log.d(TAG, "Ignoring idle query DISCONNECTED over in-flight connect UI")
+            return@VpnStatusBroadcastReceiver
+        }
+        if (eventName == "DISCONNECTED" && !fromQuery) {
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
-        val newState = VpnEventMapper.map(activity.resources, getState(), eventName, eventInfo)
+        val newState = VpnEventMapper.map(activity.resources, current, eventName, eventInfo)
         onStateChange(newState)
-        Log.d(TAG, "VPN status updated: $eventName - $eventInfo")
+        Log.d(TAG, "VPN status updated: $eventName - $eventInfo (fromQuery=$fromQuery)")
     }
 
     fun onStart() {

@@ -58,6 +58,7 @@ class OpenVpn3Service : VpnService() {
         const val ACTION_STATUS = "com.imkolganov.datagate.vpn.STATUS"
         const val EXTRA_EVENT_NAME = "event_name"
         const val EXTRA_EVENT_INFO = "event_info"
+        const val EXTRA_STATUS_FROM_QUERY = "status_from_query"
 
         const val ACTION_QUERY_STATUS = "com.imkolganov.datagate.vpn.QUERY_STATUS"
 
@@ -396,7 +397,7 @@ class OpenVpn3Service : VpnService() {
         }
 
         runSystemVpnHealthCheck("query_status")
-        broadcastStatus(name, info)
+        broadcastStatus(name, info, fromQuery = true)
         if (runtimeState == VpnRuntimeState.IDLE && !connectInProgress && !hasActiveSession && !desiredConnection) {
             stopSelf()
         }
@@ -811,20 +812,23 @@ class OpenVpn3Service : VpnService() {
         bridgeHttp = null
     }
 
-    private fun broadcastStatus(name: String, info: String) {
-        lastEventName = name
-        lastEventInfo = info
-        statePrefs.edit()
-            .putString(PREF_LAST_EVENT_NAME, name)
-            .putString(PREF_LAST_EVENT_INFO, info)
-            .putLong(PREF_LAST_EVENT_AT_MS, System.currentTimeMillis())
-            .apply()
+    private fun broadcastStatus(name: String, info: String, fromQuery: Boolean = false) {
+        if (!fromQuery) {
+            lastEventName = name
+            lastEventInfo = info
+            statePrefs.edit()
+                .putString(PREF_LAST_EVENT_NAME, name)
+                .putString(PREF_LAST_EVENT_INFO, info)
+                .putLong(PREF_LAST_EVENT_AT_MS, System.currentTimeMillis())
+                .apply()
+        }
 
         val intent = Intent(ACTION_STATUS)
             .setPackage(packageName)
             .apply {
                 putExtra(EXTRA_EVENT_NAME, name)
                 putExtra(EXTRA_EVENT_INFO, info)
+                putExtra(EXTRA_STATUS_FROM_QUERY, fromQuery)
             }
 
         sendBroadcast(intent)
