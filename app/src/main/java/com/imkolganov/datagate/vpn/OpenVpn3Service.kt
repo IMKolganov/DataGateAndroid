@@ -93,6 +93,7 @@ class OpenVpn3Service : VpnService() {
         data class CoreEvent(val name: String, val info: String) : VpnCommand
         data class NetworkChanged(val source: String, val transport: String) : VpnCommand
         data class RetryConnect(val reason: String) : VpnCommand
+        data class BridgeTransportLost(val reason: String) : VpnCommand
         object Disconnect : VpnCommand
         object QueryStatus : VpnCommand
         object Pause : VpnCommand
@@ -133,6 +134,7 @@ class OpenVpn3Service : VpnService() {
     private var pendingConnectRequest: PendingConnectRequest? = null
     private var networkAvailable = true
     private var lastReconnectAttemptAtMs: Long = 0L
+    @Volatile private var reconnectPendingAfterJob = false
     private var isNetworkCallbackRegistered = false
 
     private var vpnClient: OpenVpn3Client? = null
@@ -356,6 +358,7 @@ class OpenVpn3Service : VpnService() {
             is VpnCommand.CoreEvent -> processCoreEvent(command.name, command.info)
             is VpnCommand.NetworkChanged -> processNetworkChanged(command.source, command.transport)
             is VpnCommand.RetryConnect -> startPendingConnectIfPossible(command.reason, enforceBackoff = true)
+            is VpnCommand.BridgeTransportLost -> processBridgeTransportLost(command.reason)
             VpnCommand.Disconnect -> processDisconnect()
             VpnCommand.QueryStatus -> processQueryStatus()
             VpnCommand.Pause -> processPause()
@@ -438,6 +441,7 @@ class OpenVpn3Service : VpnService() {
         }
 
         isStopping = true
+        reconnectPendingAfterJob = false
         stopVpnInternal()
         connectInProgress = false
         hasActiveSession = false
@@ -581,6 +585,38 @@ class OpenVpn3Service : VpnService() {
                     broadcastStatus(name, info)
                 }
             }
+        }
+    }
+
+    private fun processBridgeTransportLost(reason: String) {
+        if (!OpenVpnRuntimePolicy.shouldHandleBridgeTransportLost(
+                isStopping = isStopping,
+                desiredConnection = desiredConnection,
+                isPaused = isPaused,
+                hasActiveSession = hasActiveSession
+            )
+        ) {
+            Log.d(TAG, "bridge_transport_lost_ignored: $reason state=$runtimeState")
+            return
+        }
+
+        Log.w(TAG, "bridge_transport_lost: $reason state=$runtimeState")
+        hasActiveSession = false
+        reconnectPendingAfterJob = true
+
+        if (networkAvailable) {
+            transitionState(VpnRuntimeState.CONNECTING, "bridge_transport_lost")
+            updateNotification(getString(R.string.vpn_msg_reconnecting))
+            broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+        } else {
+            transitionState(VpnRuntimeState.WAITING_NETWORK, "bridge_transport_lost")
+            updateNotification("Waiting for network...")
+            broadcastStatus("WAITING_NETWORK", "Waiting for network...")
+        }
+
+        serviceScope.launch {
+            runCatching { vpnClient?.stop() }
+                .onFailure { Log.w(TAG, "client.stop() after bridge transport loss", it) }
         }
     }
 
@@ -815,8 +851,18 @@ class OpenVpn3Service : VpnService() {
             } finally {
                 connectInProgress = false
                 stopVpnInternal()
-                if (!desiredConnection || isStopping) {
-                    stopSelf()
+                val shouldReconnect = reconnectPendingAfterJob
+                reconnectPendingAfterJob = false
+                when {
+                    OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                        reconnectPendingAfterJob = shouldReconnect,
+                        desiredConnection = desiredConnection,
+                        isStopping = isStopping,
+                        isPaused = isPaused
+                    ) -> {
+                        commandQueue.trySend(VpnCommand.RetryConnect("bridge_transport_lost"))
+                    }
+                    !desiredConnection || isStopping -> stopSelf()
                 }
             }
         }
@@ -827,6 +873,9 @@ class OpenVpn3Service : VpnService() {
         wssUrl: String,
         linkProtocol: VpnLinkProtocol
     ): Int {
+        val onTransportLost: (String) -> Unit = { reason ->
+            commandQueue.trySend(VpnCommand.BridgeTransportLost(reason))
+        }
         val maxAttempts = 2
         var lastError: Throwable? = null
         for (attempt in 1..maxAttempts) {
@@ -837,7 +886,8 @@ class OpenVpn3Service : VpnService() {
                             service = this@OpenVpn3Service,
                             port = 0,
                             wssUrl = wssUrl,
-                            http = http
+                            http = http,
+                            onTransportLost = onTransportLost
                         )
                         val dynamicPort = bridge.start()
                         bridgeStop = { bridge.stop() }
@@ -848,7 +898,8 @@ class OpenVpn3Service : VpnService() {
                             service = this@OpenVpn3Service,
                             port = 0,
                             wssUrl = wssUrl,
-                            http = http
+                            http = http,
+                            onTransportLost = onTransportLost
                         )
                         val dynamicPort = bridge.start()
                         bridgeStop = { bridge.stop() }

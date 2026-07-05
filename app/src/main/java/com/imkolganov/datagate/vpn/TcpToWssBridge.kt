@@ -7,7 +7,8 @@ class TcpToWssBridge(
     private val service: VpnService,
     private val port: Int,
     private val wssUrl: String,
-    private val http: okhttp3.OkHttpClient
+    private val http: okhttp3.OkHttpClient,
+    private val onTransportLost: ((reason: String) -> Unit)? = null
 ) {
     @Volatile private var running = false
     private var server: java.net.ServerSocket? = null
@@ -59,6 +60,10 @@ class TcpToWssBridge(
         }
 
         val queue = java.util.concurrent.LinkedBlockingQueue<okio.ByteString>()
+        val transportLostNotified = java.util.concurrent.atomic.AtomicBoolean(false)
+        fun notifyTransportLost(reason: String) {
+            BridgeTransportLoss.notifyOnce(transportLostNotified, onTransportLost, reason)
+        }
 
         val req = okhttp3.Request.Builder().url(wssUrl).build()
         val ws = http.newWebSocket(req, object : okhttp3.WebSocketListener() {
@@ -70,10 +75,12 @@ class TcpToWssBridge(
                 t: Throwable,
                 response: okhttp3.Response?
             ) {
+                notifyTransportLost(BridgeTransportLoss.formatFailureReason(t))
                 queue.offer(okio.ByteString.EMPTY)
                 try { tcp.close() } catch (_: Throwable) {}
             }
             override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
+                notifyTransportLost(BridgeTransportLoss.formatClosedReason(code, reason))
                 queue.offer(okio.ByteString.EMPTY)
                 try { tcp.close() } catch (_: Throwable) {}
             }
