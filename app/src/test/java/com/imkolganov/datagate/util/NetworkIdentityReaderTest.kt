@@ -31,4 +31,33 @@ class NetworkIdentityReaderTest {
         )
         assertEquals("10.51.15.4", picked)
     }
+
+    @Test
+    fun isConnectivitySystemFailure_treatsSecurityAndIllegalStateAsTransient() {
+        assertTrue(isConnectivitySystemFailure(SecurityException("denied")))
+        assertTrue(isConnectivitySystemFailure(IllegalStateException("busy")))
+    }
+
+    @Test
+    fun isConnectivitySystemFailure_walksCauseChain() {
+        val root = SecurityException("denied")
+        val wrapped = RuntimeException("outer", RuntimeException("mid", root))
+        assertTrue(isConnectivitySystemFailure(wrapped))
+    }
+
+    @Test
+    fun isConnectivitySystemFailure_detectsDeadSystemExceptionInCauseChain() {
+        val deadSystem = runCatching {
+            Class.forName("android.os.DeadSystemException")
+                .getDeclaredConstructor()
+                .newInstance() as Throwable
+        }.getOrNull() ?: return
+
+        assertTrue(isConnectivitySystemFailure(RuntimeException("wrap", deadSystem)))
+    }
+
+    @Test
+    fun isConnectivitySystemFailure_falseForUnrelatedErrors() {
+        assertFalse(isConnectivitySystemFailure(IllegalArgumentException("bad arg")))
+    }
 }

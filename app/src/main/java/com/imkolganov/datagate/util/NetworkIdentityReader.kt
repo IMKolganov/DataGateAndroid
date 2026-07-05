@@ -15,6 +15,15 @@ data class NetworkIdentitySnapshot(
 object NetworkIdentityReader {
 
     fun read(context: Context): NetworkIdentitySnapshot {
+        return try {
+            readUnsafe(context)
+        } catch (t: Throwable) {
+            if (isConnectivitySystemFailure(t)) NetworkIdentitySnapshot()
+            else throw t
+        }
+    }
+
+    private fun readUnsafe(context: Context): NetworkIdentitySnapshot {
         val cm = context.getSystemService(ConnectivityManager::class.java)
             ?: return NetworkIdentitySnapshot()
 
@@ -51,6 +60,23 @@ object NetworkIdentityReader {
 
     private fun formatHost(host: String?): String? =
         host?.trim()?.takeIf { it.isNotEmpty() }
+}
+
+/** True when ConnectivityManager is temporarily unavailable (VPN churn, system restart). */
+internal fun isConnectivitySystemFailure(t: Throwable): Boolean {
+    var cur: Throwable? = t
+    while (cur != null) {
+        when (cur) {
+            is SecurityException,
+            is IllegalStateException -> return true
+        }
+        when (cur.javaClass.name) {
+            "android.os.DeadSystemException",
+            "android.os.DeadSystemRuntimeException" -> return true
+        }
+        cur = cur.cause
+    }
+    return false
 }
 
 internal fun pickFirstIpv4HostAddress(addresses: Iterable<String>): String? {

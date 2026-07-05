@@ -876,15 +876,15 @@ class OpenVpn3Service : VpnService() {
         val onTransportLost: (String) -> Unit = { reason ->
             commandQueue.trySend(VpnCommand.BridgeTransportLost(reason))
         }
-        val maxAttempts = 2
+        val candidates = LocalBridgePortPool.candidatePorts()
         var lastError: Throwable? = null
-        for (attempt in 1..maxAttempts) {
+        for ((index, port) in candidates.withIndex()) {
             try {
-                return when (linkProtocol) {
+                val boundPort = when (linkProtocol) {
                     VpnLinkProtocol.UDP -> {
                         val bridge = UdpToWssBridge(
                             service = this@OpenVpn3Service,
-                            port = 0,
+                            port = port,
                             wssUrl = wssUrl,
                             http = http,
                             onTransportLost = onTransportLost
@@ -896,7 +896,7 @@ class OpenVpn3Service : VpnService() {
                     VpnLinkProtocol.TCP -> {
                         val bridge = TcpToWssBridge(
                             service = this@OpenVpn3Service,
-                            port = 0,
+                            port = port,
                             wssUrl = wssUrl,
                             http = http,
                             onTransportLost = onTransportLost
@@ -906,27 +906,40 @@ class OpenVpn3Service : VpnService() {
                         dynamicPort
                     }
                 }
+                Log.d(
+                    TAG,
+                    "Bridge bound on 127.0.0.1:$boundPort " +
+                        "(requested=$port attempt=${index + 1}/${candidates.size} protocol=$linkProtocol)"
+                )
+                return boundPort
             } catch (t: Throwable) {
                 lastError = t
-                if (t is BindException) {
+                bridgeStop?.invoke()
+                bridgeStop = null
+                if (LocalBridgePortPool.isBindConflict(t)) {
                     val reason = parseBindReason(t)
-                    Log.w(TAG, "Bridge bind failed (attempt=$attempt/$maxAttempts): $reason", t)
+                    Log.w(
+                        TAG,
+                        "Bridge bind failed on port=$port (attempt=${index + 1}/${candidates.size}): $reason",
+                        t
+                    )
                     crashLogger.logNonFatal(
                         tag = "OpenVpn3Service.bridge_bind_failed",
                         throwable = t,
                         extras = mapOf(
-                            "attempt" to attempt.toString(),
-                            "max_attempts" to maxAttempts.toString(),
+                            "attempt" to (index + 1).toString(),
+                            "max_attempts" to candidates.size.toString(),
+                            "requested_port" to port.toString(),
                             "bind_reason" to reason,
                             "link_protocol" to linkProtocol.name
                         )
                     )
-                    if (attempt < maxAttempts) continue
+                    continue
                 }
                 throw t
             }
         }
-        throw lastError ?: IllegalStateException("Bridge failed to start")
+        throw lastError ?: IllegalStateException("No free local bridge port in pool")
     }
 
     private fun parseBindReason(t: Throwable): String {
