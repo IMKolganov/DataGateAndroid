@@ -28,6 +28,9 @@ set(LZ4_LIBRARY "${LZ4_ROOT}/lib/liblz4.a")
 
 set(FMT_INCLUDE_DIR "${O3_DIR}/external/fmt/include")
 set(ASIO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/asio/asio/include")
+
+# Override upstream openvpn/common/version.hpp default (IV_VER sent to server).
+set(DATAGATE_OPENVPN_VERSION "3.12_datagate_android_1.0.8" CACHE STRING "OpenVPN IV_VER string")
 # =========================================
 
 # Collect core sources (client + core), then exclude platform-specific agents
@@ -64,6 +67,7 @@ target_compile_definitions(ovpn3-core PRIVATE
         USE_ASIO
         HAVE_LZ4
         USE_OPENSSL
+        "OPENVPN_VERSION=\"${DATAGATE_OPENVPN_VERSION}\""
 )
 
 # JNI shared library loaded from Java/Kotlin (wraps ovpn3-core)
