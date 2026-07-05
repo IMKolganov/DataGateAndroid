@@ -9,6 +9,7 @@ import com.imkolganov.datagate.json.optStringOrNull
 import com.imkolganov.datagate.json.parseBackendApiEnvelopeOrThrow
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
+import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeRequest
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeResponse
 import executeSuspending
 import okhttp3.MediaType.Companion.toMediaType
@@ -43,11 +44,14 @@ class FreeTierApi(
         }
     }
 
-    suspend fun requestAccountLinkCode(): ApiResponse<RequestTelegramAccountLinkCodeResponse> {
+    suspend fun requestAccountLinkCode(
+        request: RequestTelegramAccountLinkCodeRequest,
+    ): ApiResponse<RequestTelegramAccountLinkCodeResponse> {
         val url = baseUrl.trimEnd('/') + ApiConfig.TELEGRAM_REQUEST_ACCOUNT_LINK_CODE_PATH
+        val bodyJson = buildAccountLinkCodeRequestBody(request.telegramId)
         val req = Request.Builder()
             .url(url)
-            .post("{}".toRequestBody(jsonMediaType))
+            .post(bodyJson.toRequestBody(jsonMediaType))
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .build()
@@ -61,6 +65,9 @@ class FreeTierApi(
             return parseAccountLinkCodeResponse(body)
         }
     }
+
+    internal fun buildAccountLinkCodeRequestBody(telegramId: Long): String =
+        JSONObject().apply { put("telegramId", telegramId) }.toString()
 
     internal fun parseAccessStatusResponse(body: String): ApiResponse<FreeTierAccessStatusResponse> {
         val root = JSONObject(body)

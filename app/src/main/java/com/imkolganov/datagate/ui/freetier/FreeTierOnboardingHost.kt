@@ -4,13 +4,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -23,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.LocalActivity
 import androidx.lifecycle.Lifecycle
@@ -43,6 +47,8 @@ import com.imkolganov.datagate.freetier.isFreeTierLinkCodeExpired
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnResume
 import com.imkolganov.datagate.freetier.telegramChannelUrl
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
+import com.imkolganov.datagate.freetier.parseTelegramUserId
+import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeRequest
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeResponse
 import com.imkolganov.datagate.update.ApkUpdateInstaller
 import com.imkolganov.datagate.util.deepMessageForApiError
@@ -75,6 +81,7 @@ fun FreeTierOnboardingHost(
     var statusLoading by remember { mutableStateOf(false) }
     var linkCodeLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var telegramIdInput by remember { mutableStateOf("") }
 
     var lastStatusFetchMs by remember { mutableLongStateOf(0L) }
     var refreshOnNextResume by remember { mutableStateOf(false) }
@@ -149,6 +156,12 @@ fun FreeTierOnboardingHost(
             statusErrorVisible = false
             return@LaunchedEffect
         }
+        fetchStatus()
+    }
+
+    val statusRefreshNonce by FreeTierComplianceController.statusRefreshNonce.collectAsState()
+    LaunchedEffect(statusRefreshNonce) {
+        if (adminTotpGate != AdminTotpGate.Allowed || statusRefreshNonce == 0) return@LaunchedEffect
         fetchStatus()
     }
 
@@ -259,6 +272,28 @@ fun FreeTierOnboardingHost(
                     style = MaterialTheme.typography.bodyMedium
                 )
 
+                if (copyMode == FreeTierOnboardingCopyMode.LinkAccount && linkCode == null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = telegramIdInput,
+                        onValueChange = {
+                            telegramIdInput = it
+                            errorMessage = null
+                        },
+                        label = { Text(stringResource(R.string.free_tier_telegram_id_label)) },
+                        supportingText = { Text(stringResource(R.string.free_tier_telegram_id_hint)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.free_tier_register_bot_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
                 linkCode?.let { code ->
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -335,12 +370,25 @@ fun FreeTierOnboardingHost(
                     TextButton(
                         enabled = !linkCodeLoading && !statusLoading,
                         onClick = {
+                            val telegramId = parseTelegramUserId(telegramIdInput)
+                            if (telegramId == null) {
+                                errorMessage = appContext.getString(
+                                    if (telegramIdInput.isBlank()) {
+                                        R.string.free_tier_telegram_id_required
+                                    } else {
+                                        R.string.free_tier_telegram_id_invalid
+                                    }
+                                )
+                                return@TextButton
+                            }
                             scope.launch {
                                 linkCodeLoading = true
                                 errorMessage = null
                                 try {
                                     val response = withContext(Dispatchers.IO) {
-                                        freeTierApi.requestAccountLinkCode()
+                                        freeTierApi.requestAccountLinkCode(
+                                            RequestTelegramAccountLinkCodeRequest(telegramId = telegramId)
+                                        )
                                     }
                                     if (response.success) {
                                         val data = response.data

@@ -406,4 +406,10 @@ Tista’ tiftaħ il-paġna tar-rilaxx jew tniżżel l-APK.</string>
     <string name="free_tier_link_code_failed">Ma setax jitlesta talba għal kodiċi ta\' link.</string>
     <string name="free_tier_status_error_title">Ma setax jiġi verifikat l-aċċess</string>
     <string name="free_tier_status_check_failed">Ma setax jiġi verifikat l-aċċess għal pjan Free. Iċċekkja l-konnessioni u erġa\' pprova.</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
+
 </resources>

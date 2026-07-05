@@ -163,4 +163,19 @@ class FreeTierOnboardingRulesTest {
     fun isFreeTierLinkCodeExpired_falseWhenNotStarted() {
         assertFalse(isFreeTierLinkCodeExpired(expiresAtMs = 0L, nowMs = 1_000L))
     }
+
+    @Test
+    fun parseTelegramUserId_acceptsPositiveNumericId() {
+        assertEquals(123456789L, parseTelegramUserId("123456789"))
+        assertEquals(123456789L, parseTelegramUserId(" 123456789 "))
+    }
+
+    @Test
+    fun parseTelegramUserId_rejectsBlankOrInvalid() {
+        assertEquals(null, parseTelegramUserId(""))
+        assertEquals(null, parseTelegramUserId("   "))
+        assertEquals(null, parseTelegramUserId("abc"))
+        assertEquals(null, parseTelegramUserId("0"))
+        assertEquals(null, parseTelegramUserId("-1"))
+    }
 }

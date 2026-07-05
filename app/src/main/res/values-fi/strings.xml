@@ -388,4 +388,10 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="free_tier_link_code_failed">Linkityskoodia ei voitu pyytää.</string>
     <string name="free_tier_status_error_title">Käyttöoikeutta ei voitu tarkistaa</string>
     <string name="free_tier_status_check_failed">Free-sopimuksen käyttöoikeutta ei voitu vahvistaa. Tarkista yhteys ja yritä uudelleen.</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
+
 </resources>

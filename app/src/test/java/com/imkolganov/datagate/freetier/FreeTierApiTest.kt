@@ -156,6 +156,14 @@ class FreeTierApiTest {
         assertEquals(900, data.expiresInSeconds)
     }
 
+    @Test
+    fun buildAccountLinkCodeRequestBody_includesTelegramId() {
+        assertEquals(
+            """{"telegramId":123456789}""",
+            api.buildAccountLinkCodeRequestBody(123456789L)
+        )
+    }
+
     @Test(expected = java.io.IOException::class)
     fun parseAccountLinkCodeResponse_throwsWhenSuccessFalse() {
         api.parseAccountLinkCodeResponse(
