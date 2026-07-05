@@ -11,7 +11,7 @@ class OpenVpnServersRepository(
 ) {
     suspend fun listServersWithStatus(): List<OpenVpnServerWithStatusV2Item> {
         val response = withContext(Dispatchers.IO) {
-            api.getOpenVpnServersWithStatusV2()
+            api.getOpenVpnServersWithStatusV3()
         }
 
         if (!response.success) {

@@ -8,7 +8,7 @@
 
 package net.openvpn.ovpn3;
 
-public class ClientAPI_OpenVPNClient extends ClientAPI_TunBuilderBase {
+public class ClientAPI_OpenVPNClient extends ClientAPI_TunBuilderBase implements LogReceiverSwigInterface {
   private transient long swigCPtr;
 
   protected ClientAPI_OpenVPNClient(long cPtr, boolean cMemoryOwn) {
@@ -46,6 +46,10 @@ public class ClientAPI_OpenVPNClient extends ClientAPI_TunBuilderBase {
       swigCPtr = 0;
     }
     super.delete();
+  }
+
+  public long LogReceiverSwigInterface_GetInterfaceCPtr() {
+    return ovpncliJNI.ClientAPI_OpenVPNClient_LogReceiverSwigInterface_GetInterfaceCPtr(swigCPtr);
   }
 
   protected void swigDirectorDisconnect() {

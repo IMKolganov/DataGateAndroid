@@ -24,10 +24,12 @@ import com.imkolganov.datagate.logger.CrashLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
+import java.util.concurrent.ExecutorService
 import net.openvpn.ovpn3.ClientAPI_Config
 import net.openvpn.ovpn3.ClientAPI_EvalConfig
 import net.openvpn.ovpn3.ClientAPI_ProvideCreds
@@ -93,6 +95,7 @@ class OpenVpn3Service : VpnService() {
         data class CoreEvent(val name: String, val info: String) : VpnCommand
         data class NetworkChanged(val source: String, val transport: String) : VpnCommand
         data class RetryConnect(val reason: String) : VpnCommand
+        data class BridgeTransportLost(val reason: String) : VpnCommand
         object Disconnect : VpnCommand
         object QueryStatus : VpnCommand
         object Pause : VpnCommand
@@ -126,6 +129,8 @@ class OpenVpn3Service : VpnService() {
     private var sessionServerDisplayName: String? = null
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
+    private val ovpnNativeExecutor: ExecutorService = OvpnNativeThread.createExecutorService()
+    private val ovpnNativeDispatcher = ovpnNativeExecutor.asCoroutineDispatcher()
     private val commandQueue = Channel<VpnCommand>(Channel.UNLIMITED)
     private var commandProcessorJob: Job? = null
     private var runtimeState: VpnRuntimeState = VpnRuntimeState.IDLE
@@ -133,6 +138,7 @@ class OpenVpn3Service : VpnService() {
     private var pendingConnectRequest: PendingConnectRequest? = null
     private var networkAvailable = true
     private var lastReconnectAttemptAtMs: Long = 0L
+    @Volatile private var reconnectPendingAfterJob = false
     private var isNetworkCallbackRegistered = false
 
     private var vpnClient: OpenVpn3Client? = null
@@ -184,6 +190,7 @@ class OpenVpn3Service : VpnService() {
         commandProcessorJob = null
         unregisterNetworkCallbackSafely()
         stopVpnInternal()
+        ovpnNativeExecutor.shutdown()
         super.onDestroy()
     }
 
@@ -356,6 +363,7 @@ class OpenVpn3Service : VpnService() {
             is VpnCommand.CoreEvent -> processCoreEvent(command.name, command.info)
             is VpnCommand.NetworkChanged -> processNetworkChanged(command.source, command.transport)
             is VpnCommand.RetryConnect -> startPendingConnectIfPossible(command.reason, enforceBackoff = true)
+            is VpnCommand.BridgeTransportLost -> processBridgeTransportLost(command.reason)
             VpnCommand.Disconnect -> processDisconnect()
             VpnCommand.QueryStatus -> processQueryStatus()
             VpnCommand.Pause -> processPause()
@@ -438,6 +446,7 @@ class OpenVpn3Service : VpnService() {
         }
 
         isStopping = true
+        reconnectPendingAfterJob = false
         stopVpnInternal()
         connectInProgress = false
         hasActiveSession = false
@@ -498,8 +507,10 @@ class OpenVpn3Service : VpnService() {
         connectInProgress = false
         transitionState(VpnRuntimeState.PAUSED, "pause_command")
         vpnClient?.let { client ->
-            runCatching { client.pause("user") }
-                .onFailure { Log.w(TAG, "client.pause() failed", it) }
+            serviceScope.launch(ovpnNativeDispatcher) {
+                runCatching { client.pause("user") }
+                    .onFailure { Log.w(TAG, "client.pause() failed", it) }
+            }
         }
         updateNotification(getString(R.string.vpn_status_paused))
         broadcastStatus("PAUSED", getString(R.string.vpn_msg_paused))
@@ -513,8 +524,10 @@ class OpenVpn3Service : VpnService() {
         isPaused = false
         val client = vpnClient
         if (client != null) {
-            runCatching { client.resume() }
-                .onFailure { Log.w(TAG, "client.resume() failed", it) }
+            serviceScope.launch(ovpnNativeDispatcher) {
+                runCatching { client.resume() }
+                    .onFailure { Log.w(TAG, "client.resume() failed", it) }
+            }
             transitionState(VpnRuntimeState.CONNECTING, "resume_command")
             connectInProgress = true
             updateNotification(getString(R.string.vpn_msg_resuming))
@@ -581,6 +594,38 @@ class OpenVpn3Service : VpnService() {
                     broadcastStatus(name, info)
                 }
             }
+        }
+    }
+
+    private fun processBridgeTransportLost(reason: String) {
+        if (!OpenVpnRuntimePolicy.shouldHandleBridgeTransportLost(
+                isStopping = isStopping,
+                desiredConnection = desiredConnection,
+                isPaused = isPaused,
+                hasActiveSession = hasActiveSession
+            )
+        ) {
+            Log.d(TAG, "bridge_transport_lost_ignored: $reason state=$runtimeState")
+            return
+        }
+
+        Log.w(TAG, "bridge_transport_lost: $reason state=$runtimeState")
+        hasActiveSession = false
+        reconnectPendingAfterJob = true
+
+        if (networkAvailable) {
+            transitionState(VpnRuntimeState.CONNECTING, "bridge_transport_lost")
+            updateNotification(getString(R.string.vpn_msg_reconnecting))
+            broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+        } else {
+            transitionState(VpnRuntimeState.WAITING_NETWORK, "bridge_transport_lost")
+            updateNotification("Waiting for network...")
+            broadcastStatus("WAITING_NETWORK", "Waiting for network...")
+        }
+
+        serviceScope.launch(ovpnNativeDispatcher) {
+            runCatching { vpnClient?.stop() }
+                .onFailure { Log.w(TAG, "client.stop() after bridge transport loss", it) }
         }
     }
 
@@ -749,7 +794,7 @@ class OpenVpn3Service : VpnService() {
     ) {
         stopVpnInternal()
 
-        vpnJob = serviceScope.launch {
+        vpnJob = serviceScope.launch(ovpnNativeDispatcher) {
             try {
                 val http = buildProtectedOkHttp(this@OpenVpn3Service)
                 bridgeHttp = http
@@ -815,8 +860,18 @@ class OpenVpn3Service : VpnService() {
             } finally {
                 connectInProgress = false
                 stopVpnInternal()
-                if (!desiredConnection || isStopping) {
-                    stopSelf()
+                val shouldReconnect = reconnectPendingAfterJob
+                reconnectPendingAfterJob = false
+                when {
+                    OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                        reconnectPendingAfterJob = shouldReconnect,
+                        desiredConnection = desiredConnection,
+                        isStopping = isStopping,
+                        isPaused = isPaused
+                    ) -> {
+                        commandQueue.trySend(VpnCommand.RetryConnect("bridge_transport_lost"))
+                    }
+                    !desiredConnection || isStopping -> stopSelf()
                 }
             }
         }
@@ -827,17 +882,22 @@ class OpenVpn3Service : VpnService() {
         wssUrl: String,
         linkProtocol: VpnLinkProtocol
     ): Int {
-        val maxAttempts = 2
+        val onTransportLost: (String) -> Unit = { reason ->
+            commandQueue.trySend(VpnCommand.BridgeTransportLost(reason))
+        }
+        val candidates = LocalBridgePortPool.candidatePorts(applicationContext)
         var lastError: Throwable? = null
-        for (attempt in 1..maxAttempts) {
+        var lastBindReason: String? = null
+        for ((index, port) in candidates.withIndex()) {
             try {
-                return when (linkProtocol) {
+                val boundPort = when (linkProtocol) {
                     VpnLinkProtocol.UDP -> {
                         val bridge = UdpToWssBridge(
                             service = this@OpenVpn3Service,
-                            port = 0,
+                            port = port,
                             wssUrl = wssUrl,
-                            http = http
+                            http = http,
+                            onTransportLost = onTransportLost
                         )
                         val dynamicPort = bridge.start()
                         bridgeStop = { bridge.stop() }
@@ -846,36 +906,51 @@ class OpenVpn3Service : VpnService() {
                     VpnLinkProtocol.TCP -> {
                         val bridge = TcpToWssBridge(
                             service = this@OpenVpn3Service,
-                            port = 0,
+                            port = port,
                             wssUrl = wssUrl,
-                            http = http
+                            http = http,
+                            onTransportLost = onTransportLost
                         )
                         val dynamicPort = bridge.start()
                         bridgeStop = { bridge.stop() }
                         dynamicPort
                     }
                 }
+                Log.d(
+                    TAG,
+                    "Bridge bound on 127.0.0.1:$boundPort " +
+                        "(requested=$port attempt=${index + 1}/${candidates.size} protocol=$linkProtocol)"
+                )
+                return boundPort
             } catch (t: Throwable) {
                 lastError = t
-                if (t is BindException) {
+                bridgeStop?.invoke()
+                bridgeStop = null
+                if (LocalBridgePortPool.isBindConflict(t)) {
                     val reason = parseBindReason(t)
-                    Log.w(TAG, "Bridge bind failed (attempt=$attempt/$maxAttempts): $reason", t)
-                    crashLogger.logNonFatal(
-                        tag = "OpenVpn3Service.bridge_bind_failed",
-                        throwable = t,
-                        extras = mapOf(
-                            "attempt" to attempt.toString(),
-                            "max_attempts" to maxAttempts.toString(),
-                            "bind_reason" to reason,
-                            "link_protocol" to linkProtocol.name
-                        )
+                    lastBindReason = reason
+                    Log.w(
+                        TAG,
+                        "Bridge bind failed on port=$port (attempt=${index + 1}/${candidates.size}): $reason",
+                        t
                     )
-                    if (attempt < maxAttempts) continue
+                    continue
                 }
                 throw t
             }
         }
-        throw lastError ?: IllegalStateException("Bridge failed to start")
+        lastError?.let { error ->
+            crashLogger.logNonFatal(
+                tag = "OpenVpn3Service.bridge_bind_failed",
+                throwable = error,
+                extras = mapOf(
+                    "attempts" to candidates.size.toString(),
+                    "bind_reason" to (lastBindReason ?: parseBindReason(error)),
+                    "link_protocol" to linkProtocol.name
+                )
+            )
+        }
+        throw lastError ?: IllegalStateException("No free local bridge port in pool")
     }
 
     private fun parseBindReason(t: Throwable): String {
@@ -887,21 +962,32 @@ class OpenVpn3Service : VpnService() {
         }
     }
 
+    private fun invokeOnOvpnNative(block: () -> Unit) {
+        if (OvpnNativeThread.runsOnNativeThread()) {
+            block()
+        } else {
+            ovpnNativeExecutor.submit(block).get()
+        }
+    }
+
     private fun stopVpnInternal() {
         Log.d(TAG, "stopVpnInternal")
 
         vpnJob?.cancel()
         vpnJob = null
 
-        vpnClient?.let {
-            try {
-                Log.d(TAG, "Calling client.stop()")
-                it.stop()
-            } catch (t: Throwable) {
-                Log.w(TAG, "client.stop() failed", t)
+        val client = vpnClient
+        vpnClient = null
+        if (client != null) {
+            invokeOnOvpnNative {
+                try {
+                    Log.d(TAG, "Calling client.stop()")
+                    client.stop()
+                } catch (t: Throwable) {
+                    Log.w(TAG, "client.stop() failed", t)
+                }
             }
         }
-        vpnClient = null
 
         try {
             bridgeStop?.invoke()
@@ -912,6 +998,7 @@ class OpenVpn3Service : VpnService() {
         try { bridgeHttp?.dispatcher?.executorService?.shutdown() } catch (_: Throwable) {}
         try { bridgeHttp?.connectionPool?.evictAll() } catch (_: Throwable) {}
         bridgeHttp = null
+        VpnTunnelSessionStore.clear(applicationContext)
     }
 
     private fun broadcastStatus(name: String, info: String, fromQuery: Boolean = false) {

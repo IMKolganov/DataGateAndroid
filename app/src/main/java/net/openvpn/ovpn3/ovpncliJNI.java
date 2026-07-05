@@ -416,11 +416,8 @@ public class ovpncliJNI {
   public final static native void ClientAPI_LogInfo_text_set(long jarg1, ClientAPI_LogInfo jarg1_, String jarg2);
   public final static native String ClientAPI_LogInfo_text_get(long jarg1, ClientAPI_LogInfo jarg1_);
   public final static native void delete_ClientAPI_LogInfo(long jarg1);
-  public final static native void LogReceiver_log(long jarg1, LogReceiver jarg1_, long jarg2, ClientAPI_LogInfo jarg2_);
+  public final static native void LogReceiver_log(long jarg1, LogReceiverSwigInterface jarg1_, long jarg2, ClientAPI_LogInfo jarg2_);
   public final static native void delete_LogReceiver(long jarg1);
-  public final static native long new_LogReceiver();
-  public final static native void LogReceiver_director_connect(LogReceiver obj, long cptr, boolean mem_own, boolean weak_global);
-  public final static native void LogReceiver_change_ownership(LogReceiver obj, long cptr, boolean take_or_release);
   public final static native void ClientAPI_InterfaceStats_bytesIn_set(long jarg1, ClientAPI_InterfaceStats jarg1_, long jarg2);
   public final static native long ClientAPI_InterfaceStats_bytesIn_get(long jarg1, ClientAPI_InterfaceStats jarg1_);
   public final static native void ClientAPI_InterfaceStats_packetsIn_set(long jarg1, ClientAPI_InterfaceStats jarg1_, long jarg2);
@@ -548,13 +545,12 @@ public class ovpncliJNI {
   public final static native void ClientAPI_OpenVPNClient_director_connect(ClientAPI_OpenVPNClient obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void ClientAPI_OpenVPNClient_change_ownership(ClientAPI_OpenVPNClient obj, long cptr, boolean take_or_release);
   public final static native long ClientAPI_Config_SWIGUpcast(long jarg1);
+  public final static native long LogReceiver_LogReceiverSwigInterface_GetInterfaceCPtr(long jarg1);
   public final static native long ClientAPI_ExternalPKICertRequest_SWIGUpcast(long jarg1);
   public final static native long ClientAPI_ExternalPKISignRequest_SWIGUpcast(long jarg1);
+  public final static native long ClientAPI_OpenVPNClient_LogReceiverSwigInterface_GetInterfaceCPtr(long jarg1);
   public final static native long ClientAPI_OpenVPNClient_SWIGUpcast(long jarg1);
 
-  public static void SwigDirector_LogReceiver_log(LogReceiver jself, long arg0) {
-    jself.log(new ClientAPI_LogInfo(arg0, false));
-  }
   public static boolean SwigDirector_ClientAPI_OpenVPNClient_tun_builder_new(ClientAPI_OpenVPNClient jself) {
     return jself.tun_builder_new();
   }

@@ -85,6 +85,8 @@ import com.imkolganov.datagate.vpn.IpListPreferences
 import com.imkolganov.datagate.vpn.IpListRoutesRepository
 import com.imkolganov.datagate.vpn.IpListStatus
 import com.imkolganov.datagate.vpn.IpListUpdateFrequency
+import com.imkolganov.datagate.vpn.LocalBridgePortPool
+import com.imkolganov.datagate.vpn.LocalBridgePortPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -120,6 +122,9 @@ fun SettingsScreen(
 
     var authInfo by remember { mutableStateOf(tokenStore.getAuthInfo()) }
     var cidrListsEnabledMain by remember { mutableStateOf(true) }
+    var bridgePoolStartText by remember { mutableStateOf(LocalBridgePortPool.DEFAULT_POOL_START.toString()) }
+    var bridgePoolEndText by remember { mutableStateOf(LocalBridgePortPool.DEFAULT_POOL_END.toString()) }
+    var bridgePortsSavedVisible by remember { mutableStateOf(false) }
 
     if (showIpListSettings) {
         IpListSettingsScreen(onBack = { showIpListSettings = false })
@@ -135,6 +140,11 @@ fun SettingsScreen(
         cidrListsEnabledMain = withContext(Dispatchers.IO) {
             IpListPreferences.getSettings(appCtx).cidrListsEnabled
         }
+        val bridgePorts = withContext(Dispatchers.IO) {
+            LocalBridgePortPreferences.getSettings(appCtx)
+        }
+        bridgePoolStartText = bridgePorts.poolStart.toString()
+        bridgePoolEndText = bridgePorts.poolEnd.toString()
     }
 
     LaunchedEffect(showIpListSettings) {
@@ -297,6 +307,45 @@ fun SettingsScreen(
                 }
             }
         }
+
+        LocalBridgePortSettingsCard(
+            poolStartText = bridgePoolStartText,
+            poolEndText = bridgePoolEndText,
+            savedMessageVisible = bridgePortsSavedVisible,
+            onPoolStartChange = {
+                bridgePoolStartText = it.filter(Char::isDigit).take(5)
+                bridgePortsSavedVisible = false
+            },
+            onPoolEndChange = {
+                bridgePoolEndText = it.filter(Char::isDigit).take(5)
+                bridgePortsSavedVisible = false
+            },
+            onSave = {
+                scope.launch {
+                    val start = bridgePoolStartText.toIntOrNull()
+                    val end = bridgePoolEndText.toIntOrNull()
+                    if (start == null || end == null || !LocalBridgePortPool.isValidInput(start, end)) {
+                        return@launch
+                    }
+                    val saved = withContext(Dispatchers.IO) {
+                        LocalBridgePortPreferences.saveSettings(context.applicationContext, start, end)
+                    }
+                    bridgePoolStartText = saved.poolStart.toString()
+                    bridgePoolEndText = saved.poolEnd.toString()
+                    bridgePortsSavedVisible = true
+                }
+            },
+            onReset = {
+                scope.launch {
+                    val defaults = withContext(Dispatchers.IO) {
+                        LocalBridgePortPreferences.resetToDefaults(context.applicationContext)
+                    }
+                    bridgePoolStartText = defaults.poolStart.toString()
+                    bridgePoolEndText = defaults.poolEnd.toString()
+                    bridgePortsSavedVisible = false
+                }
+            }
+        )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -896,6 +945,112 @@ private fun IpListSettingsScreen(
                         }
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocalBridgePortSettingsCard(
+    poolStartText: String,
+    poolEndText: String,
+    savedMessageVisible: Boolean,
+    onPoolStartChange: (String) -> Unit,
+    onPoolEndChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onReset: () -> Unit,
+) {
+    val poolStart = poolStartText.toIntOrNull()
+    val poolEnd = poolEndText.toIntOrNull()
+    val isValid = LocalBridgePortPool.isValidInput(poolStart, poolEnd)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = AppCards.shape,
+        colors = AppCards.defaultColors(),
+        elevation = AppCards.defaultElevation()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                stringResource(R.string.settings_bridge_ports_title),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                stringResource(R.string.settings_bridge_ports_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                stringResource(R.string.settings_bridge_ports_advanced_warning),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = poolStartText,
+                onValueChange = onPoolStartChange,
+                label = { Text(stringResource(R.string.settings_bridge_ports_start_label)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = poolStartText.isNotEmpty() && !isValid,
+                singleLine = true
+            )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = poolEndText,
+                onValueChange = onPoolEndChange,
+                label = { Text(stringResource(R.string.settings_bridge_ports_end_label)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = poolEndText.isNotEmpty() && !isValid,
+                supportingText = {
+                    Text(
+                        if (!isValid && poolStartText.isNotEmpty() && poolEndText.isNotEmpty()) {
+                            stringResource(
+                                R.string.settings_bridge_ports_error,
+                                LocalBridgePortPool.MIN_USER_PORT,
+                                LocalBridgePortPool.MAX_USER_PORT,
+                                LocalBridgePortPool.MIN_POOL_SPAN,
+                                LocalBridgePortPool.MAX_POOL_SPAN
+                            )
+                        } else {
+                            stringResource(
+                                R.string.settings_bridge_ports_hint,
+                                LocalBridgePortPool.DEFAULT_POOL_START,
+                                LocalBridgePortPool.DEFAULT_POOL_END,
+                                LocalBridgePortPool.MIN_USER_PORT,
+                                LocalBridgePortPool.MAX_USER_PORT,
+                                LocalBridgePortPool.MIN_POOL_SPAN,
+                                LocalBridgePortPool.MAX_POOL_SPAN
+                            )
+                        }
+                    )
+                },
+                singleLine = true
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onSave,
+                    enabled = isValid,
+                    modifier = Modifier.weight(1f),
+                    shape = AppCards.shape
+                ) {
+                    Text(stringResource(R.string.action_save))
+                }
+                TextButton(onClick = onReset, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.settings_bridge_ports_reset))
+                }
+            }
+            if (savedMessageVisible) {
+                Text(
+                    stringResource(R.string.settings_bridge_ports_saved),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

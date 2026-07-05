@@ -380,4 +380,47 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay nije podržan</string>
+    <string name="access_unsupported_server_type_dialog_title">Vrsta poslužitelja nije podržana</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Drugo</string>
+    <string name="vpn_requires_xray_client">Ova aplikacija se ne može spojiti na XRay poslužitelje. Poslužitelj: %1$s.\n\nKoristite drugi klijent.</string>
+    <string name="vpn_requires_unsupported_server_type">Ova aplikacija ne podržava ovu vrstu poslužitelja. Poslužitelj: %1$s.\n\nKoristite drugi klijent.</string>
+    <string name="free_tier_title_link">Povežite Telegram za VPN pristup</string>
+    <string name="free_tier_title_subscribe">Pretplatite se na Telegram kanal</string>
+    <string name="free_tier_body_link">Za VPN na Free ili Default planu:\n• Pretplatite se na %1$s\n• Ili povežite račun s DataGate Telegram botom</string>
+    <string name="free_tier_body_subscribe_only">Vaš Telegram račun je povezan, ali još morate pretplatiti %1$s za VPN konfiguracije od bota.</string>
+    <string name="free_tier_body_generic">Pretplatite se na %1$s ili povežite račun putem DataGate Telegram bota.</string>
+    <string name="free_tier_get_code">Dohvati kod za povezivanje</string>
+    <string name="free_tier_get_code_loading">Dohvaćanje koda…</string>
+    <string name="free_tier_open_channel">Otvori kanal</string>
+    <string name="free_tier_open_bot">Otvori bota</string>
+    <string name="free_tier_check_again">Provjeri ponovno</string>
+    <string name="free_tier_check_again_loading">Provjera…</string>
+    <string name="free_tier_close">Zatvori</string>
+    <string name="free_tier_code_expires">Istječe za %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Otvorite DataGate Telegram bot</string>
+    <string name="free_tier_code_instruction_2">2. Pošaljite /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Ili pošaljite kod u privatnu poruku botu</string>
+    <string name="free_tier_link_code_failed">Nije moguće zatražiti kod za povezivanje.</string>
+    <string name="free_tier_status_error_title">Nije moguće provjeriti pristup</string>
+    <string name="free_tier_status_check_failed">Nije moguće provjeriti pristup Free planu. Provjerite vezu i pokušajte ponovno.</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
+
+
+    <string name="settings_bridge_ports_title">Local bridge ports</string>
+    <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
+    <string name="settings_bridge_ports_advanced_warning">Wrong values can stop VPN from connecting. Reconnect VPN after saving.</string>
+    <string name="settings_bridge_ports_start_label">Range start</string>
+    <string name="settings_bridge_ports_end_label">Range end</string>
+    <string name="settings_bridge_ports_hint">Default %1$d–%2$d. Allowed ports %3$d–%4$d, range size %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Enter start ≤ end, ports %1$d–%2$d, range size %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
+    <string name="settings_bridge_ports_reset">Reset to defaults</string>
+
 </resources>

@@ -383,4 +383,41 @@
     <string name="settings_ip_lists_update_failed_prefix">Ошибка обновления</string>
     <string name="settings_ip_lists_update_failed">Ошибка обновления: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Ошибка обновления: %1$s. Используется кешированный или встроенный список.</string>
+
+    <string name="free_tier_title_link">Подключите Telegram для доступа к VPN</string>
+    <string name="free_tier_title_subscribe">Подпишитесь на Telegram-канал</string>
+    <string name="free_tier_body_link">Чтобы использовать VPN на тарифе Free или Default:\n• Подпишитесь на %1$s\n• Или свяжите аккаунт с Telegram-ботом DataGate</string>
+    <string name="free_tier_body_subscribe_only">Telegram уже привязан, но для получения VPN-конфигов в боте нужно подписаться на %1$s.</string>
+    <string name="free_tier_body_generic">Подпишитесь на %1$s или свяжите аккаунт через Telegram-бот DataGate.</string>
+    <string name="free_tier_get_code">Получить код</string>
+    <string name="free_tier_get_code_loading">Получение кода…</string>
+    <string name="free_tier_open_channel">Открыть канал</string>
+    <string name="free_tier_open_bot">Открыть бота</string>
+    <string name="free_tier_check_again">Проверить снова</string>
+    <string name="free_tier_check_again_loading">Проверка…</string>
+    <string name="free_tier_close">Закрыть</string>
+    <string name="free_tier_code_expires">Истекает через %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Откройте Telegram-бот DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Отправьте /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Или отправьте код в личные сообщения боту</string>
+    <string name="free_tier_link_code_failed">Не удалось получить код связки.</string>
+    <string name="free_tier_status_error_title">Не удалось проверить доступ</string>
+    <string name="free_tier_status_check_failed">Не удалось проверить доступ по тарифу Free. Проверьте соединение и попробуйте снова.</string>
+    <string name="free_tier_telegram_id_label">ID пользователя Telegram</string>
+    <string name="free_tier_telegram_id_hint">Числовой ID Telegram-аккаунта, который введёт код в боте</string>
+    <string name="free_tier_telegram_id_required">Введите ваш Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Введите корректный числовой Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Откройте бота и отправьте /register при необходимости. Используйте тот же Telegram-аккаунт, который будет вводить код связки.</string>
+
+
+    <string name="settings_bridge_ports_title">Локальные порты моста</string>
+    <string name="settings_bridge_ports_subtitle">Только для опытных пользователей. Меняйте, только если VPN конфликтует с другими приложениями по портам localhost.</string>
+    <string name="settings_bridge_ports_advanced_warning">Неверные значения могут помешать подключению VPN. После сохранения переподключите VPN.</string>
+    <string name="settings_bridge_ports_start_label">Начало диапазона</string>
+    <string name="settings_bridge_ports_end_label">Конец диапазона</string>
+    <string name="settings_bridge_ports_hint">По умолчанию %1$d–%2$d. Допустимые порты %3$d–%4$d, размер диапазона %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Введите начало ≤ конец, порты %1$d–%2$d, размер диапазона %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Настройки портов сохранены. Переподключите VPN.</string>
+    <string name="settings_bridge_ports_reset">Сбросить по умолчанию</string>
+
 </resources>

@@ -22,7 +22,8 @@ class UdpToWssBridge(
     private val service: VpnService,
     private val port: Int,
     private val wssUrl: String,
-    private val http: okhttp3.OkHttpClient
+    private val http: okhttp3.OkHttpClient,
+    private val onTransportLost: ((reason: String) -> Unit)? = null
 ) {
     @Volatile
     private var running = false
@@ -31,11 +32,11 @@ class UdpToWssBridge(
 
     fun start(): Int {
         if (running) return socket?.localPort ?: port
-        running = true
 
         val ds = DatagramSocket(null)
         ds.reuseAddress = true
         ds.bind(InetSocketAddress("127.0.0.1", port))
+        running = true
         socket = ds
         protectDatagramSocket(service, ds)
         val actualPort = ds.localPort
@@ -83,6 +84,10 @@ class UdpToWssBridge(
         val queue = java.util.concurrent.LinkedBlockingQueue<okio.ByteString>()
         val wsHandshakeDone = CountDownLatch(1)
         val handshakeReleased = AtomicBoolean(false)
+        val transportLostNotified = AtomicBoolean(false)
+        fun notifyTransportLost(reason: String) {
+            BridgeTransportLoss.notifyOnce(transportLostNotified, onTransportLost, reason)
+        }
         fun releaseHandshake() {
             if (handshakeReleased.compareAndSet(false, true)) {
                 wsHandshakeDone.countDown()
@@ -109,6 +114,7 @@ class UdpToWssBridge(
                     response: okhttp3.Response?
                 ) {
                     releaseHandshake()
+                    notifyTransportLost(BridgeTransportLoss.formatFailureReason(t))
                     queue.offer(okio.ByteString.EMPTY)
                     try {
                         ds.close()
@@ -118,6 +124,7 @@ class UdpToWssBridge(
 
                 override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
                     releaseHandshake()
+                    notifyTransportLost(BridgeTransportLoss.formatClosedReason(code, reason))
                     queue.offer(okio.ByteString.EMPTY)
                     try {
                         ds.close()

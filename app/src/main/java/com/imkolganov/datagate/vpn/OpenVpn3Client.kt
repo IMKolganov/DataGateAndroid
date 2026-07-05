@@ -80,6 +80,9 @@ class OpenVpn3Client(
             "tun_builder_add_address($address/$prefix_length, gw=$gateway, ipv6=$ipv6, net30=$net30)"
         )
         return try {
+            if (!ipv6) {
+                VpnTunnelSessionStore.recordVpnIp(service.applicationContext, address)
+            }
             builder?.addAddress(address, prefix_length)
             true
         } catch (t: Throwable) {
@@ -210,6 +213,7 @@ class OpenVpn3Client(
         }
 
         Log.d(TAG, "Applied DNS servers: ${appliedServers.joinToString(", ")}")
+        VpnTunnelSessionStore.recordDnsServers(service.applicationContext, appliedServers)
     }
 
     override fun tun_builder_set_mtu(mtu: Int): Boolean {
@@ -333,6 +337,9 @@ class OpenVpn3Client(
 
     override fun tun_builder_teardown(disconnect: Boolean) {
         Log.d(TAG, "tun_builder_teardown(disconnect=$disconnect)")
+        if (disconnect) {
+            VpnTunnelSessionStore.clear(service.applicationContext)
+        }
         onTunChanged(null)
         builder = null
     }

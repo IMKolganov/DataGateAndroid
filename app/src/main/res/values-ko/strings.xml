@@ -362,4 +362,47 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay 미지원</string>
+    <string name="access_unsupported_server_type_dialog_title">지원하지 않는 서버 유형</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">기타</string>
+    <string name="vpn_requires_xray_client">이 앱은 XRay 서버에 연결할 수 없습니다. 서버: %1$s.\n\n다른 클라이언트를 사용하세요.</string>
+    <string name="vpn_requires_unsupported_server_type">이 앱은 이 서버 유형을 지원하지 않습니다. 서버: %1$s.\n\n다른 클라이언트를 사용하세요.</string>
+    <string name="free_tier_title_link">VPN 이용을 위해 Telegram 연결</string>
+    <string name="free_tier_title_subscribe">Telegram 채널 구독</string>
+    <string name="free_tier_body_link">Free 또는 Default 요금제에서 VPN을 사용하려면:\n• %1$s 구독\n• 또는 DataGate Telegram 봇과 계정 연결</string>
+    <string name="free_tier_body_subscribe_only">Telegram 계정은 연결되었지만, 봇에서 VPN 구성을 받으려면 %1$s 구독이 필요합니다.</string>
+    <string name="free_tier_body_generic">%1$s를 구독하거나 DataGate Telegram 봇으로 계정을 연결하세요.</string>
+    <string name="free_tier_get_code">연결 코드 받기</string>
+    <string name="free_tier_get_code_loading">코드 받는 중…</string>
+    <string name="free_tier_open_channel">채널 열기</string>
+    <string name="free_tier_open_bot">봇 열기</string>
+    <string name="free_tier_check_again">다시 확인</string>
+    <string name="free_tier_check_again_loading">확인 중…</string>
+    <string name="free_tier_close">닫기</string>
+    <string name="free_tier_code_expires">%1$s 후 만료</string>
+    <string name="free_tier_code_instruction_1">1. DataGate Telegram 봇 열기</string>
+    <string name="free_tier_code_instruction_2">2. /link_account %1$s 전송</string>
+    <string name="free_tier_code_instruction_3">또는 봇에게 코드를 DM으로 보내기</string>
+    <string name="free_tier_link_code_failed">연결 코드를 요청할 수 없습니다.</string>
+    <string name="free_tier_status_error_title">액세스를 확인할 수 없음</string>
+    <string name="free_tier_status_check_failed">Free 요금제 액세스를 확인할 수 없습니다. 연결을 확인하고 다시 시도하세요.</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
+
+
+    <string name="settings_bridge_ports_title">Local bridge ports</string>
+    <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
+    <string name="settings_bridge_ports_advanced_warning">Wrong values can stop VPN from connecting. Reconnect VPN after saving.</string>
+    <string name="settings_bridge_ports_start_label">Range start</string>
+    <string name="settings_bridge_ports_end_label">Range end</string>
+    <string name="settings_bridge_ports_hint">Default %1$d–%2$d. Allowed ports %3$d–%4$d, range size %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Enter start ≤ end, ports %1$d–%2$d, range size %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
+    <string name="settings_bridge_ports_reset">Reset to defaults</string>
+
 </resources>

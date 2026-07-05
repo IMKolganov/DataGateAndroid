@@ -362,4 +362,47 @@ Anda dapat membuka halaman rilis atau mengunduh APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay tidak didukung</string>
+    <string name="access_unsupported_server_type_dialog_title">Jenis server tidak didukung</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Lainnya</string>
+    <string name="vpn_requires_xray_client">Aplikasi ini tidak dapat terhubung ke server XRay. Server: %1$s.\n\nGunakan klien lain.</string>
+    <string name="vpn_requires_unsupported_server_type">Aplikasi ini tidak mendukung jenis server ini. Server: %1$s.\n\nGunakan klien lain.</string>
+    <string name="free_tier_title_link">Hubungkan Telegram untuk akses VPN</string>
+    <string name="free_tier_title_subscribe">Berlangganan saluran Telegram</string>
+    <string name="free_tier_body_link">Untuk VPN pada paket Free atau Default:\n• Berlangganan %1$s\n• Atau tautkan akun dengan bot Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">Akun Telegram Anda tertaut, tetapi Anda masih perlu berlangganan %1$s untuk mendapatkan konfigurasi VPN dari bot.</string>
+    <string name="free_tier_body_generic">Berlangganan %1$s atau tautkan akun melalui bot Telegram DataGate.</string>
+    <string name="free_tier_get_code">Dapatkan kode tautan</string>
+    <string name="free_tier_get_code_loading">Mengambil kode…</string>
+    <string name="free_tier_open_channel">Buka saluran</string>
+    <string name="free_tier_open_bot">Buka bot</string>
+    <string name="free_tier_check_again">Periksa lagi</string>
+    <string name="free_tier_check_again_loading">Memeriksa…</string>
+    <string name="free_tier_close">Tutup</string>
+    <string name="free_tier_code_expires">Kedaluwarsa dalam %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Buka bot Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Kirim /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Atau kirim kode lewat pesan pribadi ke bot</string>
+    <string name="free_tier_link_code_failed">Tidak dapat meminta kode tautan.</string>
+    <string name="free_tier_status_error_title">Tidak dapat memeriksa akses</string>
+    <string name="free_tier_status_check_failed">Tidak dapat memverifikasi akses paket Free. Periksa koneksi dan coba lagi.</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
+
+
+    <string name="settings_bridge_ports_title">Local bridge ports</string>
+    <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
+    <string name="settings_bridge_ports_advanced_warning">Wrong values can stop VPN from connecting. Reconnect VPN after saving.</string>
+    <string name="settings_bridge_ports_start_label">Range start</string>
+    <string name="settings_bridge_ports_end_label">Range end</string>
+    <string name="settings_bridge_ports_hint">Default %1$d–%2$d. Allowed ports %3$d–%4$d, range size %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Enter start ≤ end, ports %1$d–%2$d, range size %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
+    <string name="settings_bridge_ports_reset">Reset to defaults</string>
+
 </resources>

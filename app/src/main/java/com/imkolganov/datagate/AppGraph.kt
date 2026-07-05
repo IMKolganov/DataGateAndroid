@@ -11,6 +11,7 @@ import com.imkolganov.datagate.auth.http.OkHttpBackendAuthApi
 import com.imkolganov.datagate.configs.AuthConfig
 import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.quota.QuotaPlanApi
+import com.imkolganov.datagate.freetier.FreeTierApi
 import com.imkolganov.datagate.servers.OpenVpnServersApi
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
 import com.imkolganov.datagate.stats.StatsApiClient
@@ -48,6 +49,8 @@ class AppGraph(
         )
 
     val quotaPlanApi: QuotaPlanApi = QuotaPlanApi(http = httpAuth)
+
+    val freeTierApi: FreeTierApi = FreeTierApi(http = httpAuth)
 
     val ovpnApi: OvpnApiClient =
         OvpnApiClient(

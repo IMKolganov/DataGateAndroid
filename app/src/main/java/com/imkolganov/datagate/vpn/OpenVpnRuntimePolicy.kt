@@ -57,4 +57,26 @@ internal object OpenVpnRuntimePolicy {
             isConnectRequested &&
             !isVpnConnected
     }
+
+    /**
+     * WSS bridge loss is only actionable while the service still considers the tunnel up.
+     * Ignores teardown during pause/disconnect and pre-CONNECTED connect attempts.
+     */
+    fun shouldHandleBridgeTransportLost(
+        isStopping: Boolean,
+        desiredConnection: Boolean,
+        isPaused: Boolean,
+        hasActiveSession: Boolean
+    ): Boolean {
+        return !isStopping && desiredConnection && !isPaused && hasActiveSession
+    }
+
+    fun shouldReconnectAfterBridgeTransportLost(
+        reconnectPendingAfterJob: Boolean,
+        desiredConnection: Boolean,
+        isStopping: Boolean,
+        isPaused: Boolean
+    ): Boolean {
+        return reconnectPendingAfterJob && desiredConnection && !isStopping && !isPaused
+    }
 }
