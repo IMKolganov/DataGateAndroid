@@ -380,4 +380,30 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">Ní thacaítear le XRay</string>
+    <string name="access_unsupported_server_type_dialog_title">Ní thacaítear leis an gcineál freastalaí</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Eile</string>
+    <string name="vpn_requires_xray_client">Ní féidir leis an aip seo ceangal le freastalaithe XRay. Freastalaí: %1$s.\n\nÚsáid cliant eile le do thoil.</string>
+    <string name="vpn_requires_unsupported_server_type">Ní thacaíonn an aip seo leis an gcineál freastalaí seo. Freastalaí: %1$s.\n\nÚsáid cliant eile le do thoil.</string>
+    <string name="free_tier_title_link">Ceangail Telegram le haghaidh rochtana VPN</string>
+    <string name="free_tier_title_subscribe">Liostáil leis an gcainéal Telegram</string>
+    <string name="free_tier_body_link">Chun VPN a úsáid ar phlean Free nó Default:\n• Liostáil le %1$s\n• Nó ceangail do chuntas le bot Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">Tá do chuntas Telegram ceangailte, ach ní mór duit %1$s a liostáil fós chun cumraíochtaí VPN a fháil ón bot.</string>
+    <string name="free_tier_body_generic">Liostáil le %1$s nó ceangail do chuntas trí bot Telegram DataGate.</string>
+    <string name="free_tier_get_code">Faigh cód ceangail</string>
+    <string name="free_tier_get_code_loading">Ag fáil cód…</string>
+    <string name="free_tier_open_channel">Oscail cainéal</string>
+    <string name="free_tier_open_bot">Oscail bot</string>
+    <string name="free_tier_check_again">Seiceáil arís</string>
+    <string name="free_tier_check_again_loading">Ag seiceáil…</string>
+    <string name="free_tier_close">Dún</string>
+    <string name="free_tier_code_expires">Rachaidh in éag i %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Oscail bot Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Seol /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Nó seol an cód i dteachtaireacht phríobháideach chuig an bot</string>
+    <string name="free_tier_link_code_failed">Níorbh fhéidir cód ceangail a iarraidh.</string>
+    <string name="free_tier_status_error_title">Níorbh fhéidir rochtain a sheiceáil</string>
+    <string name="free_tier_status_check_failed">Níorbh fhéidir rochtain plean Free a fhíorú. Seiceáil an nasc agus bain triail eile as.</string>
 </resources>

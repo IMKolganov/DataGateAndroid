@@ -380,4 +380,30 @@ Du kan öppna versionssidan eller ladda ner APK:n.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay stöds inte</string>
+    <string name="access_unsupported_server_type_dialog_title">Servertyp stöds inte</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Annan</string>
+    <string name="vpn_requires_xray_client">Den här appen kan inte ansluta till XRay-servrar. Server: %1$s.\n\nAnvänd en annan klient.</string>
+    <string name="vpn_requires_unsupported_server_type">Den här appen stöder inte den här servertypen. Server: %1$s.\n\nAnvänd en annan klient.</string>
+    <string name="free_tier_title_link">Anslut Telegram för VPN-åtkomst</string>
+    <string name="free_tier_title_subscribe">Prenumerera på Telegram-kanalen</string>
+    <string name="free_tier_body_link">För VPN på Free- eller Default-abonnemang:\n• Prenumerera på %1$s\n• Eller länka ditt konto till DataGate Telegram-bot</string>
+    <string name="free_tier_body_subscribe_only">Ditt Telegram-konto är länkat, men du måste fortfarande prenumerera på %1$s för VPN-konfigurationer från boten.</string>
+    <string name="free_tier_body_generic">Prenumerera på %1$s eller länka ditt konto via DataGate Telegram-bot.</string>
+    <string name="free_tier_get_code">Hämta länkkod</string>
+    <string name="free_tier_get_code_loading">Hämtar kod…</string>
+    <string name="free_tier_open_channel">Öppna kanal</string>
+    <string name="free_tier_open_bot">Öppna bot</string>
+    <string name="free_tier_check_again">Kontrollera igen</string>
+    <string name="free_tier_check_again_loading">Kontrollerar…</string>
+    <string name="free_tier_close">Stäng</string>
+    <string name="free_tier_code_expires">Går ut om %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Öppna DataGate Telegram-bot</string>
+    <string name="free_tier_code_instruction_2">2. Skicka /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Eller skicka koden i ett privat meddelande till boten</string>
+    <string name="free_tier_link_code_failed">Kunde inte begära länkkod.</string>
+    <string name="free_tier_status_error_title">Kunde inte kontrollera åtkomst</string>
+    <string name="free_tier_status_check_failed">Kunde inte verifiera Free-abonnemangsåtkomst. Kontrollera anslutningen och försök igen.</string>
 </resources>

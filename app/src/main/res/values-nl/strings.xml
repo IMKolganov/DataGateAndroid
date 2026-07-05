@@ -362,4 +362,30 @@ Je kunt de releasepagina openen of de APK downloaden.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay niet ondersteund</string>
+    <string name="access_unsupported_server_type_dialog_title">Servertype niet ondersteund</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Anders</string>
+    <string name="vpn_requires_xray_client">Deze app kan geen verbinding maken met XRay-servers. Server: %1$s.\n\nGebruik een andere client.</string>
+    <string name="vpn_requires_unsupported_server_type">Deze app ondersteunt dit servertype niet. Server: %1$s.\n\nGebruik een andere client.</string>
+    <string name="free_tier_title_link">Koppel Telegram voor VPN-toegang</string>
+    <string name="free_tier_title_subscribe">Abonneer op het Telegram-kanaal</string>
+    <string name="free_tier_body_link">Voor VPN op het Free- of Default-abonnement:\n• Abonneer op %1$s\n• Of koppel uw account aan de DataGate Telegram-bot</string>
+    <string name="free_tier_body_subscribe_only">Uw Telegram-account is gekoppeld, maar u moet nog abonneren op %1$s om VPN-configs van de bot te krijgen.</string>
+    <string name="free_tier_body_generic">Abonneer op %1$s of koppel uw account via de DataGate Telegram-bot.</string>
+    <string name="free_tier_get_code">Koppelcode ophalen</string>
+    <string name="free_tier_get_code_loading">Code ophalen…</string>
+    <string name="free_tier_open_channel">Kanaal openen</string>
+    <string name="free_tier_open_bot">Bot openen</string>
+    <string name="free_tier_check_again">Opnieuw controleren</string>
+    <string name="free_tier_check_again_loading">Controleren…</string>
+    <string name="free_tier_close">Sluiten</string>
+    <string name="free_tier_code_expires">Verloopt over %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Open de DataGate Telegram-bot</string>
+    <string name="free_tier_code_instruction_2">2. Stuur /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Of stuur de code in een privébericht naar de bot</string>
+    <string name="free_tier_link_code_failed">Kon geen koppelcode opvragen.</string>
+    <string name="free_tier_status_error_title">Toegang kon niet worden gecontroleerd</string>
+    <string name="free_tier_status_check_failed">Free-abonnementtoegang kon niet worden geverifieerd. Controleer uw verbinding en probeer opnieuw.</string>
 </resources>

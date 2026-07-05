@@ -362,4 +362,30 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">不支援 XRay</string>
+    <string name="access_unsupported_server_type_dialog_title">不支援的伺服器類型</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">其他</string>
+    <string name="vpn_requires_xray_client">此應用程式無法連線至 XRay 伺服器。伺服器：%1$s。\n\n請使用其他用戶端。</string>
+    <string name="vpn_requires_unsupported_server_type">此應用程式不支援此伺服器類型。伺服器：%1$s。\n\n請使用其他用戶端。</string>
+    <string name="free_tier_title_link">連接 Telegram 以使用 VPN</string>
+    <string name="free_tier_title_subscribe">訂閱 Telegram 頻道</string>
+    <string name="free_tier_body_link">要在 Free 或 Default 方案使用 VPN：\n• 訂閱 %1$s\n• 或將帳號與 DataGate Telegram 機器人連結</string>
+    <string name="free_tier_body_subscribe_only">您的 Telegram 帳號已連結，但仍需訂閱 %1$s 才能從機器人取得 VPN 設定。</string>
+    <string name="free_tier_body_generic">訂閱 %1$s 或透過 DataGate Telegram 機器人連結帳號。</string>
+    <string name="free_tier_get_code">取得連結碼</string>
+    <string name="free_tier_get_code_loading">正在取得碼…</string>
+    <string name="free_tier_open_channel">開啟頻道</string>
+    <string name="free_tier_open_bot">開啟機器人</string>
+    <string name="free_tier_check_again">再次檢查</string>
+    <string name="free_tier_check_again_loading">正在檢查…</string>
+    <string name="free_tier_close">關閉</string>
+    <string name="free_tier_code_expires">%1$s 後到期</string>
+    <string name="free_tier_code_instruction_1">1. 開啟 DataGate Telegram 機器人</string>
+    <string name="free_tier_code_instruction_2">2. 傳送 /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">或將碼以私訊傳送給機器人</string>
+    <string name="free_tier_link_code_failed">無法請求連結碼。</string>
+    <string name="free_tier_status_error_title">無法檢查存取權</string>
+    <string name="free_tier_status_check_failed">無法驗證 Free 方案存取權。請檢查連線並重試。</string>
 </resources>

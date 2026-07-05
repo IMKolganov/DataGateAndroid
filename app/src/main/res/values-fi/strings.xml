@@ -362,4 +362,30 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay ei tuettu</string>
+    <string name="access_unsupported_server_type_dialog_title">Palvelintyyppiä ei tueta</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Muu</string>
+    <string name="vpn_requires_xray_client">Tämä sovellus ei voi yhdistää XRay-palvelimiin. Palvelin: %1$s.\n\nKäytä toista asiakasohjelmaa.</string>
+    <string name="vpn_requires_unsupported_server_type">Tämä sovellus ei tue tätä palvelintyyppiä. Palvelin: %1$s.\n\nKäytä toista asiakasohjelmaa.</string>
+    <string name="free_tier_title_link">Yhdistä Telegram VPN-käyttöä varten</string>
+    <string name="free_tier_title_subscribe">Tilaa Telegram-kanava</string>
+    <string name="free_tier_body_link">VPN Free- tai Default-sopimuksella:\n• Tilaa %1$s\n• Tai linkitä tili DataGate Telegram -botiin</string>
+    <string name="free_tier_body_subscribe_only">Telegram-tilisi on linkitetty, mutta sinun on vielä tilattava %1$s saadaksesi VPN-konfiguraatiot botilta.</string>
+    <string name="free_tier_body_generic">Tilaa %1$s tai linkitä tili DataGate Telegram -botin kautta.</string>
+    <string name="free_tier_get_code">Hae linkityskoodi</string>
+    <string name="free_tier_get_code_loading">Haetaan koodia…</string>
+    <string name="free_tier_open_channel">Avaa kanava</string>
+    <string name="free_tier_open_bot">Avaa botti</string>
+    <string name="free_tier_check_again">Tarkista uudelleen</string>
+    <string name="free_tier_check_again_loading">Tarkistetaan…</string>
+    <string name="free_tier_close">Sulje</string>
+    <string name="free_tier_code_expires">Vanhenee %1$s kuluttua</string>
+    <string name="free_tier_code_instruction_1">1. Avaa DataGate Telegram -botti</string>
+    <string name="free_tier_code_instruction_2">2. Lähetä /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Tai lähetä koodi yksityisviestinä botille</string>
+    <string name="free_tier_link_code_failed">Linkityskoodia ei voitu pyytää.</string>
+    <string name="free_tier_status_error_title">Käyttöoikeutta ei voitu tarkistaa</string>
+    <string name="free_tier_status_check_failed">Free-sopimuksen käyttöoikeutta ei voitu vahvistaa. Tarkista yhteys ja yritä uudelleen.</string>
 </resources>

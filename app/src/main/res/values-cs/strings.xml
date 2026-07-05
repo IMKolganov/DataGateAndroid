@@ -379,4 +379,30 @@ Můžete otevřít stránku vydání nebo stáhnout APK. Pomocí volby níže po
     <string name="settings_ip_lists_android_12_route_limit_hint">Doporučeno %1$d. Povoleno %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Zadejte hodnotu od %1$d do %2$d.</string>
     <string name="vpn_ip_list_ready_limited">Seznam IP adres připraven (%1$d tras; dosažen limit profilu)</string>
+
+    <string name="access_xray_dialog_title">XRay není podporován</string>
+    <string name="access_unsupported_server_type_dialog_title">Typ serveru není podporován</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Jiný</string>
+    <string name="vpn_requires_xray_client">Tato aplikace se nemůže připojit k serverům XRay. Server: %1$s.\n\nPoužijte jiného klienta.</string>
+    <string name="vpn_requires_unsupported_server_type">Tato aplikace nepodporuje tento typ serveru. Server: %1$s.\n\nPoužijte jiného klienta.</string>
+    <string name="free_tier_title_link">Propojte Telegram pro přístup k VPN</string>
+    <string name="free_tier_title_subscribe">Odebírejte Telegram kanál</string>
+    <string name="free_tier_body_link">Pro VPN na tarifu Free nebo Default:\n• Odebírejte %1$s\n• Nebo propojte účet s Telegram botem DataGate</string>
+    <string name="free_tier_body_subscribe_only">Váš Telegram účet je propojen, ale stále musíte odebírat %1$s, abyste získali VPN konfigurace od bota.</string>
+    <string name="free_tier_body_generic">Odebírejte %1$s nebo propojte účet přes Telegram bot DataGate.</string>
+    <string name="free_tier_get_code">Získat propojovací kód</string>
+    <string name="free_tier_get_code_loading">Získávání kódu…</string>
+    <string name="free_tier_open_channel">Otevřít kanál</string>
+    <string name="free_tier_open_bot">Otevřít bota</string>
+    <string name="free_tier_check_again">Zkontrolovat znovu</string>
+    <string name="free_tier_check_again_loading">Kontrola…</string>
+    <string name="free_tier_close">Zavřít</string>
+    <string name="free_tier_code_expires">Vyprší za %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Otevřete Telegram bot DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Odešlete /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Nebo odešlete kód v soukromé zprávě botovi</string>
+    <string name="free_tier_link_code_failed">Nepodařilo se vyžádat propojovací kód.</string>
+    <string name="free_tier_status_error_title">Nepodařilo se ověřit přístup</string>
+    <string name="free_tier_status_check_failed">Nepodařilo se ověřit přístup k tarifu Free. Zkontrolujte připojení a zkuste to znovu.</string>
 </resources>

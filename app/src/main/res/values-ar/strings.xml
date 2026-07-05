@@ -361,4 +361,30 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">موصى به %1$d. مسموح به %2$d-%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">أدخل قيمة من %1$d إلى %2$d.</string>
     <string name="vpn_ip_list_ready_limited">قائمة IP جاهزة (%1$d من المسارات؛ تم الوصول إلى الحد الأقصى للملف الشخصي)</string>
+
+    <string name="access_xray_dialog_title">XRay غير مدعوم</string>
+    <string name="access_unsupported_server_type_dialog_title">نوع الخادم غير مدعوم</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">آخر</string>
+    <string name="vpn_requires_xray_client">لا يمكن لهذا التطبيق الاتصال بخوادم XRay. الخادم: %1$s.\n\nيرجى استخدام عميل آخر.</string>
+    <string name="vpn_requires_unsupported_server_type">لا يدعم هذا التطبيق هذا النوع من الخوادم. الخادم: %1$s.\n\nيرجى استخدام عميل آخر.</string>
+    <string name="free_tier_title_link">اربط Telegram للوصول إلى VPN</string>
+    <string name="free_tier_title_subscribe">اشترك في قناة Telegram</string>
+    <string name="free_tier_body_link">لاستخدام VPN على خطة Free أو Default:\n• اشترك في %1$s\n• أو اربط حسابك ببوت Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">حساب Telegram مربوط، لكن ما زلت بحاجة للاشتراك في %1$s للحصول على إعدادات VPN من البوت.</string>
+    <string name="free_tier_body_generic">اشترك في %1$s أو اربط حسابك عبر بوت Telegram DataGate.</string>
+    <string name="free_tier_get_code">الحصول على رمز الربط</string>
+    <string name="free_tier_get_code_loading">جارٍ الحصول على الرمز…</string>
+    <string name="free_tier_open_channel">فتح القناة</string>
+    <string name="free_tier_open_bot">فتح البوت</string>
+    <string name="free_tier_check_again">تحقق مرة أخرى</string>
+    <string name="free_tier_check_again_loading">جارٍ التحقق…</string>
+    <string name="free_tier_close">إغلاق</string>
+    <string name="free_tier_code_expires">ينتهي خلال %1$s</string>
+    <string name="free_tier_code_instruction_1">1. افتح بوت Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. أرسل /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">أو أرسل الرمز في رسالة خاصة إلى البوت</string>
+    <string name="free_tier_link_code_failed">تعذر طلب رمز الربط.</string>
+    <string name="free_tier_status_error_title">تعذر التحقق من الوصول</string>
+    <string name="free_tier_status_check_failed">تعذر التحقق من الوصول لخطة Free. تحقق من الاتصال وحاول مرة أخرى.</string>
 </resources>

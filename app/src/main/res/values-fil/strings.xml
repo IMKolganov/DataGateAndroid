@@ -380,4 +380,30 @@ Maaari mong buksan ang release page o i-download ang APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">Hindi suportado ang XRay</string>
+    <string name="access_unsupported_server_type_dialog_title">Hindi suportado ang uri ng server</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Iba pa</string>
+    <string name="vpn_requires_xray_client">Hindi makakonekta ang app na ito sa mga XRay server. Server: %1$s.\n\nGumamit ng ibang client.</string>
+    <string name="vpn_requires_unsupported_server_type">Hindi sinusuportahan ng app na ito ang uri ng server na ito. Server: %1$s.\n\nGumamit ng ibang client.</string>
+    <string name="free_tier_title_link">Ikonekta ang Telegram para sa VPN access</string>
+    <string name="free_tier_title_subscribe">Mag-subscribe sa Telegram channel</string>
+    <string name="free_tier_body_link">Para gamitin ang VPN sa Free o Default plan:\n• Mag-subscribe sa %1$s\n• O i-link ang account sa DataGate Telegram bot</string>
+    <string name="free_tier_body_subscribe_only">Naka-link na ang Telegram account mo, pero kailangan mo pa ring mag-subscribe sa %1$s para makakuha ng VPN configs mula sa bot.</string>
+    <string name="free_tier_body_generic">Mag-subscribe sa %1$s o i-link ang account via DataGate Telegram bot.</string>
+    <string name="free_tier_get_code">Kunin ang link code</string>
+    <string name="free_tier_get_code_loading">Kinukuha ang code…</string>
+    <string name="free_tier_open_channel">Buksan ang channel</string>
+    <string name="free_tier_open_bot">Buksan ang bot</string>
+    <string name="free_tier_check_again">Suriin muli</string>
+    <string name="free_tier_check_again_loading">Sinusuri…</string>
+    <string name="free_tier_close">Isara</string>
+    <string name="free_tier_code_expires">Mag-e-expire sa %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Buksan ang DataGate Telegram bot</string>
+    <string name="free_tier_code_instruction_2">2. Ipadala ang /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">O ipadala ang code sa pribadong mensahe sa bot</string>
+    <string name="free_tier_link_code_failed">Hindi makahiling ng link code.</string>
+    <string name="free_tier_status_error_title">Hindi masuri ang access</string>
+    <string name="free_tier_status_check_failed">Hindi ma-verify ang Free plan access. Suriin ang koneksyon at subukang muli.</string>
 </resources>

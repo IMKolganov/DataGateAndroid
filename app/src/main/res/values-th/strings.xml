@@ -362,4 +362,30 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">ไม่รองรับ XRay</string>
+    <string name="access_unsupported_server_type_dialog_title">ไม่รองรับประเภทเซิร์ฟเวอร์นี้</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">อื่นๆ</string>
+    <string name="vpn_requires_xray_client">แอปนี้ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ XRay ได้ เซิร์ฟเวอร์: %1$s.\n\nโปรดใช้ไคลเอนต์อื่น</string>
+    <string name="vpn_requires_unsupported_server_type">แอปนี้ไม่รองรับประเภทเซิร์ฟเวอร์นี้ เซิร์ฟเวอร์: %1$s.\n\nโปรดใช้ไคลเอนต์อื่น</string>
+    <string name="free_tier_title_link">เชื่อม Telegram เพื่อใช้ VPN</string>
+    <string name="free_tier_title_subscribe">สมัครช่อง Telegram</string>
+    <string name="free_tier_body_link">เพื่อใช้ VPN ในแพ็ก Free หรือ Default:\n• สมัคร %1$s\n• หรือเชื่อมบัญชีกับบอท Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">บัญชี Telegram เชื่อมแล้ว แต่คุณยังต้องสมัคร %1$s เพื่อรับคอนฟิก VPN จากบอท</string>
+    <string name="free_tier_body_generic">สมัคร %1$s หรือเชื่อมบัญชีผ่านบอท Telegram DataGate</string>
+    <string name="free_tier_get_code">รับรหัสเชื่อม</string>
+    <string name="free_tier_get_code_loading">กำลังรับรหัส…</string>
+    <string name="free_tier_open_channel">เปิดช่อง</string>
+    <string name="free_tier_open_bot">เปิดบอท</string>
+    <string name="free_tier_check_again">ตรวจสอบอีกครั้ง</string>
+    <string name="free_tier_check_again_loading">กำลังตรวจสอบ…</string>
+    <string name="free_tier_close">ปิด</string>
+    <string name="free_tier_code_expires">หมดอายุใน %1$s</string>
+    <string name="free_tier_code_instruction_1">1. เปิดบอท Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. ส่ง /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">หรือส่งรหัสในข้อความส่วนตัวถึงบอท</string>
+    <string name="free_tier_link_code_failed">ไม่สามารถขอรหัสเชื่อมได้</string>
+    <string name="free_tier_status_error_title">ไม่สามารถตรวจสอบการเข้าถึงได้</string>
+    <string name="free_tier_status_check_failed">ไม่สามารถตรวจสอบการเข้าถึงแพ็ก Free ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง</string>
 </resources>

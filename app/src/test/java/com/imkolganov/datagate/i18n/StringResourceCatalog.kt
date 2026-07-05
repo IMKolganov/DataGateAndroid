@@ -40,7 +40,11 @@ fun buildLocaleStringCompletenessReports(resDir: File): List<LocaleStringComplet
     val requiredKeys = parseTranslatableStringResourceKeys(defaultXml)
     val allDefaultKeys = parseStringResourceKeys(defaultXml)
 
-    return resDir.listFiles { file -> file.isDirectory && file.name.startsWith("values-") }
+    return resDir.listFiles { file ->
+        file.isDirectory &&
+            file.name.startsWith("values-") &&
+            File(file, "strings.xml").isFile
+    }
         .orEmpty()
         .sortedBy { it.name }
         .map { localeDir ->

@@ -362,4 +362,30 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay não suportado</string>
+    <string name="access_unsupported_server_type_dialog_title">Tipo de servidor não suportado</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Outro</string>
+    <string name="vpn_requires_xray_client">Esta app não pode ligar-se a servidores XRay. Servidor: %1$s.\n\nUse outro cliente.</string>
+    <string name="vpn_requires_unsupported_server_type">Esta app não suporta este tipo de servidor. Servidor: %1$s.\n\nUse outro cliente.</string>
+    <string name="free_tier_title_link">Ligue o Telegram para aceder à VPN</string>
+    <string name="free_tier_title_subscribe">Subscreva o canal do Telegram</string>
+    <string name="free_tier_body_link">Para usar VPN no plano Free ou Default:\n• Subscreva %1$s\n• Ou associe a sua conta ao bot Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">A sua conta Telegram está associada, mas ainda precisa de subscrever %1$s para obter configs VPN do bot.</string>
+    <string name="free_tier_body_generic">Subscreva %1$s ou associe a sua conta via bot Telegram DataGate.</string>
+    <string name="free_tier_get_code">Obter código de ligação</string>
+    <string name="free_tier_get_code_loading">A obter código…</string>
+    <string name="free_tier_open_channel">Abrir canal</string>
+    <string name="free_tier_open_bot">Abrir bot</string>
+    <string name="free_tier_check_again">Verificar novamente</string>
+    <string name="free_tier_check_again_loading">A verificar…</string>
+    <string name="free_tier_close">Fechar</string>
+    <string name="free_tier_code_expires">Expira em %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Abra o bot Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Envie /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Ou envie o código numa mensagem privada ao bot</string>
+    <string name="free_tier_link_code_failed">Não foi possível pedir um código de ligação.</string>
+    <string name="free_tier_status_error_title">Não foi possível verificar o acesso</string>
+    <string name="free_tier_status_check_failed">Não foi possível verificar o acesso ao plano Free. Verifique a ligação e tente novamente.</string>
 </resources>

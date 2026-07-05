@@ -380,4 +380,30 @@ Võite avada väljalaske lehe või laadida APK alla.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay ei ole toetatud</string>
+    <string name="access_unsupported_server_type_dialog_title">Serveri tüüp pole toetatud</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Muu</string>
+    <string name="vpn_requires_xray_client">See rakendus ei saa ühenduda XRay serveritega. Server: %1$s.\n\nKasutage teist klienti.</string>
+    <string name="vpn_requires_unsupported_server_type">See rakendus ei toeta seda serveri tüüpi. Server: %1$s.\n\nKasutage teist klienti.</string>
+    <string name="free_tier_title_link">Ühenda Telegram VPN-i kasutamiseks</string>
+    <string name="free_tier_title_subscribe">Telli Telegrami kanal</string>
+    <string name="free_tier_body_link">VPN-i kasutamiseks Free või Default paketil:\n• Telli %1$s\n• Või seo konto DataGate Telegrami botiga</string>
+    <string name="free_tier_body_subscribe_only">Telegrami konto on seotud, kuid botist VPN-i konfiguratsioonide saamiseks pead ikka tellima %1$s.</string>
+    <string name="free_tier_body_generic">Telli %1$s või seo konto DataGate Telegrami boti kaudu.</string>
+    <string name="free_tier_get_code">Hangi seotuskood</string>
+    <string name="free_tier_get_code_loading">Koodi hankimine…</string>
+    <string name="free_tier_open_channel">Ava kanal</string>
+    <string name="free_tier_open_bot">Ava bot</string>
+    <string name="free_tier_check_again">Kontrolli uuesti</string>
+    <string name="free_tier_check_again_loading">Kontrollimine…</string>
+    <string name="free_tier_close">Sulge</string>
+    <string name="free_tier_code_expires">Aegub %1$s pärast</string>
+    <string name="free_tier_code_instruction_1">1. Ava DataGate Telegrami bot</string>
+    <string name="free_tier_code_instruction_2">2. Saada /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Või saada kood botile privaatsõnumina</string>
+    <string name="free_tier_link_code_failed">Seotuskoodi ei saanud taotleda.</string>
+    <string name="free_tier_status_error_title">Juurdepääsu kontroll ebaõnnestus</string>
+    <string name="free_tier_status_check_failed">Free paketi juurdepääsu ei saanud kontrollida. Kontrolli ühendust ja proovi uuesti.</string>
 </resources>

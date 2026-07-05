@@ -362,4 +362,30 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay समर्थित नहीं</string>
+    <string name="access_unsupported_server_type_dialog_title">सर्वर प्रकार समर्थित नहीं</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">अन्य</string>
+    <string name="vpn_requires_xray_client">यह ऐप XRay सर्वर से कनेक्ट नहीं हो सकता। सर्वर: %1$s.\n\nकृपया दूसरा क्लाइंट उपयोग करें।</string>
+    <string name="vpn_requires_unsupported_server_type">यह ऐप इस सर्वर प्रकार का समर्थन नहीं करता। सर्वर: %1$s.\n\nकृपया दूसरा क्लाइंट उपयोग करें।</string>
+    <string name="free_tier_title_link">VPN एक्सेस के लिए Telegram कनेक्ट करें</string>
+    <string name="free_tier_title_subscribe">Telegram चैनल सब्सक्राइब करें</string>
+    <string name="free_tier_body_link">Free या Default प्लान पर VPN उपयोग करने के लिए:\n• %1$s सब्सक्राइब करें\n• या DataGate Telegram बॉट से अकाउंट लिंक करें</string>
+    <string name="free_tier_body_subscribe_only">आपका Telegram अकाउंट लिंक है, लेकिन बॉट से VPN कॉन्फ़िग पाने के लिए %1$s सब्सक्राइब करना ज़रूरी है।</string>
+    <string name="free_tier_body_generic">%1$s सब्सक्राइब करें या DataGate Telegram बॉट से अकाउंट लिंक करें।</string>
+    <string name="free_tier_get_code">लिंक कोड प्राप्त करें</string>
+    <string name="free_tier_get_code_loading">कोड प्राप्त हो रहा है…</string>
+    <string name="free_tier_open_channel">चैनल खोलें</string>
+    <string name="free_tier_open_bot">बॉट खोलें</string>
+    <string name="free_tier_check_again">फिर से जाँचें</string>
+    <string name="free_tier_check_again_loading">जाँच हो रही है…</string>
+    <string name="free_tier_close">बंद करें</string>
+    <string name="free_tier_code_expires">%1$s में समाप्त</string>
+    <string name="free_tier_code_instruction_1">1. DataGate Telegram बॉट खोलें</string>
+    <string name="free_tier_code_instruction_2">2. /link_account %1$s भेजें</string>
+    <string name="free_tier_code_instruction_3">या बॉट को निजी संदेश में कोड भेजें</string>
+    <string name="free_tier_link_code_failed">लिंक कोड का अनुरोध नहीं हो सका।</string>
+    <string name="free_tier_status_error_title">एक्सेस जाँच नहीं हो सकी</string>
+    <string name="free_tier_status_check_failed">Free प्लान एक्सेस सत्यापित नहीं हो सका। कनेक्शन जाँचें और पुनः प्रयास करें।</string>
 </resources>

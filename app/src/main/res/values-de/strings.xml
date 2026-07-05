@@ -361,4 +361,30 @@ Sie können die Release-Seite öffnen oder die APK herunterladen. Mit der Option
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay wird nicht unterstützt</string>
+    <string name="access_unsupported_server_type_dialog_title">Servertyp wird nicht unterstützt</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Andere</string>
+    <string name="vpn_requires_xray_client">Diese App kann keine Verbindung zu XRay-Servern herstellen. Server: %1$s.\n\nBitte verwenden Sie einen anderen Client.</string>
+    <string name="vpn_requires_unsupported_server_type">Diese App unterstützt diesen Servertyp nicht. Server: %1$s.\n\nBitte verwenden Sie einen anderen Client.</string>
+    <string name="free_tier_title_link">Telegram für VPN-Zugang verbinden</string>
+    <string name="free_tier_title_subscribe">Telegram-Kanal abonnieren</string>
+    <string name="free_tier_body_link">Für VPN im Free- oder Default-Tarif:\n• Abonnieren Sie %1$s\n• Oder verknüpfen Sie Ihr Konto mit dem DataGate Telegram-Bot</string>
+    <string name="free_tier_body_subscribe_only">Ihr Telegram-Konto ist verknüpft, aber Sie müssen %1$s abonnieren, um VPN-Konfigurationen vom Bot zu erhalten.</string>
+    <string name="free_tier_body_generic">Abonnieren Sie %1$s oder verknüpfen Sie Ihr Konto über den DataGate Telegram-Bot.</string>
+    <string name="free_tier_get_code">Verknüpfungscode abrufen</string>
+    <string name="free_tier_get_code_loading">Code wird abgerufen…</string>
+    <string name="free_tier_open_channel">Kanal öffnen</string>
+    <string name="free_tier_open_bot">Bot öffnen</string>
+    <string name="free_tier_check_again">Erneut prüfen</string>
+    <string name="free_tier_check_again_loading">Wird geprüft…</string>
+    <string name="free_tier_close">Schließen</string>
+    <string name="free_tier_code_expires">Läuft ab in %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Öffnen Sie den DataGate Telegram-Bot</string>
+    <string name="free_tier_code_instruction_2">2. Senden Sie /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Oder senden Sie den Code als private Nachricht an den Bot</string>
+    <string name="free_tier_link_code_failed">Verknüpfungscode konnte nicht angefordert werden.</string>
+    <string name="free_tier_status_error_title">Zugriff konnte nicht geprüft werden</string>
+    <string name="free_tier_status_check_failed">Free-Tarif-Zugang konnte nicht geprüft werden. Prüfen Sie die Verbindung und versuchen Sie es erneut.</string>
 </resources>

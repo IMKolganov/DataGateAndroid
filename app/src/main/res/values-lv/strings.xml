@@ -380,4 +380,30 @@ Varat atvērt laidiena lapu vai lejupielādēt APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay netiek atbalstīts</string>
+    <string name="access_unsupported_server_type_dialog_title">Servera tips netiek atbalstīts</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Cits</string>
+    <string name="vpn_requires_xray_client">Šī lietotne nevar izveidot savienojumu ar XRay serveriem. Serveris: %1$s.\n\nLūdzu, izmantojiet citu klientu.</string>
+    <string name="vpn_requires_unsupported_server_type">Šī lietotne neatbalsta šo servera tipu. Serveris: %1$s.\n\nLūdzu, izmantojiet citu klientu.</string>
+    <string name="free_tier_title_link">Pievienojiet Telegram VPN piekļuvei</string>
+    <string name="free_tier_title_subscribe">Abonējiet Telegram kanālu</string>
+    <string name="free_tier_body_link">Lai izmantotu VPN ar Free vai Default plānu:\n• Abonējiet %1$s\n• Vai saistiet kontu ar DataGate Telegram botu</string>
+    <string name="free_tier_body_subscribe_only">Jūsu Telegram konts ir saistīts, bet joprojām jāabonē %1$s, lai saņemtu VPN konfigurācijas no bota.</string>
+    <string name="free_tier_body_generic">Abonējiet %1$s vai saistiet kontu, izmantojot DataGate Telegram botu.</string>
+    <string name="free_tier_get_code">Saņemt saistīšanas kodu</string>
+    <string name="free_tier_get_code_loading">Saņem kodu…</string>
+    <string name="free_tier_open_channel">Atvērt kanālu</string>
+    <string name="free_tier_open_bot">Atvērt botu</string>
+    <string name="free_tier_check_again">Pārbaudīt vēlreiz</string>
+    <string name="free_tier_check_again_loading">Pārbauda…</string>
+    <string name="free_tier_close">Aizvērt</string>
+    <string name="free_tier_code_expires">Beidzas pēc %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Atveriet DataGate Telegram botu</string>
+    <string name="free_tier_code_instruction_2">2. Nosūtiet /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Vai nosūtiet kodu privātā ziņā botam</string>
+    <string name="free_tier_link_code_failed">Neizdevās pieprasīt saistīšanas kodu.</string>
+    <string name="free_tier_status_error_title">Neizdevās pārbaudīt piekļuvi</string>
+    <string name="free_tier_status_check_failed">Neizdevās pārbaudīt Free plāna piekļuvi. Pārbaudiet savienojumu un mēģiniet vēlreiz.</string>
 </resources>

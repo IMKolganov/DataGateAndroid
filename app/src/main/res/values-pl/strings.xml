@@ -362,4 +362,30 @@ Możesz otworzyć stronę wydania lub pobrać APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay nie jest obsługiwany</string>
+    <string name="access_unsupported_server_type_dialog_title">Typ serwera nie jest obsługiwany</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Inny</string>
+    <string name="vpn_requires_xray_client">Ta aplikacja nie może łączyć się z serwerami XRay. Serwer: %1$s.\n\nUżyj innego klienta.</string>
+    <string name="vpn_requires_unsupported_server_type">Ta aplikacja nie obsługuje tego typu serwera. Serwer: %1$s.\n\nUżyj innego klienta.</string>
+    <string name="free_tier_title_link">Połącz Telegram, aby uzyskać dostęp do VPN</string>
+    <string name="free_tier_title_subscribe">Subskrybuj kanał Telegram</string>
+    <string name="free_tier_body_link">Aby korzystać z VPN w planie Free lub Default:\n• Subskrybuj %1$s\n• Lub połącz konto z botem Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">Twoje konto Telegram jest połączone, ale nadal musisz subskrybować %1$s, aby otrzymywać konfiguracje VPN z bota.</string>
+    <string name="free_tier_body_generic">Subskrybuj %1$s lub połącz konto przez bota Telegram DataGate.</string>
+    <string name="free_tier_get_code">Pobierz kod powiązania</string>
+    <string name="free_tier_get_code_loading">Pobieranie kodu…</string>
+    <string name="free_tier_open_channel">Otwórz kanał</string>
+    <string name="free_tier_open_bot">Otwórz bota</string>
+    <string name="free_tier_check_again">Sprawdź ponownie</string>
+    <string name="free_tier_check_again_loading">Sprawdzanie…</string>
+    <string name="free_tier_close">Zamknij</string>
+    <string name="free_tier_code_expires">Wygasa za %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Otwórz bota Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Wyślij /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Lub wyślij kod w prywatnej wiadomości do bota</string>
+    <string name="free_tier_link_code_failed">Nie udało się uzyskać kodu powiązania.</string>
+    <string name="free_tier_status_error_title">Nie udało się sprawdzić dostępu</string>
+    <string name="free_tier_status_check_failed">Nie udało się zweryfikować dostępu do planu Free. Sprawdź połączenie i spróbuj ponownie.</string>
 </resources>

@@ -380,4 +380,30 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">Az XRay nem támogatott</string>
+    <string name="access_unsupported_server_type_dialog_title">A szerver típusa nem támogatott</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Egyéb</string>
+    <string name="vpn_requires_xray_client">Ez az alkalmazás nem tud csatlakozni XRay szerverekhez. Szerver: %1$s.\n\nHasználjon másik klienst.</string>
+    <string name="vpn_requires_unsupported_server_type">Ez az alkalmazás nem támogatja ezt a szerver típust. Szerver: %1$s.\n\nHasználjon másik klienst.</string>
+    <string name="free_tier_title_link">Telegram csatlakoztatása VPN-hozzáféréshez</string>
+    <string name="free_tier_title_subscribe">Iratkozzon fel a Telegram csatornára</string>
+    <string name="free_tier_body_link">VPN használatához Free vagy Default csomaggal:\n• Iratkozzon fel: %1$s\n• Vagy kapcsolja össze fiókját a DataGate Telegram bottal</string>
+    <string name="free_tier_body_subscribe_only">A Telegram fiókja össze van kapcsolva, de továbbra is fel kell iratkoznia: %1$s, hogy VPN konfigurációkat kapjon a bottól.</string>
+    <string name="free_tier_body_generic">Iratkozzon fel: %1$s, vagy kapcsolja össze fiókját a DataGate Telegram boton keresztül.</string>
+    <string name="free_tier_get_code">Összekapcsoló kód kérése</string>
+    <string name="free_tier_get_code_loading">Kód kérése…</string>
+    <string name="free_tier_open_channel">Csatorna megnyitása</string>
+    <string name="free_tier_open_bot">Bot megnyitása</string>
+    <string name="free_tier_check_again">Ellenőrzés újra</string>
+    <string name="free_tier_check_again_loading">Ellenőrzés…</string>
+    <string name="free_tier_close">Bezárás</string>
+    <string name="free_tier_code_expires">Lejár: %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Nyissa meg a DataGate Telegram botot</string>
+    <string name="free_tier_code_instruction_2">2. Küldje el: /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Vagy küldje el a kódot privát üzenetben a botnak</string>
+    <string name="free_tier_link_code_failed">Az összekapcsoló kódot nem sikerült kérni.</string>
+    <string name="free_tier_status_error_title">A hozzáférés ellenőrzése sikertelen</string>
+    <string name="free_tier_status_check_failed">A Free csomag hozzáférését nem sikerült ellenőrizni. Ellenőrizze a kapcsolatot, és próbálja újra.</string>
 </resources>

@@ -379,4 +379,30 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">Препоръчва се %1$d. Разрешено %2$d-%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Въведете стойност от %1$d до %2$d.</string>
     <string name="vpn_ip_list_ready_limited">Списъкът с IP адреси е готов (%1$d маршрута; достигнат лимитът на профила)</string>
+
+    <string name="access_xray_dialog_title">XRay не се поддържа</string>
+    <string name="access_unsupported_server_type_dialog_title">Типът сървър не се поддържа</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Друг</string>
+    <string name="vpn_requires_xray_client">Това приложение не може да се свърже с XRay сървъри. Сървър: %1$s.\n\nМоля, използвайте друг клиент.</string>
+    <string name="vpn_requires_unsupported_server_type">Това приложение не поддържа този тип сървър. Сървър: %1$s.\n\nМоля, използвайте друг клиент.</string>
+    <string name="free_tier_title_link">Свържете Telegram за достъп до VPN</string>
+    <string name="free_tier_title_subscribe">Абонирайте се за Telegram канала</string>
+    <string name="free_tier_body_link">За VPN на план Free или Default:\n• Абонирайте се за %1$s\n• Или свържете акаунта с Telegram бота DataGate</string>
+    <string name="free_tier_body_subscribe_only">Telegram акаунтът е свързан, но все още трябва да се абонирате за %1$s, за да получавате VPN конфигурации от бота.</string>
+    <string name="free_tier_body_generic">Абонирайте се за %1$s или свържете акаунта чрез Telegram бота DataGate.</string>
+    <string name="free_tier_get_code">Вземете код за свързване</string>
+    <string name="free_tier_get_code_loading">Вземане на код…</string>
+    <string name="free_tier_open_channel">Отвори канала</string>
+    <string name="free_tier_open_bot">Отвори бота</string>
+    <string name="free_tier_check_again">Провери отново</string>
+    <string name="free_tier_check_again_loading">Проверяване…</string>
+    <string name="free_tier_close">Затвори</string>
+    <string name="free_tier_code_expires">Изтича след %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Отворете Telegram бота DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Изпратете /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Или изпратете кода в лично съобщение на бота</string>
+    <string name="free_tier_link_code_failed">Неуспешно заявяване на код за свързване.</string>
+    <string name="free_tier_status_error_title">Неуспешна проверка на достъпа</string>
+    <string name="free_tier_status_check_failed">Неуспешна проверка на достъпа до план Free. Проверете връзката и опитайте отново.</string>
 </resources>

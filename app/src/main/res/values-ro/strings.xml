@@ -380,4 +380,30 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay neacceptat</string>
+    <string name="access_unsupported_server_type_dialog_title">Tip de server neacceptat</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Altul</string>
+    <string name="vpn_requires_xray_client">Această aplicație nu se poate conecta la servere XRay. Server: %1$s.\n\nFolosiți un alt client.</string>
+    <string name="vpn_requires_unsupported_server_type">Această aplicație nu acceptă acest tip de server. Server: %1$s.\n\nFolosiți un alt client.</string>
+    <string name="free_tier_title_link">Conectați Telegram pentru acces VPN</string>
+    <string name="free_tier_title_subscribe">Abonați-vă la canalul Telegram</string>
+    <string name="free_tier_body_link">Pentru VPN pe planul Free sau Default:\n• Abonați-vă la %1$s\n• Sau conectați contul la botul Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">Contul Telegram este conectat, dar trebuie să vă abonați la %1$s pentru configs VPN de la bot.</string>
+    <string name="free_tier_body_generic">Abonați-vă la %1$s sau conectați contul prin botul Telegram DataGate.</string>
+    <string name="free_tier_get_code">Obține cod de legătură</string>
+    <string name="free_tier_get_code_loading">Se obține codul…</string>
+    <string name="free_tier_open_channel">Deschide canalul</string>
+    <string name="free_tier_open_bot">Deschide botul</string>
+    <string name="free_tier_check_again">Verifică din nou</string>
+    <string name="free_tier_check_again_loading">Se verifică…</string>
+    <string name="free_tier_close">Închide</string>
+    <string name="free_tier_code_expires">Expiră în %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Deschide botul Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Trimite /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Sau trimite codul într-un mesaj privat botului</string>
+    <string name="free_tier_link_code_failed">Nu s-a putut solicita codul de legătură.</string>
+    <string name="free_tier_status_error_title">Nu s-a putut verifica accesul</string>
+    <string name="free_tier_status_check_failed">Nu s-a putut verifica accesul la planul Free. Verificați conexiunea și încercați din nou.</string>
 </resources>

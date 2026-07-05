@@ -362,4 +362,30 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay 非対応</string>
+    <string name="access_unsupported_server_type_dialog_title">サーバータイプ非対応</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">その他</string>
+    <string name="vpn_requires_xray_client">このアプリは XRay サーバーに接続できません。サーバー: %1$s。\n\n別のクライアントをご利用ください。</string>
+    <string name="vpn_requires_unsupported_server_type">このアプリはこのサーバータイプに対応していません。サーバー: %1$s。\n\n別のクライアントをご利用ください。</string>
+    <string name="free_tier_title_link">VPN 利用のために Telegram を連携</string>
+    <string name="free_tier_title_subscribe">Telegram チャンネルを購読</string>
+    <string name="free_tier_body_link">Free または Default プランで VPN を利用するには:\n• %1$s を購読\n• または DataGate Telegram ボットとアカウントを連携</string>
+    <string name="free_tier_body_subscribe_only">Telegram アカウントは連携済みですが、ボットから VPN 設定を取得するには %1$s の購読が必要です。</string>
+    <string name="free_tier_body_generic">%1$s を購読するか、DataGate Telegram ボット経由でアカウントを連携してください。</string>
+    <string name="free_tier_get_code">連携コードを取得</string>
+    <string name="free_tier_get_code_loading">コード取得中…</string>
+    <string name="free_tier_open_channel">チャンネルを開く</string>
+    <string name="free_tier_open_bot">ボットを開く</string>
+    <string name="free_tier_check_again">再確認</string>
+    <string name="free_tier_check_again_loading">確認中…</string>
+    <string name="free_tier_close">閉じる</string>
+    <string name="free_tier_code_expires">有効期限: %1$s</string>
+    <string name="free_tier_code_instruction_1">1. DataGate Telegram ボットを開く</string>
+    <string name="free_tier_code_instruction_2">2. /link_account %1$s を送信</string>
+    <string name="free_tier_code_instruction_3">またはボットにコードを DM で送信</string>
+    <string name="free_tier_link_code_failed">連携コードを取得できませんでした。</string>
+    <string name="free_tier_status_error_title">アクセスを確認できませんでした</string>
+    <string name="free_tier_status_check_failed">Free プランのアクセスを確認できませんでした。接続を確認して再試行してください。</string>
 </resources>
