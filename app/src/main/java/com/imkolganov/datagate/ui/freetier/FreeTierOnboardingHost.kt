@@ -43,6 +43,8 @@ import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.freetier.isFreeTierLinkCodeExpired
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnPoll
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnResume
+import com.imkolganov.datagate.freetier.shouldShowTelegramVpnFirstHint
+import com.imkolganov.datagate.freetier.shouldWarnLinkCodeExpiringSoon
 import com.imkolganov.datagate.freetier.telegramChannelUrl
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeResponse
@@ -79,6 +81,7 @@ fun FreeTierOnboardingHost(
     var statusLoading by remember { mutableStateOf(false) }
     var linkCodeLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var linkCodeExpiredNotice by remember { mutableStateOf(false) }
 
     var lastStatusFetchMs by remember { mutableLongStateOf(0L) }
     var refreshOnNextResume by remember { mutableStateOf(false) }
@@ -103,6 +106,7 @@ fun FreeTierOnboardingHost(
                 codeExpiresAtMs = 0L
                 codeSecondsLeft = 0
                 errorMessage = null
+                linkCodeExpiredNotice = false
             }
             FreeTierStatusFetchOutcome.ShowOnboarding -> {
                 statusErrorVisible = false
@@ -204,6 +208,8 @@ fun FreeTierOnboardingHost(
             if (isFreeTierLinkCodeExpired(codeExpiresAtMs, now)) {
                 codeSecondsLeft = 0
                 linkCode = null
+                linkCodeExpiredNotice = true
+                codeExpiresAtMs = 0L
                 break
             }
             codeSecondsLeft = ((codeExpiresAtMs - now) / 1000L).toInt()
@@ -280,6 +286,24 @@ fun FreeTierOnboardingHost(
                     style = MaterialTheme.typography.bodyMedium
                 )
 
+                if (shouldShowTelegramVpnFirstHint(copyMode)) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.free_tier_telegram_blocked_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                if (linkCodeExpiredNotice && linkCode == null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.free_tier_code_expired),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+
                 linkCode?.let { code ->
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -302,18 +326,27 @@ fun FreeTierOnboardingHost(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                    if (shouldWarnLinkCodeExpiringSoon(codeSecondsLeft)) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(
+                                R.string.free_tier_code_expires_soon,
+                                formatCountdown(codeSecondsLeft)
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.free_tier_code_instruction_1),
+                        text = stringResource(R.string.free_tier_code_steps_with_vpn, code.code),
                         style = MaterialTheme.typography.bodySmall
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.free_tier_code_instruction_2, code.code),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = stringResource(R.string.free_tier_code_instruction_3),
-                        style = MaterialTheme.typography.bodySmall
+                        text = stringResource(R.string.free_tier_open_bot_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -359,6 +392,7 @@ fun FreeTierOnboardingHost(
                             scope.launch {
                                 linkCodeLoading = true
                                 errorMessage = null
+                                linkCodeExpiredNotice = false
                                 try {
                                     val response = withContext(Dispatchers.IO) {
                                         freeTierApi.requestAccountLinkCode()

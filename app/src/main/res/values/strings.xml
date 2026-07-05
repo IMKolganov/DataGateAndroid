@@ -287,6 +287,11 @@
     <string name="free_tier_link_code_failed">Could not request a link code.</string>
     <string name="free_tier_status_error_title">Could not check access</string>
     <string name="free_tier_status_check_failed">Could not verify Free plan access. Check your connection and try again.</string>
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_steps_with_vpn">1. Connect VPN in the Access tab\n2. Open the DataGate Telegram bot\n3. Send /link_account %1$s, or send the code in a private message to the bot</string>
+    <string name="free_tier_open_bot_hint">Connect VPN first if Telegram is blocked in your region.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
 
     <string name="update_dialog_title">New version %1$s</string>
     <string name="update_dialog_body">A newer build is available on GitHub. Latest release: %1$s. You have: %2$s.\n\nYou can open the release page or download the APK. Use the option below to keep suggesting updates for future releases.</string>

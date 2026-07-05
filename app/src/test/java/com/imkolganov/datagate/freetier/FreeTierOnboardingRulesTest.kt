@@ -180,4 +180,19 @@ class FreeTierOnboardingRulesTest {
     fun isFreeTierLinkCodeExpired_falseWhenNotStarted() {
         assertFalse(isFreeTierLinkCodeExpired(expiresAtMs = 0L, nowMs = 1_000L))
     }
+
+    @Test
+    fun shouldShowTelegramVpnFirstHint_trueForAllCopyModes() {
+        FreeTierOnboardingCopyMode.entries.forEach { mode ->
+            assertTrue(shouldShowTelegramVpnFirstHint(mode))
+        }
+    }
+
+    @Test
+    fun shouldWarnLinkCodeExpiringSoon_withinThreshold() {
+        assertTrue(shouldWarnLinkCodeExpiringSoon(secondsLeft = 300))
+        assertTrue(shouldWarnLinkCodeExpiringSoon(secondsLeft = 1))
+        assertFalse(shouldWarnLinkCodeExpiringSoon(secondsLeft = 301))
+        assertFalse(shouldWarnLinkCodeExpiringSoon(secondsLeft = 0))
+    }
 }
