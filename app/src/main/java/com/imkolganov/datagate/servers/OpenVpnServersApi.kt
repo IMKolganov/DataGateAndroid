@@ -15,6 +15,7 @@ import com.imkolganov.datagate.model.servers.OpenVpnServerV2Dto
 import com.imkolganov.datagate.model.servers.OpenVpnServerWithStatusV2Item
 import com.imkolganov.datagate.model.servers.OpenVpnServersWithStatusV2Data
 import com.imkolganov.datagate.model.servers.QuotaPlanGroupDto
+import com.imkolganov.datagate.model.servers.UserQuotaPlanContextDto
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -25,8 +26,8 @@ class OpenVpnServersApi(
     private val http: OkHttpClient,
     private val baseUrl: String = AuthConfig.BACKEND_BASE_URL
 ) {
-    fun getOpenVpnServersWithStatusV2(): ApiResponse<OpenVpnServersWithStatusV2Data> {
-        val url = baseUrl.trimEnd('/') + "/" + ApiConfig.API_OPEN_VPN_SERVERS_V2_GET_ALL_WITH_STATUS_PATH.trimStart('/')
+    fun getOpenVpnServersWithStatusV3(): ApiResponse<OpenVpnServersWithStatusV2Data> {
+        val url = baseUrl.trimEnd('/') + "/" + ApiConfig.API_OPEN_VPN_SERVERS_V3_GET_ALL_WITH_STATUS_PATH.trimStart('/')
 
         val req = Request.Builder()
             .url(url)
@@ -56,14 +57,45 @@ class OpenVpnServersApi(
         val arr = dataObj?.let { o ->
             o.optJSONArray("vpnServerWithStatuses")
                 ?: o.optJSONArray("VpnServerWithStatuses")
+                ?: o.optJSONArray("openVpnServerWithStatuses")
+                ?: o.optJSONArray("OpenVpnServerWithStatuses")
         } ?: JSONArray()
 
         val list = parseWithStatusItems(arr)
+        val userQuotaPlan = dataObj?.let { parseUserQuotaPlan(it) }
 
         return ApiResponse(
             success = success,
             message = message,
-            data = OpenVpnServersWithStatusV2Data(openVpnServerWithStatuses = list)
+            data = OpenVpnServersWithStatusV2Data(
+                openVpnServerWithStatuses = list,
+                userQuotaPlan = userQuotaPlan,
+            )
+        )
+    }
+
+    private fun parseUserQuotaPlan(dataObj: JSONObject): UserQuotaPlanContextDto? {
+        val o = dataObj.optJSONObject("userQuotaPlan")
+            ?: dataObj.optJSONObject("UserQuotaPlan")
+            ?: return null
+
+        val allowedArr = o.optJSONArray("allowedVpnServerIds")
+            ?: o.optJSONArray("AllowedVpnServerIds")
+        val allowedIds = allowedArr?.let { arr ->
+            ArrayList<Int>(arr.length()).apply {
+                for (i in 0 until arr.length()) {
+                    val id = arr.optInt(i, -1)
+                    if (id >= 0) add(id)
+                }
+            }
+        }
+
+        return UserQuotaPlanContextDto(
+            isPrivileged = o.optBoolean("isPrivileged", o.optBoolean("IsPrivileged", false)),
+            userQuotaPlanId = o.optIntOrNull("userQuotaPlanId") ?: o.optIntOrNull("UserQuotaPlanId"),
+            quotaPlanId = o.optIntOrNull("quotaPlanId") ?: o.optIntOrNull("QuotaPlanId"),
+            quotaPlanName = o.optStringOrNull("quotaPlanName") ?: o.optStringOrNull("QuotaPlanName"),
+            allowedVpnServerIds = allowedIds,
         )
     }
 
@@ -78,13 +110,23 @@ class OpenVpnServersApi(
     }
 
     private fun parseWithStatusItem(obj: JSONObject): OpenVpnServerWithStatusV2Item? {
-        val serverResponsesObj = obj.optJSONObject("vpnServerResponses")
+        val serverResponsesObj = obj.optJSONObject("openVpnServerResponses")
+            ?: obj.optJSONObject("OpenVpnServerResponses")
+            ?: obj.optJSONObject("vpnServerResponses")
             ?: obj.optJSONObject("VpnServerResponses")
-        val openVpnServerObj = serverResponsesObj?.optJSONObject("vpnServer")
+        val openVpnServerObj = serverResponsesObj?.optJSONObject("openVpnServer")
+            ?: serverResponsesObj?.optJSONObject("OpenVpnServer")
+            ?: serverResponsesObj?.optJSONObject("vpnServer")
             ?: serverResponsesObj?.optJSONObject("VpnServer")
+            ?: obj.optJSONObject("openVpnServer")
+            ?: obj.optJSONObject("OpenVpnServer")
+            ?: obj.optJSONObject("vpnServer")
+            ?: obj.optJSONObject("VpnServer")
         val server = openVpnServerObj?.let { parseServerV2(it) } ?: return null
 
-        val logObj = obj.optJSONObject("vpnServerStatusLogResponse")
+        val logObj = obj.optJSONObject("openVpnServerStatusLogResponse")
+            ?: obj.optJSONObject("OpenVpnServerStatusLogResponse")
+            ?: obj.optJSONObject("vpnServerStatusLogResponse")
             ?: obj.optJSONObject("VpnServerStatusLogResponse")
         val log = logObj?.let { parseStatusLog(it) }
 

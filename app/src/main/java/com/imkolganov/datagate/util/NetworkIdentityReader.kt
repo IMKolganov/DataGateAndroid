@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.LinkAddress
 import android.net.NetworkCapabilities
+import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
 import java.net.Inet4Address
 
 data class NetworkIdentitySnapshot(
@@ -15,6 +16,24 @@ data class NetworkIdentitySnapshot(
 object NetworkIdentityReader {
 
     fun read(context: Context): NetworkIdentitySnapshot {
+        val fromSession = VpnTunnelSessionStore.read(context)
+        return try {
+            mergeWithSession(readUnsafe(context), fromSession)
+        } catch (t: Throwable) {
+            if (isConnectivitySystemFailure(t)) fromSession
+            else throw t
+        }
+    }
+
+    internal fun mergeWithSession(
+        fromSystem: NetworkIdentitySnapshot,
+        fromSession: NetworkIdentitySnapshot
+    ): NetworkIdentitySnapshot = NetworkIdentitySnapshot(
+        vpnIpAddress = fromSystem.vpnIpAddress ?: fromSession.vpnIpAddress,
+        dnsServers = fromSystem.dnsServers.ifEmpty { fromSession.dnsServers }
+    )
+
+    private fun readUnsafe(context: Context): NetworkIdentitySnapshot {
         val cm = context.getSystemService(ConnectivityManager::class.java)
             ?: return NetworkIdentitySnapshot()
 
@@ -27,14 +46,22 @@ object NetworkIdentityReader {
     }
 
     private fun findVpnNetwork(cm: ConnectivityManager): android.net.Network? {
+        var fallback: android.net.Network? = null
         @Suppress("DEPRECATION")
         for (network in cm.allNetworks) {
             val caps = cm.getNetworkCapabilities(network) ?: continue
-            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+            if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
+            fallback = network
+            val props = cm.getLinkProperties(network) ?: continue
+            val hasTunnelIpv4 = props.linkAddresses.any { linkAddress ->
+                val host = linkAddress.address
+                host is Inet4Address && !host.isLoopbackAddress
+            }
+            if (hasTunnelIpv4) {
                 return network
             }
         }
-        return null
+        return fallback
     }
 
     private fun List<LinkAddress>.firstIpv4Host(): String? {
@@ -51,6 +78,23 @@ object NetworkIdentityReader {
 
     private fun formatHost(host: String?): String? =
         host?.trim()?.takeIf { it.isNotEmpty() }
+}
+
+/** True when ConnectivityManager is temporarily unavailable (VPN churn, system restart). */
+internal fun isConnectivitySystemFailure(t: Throwable): Boolean {
+    var cur: Throwable? = t
+    while (cur != null) {
+        when (cur) {
+            is SecurityException,
+            is IllegalStateException -> return true
+        }
+        when (cur.javaClass.name) {
+            "android.os.DeadSystemException",
+            "android.os.DeadSystemRuntimeException" -> return true
+        }
+        cur = cur.cause
+    }
+    return false
 }
 
 internal fun pickFirstIpv4HostAddress(addresses: Iterable<String>): String? {

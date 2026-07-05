@@ -75,6 +75,105 @@ class OpenVpnRuntimePolicyTest {
     }
 
     @Test
+    fun shouldHandleBridgeTransportLost_trueOnlyForActiveSession() {
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldHandleBridgeTransportLost(
+                isStopping = false,
+                desiredConnection = true,
+                isPaused = false,
+                hasActiveSession = true
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldHandleBridgeTransportLost(
+                isStopping = true,
+                desiredConnection = true,
+                isPaused = false,
+                hasActiveSession = true
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldHandleBridgeTransportLost(
+                isStopping = false,
+                desiredConnection = false,
+                isPaused = false,
+                hasActiveSession = true
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldHandleBridgeTransportLost(
+                isStopping = false,
+                desiredConnection = true,
+                isPaused = true,
+                hasActiveSession = true
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldHandleBridgeTransportLost(
+                isStopping = false,
+                desiredConnection = true,
+                isPaused = false,
+                hasActiveSession = false
+            )
+        )
+    }
+
+    @Test
+    fun shouldReconnectAfterBridgeTransportLost_requiresPendingFlagAndActiveIntent() {
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                reconnectPendingAfterJob = true,
+                desiredConnection = true,
+                isStopping = false,
+                isPaused = false
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                reconnectPendingAfterJob = false,
+                desiredConnection = true,
+                isStopping = false,
+                isPaused = false
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                reconnectPendingAfterJob = true,
+                desiredConnection = false,
+                isStopping = false,
+                isPaused = false
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                reconnectPendingAfterJob = true,
+                desiredConnection = true,
+                isStopping = true,
+                isPaused = false
+            )
+        )
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                reconnectPendingAfterJob = true,
+                desiredConnection = true,
+                isStopping = false,
+                isPaused = true
+            )
+        )
+    }
+
+    @Test
+    fun restoreCachedStatus_connectingIsDowngradedToDisconnectedSnapshot() {
+        val restored = OpenVpnRuntimePolicy.restoreCachedStatus(
+            cachedName = "CONNECTING",
+            cachedInfo = "Negotiating"
+        )
+
+        assertEquals("DISCONNECTED", restored.eventName)
+        assertTrue(restored.shouldPersist)
+    }
+
+    @Test
     fun shouldIgnoreIdleQueryDisconnected_falseWhenConnectedOrNotFromQuery() {
         assertFalse(
             OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(

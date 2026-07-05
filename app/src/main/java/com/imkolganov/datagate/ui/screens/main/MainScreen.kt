@@ -14,6 +14,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.update.UpdatePromptController
 import kotlinx.coroutines.launch
@@ -77,6 +79,13 @@ fun MainScreen(
     var selectedTabKey by rememberSaveable { mutableStateOf(BottomTab.Home.name) }
     val selectedTab = BottomTab.entries.find { it.name == selectedTabKey } ?: BottomTab.Home
     val accessState by accessViewModel.state.collectAsState()
+
+    LaunchedEffect(selectedTab) {
+        when (selectedTab) {
+            BottomTab.Home, BottomTab.Access -> FreeTierComplianceController.requestStatusRefresh()
+            else -> Unit
+        }
+    }
 
     Scaffold(
         bottomBar = {

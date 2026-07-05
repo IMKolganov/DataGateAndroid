@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.auth
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -35,6 +36,36 @@ class JwtClaimsTest {
             payload = "eyJyb2xlIjoiQWRtaW4iLCJuYW1laWQiOiJ1c2VyLTEifQ"
         )
         assertTrue(JwtClaimsReader.isAdmin(token))
+    }
+
+    @Test
+    fun read_prefersExternalIdClaim_forVpnIdentity() {
+        val token = jwt(
+            payload = "eyJleHRlcm5hbElkIjoiYWNjb3VudHMuZ29vZ2xlLmNvbTpzdWIxMjMiLCJuYW1laWQiOiI3In0"
+        )
+
+        val claims = JwtClaimsReader.read(token)
+
+        assertEquals("accounts.google.com:sub123", claims.externalId)
+        assertEquals("7", claims.userId)
+    }
+
+    @Test
+    fun read_fallsBackToSubWhenExternalIdMissing() {
+        val token = jwt(
+            payload = "eyJzdWIiOiJmYWxsYmFjay1zdWIiLCJuYW1laWQiOiI4In0"
+        )
+
+        val claims = JwtClaimsReader.read(token)
+
+        assertEquals("fallback-sub", claims.externalId)
+    }
+
+    @Test
+    fun read_returnsNullExternalIdForBlankToken() {
+        val claims = JwtClaimsReader.read(null)
+
+        assertEquals(null, claims.externalId)
     }
 
     private fun jwt(payload: String): String =

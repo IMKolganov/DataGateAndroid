@@ -362,4 +362,47 @@
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">不支持 XRay</string>
+    <string name="access_unsupported_server_type_dialog_title">不支持的服务器类型</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">其他</string>
+    <string name="vpn_requires_xray_client">此应用无法连接 XRay 服务器。服务器：%1$s。\n\n请使用其他客户端。</string>
+    <string name="vpn_requires_unsupported_server_type">此应用不支持此服务器类型。服务器：%1$s。\n\n请使用其他客户端。</string>
+    <string name="free_tier_title_link">连接 Telegram 以使用 VPN</string>
+    <string name="free_tier_title_subscribe">订阅 Telegram 频道</string>
+    <string name="free_tier_body_link">要在 Free 或 Default 套餐使用 VPN：\n• 订阅 %1$s\n• 或将账号与 DataGate Telegram 机器人关联</string>
+    <string name="free_tier_body_subscribe_only">您的 Telegram 账号已关联，但仍需订阅 %1$s 才能从机器人获取 VPN 配置。</string>
+    <string name="free_tier_body_generic">订阅 %1$s 或通过 DataGate Telegram 机器人关联账号。</string>
+    <string name="free_tier_get_code">获取关联码</string>
+    <string name="free_tier_get_code_loading">正在获取码…</string>
+    <string name="free_tier_open_channel">打开频道</string>
+    <string name="free_tier_open_bot">打开机器人</string>
+    <string name="free_tier_check_again">再次检查</string>
+    <string name="free_tier_check_again_loading">正在检查…</string>
+    <string name="free_tier_close">关闭</string>
+    <string name="free_tier_code_expires">%1$s 后过期</string>
+    <string name="free_tier_code_instruction_1">1. 打开 DataGate Telegram 机器人</string>
+    <string name="free_tier_code_instruction_2">2. 发送 /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">或将码私信发送给机器人</string>
+    <string name="free_tier_link_code_failed">无法请求关联码。</string>
+    <string name="free_tier_status_error_title">无法检查访问权限</string>
+    <string name="free_tier_status_check_failed">无法验证 Free 套餐访问权限。请检查网络连接并重试。</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
+
+
+    <string name="settings_bridge_ports_title">Local bridge ports</string>
+    <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
+    <string name="settings_bridge_ports_advanced_warning">Wrong values can stop VPN from connecting. Reconnect VPN after saving.</string>
+    <string name="settings_bridge_ports_start_label">Range start</string>
+    <string name="settings_bridge_ports_end_label">Range end</string>
+    <string name="settings_bridge_ports_hint">Default %1$d–%2$d. Allowed ports %3$d–%4$d, range size %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Enter start ≤ end, ports %1$d–%2$d, range size %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
+    <string name="settings_bridge_ports_reset">Reset to defaults</string>
+
 </resources>

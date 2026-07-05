@@ -8,7 +8,7 @@
 
 package net.openvpn.ovpn3;
 
-public class LogReceiver {
+public class LogReceiver implements LogReceiverSwigInterface {
   private transient long swigCPtr;
   protected transient boolean swigCMemOwn;
 
@@ -48,28 +48,12 @@ public class LogReceiver {
     }
   }
 
-  protected void swigDirectorDisconnect() {
-    swigCMemOwn = false;
-    delete();
-  }
-
-  public void swigReleaseOwnership() {
-    swigCMemOwn = false;
-    ovpncliJNI.LogReceiver_change_ownership(this, swigCPtr, false);
-  }
-
-  public void swigTakeOwnership() {
-    swigCMemOwn = true;
-    ovpncliJNI.LogReceiver_change_ownership(this, swigCPtr, true);
+  public long LogReceiverSwigInterface_GetInterfaceCPtr() {
+    return ovpncliJNI.LogReceiver_LogReceiverSwigInterface_GetInterfaceCPtr(swigCPtr);
   }
 
   public void log(ClientAPI_LogInfo arg0) {
     ovpncliJNI.LogReceiver_log(swigCPtr, this, ClientAPI_LogInfo.getCPtr(arg0), arg0);
-  }
-
-  public LogReceiver() {
-    this(ovpncliJNI.new_LogReceiver(), true);
-    ovpncliJNI.LogReceiver_director_connect(this, swigCPtr, true, true);
   }
 
 }

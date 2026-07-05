@@ -253,8 +253,45 @@
     <string name="settings_ip_lists_update_failed">Update failed: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Update failed: %1$s. Using cached or built-in list.</string>
 
+    <string name="settings_bridge_ports_title">Local bridge ports</string>
+    <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
+    <string name="settings_bridge_ports_advanced_warning">Wrong values can stop VPN from connecting. Reconnect VPN after saving.</string>
+    <string name="settings_bridge_ports_start_label">Range start</string>
+    <string name="settings_bridge_ports_end_label">Range end</string>
+    <string name="settings_bridge_ports_hint">Default %1$d–%2$d. Allowed ports %3$d–%4$d, range size %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Enter start ≤ end, ports %1$d–%2$d, range size %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
+    <string name="settings_bridge_ports_reset">Reset to defaults</string>
+
     <string name="project_website_url" translatable="false">https://datagateapp.com/</string>
     <string name="project_telegram_url" translatable="false">https://t.me/datagateapp</string>
+
+    <string name="free_tier_default_channel" translatable="false">@DataGateVPNBot</string>
+    <string name="free_tier_default_channel_handle" translatable="false">DataGateVPNBot</string>
+    <string name="free_tier_title_link">Connect Telegram for VPN access</string>
+    <string name="free_tier_title_subscribe">Subscribe to the Telegram channel</string>
+    <string name="free_tier_body_link">To use VPN on the Free or Default plan:\n• Subscribe to %1$s\n• Or link your account with the DataGate Telegram bot</string>
+    <string name="free_tier_body_subscribe_only">Your Telegram account is linked, but you still need to subscribe to %1$s to get VPN configs from the bot.</string>
+    <string name="free_tier_body_generic">Subscribe to %1$s or link your account via the DataGate Telegram bot.</string>
+    <string name="free_tier_get_code">Get link code</string>
+    <string name="free_tier_get_code_loading">Getting code…</string>
+    <string name="free_tier_open_channel">Open channel</string>
+    <string name="free_tier_open_bot">Open bot</string>
+    <string name="free_tier_check_again">Check again</string>
+    <string name="free_tier_check_again_loading">Checking…</string>
+    <string name="free_tier_close">Close</string>
+    <string name="free_tier_code_expires">Expires in %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Open the DataGate Telegram bot</string>
+    <string name="free_tier_code_instruction_2">2. Send /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Or send the code in a private message to the bot</string>
+    <string name="free_tier_link_code_failed">Could not request a link code.</string>
+    <string name="free_tier_status_error_title">Could not check access</string>
+    <string name="free_tier_status_check_failed">Could not verify Free plan access. Check your connection and try again.</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
     <string name="update_dialog_title">New version %1$s</string>
     <string name="update_dialog_body">A newer build is available on GitHub. Latest release: %1$s. You have: %2$s.\n\nYou can open the release page or download the APK. Use the option below to keep suggesting updates for future releases.</string>

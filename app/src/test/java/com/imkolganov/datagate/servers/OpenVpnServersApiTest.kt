@@ -109,6 +109,70 @@ class OpenVpnServersApiTest {
     }
 
     @Test
+    fun parseWithStatusResponse_acceptsOpenVpnV2BackendNames() {
+        val response = api.parseWithStatusResponse(
+            """
+            {
+              "success": true,
+              "message": "Success",
+              "data": {
+                "openVpnServerWithStatuses": [
+                  {
+                    "openVpnServerResponses": {
+                      "openVpnServer": {
+                        "id": 11,
+                        "serverName": "s1-7",
+                        "isOnline": true,
+                        "isDefault": false,
+                        "apiUrl": "https://api.example",
+                        "isEnableWss": true,
+                        "isDeleted": false,
+                        "tags": ["eu"],
+                        "quotaPlanGroups": [],
+                        "isAccessibleForUserQuotaPlan": true
+                      }
+                    },
+                    "openVpnServerStatusLogResponse": {
+                      "vpnServerId": 11,
+                      "serverRemoteIp": "5.22.212.200"
+                    },
+                    "countConnectedClients": 1
+                  },
+                  {
+                    "openVpnServerResponses": {
+                      "openVpnServer": {
+                        "id": 12,
+                        "serverName": "s1-8",
+                        "isOnline": true,
+                        "isDefault": false,
+                        "apiUrl": "https://api2.example",
+                        "isEnableWss": true,
+                        "isDeleted": false,
+                        "tags": [],
+                        "quotaPlanGroups": [],
+                        "isAccessibleForUserQuotaPlan": true
+                      }
+                    },
+                    "openVpnServerStatusLogResponse": {
+                      "vpnServerId": 12
+                    },
+                    "countConnectedClients": 0
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+
+        val servers = response.data!!.openVpnServerWithStatuses
+        assertTrue(response.success)
+        assertEquals(2, servers.size)
+        assertEquals("s1-7", servers[0].server.serverName)
+        assertEquals("s1-8", servers[1].server.serverName)
+        assertEquals("5.22.212.200", servers[0].openVpnServerStatusLogResponse?.serverRemoteIp)
+    }
+
+    @Test
     fun parseWithStatusResponse_readsServerTypeFromBackend() {
         val xray = api.parseWithStatusResponse(
             """
@@ -138,5 +202,85 @@ class OpenVpnServersApiTest {
         ).data!!.openVpnServerWithStatuses.single().server
 
         assertEquals(VpnServerType.Xray, xray.serverType)
+    }
+
+    @Test
+    fun parseWithStatusResponse_parsesV3UserQuotaPlanAndFullServerList() {
+        val response = api.parseWithStatusResponse(
+            """
+            {
+              "success": true,
+              "message": "Success",
+              "data": {
+                "userQuotaPlan": {
+                  "isPrivileged": false,
+                  "userQuotaPlanId": 110,
+                  "quotaPlanId": 2,
+                  "quotaPlanName": "Default",
+                  "allowedVpnServerIds": [3, 63, 65, 68, 69, 76]
+                },
+                "vpnServerWithStatuses": [
+                  {
+                    "vpnServerResponses": {
+                      "vpnServer": {
+                        "id": 1,
+                        "serverName": "cyprus",
+                        "isOnline": true,
+                        "isDefault": false,
+                        "apiUrl": "https://api.example",
+                        "isEnableWss": true,
+                        "isDeleted": false,
+                        "tags": [],
+                        "quotaPlanGroups": [],
+                        "isAccessibleForUserQuotaPlan": false
+                      }
+                    }
+                  },
+                  {
+                    "vpnServerResponses": {
+                      "vpnServer": {
+                        "id": 69,
+                        "serverName": "helsinki",
+                        "isOnline": true,
+                        "isDefault": false,
+                        "apiUrl": "https://api.example",
+                        "isEnableWss": true,
+                        "isDeleted": false,
+                        "tags": [],
+                        "quotaPlanGroups": [],
+                        "isAccessibleForUserQuotaPlan": true
+                      }
+                    }
+                  },
+                  {
+                    "vpnServerResponses": {
+                      "vpnServer": {
+                        "id": 76,
+                        "serverName": "norway-xray",
+                        "serverType": 1,
+                        "isOnline": true,
+                        "isDefault": false,
+                        "apiUrl": "https://api.example",
+                        "isEnableWss": false,
+                        "isDeleted": false,
+                        "tags": [],
+                        "quotaPlanGroups": [],
+                        "isAccessibleForUserQuotaPlan": true
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+
+        val data = response.data!!
+        assertTrue(response.success)
+        assertEquals(3, data.openVpnServerWithStatuses.size)
+        assertEquals("Default", data.userQuotaPlan?.quotaPlanName)
+        assertEquals(listOf(3, 63, 65, 68, 69, 76), data.userQuotaPlan?.allowedVpnServerIds)
+        assertEquals(false, data.openVpnServerWithStatuses[0].server.isAccessibleForUserQuotaPlan)
+        assertEquals(true, data.openVpnServerWithStatuses[1].server.isAccessibleForUserQuotaPlan)
     }
 }

@@ -362,4 +362,47 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
     <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
+
+    <string name="access_xray_dialog_title">XRay não suportado</string>
+    <string name="access_unsupported_server_type_dialog_title">Tipo de servidor não suportado</string>
+    <string name="label_server_type_xray">Xray</string>
+    <string name="label_server_type_unknown">Outro</string>
+    <string name="vpn_requires_xray_client">Esta app não pode ligar-se a servidores XRay. Servidor: %1$s.\n\nUse outro cliente.</string>
+    <string name="vpn_requires_unsupported_server_type">Esta app não suporta este tipo de servidor. Servidor: %1$s.\n\nUse outro cliente.</string>
+    <string name="free_tier_title_link">Ligue o Telegram para aceder à VPN</string>
+    <string name="free_tier_title_subscribe">Subscreva o canal do Telegram</string>
+    <string name="free_tier_body_link">Para usar VPN no plano Free ou Default:\n• Subscreva %1$s\n• Ou associe a sua conta ao bot Telegram DataGate</string>
+    <string name="free_tier_body_subscribe_only">A sua conta Telegram está associada, mas ainda precisa de subscrever %1$s para obter configs VPN do bot.</string>
+    <string name="free_tier_body_generic">Subscreva %1$s ou associe a sua conta via bot Telegram DataGate.</string>
+    <string name="free_tier_get_code">Obter código de ligação</string>
+    <string name="free_tier_get_code_loading">A obter código…</string>
+    <string name="free_tier_open_channel">Abrir canal</string>
+    <string name="free_tier_open_bot">Abrir bot</string>
+    <string name="free_tier_check_again">Verificar novamente</string>
+    <string name="free_tier_check_again_loading">A verificar…</string>
+    <string name="free_tier_close">Fechar</string>
+    <string name="free_tier_code_expires">Expira em %1$s</string>
+    <string name="free_tier_code_instruction_1">1. Abra o bot Telegram DataGate</string>
+    <string name="free_tier_code_instruction_2">2. Envie /link_account %1$s</string>
+    <string name="free_tier_code_instruction_3">Ou envie o código numa mensagem privada ao bot</string>
+    <string name="free_tier_link_code_failed">Não foi possível pedir um código de ligação.</string>
+    <string name="free_tier_status_error_title">Não foi possível verificar o acesso</string>
+    <string name="free_tier_status_check_failed">Não foi possível verificar o acesso ao plano Free. Verifique a ligação e tente novamente.</string>
+    <string name="free_tier_telegram_id_label">Telegram user ID</string>
+    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
+    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
+    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
+    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
+
+
+    <string name="settings_bridge_ports_title">Local bridge ports</string>
+    <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
+    <string name="settings_bridge_ports_advanced_warning">Wrong values can stop VPN from connecting. Reconnect VPN after saving.</string>
+    <string name="settings_bridge_ports_start_label">Range start</string>
+    <string name="settings_bridge_ports_end_label">Range end</string>
+    <string name="settings_bridge_ports_hint">Default %1$d–%2$d. Allowed ports %3$d–%4$d, range size %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Enter start ≤ end, ports %1$d–%2$d, range size %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
+    <string name="settings_bridge_ports_reset">Reset to defaults</string>
+
 </resources>
