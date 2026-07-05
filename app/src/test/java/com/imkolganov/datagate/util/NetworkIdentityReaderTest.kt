@@ -57,6 +57,35 @@ class NetworkIdentityReaderTest {
     }
 
     @Test
+    fun mergeWithSession_prefersSystemValuesAndFallsBackToSession() {
+        val merged = NetworkIdentityReader.mergeWithSession(
+            fromSystem = NetworkIdentitySnapshot(vpnIpAddress = null, dnsServers = emptyList()),
+            fromSession = NetworkIdentitySnapshot(
+                vpnIpAddress = "10.51.15.4",
+                dnsServers = listOf("8.8.8.8", "1.1.1.1")
+            )
+        )
+        assertEquals("10.51.15.4", merged.vpnIpAddress)
+        assertEquals(listOf("8.8.8.8", "1.1.1.1"), merged.dnsServers)
+    }
+
+    @Test
+    fun mergeWithSession_keepsSystemWhenPresent() {
+        val merged = NetworkIdentityReader.mergeWithSession(
+            fromSystem = NetworkIdentitySnapshot(
+                vpnIpAddress = "10.8.0.2",
+                dnsServers = listOf("9.9.9.9")
+            ),
+            fromSession = NetworkIdentitySnapshot(
+                vpnIpAddress = "10.51.15.4",
+                dnsServers = listOf("8.8.8.8")
+            )
+        )
+        assertEquals("10.8.0.2", merged.vpnIpAddress)
+        assertEquals(listOf("9.9.9.9"), merged.dnsServers)
+    }
+
+    @Test
     fun isConnectivitySystemFailure_falseForUnrelatedErrors() {
         assertFalse(isConnectivitySystemFailure(IllegalArgumentException("bad arg")))
     }

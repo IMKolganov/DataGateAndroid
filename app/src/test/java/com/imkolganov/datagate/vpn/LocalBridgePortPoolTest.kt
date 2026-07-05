@@ -10,12 +10,46 @@ import java.util.Random
 class LocalBridgePortPoolTest {
 
     @Test
-    fun candidatePorts_startsWithEphemeralThenUsesDedicatedPool() {
-        val ports = LocalBridgePortPool.candidatePorts(Random(1))
-        assertEquals(0, ports.first())
-        assertEquals(101, ports.size)
-        assertTrue(ports.drop(1).all { it in LocalBridgePortPool.POOL_START..LocalBridgePortPool.POOL_END })
-        assertEquals(ports.drop(1).toSet().size, 100)
+    fun candidatePorts_usesConfiguredDedicatedPool() {
+        val ports = LocalBridgePortPool.candidatePorts(
+            poolStart = LocalBridgePortPool.DEFAULT_POOL_START,
+            poolEnd = LocalBridgePortPool.DEFAULT_POOL_END,
+            random = Random(1)
+        )
+        assertEquals(100, ports.size)
+        assertTrue(
+            ports.all {
+                it in LocalBridgePortPool.DEFAULT_POOL_START..LocalBridgePortPool.DEFAULT_POOL_END
+            }
+        )
+        assertEquals(ports.toSet().size, 100)
+    }
+
+    @Test
+    fun isValidInput_acceptsDefaultRange() {
+        assertTrue(
+            LocalBridgePortPool.isValidInput(
+                LocalBridgePortPool.DEFAULT_POOL_START,
+                LocalBridgePortPool.DEFAULT_POOL_END
+            )
+        )
+    }
+
+    @Test
+    fun isValidInput_rejectsTooSmallSpan() {
+        assertFalse(LocalBridgePortPool.isValidInput(38_400, 38_405))
+    }
+
+    @Test
+    fun isValidInput_rejectsInvertedRange() {
+        assertFalse(LocalBridgePortPool.isValidInput(38_500, 38_400))
+    }
+
+    @Test
+    fun normalizeRange_clampsCorruptedStoredValues() {
+        val normalized = LocalBridgePortPool.normalizeRange(60_000, 70_000)
+        assertTrue(normalized.poolEnd <= LocalBridgePortPool.MAX_USER_PORT)
+        assertTrue(normalized.poolEnd - normalized.poolStart + 1 >= LocalBridgePortPool.MIN_POOL_SPAN)
     }
 
     @Test

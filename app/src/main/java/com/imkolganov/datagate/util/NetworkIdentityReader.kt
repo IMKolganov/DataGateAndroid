@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.LinkAddress
 import android.net.NetworkCapabilities
+import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
 import java.net.Inet4Address
 
 data class NetworkIdentitySnapshot(
@@ -15,13 +16,22 @@ data class NetworkIdentitySnapshot(
 object NetworkIdentityReader {
 
     fun read(context: Context): NetworkIdentitySnapshot {
+        val fromSession = VpnTunnelSessionStore.read(context)
         return try {
-            readUnsafe(context)
+            mergeWithSession(readUnsafe(context), fromSession)
         } catch (t: Throwable) {
-            if (isConnectivitySystemFailure(t)) NetworkIdentitySnapshot()
+            if (isConnectivitySystemFailure(t)) fromSession
             else throw t
         }
     }
+
+    internal fun mergeWithSession(
+        fromSystem: NetworkIdentitySnapshot,
+        fromSession: NetworkIdentitySnapshot
+    ): NetworkIdentitySnapshot = NetworkIdentitySnapshot(
+        vpnIpAddress = fromSystem.vpnIpAddress ?: fromSession.vpnIpAddress,
+        dnsServers = fromSystem.dnsServers.ifEmpty { fromSession.dnsServers }
+    )
 
     private fun readUnsafe(context: Context): NetworkIdentitySnapshot {
         val cm = context.getSystemService(ConnectivityManager::class.java)
@@ -36,21 +46,22 @@ object NetworkIdentityReader {
     }
 
     private fun findVpnNetwork(cm: ConnectivityManager): android.net.Network? {
-        var candidate: android.net.Network? = null
+        var fallback: android.net.Network? = null
         @Suppress("DEPRECATION")
         for (network in cm.allNetworks) {
             val caps = cm.getNetworkCapabilities(network) ?: continue
             if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
+            fallback = network
             val props = cm.getLinkProperties(network) ?: continue
             val hasTunnelIpv4 = props.linkAddresses.any { linkAddress ->
                 val host = linkAddress.address
                 host is Inet4Address && !host.isLoopbackAddress
             }
             if (hasTunnelIpv4) {
-                candidate = network
+                return network
             }
         }
-        return candidate
+        return fallback
     }
 
     private fun List<LinkAddress>.firstIpv4Host(): String? {

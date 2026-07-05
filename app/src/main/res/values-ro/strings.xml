@@ -412,4 +412,15 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
     <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
+
+    <string name="settings_bridge_ports_title">Local bridge ports</string>
+    <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
+    <string name="settings_bridge_ports_advanced_warning">Wrong values can stop VPN from connecting. Reconnect VPN after saving.</string>
+    <string name="settings_bridge_ports_start_label">Range start</string>
+    <string name="settings_bridge_ports_end_label">Range end</string>
+    <string name="settings_bridge_ports_hint">Default %1$d–%2$d. Allowed ports %3$d–%4$d, range size %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Enter start ≤ end, ports %1$d–%2$d, range size %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
+    <string name="settings_bridge_ports_reset">Reset to defaults</string>
+
 </resources>

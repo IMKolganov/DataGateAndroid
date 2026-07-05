@@ -409,4 +409,15 @@
     <string name="free_tier_telegram_id_invalid">Введите корректный числовой Telegram user ID.</string>
     <string name="free_tier_register_bot_hint">Откройте бота и отправьте /register при необходимости. Используйте тот же Telegram-аккаунт, который будет вводить код связки.</string>
 
+
+    <string name="settings_bridge_ports_title">Локальные порты моста</string>
+    <string name="settings_bridge_ports_subtitle">Только для опытных пользователей. Меняйте, только если VPN конфликтует с другими приложениями по портам localhost.</string>
+    <string name="settings_bridge_ports_advanced_warning">Неверные значения могут помешать подключению VPN. После сохранения переподключите VPN.</string>
+    <string name="settings_bridge_ports_start_label">Начало диапазона</string>
+    <string name="settings_bridge_ports_end_label">Конец диапазона</string>
+    <string name="settings_bridge_ports_hint">По умолчанию %1$d–%2$d. Допустимые порты %3$d–%4$d, размер диапазона %5$d–%6$d.</string>
+    <string name="settings_bridge_ports_error">Введите начало ≤ конец, порты %1$d–%2$d, размер диапазона %3$d–%4$d.</string>
+    <string name="settings_bridge_ports_saved">Настройки портов сохранены. Переподключите VPN.</string>
+    <string name="settings_bridge_ports_reset">Сбросить по умолчанию</string>
+
 </resources>
