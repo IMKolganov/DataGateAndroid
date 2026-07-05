@@ -422,9 +422,10 @@ Võite avada väljalaske lehe või laadida APK alla.</string>
     <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
     <string name="free_tier_code_steps_with_vpn">1. Connect VPN in the Access tab
 2. Open the DataGate Telegram bot
-3. Send /link_account %1, or send the code in a private message to the bot</string>
+3. Send /link_account %1$s, or send the code in a private message to the bot</string>
     <string name="free_tier_open_bot_hint">Connect VPN first if Telegram is blocked in your region.</string>
-    <string name="free_tier_code_expires_soon">Code expires soon (%1). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
     <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
 
+    <string name="free_tier_copy_code">Copy code</string>
 </resources>

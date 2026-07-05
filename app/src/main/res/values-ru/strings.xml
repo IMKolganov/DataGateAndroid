@@ -408,6 +408,7 @@
     <string name="free_tier_open_bot_hint">Сначала подключите VPN, если Telegram заблокирован в вашем регионе.</string>
     <string name="free_tier_code_expires_soon">Код скоро истечёт (%1$s). Подключите VPN и откройте бота или запросите новый код.</string>
     <string name="free_tier_code_expired">Код связки истёк. Нажмите «Получить код», чтобы запросить новый.</string>
+    <string name="free_tier_copy_code">Скопировать код</string>
 
     <string name="settings_bridge_ports_title">Локальные порты моста</string>
     <string name="settings_bridge_ports_subtitle">Только для опытных пользователей. Меняйте, только если VPN конфликтует с другими приложениями по портам localhost.</string>

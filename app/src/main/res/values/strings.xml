@@ -292,6 +292,7 @@
     <string name="free_tier_open_bot_hint">Connect VPN first if Telegram is blocked in your region.</string>
     <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
     <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+    <string name="free_tier_copy_code">Copy code</string>
 
     <string name="update_dialog_title">New version %1$s</string>
     <string name="update_dialog_body">A newer build is available on GitHub. Latest release: %1$s. You have: %2$s.\n\nYou can open the release page or download the APK. Use the option below to keep suggesting updates for future releases.</string>
