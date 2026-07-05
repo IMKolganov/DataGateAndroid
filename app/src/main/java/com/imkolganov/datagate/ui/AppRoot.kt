@@ -24,6 +24,8 @@ import com.imkolganov.datagate.ui.theme.ThemeMode
 import com.imkolganov.datagate.update.UpdateCheckHost
 import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.update.UpdatePromptController
+import com.imkolganov.datagate.freetier.FreeTierApi
+import com.imkolganov.datagate.ui.freetier.FreeTierOnboardingHost
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -50,6 +52,7 @@ fun AppRoot(
     appLocale: AppLocale,
     onAppLocaleChange: (AppLocale) -> Unit,
     http: OkHttpClient,
+    freeTierApi: FreeTierApi,
     openUpdateFromNotificationPending: Boolean,
     onConsumedOpenUpdateFromNotification: () -> Unit,
 ) {
@@ -139,6 +142,10 @@ fun AppRoot(
                 onAppLocaleChange = onAppLocaleChange
             )
             UpdateCheckHost(isLoggedIn = true, http = http)
+            FreeTierOnboardingHost(
+                adminTotpGate = authState.adminTotpGate,
+                freeTierApi = freeTierApi,
+            )
         }
     } else {
         LoginScreen(

@@ -16,6 +16,9 @@ object ApiConfig {
     const val TOTP_CONFIRM_PATH = "/api/auth/totp/confirm"
     const val TOTP_DISABLE_PATH = "/api/auth/totp/disable"
 
+    const val FREE_TIER_ACCESS_STATUS_PATH = "/api/auth/free-tier-access/status"
+    const val TELEGRAM_REQUEST_ACCOUNT_LINK_CODE_PATH = "/api/auth/telegram/request-account-link-code"
+
     /** GET …/get-all — V2 list without live metrics (optional). */
     const val API_OPEN_VPN_SERVERS_V2_GET_ALL_PATH = "api/v2/open-vpn-servers/get-all"
 

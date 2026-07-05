@@ -193,6 +193,7 @@ class MainActivity : AppCompatActivity() {
                         LanguagePreferenceStore.setLocale(applicationContext, next)
                     },
                     http = graph.httpPlain,
+                    freeTierApi = graph.freeTierApi,
                     openUpdateFromNotificationPending = pendingOpenUpdateFromNotification,
                     onConsumedOpenUpdateFromNotification = {
                         pendingOpenUpdateFromNotification = false

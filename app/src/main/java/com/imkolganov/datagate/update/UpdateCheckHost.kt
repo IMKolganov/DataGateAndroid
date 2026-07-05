@@ -29,10 +29,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 
 @Composable
@@ -87,6 +90,12 @@ fun UpdateCheckHost(
             return@LaunchedEffect
         }
         delay(2500)
+        withTimeoutOrNull(120_000L) {
+            FreeTierComplianceController.onboardingVisible.first { !it }
+        }
+        if (FreeTierComplianceController.onboardingVisible.value) {
+            return@LaunchedEffect
+        }
         val release = withContext(Dispatchers.IO) {
             if (!UpdatePreferences.shouldRunCheck(appContext)) return@withContext null
             val repo = BuildConfig.GITHUB_RELEASES_REPO
