@@ -44,6 +44,7 @@ import com.imkolganov.datagate.freetier.freeTierOnboardingCopyMode
 import com.imkolganov.datagate.freetier.FreeTierStatusFetchResult
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.freetier.isFreeTierLinkCodeExpired
+import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnPoll
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnResume
 import com.imkolganov.datagate.freetier.telegramChannelUrl
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
@@ -56,6 +57,8 @@ import com.imkolganov.datagate.util.userFriendlyApiError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -85,6 +88,7 @@ fun FreeTierOnboardingHost(
 
     var lastStatusFetchMs by remember { mutableLongStateOf(0L) }
     var refreshOnNextResume by remember { mutableStateOf(false) }
+    val fetchMutex = remember { Mutex() }
 
     val defaultChannelLabel = stringResource(R.string.free_tier_default_channel)
     val defaultChannelHandle = stringResource(R.string.free_tier_default_channel_handle)
@@ -105,6 +109,7 @@ fun FreeTierOnboardingHost(
                 codeExpiresAtMs = 0L
                 codeSecondsLeft = 0
                 errorMessage = null
+                telegramIdInput = ""
             }
             FreeTierStatusFetchOutcome.ShowOnboarding -> {
                 statusErrorVisible = false
@@ -121,24 +126,34 @@ fun FreeTierOnboardingHost(
         }
     }
 
-    suspend fun fetchStatus() {
-        statusLoading = true
-        try {
-            val response = withContext(Dispatchers.IO) { freeTierApi.getAccessStatus() }
-            lastStatusFetchMs = System.currentTimeMillis()
-            applyFetchResult(evaluateFreeTierStatusFetch(response))
-        } catch (e: Exception) {
-            lastStatusFetchMs = System.currentTimeMillis()
-            applyFetchResult(
-                evaluateFreeTierStatusFetch(
-                    response = ApiResponse(success = false, message = null, data = null),
-                    apiFailureMessage = appContext.resources.userFriendlyApiError(
-                        e.deepMessageForApiError()
-                    ),
+    suspend fun fetchStatus(force: Boolean = false) {
+        if (!force) {
+            val now = System.currentTimeMillis()
+            if (!shouldRefreshFreeTierStatusOnPoll(lastStatusFetchMs, now)) return
+        }
+        fetchMutex.withLock {
+            if (!force) {
+                val now = System.currentTimeMillis()
+                if (!shouldRefreshFreeTierStatusOnPoll(lastStatusFetchMs, now)) return@withLock
+            }
+            statusLoading = true
+            try {
+                val response = withContext(Dispatchers.IO) { freeTierApi.getAccessStatus() }
+                lastStatusFetchMs = System.currentTimeMillis()
+                applyFetchResult(evaluateFreeTierStatusFetch(response))
+            } catch (e: Exception) {
+                lastStatusFetchMs = System.currentTimeMillis()
+                applyFetchResult(
+                    evaluateFreeTierStatusFetch(
+                        response = ApiResponse(success = false, message = null, data = null),
+                        apiFailureMessage = appContext.resources.userFriendlyApiError(
+                            e.deepMessageForApiError()
+                        ),
+                    )
                 )
-            )
-        } finally {
-            statusLoading = false
+            } finally {
+                statusLoading = false
+            }
         }
     }
 
@@ -156,13 +171,13 @@ fun FreeTierOnboardingHost(
             statusErrorVisible = false
             return@LaunchedEffect
         }
-        fetchStatus()
+        fetchStatus(force = true)
     }
 
     val statusRefreshNonce by FreeTierComplianceController.statusRefreshNonce.collectAsState()
     LaunchedEffect(statusRefreshNonce) {
         if (adminTotpGate != AdminTotpGate.Allowed || statusRefreshNonce == 0) return@LaunchedEffect
-        fetchStatus()
+        fetchStatus(force = false)
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -178,7 +193,7 @@ fun FreeTierOnboardingHost(
                     )
                 ) {
                     refreshOnNextResume = false
-                    scope.launch { fetchStatus() }
+                    scope.launch { fetchStatus(force = true) }
                 }
             }
         }
@@ -216,7 +231,7 @@ fun FreeTierOnboardingHost(
             confirmButton = {
                 TextButton(
                     enabled = !statusLoading,
-                    onClick = { scope.launch { fetchStatus() } }
+                    onClick = { scope.launch { fetchStatus(force = true) } }
                 ) {
                     Text(
                         if (statusLoading) {
@@ -343,7 +358,7 @@ fun FreeTierOnboardingHost(
                 Spacer(modifier = Modifier.height(8.dp))
                 TextButton(
                     enabled = !statusLoading,
-                    onClick = { scope.launch { fetchStatus() } },
+                    onClick = { scope.launch { fetchStatus(force = true) } },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(

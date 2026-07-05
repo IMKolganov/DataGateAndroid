@@ -15,11 +15,11 @@ class TcpToWssBridge(
 
     fun start(): Int {
         if (running) return server?.localPort ?: port
-        running = true
 
         val ss = java.net.ServerSocket()
         ss.reuseAddress = true
         ss.bind(java.net.InetSocketAddress("127.0.0.1", port))
+        running = true
         server = ss
         val actualPort = ss.localPort
 

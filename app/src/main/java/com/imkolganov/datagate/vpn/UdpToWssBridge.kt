@@ -32,11 +32,11 @@ class UdpToWssBridge(
 
     fun start(): Int {
         if (running) return socket?.localPort ?: port
-        running = true
 
         val ds = DatagramSocket(null)
         ds.reuseAddress = true
         ds.bind(InetSocketAddress("127.0.0.1", port))
+        running = true
         socket = ds
         protectDatagramSocket(service, ds)
         val actualPort = ds.localPort

@@ -69,6 +69,23 @@ class FreeTierOnboardingRulesTest {
     }
 
     @Test
+    fun shouldRefreshOnPoll_whenNeverFetchedOrIntervalElapsed() {
+        assertTrue(shouldRefreshFreeTierStatusOnPoll(lastStatusFetchMs = 0L, nowMs = 1L))
+        assertTrue(
+            shouldRefreshFreeTierStatusOnPoll(
+                lastStatusFetchMs = 0L,
+                nowMs = FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS,
+            )
+        )
+        assertFalse(
+            shouldRefreshFreeTierStatusOnPoll(
+                lastStatusFetchMs = 10_000L,
+                nowMs = 20_000L,
+            )
+        )
+    }
+
+    @Test
     fun shouldRefreshOnResume_falseWhenTooSoon() {
         assertFalse(
             shouldRefreshFreeTierStatusOnResume(

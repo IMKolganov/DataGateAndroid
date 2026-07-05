@@ -6,7 +6,6 @@ import com.imkolganov.datagate.json.formatHttpErrorDetail
 import com.imkolganov.datagate.json.optDataObject
 import com.imkolganov.datagate.json.optIntOrNull
 import com.imkolganov.datagate.json.optStringOrNull
-import com.imkolganov.datagate.json.parseBackendApiEnvelopeOrThrow
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeRequest
@@ -82,11 +81,15 @@ class FreeTierApi(
     }
 
     internal fun parseAccountLinkCodeResponse(body: String): ApiResponse<RequestTelegramAccountLinkCodeResponse> {
-        val root = parseBackendApiEnvelopeOrThrow("Telegram account link code", 200, body)
+        val root = JSONObject(body)
+        val success = root.optBoolean("success", root.optBoolean("Success", false))
         val message = root.optString("message", root.optString("Message", "")).trim().ifEmpty { null }
+        if (!success) {
+            return ApiResponse(success = false, message = message, data = null)
+        }
         val dataObj = root.optDataObject()
         val data = dataObj?.let { parseAccountLinkCode(it) }
-        return ApiResponse(success = true, message = message, data = data)
+        return ApiResponse(success = success, message = message, data = data)
     }
 
     private fun parseAccessStatus(o: JSONObject): FreeTierAccessStatusResponse {

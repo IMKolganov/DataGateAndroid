@@ -164,9 +164,9 @@ class FreeTierApiTest {
         )
     }
 
-    @Test(expected = java.io.IOException::class)
-    fun parseAccountLinkCodeResponse_throwsWhenSuccessFalse() {
-        api.parseAccountLinkCodeResponse(
+    @Test
+    fun parseAccountLinkCodeResponse_returnsFailureWhenSuccessFalse() {
+        val response = api.parseAccountLinkCodeResponse(
             """
             {
               "success": false,
@@ -174,5 +174,9 @@ class FreeTierApiTest {
             }
             """.trimIndent()
         )
+
+        assertFalse(response.success)
+        assertEquals("Already linked to Telegram", response.message)
+        assertEquals(null, response.data)
     }
 }

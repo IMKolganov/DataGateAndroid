@@ -878,6 +878,7 @@ class OpenVpn3Service : VpnService() {
         }
         val candidates = LocalBridgePortPool.candidatePorts()
         var lastError: Throwable? = null
+        var lastBindReason: String? = null
         for ((index, port) in candidates.withIndex()) {
             try {
                 val boundPort = when (linkProtocol) {
@@ -918,26 +919,27 @@ class OpenVpn3Service : VpnService() {
                 bridgeStop = null
                 if (LocalBridgePortPool.isBindConflict(t)) {
                     val reason = parseBindReason(t)
+                    lastBindReason = reason
                     Log.w(
                         TAG,
                         "Bridge bind failed on port=$port (attempt=${index + 1}/${candidates.size}): $reason",
                         t
                     )
-                    crashLogger.logNonFatal(
-                        tag = "OpenVpn3Service.bridge_bind_failed",
-                        throwable = t,
-                        extras = mapOf(
-                            "attempt" to (index + 1).toString(),
-                            "max_attempts" to candidates.size.toString(),
-                            "requested_port" to port.toString(),
-                            "bind_reason" to reason,
-                            "link_protocol" to linkProtocol.name
-                        )
-                    )
                     continue
                 }
                 throw t
             }
+        }
+        lastError?.let { error ->
+            crashLogger.logNonFatal(
+                tag = "OpenVpn3Service.bridge_bind_failed",
+                throwable = error,
+                extras = mapOf(
+                    "attempts" to candidates.size.toString(),
+                    "bind_reason" to (lastBindReason ?: parseBindReason(error)),
+                    "link_protocol" to linkProtocol.name
+                )
+            )
         }
         throw lastError ?: IllegalStateException("No free local bridge port in pool")
     }

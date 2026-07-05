@@ -41,6 +41,7 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 8
+        // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
         versionName = "1.0.8"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }

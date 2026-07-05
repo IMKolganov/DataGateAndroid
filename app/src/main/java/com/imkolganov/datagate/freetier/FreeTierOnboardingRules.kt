@@ -35,7 +35,14 @@ fun shouldRefreshFreeTierStatusOnResume(
     refreshOnNextResume: Boolean,
     nowMs: Long,
     minIntervalMs: Long = FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS,
-): Boolean = refreshOnNextResume || (nowMs - lastStatusFetchMs >= minIntervalMs)
+): Boolean = refreshOnNextResume || shouldRefreshFreeTierStatusOnPoll(lastStatusFetchMs, nowMs, minIntervalMs)
+
+/** Tab-open / nonce polls respect the same minimum interval as resume refresh. */
+fun shouldRefreshFreeTierStatusOnPoll(
+    lastStatusFetchMs: Long,
+    nowMs: Long,
+    minIntervalMs: Long = FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS,
+): Boolean = lastStatusFetchMs == 0L || nowMs - lastStatusFetchMs >= minIntervalMs
 
 fun freeTierOnboardingCopyMode(status: FreeTierAccessStatusResponse): FreeTierOnboardingCopyMode =
     when {

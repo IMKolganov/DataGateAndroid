@@ -36,14 +36,21 @@ object NetworkIdentityReader {
     }
 
     private fun findVpnNetwork(cm: ConnectivityManager): android.net.Network? {
+        var candidate: android.net.Network? = null
         @Suppress("DEPRECATION")
         for (network in cm.allNetworks) {
             val caps = cm.getNetworkCapabilities(network) ?: continue
-            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
-                return network
+            if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
+            val props = cm.getLinkProperties(network) ?: continue
+            val hasTunnelIpv4 = props.linkAddresses.any { linkAddress ->
+                val host = linkAddress.address
+                host is Inet4Address && !host.isLoopbackAddress
+            }
+            if (hasTunnelIpv4) {
+                candidate = network
             }
         }
-        return null
+        return candidate
     }
 
     private fun List<LinkAddress>.firstIpv4Host(): String? {
