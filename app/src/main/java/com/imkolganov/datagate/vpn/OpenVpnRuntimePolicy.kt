@@ -79,4 +79,13 @@ internal object OpenVpnRuntimePolicy {
     ): Boolean {
         return reconnectPendingAfterJob && desiredConnection && !isStopping && !isPaused
     }
+
+    /**
+     * While [connect] blocks the single native executor thread, another thread must not
+     * [java.util.concurrent.Future.get] on a queued [stop] — that deadlocks disconnect.
+     */
+    fun shouldAwaitNativeStopOnCallerThread(
+        runsOnNativeThread: Boolean,
+        nativeVpnJobActive: Boolean,
+    ): Boolean = runsOnNativeThread || !nativeVpnJobActive
 }

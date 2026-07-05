@@ -962,30 +962,31 @@ class OpenVpn3Service : VpnService() {
         }
     }
 
-    private fun invokeOnOvpnNative(block: () -> Unit) {
-        if (OvpnNativeThread.runsOnNativeThread()) {
-            block()
-        } else {
-            ovpnNativeExecutor.submit(block).get()
-        }
-    }
-
     private fun stopVpnInternal() {
         Log.d(TAG, "stopVpnInternal")
 
-        vpnJob?.cancel()
+        val job = vpnJob
         vpnJob = null
+        job?.cancel()
 
         val client = vpnClient
         vpnClient = null
         if (client != null) {
-            invokeOnOvpnNative {
-                try {
-                    Log.d(TAG, "Calling client.stop()")
-                    client.stop()
-                } catch (t: Throwable) {
-                    Log.w(TAG, "client.stop() failed", t)
-                }
+            val nativeJobActive = job?.isActive == true
+            OpenVpnNativeStopScheduling.runOrQueueStop(
+                nativeExecutor = ovpnNativeExecutor,
+                nativeVpnJobActive = nativeJobActive,
+                stopAction = Runnable {
+                    try {
+                        Log.d(TAG, "Calling client.stop()")
+                        client.stop()
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "client.stop() failed", t)
+                    }
+                },
+            )
+            if (nativeJobActive && !OvpnNativeThread.runsOnNativeThread()) {
+                Log.d(TAG, "Queued client.stop() without blocking (native job active)")
             }
         }
 

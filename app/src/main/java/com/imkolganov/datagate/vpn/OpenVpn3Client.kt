@@ -322,8 +322,8 @@ class OpenVpn3Client(
     }
 
     override fun tun_builder_persist(): Boolean {
-        Log.d(TAG, "tun_builder_persist()")
-        return true
+        Log.d(TAG, "tun_builder_persist() -> false")
+        return false
     }
 
     override fun tun_builder_get_local_networks(ipv6: Boolean): ClientAPI_StringVec {

@@ -182,13 +182,6 @@ class FreeTierOnboardingRulesTest {
     }
 
     @Test
-    fun shouldShowTelegramVpnFirstHint_trueForAllCopyModes() {
-        FreeTierOnboardingCopyMode.entries.forEach { mode ->
-            assertTrue(shouldShowTelegramVpnFirstHint(mode))
-        }
-    }
-
-    @Test
     fun shouldWarnLinkCodeExpiringSoon_withinThreshold() {
         assertTrue(shouldWarnLinkCodeExpiringSoon(secondsLeft = 300))
         assertTrue(shouldWarnLinkCodeExpiringSoon(secondsLeft = 1))

@@ -200,4 +200,26 @@ class OpenVpnRuntimePolicyTest {
             )
         )
     }
+
+    @Test
+    fun shouldAwaitNativeStopOnCallerThread_avoidsDeadlockWhileConnectBlocksNativeExecutor() {
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldAwaitNativeStopOnCallerThread(
+                runsOnNativeThread = false,
+                nativeVpnJobActive = true,
+            )
+        )
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldAwaitNativeStopOnCallerThread(
+                runsOnNativeThread = true,
+                nativeVpnJobActive = true,
+            )
+        )
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldAwaitNativeStopOnCallerThread(
+                runsOnNativeThread = false,
+                nativeVpnJobActive = false,
+            )
+        )
+    }
 }

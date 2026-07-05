@@ -84,9 +84,6 @@ fun evaluateFreeTierStatusFetch(
 fun isFreeTierLinkCodeExpired(expiresAtMs: Long, nowMs: Long): Boolean =
     expiresAtMs > 0L && nowMs >= expiresAtMs
 
-/** Shown in every onboarding copy mode — Telegram may be blocked until VPN is on. */
-fun shouldShowTelegramVpnFirstHint(copyMode: FreeTierOnboardingCopyMode): Boolean = true
-
 fun shouldWarnLinkCodeExpiringSoon(
     secondsLeft: Int,
     warningThresholdSeconds: Int = FREE_TIER_LINK_CODE_EXPIRY_WARNING_SECONDS,
