@@ -157,10 +157,10 @@ class FreeTierApiTest {
     }
 
     @Test
-    fun buildAccountLinkCodeRequestBody_includesTelegramId() {
+    fun buildAccountLinkCodeRequestBody_isEmptyObject() {
         assertEquals(
-            """{"telegramId":123456789}""",
-            api.buildAccountLinkCodeRequestBody(123456789L)
+            "{}",
+            api.buildAccountLinkCodeRequestBody()
         )
     }
 

@@ -80,9 +80,3 @@ fun evaluateFreeTierStatusFetch(
 
 fun isFreeTierLinkCodeExpired(expiresAtMs: Long, nowMs: Long): Boolean =
     expiresAtMs > 0L && nowMs >= expiresAtMs
-
-fun parseTelegramUserId(input: String): Long? {
-    val trimmed = input.trim()
-    if (trimmed.isEmpty()) return null
-    return trimmed.toLongOrNull()?.takeIf { it > 0L }
-}

@@ -402,11 +402,6 @@
     <string name="free_tier_link_code_failed">Не вдалося отримати код прив\'язки.</string>
     <string name="free_tier_status_error_title">Не вдалося перевірити доступ</string>
     <string name="free_tier_status_check_failed">Не вдалося перевірити доступ за тарифом Free. Перевірте з\'єднання та спробуйте знову.</string>
-    <string name="free_tier_telegram_id_label">ID користувача Telegram</string>
-    <string name="free_tier_telegram_id_hint">Числовий ID Telegram-акаунта, який введе код у боті</string>
-    <string name="free_tier_telegram_id_required">Введіть ваш Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Введіть коректний числовий Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Відкрийте бота та надішліть /register за потреби. Використовуйте той самий Telegram-акаунт, який вводитиме код прив\'язки.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>

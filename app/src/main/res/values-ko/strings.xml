@@ -388,11 +388,6 @@
     <string name="free_tier_link_code_failed">연결 코드를 요청할 수 없습니다.</string>
     <string name="free_tier_status_error_title">액세스를 확인할 수 없음</string>
     <string name="free_tier_status_check_failed">Free 요금제 액세스를 확인할 수 없습니다. 연결을 확인하고 다시 시도하세요.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>

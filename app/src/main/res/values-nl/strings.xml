@@ -388,11 +388,6 @@ Je kunt de releasepagina openen of de APK downloaden.</string>
     <string name="free_tier_link_code_failed">Kon geen koppelcode opvragen.</string>
     <string name="free_tier_status_error_title">Toegang kon niet worden gecontroleerd</string>
     <string name="free_tier_status_check_failed">Free-abonnementtoegang kon niet worden geverifieerd. Controleer uw verbinding en probeer opnieuw.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>

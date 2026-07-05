@@ -287,11 +287,6 @@
     <string name="free_tier_link_code_failed">Could not request a link code.</string>
     <string name="free_tier_status_error_title">Could not check access</string>
     <string name="free_tier_status_check_failed">Could not verify Free plan access. Check your connection and try again.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
     <string name="update_dialog_title">New version %1$s</string>
     <string name="update_dialog_body">A newer build is available on GitHub. Latest release: %1$s. You have: %2$s.\n\nYou can open the release page or download the APK. Use the option below to keep suggesting updates for future releases.</string>

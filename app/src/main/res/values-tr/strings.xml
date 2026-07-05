@@ -388,11 +388,6 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="free_tier_link_code_failed">Bağlantı kodu istenemedi.</string>
     <string name="free_tier_status_error_title">Erişim kontrol edilemedi</string>
     <string name="free_tier_status_check_failed">Free plan erişimi doğrulanamadı. Bağlantınızı kontrol edip tekrar deneyin.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>

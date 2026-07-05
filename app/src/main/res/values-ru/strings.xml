@@ -403,11 +403,6 @@
     <string name="free_tier_link_code_failed">Не удалось получить код связки.</string>
     <string name="free_tier_status_error_title">Не удалось проверить доступ</string>
     <string name="free_tier_status_check_failed">Не удалось проверить доступ по тарифу Free. Проверьте соединение и попробуйте снова.</string>
-    <string name="free_tier_telegram_id_label">ID пользователя Telegram</string>
-    <string name="free_tier_telegram_id_hint">Числовой ID Telegram-аккаунта, который введёт код в боте</string>
-    <string name="free_tier_telegram_id_required">Введите ваш Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Введите корректный числовой Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Откройте бота и отправьте /register при необходимости. Используйте тот же Telegram-аккаунт, который будет вводить код связки.</string>
 
 
     <string name="settings_bridge_ports_title">Локальные порты моста</string>
