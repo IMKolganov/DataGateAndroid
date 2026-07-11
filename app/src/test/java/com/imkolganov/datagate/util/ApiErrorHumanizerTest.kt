@@ -2,6 +2,11 @@ package com.imkolganov.datagate.util
 
 import android.app.Application
 import android.content.res.Resources
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
+import androidx.credentials.exceptions.GetCredentialUnknownException
+import androidx.credentials.exceptions.GetCredentialUnsupportedException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.test.core.app.ApplicationProvider
 import com.imkolganov.datagate.R
 import org.junit.Assert.assertEquals
@@ -89,6 +94,88 @@ class ApiErrorHumanizerTest {
         val level1 = RuntimeException("API call failed", level2)
         val msg = resources.userFriendlyApiError(level1)
         assertEquals(resources.getString(R.string.error_network_no_internet), msg)
+    }
+
+    // --- Google Credential Manager (Sign-in with Google) classification ---
+    // GoogleCredentialManager.getGoogleIdTokenOrThrow always wraps the androidx.credentials
+    // exception it caught as the `cause` of an IllegalStateException with a technical
+    // "class=..., type=..., message=..." string — these tests mirror that shape.
+
+    @Test
+    fun googleCredentialCancellation_mapsToFriendlySignInCancelled() {
+        val wrapped = IllegalStateException(
+            "Google sign-in was cancelled or blocked by Credential Manager. " +
+                "class=GetCredentialCancellationException, type=TYPE_USER_CANCELED, message=User cancelled the selector",
+            GetCredentialCancellationException("User cancelled the selector")
+        )
+        val msg = resources.userFriendlyApiError(wrapped)
+        assertEquals(resources.getString(R.string.error_google_signin_cancelled), msg)
+    }
+
+    @Test
+    fun noCredentialException_mapsToNoAccountFound() {
+        val wrapped = IllegalStateException(
+            "No Google credential is available. Add a Google account, update Google Play services, or choose an account.",
+            NoCredentialException("No credentials available")
+        )
+        val msg = resources.userFriendlyApiError(wrapped)
+        assertEquals(resources.getString(R.string.error_google_no_account), msg)
+    }
+
+    @Test
+    fun getCredentialProviderConfigurationException_mapsToSignInConfigError() {
+        val wrapped = IllegalStateException(
+            "Google sign-in provider is not configured or is unavailable.",
+            GetCredentialProviderConfigurationException("Provider misconfigured")
+        )
+        val msg = resources.userFriendlyApiError(wrapped)
+        assertEquals(resources.getString(R.string.error_google_signin_config), msg)
+    }
+
+    @Test
+    fun getCredentialUnsupportedException_mapsToSignInUnsupported() {
+        val wrapped = IllegalStateException(
+            "Google sign-in is not supported on this device or Credential Manager is disabled.",
+            GetCredentialUnsupportedException("Unsupported")
+        )
+        val msg = resources.userFriendlyApiError(wrapped)
+        assertEquals(resources.getString(R.string.error_google_signin_unsupported), msg)
+    }
+
+    @Test
+    fun otherGetCredentialException_mapsToGenericSignInFailed() {
+        val wrapped = IllegalStateException(
+            "Google Credential Manager failed.",
+            GetCredentialUnknownException("Unknown failure")
+        )
+        val msg = resources.userFriendlyApiError(wrapped)
+        assertEquals(resources.getString(R.string.error_google_signin_failed), msg)
+    }
+
+    @Test
+    fun googleReauthFallbackFailure_stillTakesPriorityOverGenericCancellationType() {
+        // The wrapper message names both flows explicitly; even though its `cause` is a plain
+        // GetCredentialCancellationException, the richer, more actionable reauth-fallback message
+        // must win over the generic "sign-in cancelled" classification.
+        val wrapped = IllegalStateException(
+            "Google account reauth failed, and account picker fallback also failed. " +
+                "Primary: class=GetCredentialCancellationException, type=[16]. " +
+                "Fallback: class=GetCredentialCancellationException, type=TYPE_USER_CANCELED.",
+            GetCredentialCancellationException("User cancelled the selector")
+        )
+        val msg = resources.userFriendlyApiError(wrapped)
+        assertEquals(resources.getString(R.string.error_google_account_reauth_fallback_failed), msg)
+    }
+
+    @Test
+    fun googleReauthFailure_stillTakesPriorityOverGenericCancellationType() {
+        val wrapped = IllegalStateException(
+            "Google sign-in was cancelled or blocked by Credential Manager. " +
+                "class=GetCredentialCancellationException, type=[16], message=Account reauth failed",
+            GetCredentialCancellationException("Account reauth failed")
+        )
+        val msg = resources.userFriendlyApiError(wrapped)
+        assertEquals(resources.getString(R.string.error_google_account_reauth_failed), msg)
     }
 
     @Test

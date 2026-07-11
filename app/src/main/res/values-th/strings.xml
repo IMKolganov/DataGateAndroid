@@ -307,6 +307,11 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">การยืนยันตัวตน Google อีกครั้งล้มเหลว ตรวจสอบบัญชี Google บนอุปกรณ์นี้ อัปเดต Google Play services แล้วลองเข้าสู่ระบบอีกครั้ง</string>
     <string name="error_google_account_reauth_fallback_failed">การเข้าสู่ระบบ Google ล้มเหลวก่อนติดต่อแบ็กเอนด์ ทั้งสองขั้นตอน Google Credential Manager ล้มเหลวขณะยืนยันตัวตนอีกครั้ง หากมีบัญชี Google บนอุปกรณ์ ให้ตรวจสอบชื่อแพ็กเกจไคลเอนต์ OAuth Android และ SHA-1/SHA-256 ของบิลด์นี้</string>
+    <string name="error_google_signin_cancelled">การเข้าสู่ระบบถูกยกเลิก หากอุปกรณ์นี้ไม่มีบัญชี Google ให้เพิ่มบัญชีในการตั้งค่าแล้วลองอีกครั้ง</string>
+    <string name="error_google_no_account">ไม่พบบัญชี Google บนอุปกรณ์นี้ เพิ่มบัญชี Google ในการตั้งค่า แล้วลองอีกครั้ง</string>
+    <string name="error_google_signin_config">การเข้าสู่ระบบ Google ตั้งค่าไม่ถูกต้องบนอุปกรณ์นี้ อัปเดต Google Play services แล้วลองอีกครั้ง</string>
+    <string name="error_google_signin_unsupported">อุปกรณ์นี้ไม่รองรับการเข้าสู่ระบบ Google</string>
+    <string name="error_google_signin_failed">เข้าสู่ระบบ Google ไม่สำเร็จ กรุณาลองอีกครั้ง</string>
     <string name="error_network_no_internet">ไม่มีการเชื่อมต่ออินเทอร์เน็ต ตรวจสอบเครือข่ายของคุณแล้วลองอีกครั้ง</string>
     <string name="error_network_timeout">การเชื่อมต่อหมดเวลา ลองอีกครั้ง</string>
     <string name="error_network_interrupted">การเชื่อมต่อเครือข่ายถูกขัดจังหวะ ลองอีกครั้ง</string>

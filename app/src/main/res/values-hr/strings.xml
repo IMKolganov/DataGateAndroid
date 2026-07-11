@@ -325,6 +325,11 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Ponovna autentikacija Google računa nije uspjela. Provjerite Google račun na ovom uređaju, ažurirajte Google Play usluge zatim pokušajte se ponovo prijaviti.</string>
     <string name="error_google_account_reauth_fallback_failed">Prijava Googleom nije uspjela prije kontakta s pozadinom. Oba tijeka Google Credential Managera nisu uspjela tijekom ponovne autentikacije. Ako je na uređaju prisutan Google račun, provjerite OAuth Android naziv paketa klijenta te SHA‑1/SHA‑256 ovog izdanja.</string>
+    <string name="error_google_signin_cancelled">Prijava je otkazana. Ako na ovom uređaju nema Google računa, dodajte ga u postavkama i pokušajte ponovo.</string>
+    <string name="error_google_no_account">Na ovom uređaju nije pronađen Google račun. Dodajte Google račun u postavkama, zatim pokušajte ponovo.</string>
+    <string name="error_google_signin_config">Prijava putem Googlea nije pravilno konfigurirana na ovom uređaju. Ažurirajte Google Play usluge i pokušajte ponovo.</string>
+    <string name="error_google_signin_unsupported">Prijava putem Googlea nije podržana na ovom uređaju.</string>
+    <string name="error_google_signin_failed">Prijava putem Googlea nije uspjela. Pokušajte ponovo.</string>
     <string name="error_network_no_internet">Nema internetske veze. Provjerite mrežu i pokušajte ponovno.</string>
     <string name="error_network_timeout">Isteklo je vrijeme veze. Pokušajte ponovno.</string>
     <string name="error_network_interrupted">Mrežna veza je prekinuta. Pokušajte ponovno.</string>

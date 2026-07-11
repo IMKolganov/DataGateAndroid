@@ -307,6 +307,11 @@ Możesz otworzyć stronę wydania lub pobrać APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Ponowna autoryzacja konta Google nie powiodła się. Sprawdź konto Google na tym urządzeniu, zaktualizuj Usługi Google Play i spróbuj zalogować się ponownie.</string>
     <string name="error_google_account_reauth_fallback_failed">Logowanie Google nie powiodło się przed połączeniem z zapleczem. Oba przebiegi Google Credential Manager nie powiodły się przy ponownej autoryzacji. Jeśli na urządzeniu jest konto Google, sprawdź nazwę pakietu klienta OAuth dla Android oraz SHA‑1/SHA‑256 dla tej kompilacji.</string>
+    <string name="error_google_signin_cancelled">Logowanie zostało anulowane. Jeśli na tym urządzeniu nie ma konta Google, dodaj je w Ustawieniach i spróbuj ponownie.</string>
+    <string name="error_google_no_account">Nie znaleziono konta Google na tym urządzeniu. Dodaj konto Google w Ustawieniach, a następnie spróbuj ponownie.</string>
+    <string name="error_google_signin_config">Logowanie przez Google nie jest prawidłowo skonfigurowane na tym urządzeniu. Zaktualizuj Usługi Google Play i spróbuj ponownie.</string>
+    <string name="error_google_signin_unsupported">Logowanie przez Google nie jest obsługiwane na tym urządzeniu.</string>
+    <string name="error_google_signin_failed">Logowanie przez Google nie powiodło się. Spróbuj ponownie.</string>
     <string name="error_network_no_internet">Brak połączenia z internetem. Sprawdź sieć i spróbuj ponownie.</string>
     <string name="error_network_timeout">Przekroczono limit czasu połączenia. Spróbuj ponownie.</string>
     <string name="error_network_interrupted">Połączenie sieciowe zostało przerwane. Spróbuj ponownie.</string>

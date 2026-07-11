@@ -171,18 +171,18 @@ class VpnLifecyclePolicyTest {
     @Test
     fun pauseResumeCommands_matchServiceValidation() {
         val reject = VpnCommandContract.evaluatePause(
-            VpnCommandContract.VpnServiceSnapshot("IDLE", hasActiveSession = false, vpnClientPresent = false, isPaused = false)
+            VpnCommandContract.VpnServiceSnapshot(hasActiveSession = false, vpnClientPresent = false, isPaused = false)
         )
         assertTrue(reject is VpnCommandContract.CommandDecision.Reject)
         assertEquals("no_active_session", (reject as VpnCommandContract.CommandDecision.Reject).reason)
 
         val accept = VpnCommandContract.evaluatePause(
-            VpnCommandContract.VpnServiceSnapshot("CONNECTED", hasActiveSession = true, vpnClientPresent = true, isPaused = false)
+            VpnCommandContract.VpnServiceSnapshot(hasActiveSession = true, vpnClientPresent = true, isPaused = false)
         )
         assertTrue(accept is VpnCommandContract.CommandDecision.Accept)
 
         val resumeReject = VpnCommandContract.evaluateResume(
-            VpnCommandContract.VpnServiceSnapshot("CONNECTED", hasActiveSession = true, vpnClientPresent = true, isPaused = false)
+            VpnCommandContract.VpnServiceSnapshot(hasActiveSession = true, vpnClientPresent = true, isPaused = false)
         )
         assertTrue(resumeReject is VpnCommandContract.CommandDecision.Reject)
     }
@@ -239,6 +239,17 @@ class VpnLifecyclePolicyTest {
         assertFalse(restored.isVpnPaused)
         assertEquals("Frankfurt", restored.selectedServerName)
         assertEquals(7, restored.selectedServerId)
+    }
+
+    @Test
+    fun hasVpnPermission_isPreserved_acrossBroadcasts() {
+        val initial = VpnStatusUiState(hasVpnPermission = false)
+        val afterConnecting = mapper(initial, "CONNECTING", "")
+        assertFalse(afterConnecting.hasVpnPermission)
+
+        val granted = VpnStatusUiState(hasVpnPermission = true)
+        val afterConnected = mapper(granted, "CONNECTED", "")
+        assertTrue(afterConnected.hasVpnPermission)
     }
 
     @Test

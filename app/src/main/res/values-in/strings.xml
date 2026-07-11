@@ -307,6 +307,11 @@ Anda dapat membuka halaman rilis atau mengunduh APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Autentikasi ulang akun Google gagal. Periksa akun Google di perangkat ini, perbarui Google Play services, lalu coba masuk lagi.</string>
     <string name="error_google_account_reauth_fallback_failed">Masuk Google gagal sebelum menghubungi backend. Kedua alur Google Credential Manager gagal saat mengautentikasi ulang akun. Jika ada akun Google di perangkat, periksa nama paket klien OAuth Android dan SHA-1/SHA-256 untuk build ini.</string>
+    <string name="error_google_signin_cancelled">Login dibatalkan. Jika tidak ada akun Google di perangkat ini, tambahkan satu di Setelan dan coba lagi.</string>
+    <string name="error_google_no_account">Tidak ditemukan akun Google di perangkat ini. Tambahkan akun Google di Setelan, lalu coba lagi.</string>
+    <string name="error_google_signin_config">Login Google tidak dikonfigurasi dengan benar di perangkat ini. Perbarui Google Play services dan coba lagi.</string>
+    <string name="error_google_signin_unsupported">Login Google tidak didukung di perangkat ini.</string>
+    <string name="error_google_signin_failed">Login Google gagal. Coba lagi.</string>
     <string name="error_network_no_internet">Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.</string>
     <string name="error_network_timeout">Koneksi melewati batas waktu. Coba lagi.</string>
     <string name="error_network_interrupted">Koneksi jaringan terputus. Coba lagi.</string>

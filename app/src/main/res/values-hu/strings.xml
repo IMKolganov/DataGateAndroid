@@ -325,6 +325,11 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">A Google-fiók újbóli hitelesítése sikertelen. Ellenőrizd a Google-fiókot ezen az eszközön, frissítsd a Google Play szolgáltatásokat, majd próbáld újra a bejelentkezést.</string>
     <string name="error_google_account_reauth_fallback_failed">Google bejelentkezés a háttér elérése előtt meghiúsult. Mindkét Google Credential Manager folyamat sikertelen volt az újbóli hitelesítéskor. Ha van Google-fiók az eszközön, ellenőrizd az OAuth Android ügyfél csomagnevét és a build SHA‑1/SHA‑256 értékeit.</string>
+    <string name="error_google_signin_cancelled">A bejelentkezés megszakadt. Ha nincs Google-fiók ezen az eszközön, adj hozzá egyet a Beállításokban, és próbáld újra.</string>
+    <string name="error_google_no_account">Nem található Google-fiók ezen az eszközön. Adj hozzá egy Google-fiókot a Beállításokban, majd próbáld újra.</string>
+    <string name="error_google_signin_config">A Google-bejelentkezés nincs megfelelően beállítva ezen az eszközön. Frissítsd a Google Play szolgáltatásokat, és próbáld újra.</string>
+    <string name="error_google_signin_unsupported">A Google-bejelentkezés nem támogatott ezen az eszközön.</string>
+    <string name="error_google_signin_failed">A Google-bejelentkezés sikertelen volt. Próbáld újra.</string>
     <string name="error_network_no_internet">Nincs internetkapcsolat. Ellenőrizd a hálózatot, és próbáld újra.</string>
     <string name="error_network_timeout">A kapcsolat túllépte az időkorlátot. Próbáld újra.</string>
     <string name="error_network_interrupted">A hálózati kapcsolat megszakadt. Próbáld újra.</string>

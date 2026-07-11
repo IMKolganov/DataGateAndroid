@@ -325,6 +325,11 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Theip ar athfhíordheimhniú cuntais Google. Seiceáil an cuntas Google ar an ngléas seo, nuashonraigh seirbhísí Google Play, ansin bain triail eile as síniú isteach.</string>
     <string name="error_google_account_reauth_fallback_failed">Theip ar shíniú Google sular cuireadh teagmháil leis an mbuninneall. Theip ar an dá shruth Google Credential Manager agus an cuntas á athfhíordheimhniú. Más ann do chuntas Google ar an ngléas, seiceáil ainm pacáiste an chliaint OAuth Android agus SHA-1/SHA-256 don thógáil seo.</string>
+    <string name="error_google_signin_cancelled">Cuireadh an síniú isteach ar ceal. Mura bhfuil cuntas Google ar an ngléas seo, cuir ceann leis sna Socruithe agus bain triail eile as.</string>
+    <string name="error_google_no_account">Níor aimsíodh cuntas Google ar an ngléas seo. Cuir cuntas Google leis sna Socruithe, ansin bain triail eile as.</string>
+    <string name="error_google_signin_config">Níl an síniú isteach le Google cumraithe i gceart ar an ngléas seo. Nuashonraigh seirbhísí Google Play agus bain triail eile as.</string>
+    <string name="error_google_signin_unsupported">Ní thacaítear leis an síniú isteach le Google ar an ngléas seo.</string>
+    <string name="error_google_signin_failed">Theip ar an síniú isteach le Google. Bain triail eile as.</string>
     <string name="error_network_no_internet">Níl aon nasc idirlín ann. Seiceáil do líonra agus bain triail eile as.</string>
     <string name="error_network_timeout">Chuaigh an nasc thar am. Bain triail eile as.</string>
     <string name="error_network_interrupted">Cuireadh isteach ar an nasc líonra. Bain triail eile as.</string>

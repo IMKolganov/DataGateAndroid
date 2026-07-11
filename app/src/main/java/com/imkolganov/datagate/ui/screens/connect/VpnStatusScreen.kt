@@ -71,6 +71,7 @@ import com.imkolganov.datagate.vpn.VpnStatusUiState
 fun VpnStatusScreen(
     state: VpnStatusUiState,
     onConnectClick: () -> Unit,
+    onRequestPermissionClick: () -> Unit,
     onDisconnectClick: () -> Unit,
     onPauseClick: () -> Unit = {},
     onResumeClick: () -> Unit = {},
@@ -143,11 +144,20 @@ fun VpnStatusScreen(
 
     val scrollState = rememberScrollState()
     var showReportDialog by remember { mutableStateOf(false) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
     val onClick = {
         when {
+            isPausing || isResuming -> Unit // Command already pending — ignore taps until confirmed/rejected.
             isPaused -> onResumeClick()
             isConnected || isConnecting -> onDisconnectClick()
-            else -> onConnectClick()
+            else -> {
+                if (state.hasVpnPermission) {
+                    onConnectClick()
+                } else {
+                    showPermissionDialog = true
+                }
+            }
         }
     }
 
@@ -408,6 +418,27 @@ fun VpnStatusScreen(
             }
         )
     }
+
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text(stringResource(R.string.vpn_permission_dialog_title)) },
+            text = { Text(stringResource(R.string.vpn_permission_dialog_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionDialog = false
+                    onRequestPermissionClick()
+                }) {
+                    Text(stringResource(R.string.vpn_permission_dialog_grant))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text(stringResource(R.string.update_dialog_later))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -509,6 +540,7 @@ fun VpnStatusScreenPreview_Connected() {
                 lastMessage = "Connected to DataGate VPN (10.0.0.2)"
             ),
             onConnectClick = {},
+            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }
@@ -525,6 +557,7 @@ fun VpnStatusScreenPreview_Connecting() {
                 lastMessage = "Connecting to server..."
             ),
             onConnectClick = {},
+            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }
@@ -540,6 +573,7 @@ fun VpnStatusScreenPreview_Disconnected() {
                 lastMessage = ""
             ),
             onConnectClick = {},
+            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }

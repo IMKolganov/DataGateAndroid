@@ -307,6 +307,11 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google खाता पुनः प्रमाणीकरण विफल। इस डिवाइस पर Google खाता जाँचें, Google Play सेवाएँ अपडेट करें, फिर पुनः साइन इन करने का प्रयास करें।</string>
     <string name="error_google_account_reauth_fallback_failed">बैकएंड से संपर्क से पहले Google साइन-इन विफल। खाता पुनः प्रमाणीकरण के दौरान दोनों Google Credential Manager प्रवाह विफल। यदि डिवाइस पर Google खाता है, तो इस बिल्ड के लिए OAuth Android क्लाइंट पैकेज नाम तथा SHA-1/SHA-256 जाँचें।</string>
+    <string name="error_google_signin_cancelled">साइन-इन रद्द कर दिया गया। यदि इस डिवाइस पर कोई Google खाता नहीं है, तो सेटिंग्स में एक जोड़ें और फिर से प्रयास करें।</string>
+    <string name="error_google_no_account">इस डिवाइस पर कोई Google खाता नहीं मिला। सेटिंग्स में Google खाता जोड़ें, फिर से प्रयास करें।</string>
+    <string name="error_google_signin_config">इस डिवाइस पर Google साइन-इन सही तरीके से कॉन्फ़िगर नहीं है। Google Play सेवाएँ अपडेट करें और फिर से प्रयास करें।</string>
+    <string name="error_google_signin_unsupported">इस डिवाइस पर Google साइन-इन समर्थित नहीं है।</string>
+    <string name="error_google_signin_failed">Google साइन-इन विफल हुआ। कृपया फिर से प्रयास करें।</string>
     <string name="error_network_no_internet">इंटरनेट कनेक्शन नहीं है। अपना नेटवर्क जाँचें और फिर से प्रयास करें।</string>
     <string name="error_network_timeout">कनेक्शन का समय समाप्त हो गया। फिर से प्रयास करें।</string>
     <string name="error_network_interrupted">नेटवर्क कनेक्शन बाधित हो गया। फिर से प्रयास करें।</string>

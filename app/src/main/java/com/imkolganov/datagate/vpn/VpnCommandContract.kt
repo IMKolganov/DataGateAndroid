@@ -20,7 +20,6 @@ object VpnCommandContract {
     }
 
     data class VpnServiceSnapshot(
-        val runtimeState: String,
         val hasActiveSession: Boolean,
         val vpnClientPresent: Boolean,
         val isPaused: Boolean,

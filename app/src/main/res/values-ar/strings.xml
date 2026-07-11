@@ -312,6 +312,11 @@
     <string name="settings_ip_lists_android_12_warning">يتطلب تجاوز قائمة IP نظام Android 13 أو إصدارًا أحدث. في نظام التشغيل Android 12 والإصدارات الأقدم، يتم تعطيل وضع التوجيه هذا لأن واجهة VPN API لا يمكنها استبعاد قوائم المسارات الكبيرة بأمان.</string>
     <string name="error_google_account_reauth_failed">فشلت إعادة مصادقة حساب Google. تحقق من حساب Google على هذا الجهاز، وقم بتحديث خدمات Google Play، ثم حاول تسجيل الدخول مرة أخرى.</string>
     <string name="error_google_account_reauth_fallback_failed">فشل تسجيل الدخول إلى Google قبل الاتصال بالواجهة الخلفية. فشل كلا تدفقي مدير بيانات الاعتماد في Google أثناء إعادة مصادقة الحساب. إذا كان حساب Google موجودًا على الجهاز، فتحقق من اسم حزمة عميل OAuth Android وSHA-1/SHA-256 لهذا الإصدار.</string>
+    <string name="error_google_signin_cancelled">تم إلغاء تسجيل الدخول. إذا لم يكن هناك حساب Google على هذا الجهاز، فأضف حسابًا من الإعدادات وحاول مرة أخرى.</string>
+    <string name="error_google_no_account">لم يتم العثور على حساب Google على هذا الجهاز. أضف حساب Google من الإعدادات، ثم حاول مرة أخرى.</string>
+    <string name="error_google_signin_config">تسجيل الدخول إلى Google غير مهيأ بشكل صحيح على هذا الجهاز. حدّث خدمات Google Play وحاول مرة أخرى.</string>
+    <string name="error_google_signin_unsupported">تسجيل الدخول إلى Google غير مدعوم على هذا الجهاز.</string>
+    <string name="error_google_signin_failed">فشل تسجيل الدخول إلى Google. حاول مرة أخرى.</string>
     <string name="error_network_no_internet">لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.</string>
     <string name="error_network_timeout">انتهت مهلة الاتصال. حاول مرة أخرى.</string>
     <string name="error_network_interrupted">انقطع الاتصال بالشبكة. حاول مرة أخرى.</string>

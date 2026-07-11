@@ -502,7 +502,6 @@ class OpenVpn3Service : VpnService() {
     private fun processPause() {
         val decision = VpnCommandContract.evaluatePause(
             VpnCommandContract.VpnServiceSnapshot(
-                runtimeState = runtimeState.name,
                 hasActiveSession = hasActiveSession,
                 vpnClientPresent = vpnClient != null,
                 isPaused = isPaused,
@@ -551,7 +550,6 @@ class OpenVpn3Service : VpnService() {
     private fun processResume() {
         val decision = VpnCommandContract.evaluateResume(
             VpnCommandContract.VpnServiceSnapshot(
-                runtimeState = runtimeState.name,
                 hasActiveSession = hasActiveSession,
                 vpnClientPresent = vpnClient != null,
                 isPaused = isPaused,
@@ -574,10 +572,7 @@ class OpenVpn3Service : VpnService() {
                 action = { client.resume() },
                 onFailure = { error ->
                     Log.w(TAG, "client.resume() scheduling failed", error)
-                    isPaused = true
-                    connectInProgress = false
-                    transitionState(VpnRuntimeState.PAUSED, "resume_rollback")
-                    broadcastStatus("RESUME_REJECTED", error.message ?: "resume_failed")
+                    rollbackResumeCommand(error.message ?: "resume_failed")
                 },
             )
         } else if (pendingConnectRequest != null) {
@@ -586,6 +581,13 @@ class OpenVpn3Service : VpnService() {
             transitionState(VpnRuntimeState.IDLE, "resume_without_session")
             broadcastStatus("DISCONNECTED", getString(R.string.vpn_msg_disconnected))
         }
+    }
+
+    private fun rollbackResumeCommand(reason: String) {
+        isPaused = true
+        connectInProgress = false
+        transitionState(VpnRuntimeState.PAUSED, "resume_rollback")
+        broadcastStatus("RESUME_REJECTED", reason)
     }
 
     private fun processCoreEvent(name: String, info: String) {

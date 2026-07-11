@@ -1,6 +1,11 @@
 package com.imkolganov.datagate.util
 
 import android.content.res.Resources
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
+import androidx.credentials.exceptions.GetCredentialUnsupportedException
+import androidx.credentials.exceptions.NoCredentialException
 import com.imkolganov.datagate.R
 import java.net.ConnectException
 import java.net.NoRouteToHostException
@@ -28,13 +33,25 @@ fun Throwable.deepMessageForApiError(): String {
 /**
  * Turns a caught [Throwable] from a network/API call into a short, user-facing string.
  *
- * Classifies by walking the full cause chain and matching known network exception *types* first
- * (locale/OEM-independent, unlike message text), then falls back to the message-based
- * [userFriendlyApiError] below for anything else (HTTP error bodies, API-level messages, etc.).
+ * Classifies by walking the full cause chain and matching known network/Credential-Manager
+ * exception *types* first (locale/OEM-independent, unlike message text), then falls back to the
+ * message-based [userFriendlyApiError] below for anything else (HTTP error bodies, API-level
+ * messages, etc.).
+ *
+ * The Google-account-reauth narrative messages (built by [com.imkolganov.datagate.auth.GoogleCredentialManager]
+ * when a fallback sign-in attempt *also* fails) are deliberately checked first and, if matched, skip
+ * type classification entirely: they wrap a generic [GetCredentialException] subtype as their cause,
+ * which would otherwise be misclassified into a less specific message than the one already tailored
+ * to that scenario.
  */
 fun Resources.userFriendlyApiError(throwable: Throwable): String {
-    classifyNetworkException(throwable)?.let { return getString(it) }
-    return userFriendlyApiError(throwable.deepMessageForApiError())
+    val deepMessage = throwable.deepMessageForApiError()
+    val lower = deepMessage.lowercase(Locale.US)
+    if (!isGoogleReauthFallbackMessage(lower) && !isGoogleReauthFailureMessage(lower)) {
+        classifyNetworkException(throwable)?.let { return getString(it) }
+        classifyCredentialException(throwable)?.let { return getString(it) }
+    }
+    return userFriendlyApiError(deepMessage)
 }
 
 /**
@@ -61,6 +78,41 @@ private fun classifyNetworkException(throwable: Throwable): Int? {
 }
 
 /**
+ * Walks the throwable's cause chain looking for androidx.credentials Sign-in-with-Google failures
+ * (e.g. the user dismissing the account picker, or no Google account on the device), so they get a
+ * friendly, actionable message instead of raw `class=..., type=..., message=...` Credential Manager
+ * diagnostics (see [com.imkolganov.datagate.auth.GoogleCredentialManager]).
+ *
+ * Order matters: subtypes of [GetCredentialException] must be checked before the generic
+ * [GetCredentialException] catch-all.
+ */
+private fun classifyCredentialException(throwable: Throwable): Int? {
+    var c: Throwable? = throwable
+    var depth = 0
+    while (c != null && depth++ < 8) {
+        when (c) {
+            is NoCredentialException -> return R.string.error_google_no_account
+            is GetCredentialProviderConfigurationException -> return R.string.error_google_signin_config
+            is GetCredentialUnsupportedException -> return R.string.error_google_signin_unsupported
+            is GetCredentialCancellationException -> return R.string.error_google_signin_cancelled
+            is GetCredentialException -> return R.string.error_google_signin_failed
+        }
+        c = c.cause
+    }
+    return null
+}
+
+/**
+ * Shared with [userFriendlyApiError] (String) so the throwable-based entry point can skip type
+ * classification for these narrative messages instead of duplicating the substring checks.
+ */
+private fun isGoogleReauthFallbackMessage(lower: String): Boolean =
+    lower.contains("account picker fallback also failed")
+
+private fun isGoogleReauthFailureMessage(lower: String): Boolean =
+    lower.contains("account reauth failed") || lower.contains("[16]")
+
+/**
  * Turns raw API/HTTP exception text (often including nginx HTML bodies) into short, user-facing strings.
  */
 fun Resources.userFriendlyApiError(raw: String?): String {
@@ -81,11 +133,11 @@ fun Resources.userFriendlyApiError(raw: String?): String {
         return classifyHttpStatus(lower)
     }
 
-    if (lower.contains("account picker fallback also failed")) {
+    if (isGoogleReauthFallbackMessage(lower)) {
         return getString(R.string.error_google_account_reauth_fallback_failed)
     }
 
-    if (lower.contains("account reauth failed") || lower.contains("[16]")) {
+    if (isGoogleReauthFailureMessage(lower)) {
         return getString(R.string.error_google_account_reauth_failed)
     }
 

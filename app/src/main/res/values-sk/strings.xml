@@ -325,6 +325,11 @@ Môžete otvoriť stránku vydania alebo stiahnuť APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Opätovná autentifikácia účtu Google zlyhala. Skontrolujte účet Google na tomto zariadení, aktualizujte služby Google Play a skúste sa znova prihlásiť.</string>
     <string name="error_google_account_reauth_fallback_failed">Prihlásenie cez Google zlyhalo pred kontaktom s backendom. Obe toky Google Credential Manager zlyhali pri opätovnej autentifikácii. Ak je na zariadení účet Google, skontrolujte názov balíka OAuth Android klienta a SHA-1/SHA-256 pre túto zostavu.</string>
+    <string name="error_google_signin_cancelled">Prihlásenie bolo zrušené. Ak na tomto zariadení nie je účet Google, pridajte ho v Nastaveniach a skúste to znova.</string>
+    <string name="error_google_no_account">Na tomto zariadení sa nenašiel žiadny účet Google. Pridajte účet Google v Nastaveniach a skúste to znova.</string>
+    <string name="error_google_signin_config">Prihlásenie cez Google nie je na tomto zariadení správne nakonfigurované. Aktualizujte služby Google Play a skúste to znova.</string>
+    <string name="error_google_signin_unsupported">Prihlásenie cez Google nie je na tomto zariadení podporované.</string>
+    <string name="error_google_signin_failed">Prihlásenie cez Google zlyhalo. Skúste to znova.</string>
     <string name="error_network_no_internet">Žiadne internetové pripojenie. Skontrolujte sieť a skúste znova.</string>
     <string name="error_network_timeout">Vypršal časový limit pripojenia. Skúste znova.</string>
     <string name="error_network_interrupted">Sieťové pripojenie bolo prerušené. Skúste znova.</string>

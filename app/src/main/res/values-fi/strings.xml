@@ -307,6 +307,11 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google-tilin uudelleentunnistautuminen epäonnistui. Tarkista Google-tili tässä laitteessa, päivitä Google Play -palvelut ja yritä kirjautua uudelleen.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-kirjautuminen epäonnistui ennen taustajärjestelmään yhteyttä. Molemmat Google Credential Manager -virrat epäonnistuivat tilin uudelleentunnistautumisessa. Jos laitteella on Google-tili, tarkista OAuth Android -asiakkaan paketin nimi ja tämän version SHA-1/SHA-256.</string>
+    <string name="error_google_signin_cancelled">Kirjautuminen peruutettiin. Jos tässä laitteessa ei ole Google-tiliä, lisää yksi asetuksista ja yritä uudelleen.</string>
+    <string name="error_google_no_account">Tästä laitteesta ei löytynyt Google-tiliä. Lisää Google-tili asetuksissa ja yritä uudelleen.</string>
+    <string name="error_google_signin_config">Google-kirjautumista ei ole määritetty oikein tässä laitteessa. Päivitä Google Play -palvelut ja yritä uudelleen.</string>
+    <string name="error_google_signin_unsupported">Google-kirjautumista ei tueta tässä laitteessa.</string>
+    <string name="error_google_signin_failed">Google-kirjautuminen epäonnistui. Yritä uudelleen.</string>
     <string name="error_network_no_internet">Ei internetyhteyttä. Tarkista verkkoyhteys ja yritä uudelleen.</string>
     <string name="error_network_timeout">Yhteys aikakatkaistiin. Yritä uudelleen.</string>
     <string name="error_network_interrupted">Verkkoyhteys katkesi. Yritä uudelleen.</string>

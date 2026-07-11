@@ -29,7 +29,6 @@ class VpnCommandContractTest {
     fun evaluatePause_rejectsWhenNoActiveSessionAndNoClient() {
         val decision = VpnCommandContract.evaluatePause(
             VpnCommandContract.VpnServiceSnapshot(
-                runtimeState = "CONNECTED",
                 hasActiveSession = false,
                 vpnClientPresent = false,
                 isPaused = false,
@@ -42,12 +41,12 @@ class VpnCommandContractTest {
     @Test
     fun evaluatePause_acceptsWhenSessionOrClientPresent() {
         val withSession = VpnCommandContract.evaluatePause(
-            VpnCommandContract.VpnServiceSnapshot("CONNECTED", hasActiveSession = true, vpnClientPresent = false, isPaused = false)
+            VpnCommandContract.VpnServiceSnapshot(hasActiveSession = true, vpnClientPresent = false, isPaused = false)
         )
         assertTrue(withSession is VpnCommandContract.CommandDecision.Accept)
 
         val withClient = VpnCommandContract.evaluatePause(
-            VpnCommandContract.VpnServiceSnapshot("CONNECTING", hasActiveSession = false, vpnClientPresent = true, isPaused = false)
+            VpnCommandContract.VpnServiceSnapshot(hasActiveSession = false, vpnClientPresent = true, isPaused = false)
         )
         assertTrue(withClient is VpnCommandContract.CommandDecision.Accept)
     }
@@ -55,7 +54,7 @@ class VpnCommandContractTest {
     @Test
     fun evaluateResume_rejectsWhenNotPaused() {
         val decision = VpnCommandContract.evaluateResume(
-            VpnCommandContract.VpnServiceSnapshot("CONNECTED", hasActiveSession = true, vpnClientPresent = true, isPaused = false)
+            VpnCommandContract.VpnServiceSnapshot(hasActiveSession = true, vpnClientPresent = true, isPaused = false)
         )
         assertTrue(decision is VpnCommandContract.CommandDecision.Reject)
         assertEquals("not_paused", (decision as VpnCommandContract.CommandDecision.Reject).reason)
@@ -102,7 +101,7 @@ class VpnCommandContractTest {
         assertFalse(ui.isVpnPaused)
 
         val decision = VpnCommandContract.evaluatePause(
-            VpnCommandContract.VpnServiceSnapshot("IDLE", false, false, false)
+            VpnCommandContract.VpnServiceSnapshot(false, false, false)
         )
         assertTrue(decision is VpnCommandContract.CommandDecision.Reject)
 

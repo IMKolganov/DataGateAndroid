@@ -59,7 +59,7 @@ class VpnController(
             Log.d(TAG, "Ignoring idle query DISCONNECTED over in-flight connect UI")
             return@VpnStatusBroadcastReceiver
         }
-        if (eventName == "PAUSED" || eventName == "RESUMED" || eventName == "CONNECTED" || eventName == "DISCONNECTED") {
+        if (VpnCommandContract.isAuthoritativeTunnelEvent(eventName)) {
             pendingCommandRollback = null
         }
         if (eventName == "DISCONNECTED" && !fromQuery) {
@@ -71,6 +71,7 @@ class VpnController(
 
     fun onStart() {
         registerReceiver()
+        updatePermissionState()
 
         val cached = VpnLifecyclePolicy.CachedPrefsSnapshot(
             selectedServerName = prefs.getString("selected_server_name", null),
@@ -197,6 +198,7 @@ class VpnController(
 
     fun onPermissionGranted() {
         Log.d(TAG, "VPN permission granted from launcher")
+        updatePermissionState()
 
         val cfg = pendingConfigText
         val wss = pendingWssLink
@@ -217,6 +219,7 @@ class VpnController(
 
     fun onPermissionDenied() {
         Log.w(TAG, "VPN permission denied from launcher")
+        updatePermissionState()
         pendingConfigText = null
         pendingWssLink = null
         pendingLinkProtocol = null
@@ -372,6 +375,22 @@ class VpnController(
         }
 
         isReceiverRegistered = true
+    }
+
+    private fun updatePermissionState() {
+        val hasPermission = VpnService.prepare(activity) == null
+        if (getState().hasVpnPermission != hasPermission) {
+            onStateChange(getState().copy(hasVpnPermission = hasPermission))
+        }
+    }
+
+    fun requestVpnPermission() {
+        val prepareIntent = VpnService.prepare(activity)
+        if (prepareIntent != null) {
+            permissionLauncher.launch(prepareIntent)
+        } else {
+            updatePermissionState()
+        }
     }
 
     fun showError(message: String) {

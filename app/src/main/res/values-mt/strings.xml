@@ -325,6 +325,11 @@ Tista’ tiftaħ il-paġna tar-rilaxx jew tniżżel l-APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Ir-ri-autentikazzjoni tal-kont Google falliet. Iċċekkja l-kont Google fuq dan it-tagħmir, aġġorna s-servizzi ta’ Google Play, imbagħad erġa’ pprova s-sign in.</string>
     <string name="error_google_account_reauth_fallback_failed">Is-sign in ma’ Google falliet qabel ma ngħata kontatt mal-backend. Iż-żewġ flows ta’ Google Credential Manager fallew waqt ir-ri-autentikazzjoni tal-kont. Jekk ikun hemm kont Google fuq it-tagħmir, iċċekkja l-isem tal-pakkett tal-klijent OAuth Android u SHA-1/SHA-256 għal dan il-build.</string>
+    <string name="error_google_signin_cancelled">Is-sign in tħassar. Jekk m’hemm l-ebda kont Google fuq dan it-tagħmir, żid wieħed fis-Settings u erġa’ pprova.</string>
+    <string name="error_google_no_account">Ma nstab l-ebda kont Google fuq dan it-tagħmir. Żid kont Google fis-Settings, imbagħad erġa’ pprova.</string>
+    <string name="error_google_signin_config">Is-sign in ta’ Google mhux ikkonfigurat sew fuq dan it-tagħmir. Aġġorna s-servizzi ta’ Google Play u erġa’ pprova.</string>
+    <string name="error_google_signin_unsupported">Is-sign in ta’ Google mhux appoġġjat fuq dan it-tagħmir.</string>
+    <string name="error_google_signin_failed">Is-sign in ta’ Google falla. Jekk jogħġbok erġa’ pprova.</string>
     <string name="error_network_no_internet">M\'hemm l-ebda konnessjoni tal-internet. Iċċekkja n-network tiegħek u erġa\' pprova.</string>
     <string name="error_network_timeout">Il-konnessjoni skadiet. Erġa\' pprova.</string>
     <string name="error_network_interrupted">Il-konnessjoni tan-network ġiet interrotta. Erġa\' pprova.</string>

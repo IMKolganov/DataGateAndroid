@@ -8,5 +8,6 @@ data class VpnStatusUiState(
     val pendingUserCommand: VpnCommandContract.PendingUserCommand? = null,
     val selectedServerName: String? = null,
     val lastMessage: String = "",
-    val selectedServerId: Int? = null
+    val selectedServerId: Int? = null,
+    val hasVpnPermission: Boolean = true
 )

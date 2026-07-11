@@ -307,6 +307,11 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">A reautenticação da conta Google falhou. Verifique a conta Google neste dispositivo, atualize o Google Play Services e tente entrar novamente.</string>
     <string name="error_google_account_reauth_fallback_failed">O login com Google falhou antes de contatar o backend. Ambos os fluxos do Google Credential Manager falharam ao reautenticar. Se houver uma conta Google no dispositivo, verifique o nome do pacote do cliente OAuth Android e os SHA-1/SHA-256 desta build.</string>
+    <string name="error_google_signin_cancelled">O login foi cancelado. Se não houver uma conta do Google neste dispositivo, adicione uma nas Configurações e tente novamente.</string>
+    <string name="error_google_no_account">Nenhuma conta do Google foi encontrada neste dispositivo. Adicione uma conta do Google nas Configurações e tente novamente.</string>
+    <string name="error_google_signin_config">O login do Google não está configurado corretamente neste dispositivo. Atualize o Google Play Services e tente novamente.</string>
+    <string name="error_google_signin_unsupported">O login do Google não é compatível com este dispositivo.</string>
+    <string name="error_google_signin_failed">Falha ao entrar com o Google. Tente novamente.</string>
     <string name="error_network_no_internet">Sem conexão com a internet. Verifique sua rede e tente novamente.</string>
     <string name="error_network_timeout">A conexão expirou. Tente novamente.</string>
     <string name="error_network_interrupted">A conexão de rede foi interrompida. Tente novamente.</string>

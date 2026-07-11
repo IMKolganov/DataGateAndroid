@@ -325,6 +325,11 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Reautentificarea contului Google a eșuat. Verifică contul Google pe acest dispozitiv, actualizează serviciile Google Play, apoi încearcă din nou autentificarea.</string>
     <string name="error_google_account_reauth_fallback_failed">Autentificarea Google a eșuat înainte de a contacta backend-ul. Ambele fluxuri Google Credential Manager au eșuat la reautentificare. Dacă există un cont Google pe dispozitiv, verifică numele pachetului clientului OAuth Android și SHA-1/SHA-256 pentru această build.</string>
+    <string name="error_google_signin_cancelled">Autentificarea a fost anulată. Dacă pe acest dispozitiv nu există un cont Google, adaugă unul din Setări și încearcă din nou.</string>
+    <string name="error_google_no_account">Nu a fost găsit niciun cont Google pe acest dispozitiv. Adaugă un cont Google din Setări, apoi încearcă din nou.</string>
+    <string name="error_google_signin_config">Autentificarea cu Google nu este configurată corect pe acest dispozitiv. Actualizează serviciile Google Play și încearcă din nou.</string>
+    <string name="error_google_signin_unsupported">Autentificarea cu Google nu este acceptată pe acest dispozitiv.</string>
+    <string name="error_google_signin_failed">Autentificarea cu Google a eșuat. Încearcă din nou.</string>
     <string name="error_network_no_internet">Nu există conexiune la internet. Verifică rețeaua și încearcă din nou.</string>
     <string name="error_network_timeout">Conexiunea a expirat. Încearcă din nou.</string>
     <string name="error_network_interrupted">Conexiunea la rețea a fost întreruptă. Încearcă din nou.</string>

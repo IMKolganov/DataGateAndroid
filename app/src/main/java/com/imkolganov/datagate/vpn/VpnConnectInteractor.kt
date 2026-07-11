@@ -180,6 +180,9 @@ class VpnConnectInteractor(
                 android12OvpnRouteLimit = ipListSettings.android12OvpnRouteLimit,
                 supportsAndroidRouteExclusion = supportsAndroidRouteExclusion
             )
+            IpListEstablishRoutePolicy.establishBudgetViolation(routePlan, ipListSettings.coverageMode)?.let { violation ->
+                Log.w("OpenVPN3", "excludeRoute establish budget violation: $violation")
+            }
             Log.d(
                 "OpenVPN3",
                 "IP list routes prepared: applied=${routePlan.appliedRouteCount}/${bypassRoutes.size}, " +

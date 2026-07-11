@@ -63,6 +63,7 @@ fun AccessScreen(
     vpnState: VpnStatusUiState,
     onEvent: (AccessContract.UiEvent) -> Unit,
     onConnectVpn: () -> Unit,
+    onRequestPermissionClick: () -> Unit,
     onDisconnectVpn: () -> Unit,
     onPauseVpn: () -> Unit = {},
     onResumeVpn: () -> Unit = {},
@@ -99,6 +100,7 @@ fun AccessScreen(
     val externalIpLoading = state.isLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
 
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
     var noWssDialogName by remember { mutableStateOf<String?>(null) }
     var xrayDialogName by remember { mutableStateOf<String?>(null) }
     var unsupportedTypeDialogName by remember { mutableStateOf<String?>(null) }
@@ -162,7 +164,11 @@ fun AccessScreen(
                 noWssDialogName = server.name
                 return
             }
-            onConnectVpn()
+            if (vpnState.hasVpnPermission) {
+                onConnectVpn()
+            } else {
+                showPermissionDialog = true
+            }
         }
     }
 
@@ -251,6 +257,27 @@ fun AccessScreen(
             confirmButton = {
                 TextButton(onClick = { unsupportedTypeDialogName = null }) {
                     Text(stringResource(R.string.action_ok))
+                }
+            }
+        )
+    }
+
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text(stringResource(R.string.vpn_permission_dialog_title)) },
+            text = { Text(stringResource(R.string.vpn_permission_dialog_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionDialog = false
+                    onRequestPermissionClick()
+                }) {
+                    Text(stringResource(R.string.vpn_permission_dialog_grant))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text(stringResource(R.string.update_dialog_later))
                 }
             }
         )

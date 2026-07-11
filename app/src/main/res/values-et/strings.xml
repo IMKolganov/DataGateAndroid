@@ -325,6 +325,11 @@ Võite avada väljalaske lehe või laadida APK alla.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google konto uuesti autentimine ebaõnnestus. Kontrollige selle seadme Google kontot, värskendage Google Play teenuseid ja proovige uuesti sisse logida.</string>
     <string name="error_google_account_reauth_fallback_failed">Google sisselogimine ebaõnnestus enne backendiga ühendust. Mõlemad Google Credential Manager voogude katsetused konto uuesti autentimisel ebaõnnestusid. Kui seadmel on Google konto, kontrollige selle ühenduse OAuth Android kliendi paketi nime ja SHA-1/SHA-256 räsandeid selle kompilatsiooni jaoks.</string>
+    <string name="error_google_signin_cancelled">Sisselogimine katkestati. Kui sellel seadmel ei ole Google kontot, lisage üks seadetes ja proovige uuesti.</string>
+    <string name="error_google_no_account">Sellel seadmel ei leitud Google kontot. Lisage Google konto seadetes ja proovige uuesti.</string>
+    <string name="error_google_signin_config">Google\'iga sisselogimine ei ole sellel seadmel õigesti seadistatud. Värskendage Google Play teenuseid ja proovige uuesti.</string>
+    <string name="error_google_signin_unsupported">Google\'iga sisselogimine ei ole selles seadmes toetatud.</string>
+    <string name="error_google_signin_failed">Google\'iga sisselogimine ebaõnnestus. Proovige uuesti.</string>
     <string name="error_network_no_internet">Interneti-ühendus puudub. Kontrollige võrku ja proovige uuesti.</string>
     <string name="error_network_timeout">Ühenduse ajalõpp. Proovige uuesti.</string>
     <string name="error_network_interrupted">Võrguühendus katkes. Proovige uuesti.</string>
