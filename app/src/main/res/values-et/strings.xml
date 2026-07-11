@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Telli — see on oluline</string>
     <string name="home_telegram_channel_body">Projekti Telegrami kanal: uudised ja teated teenuseprobleemide korral.</string>
+    <string name="home_grace_banner_title">Ühendatud — ajutine juurdepääs</string>
+    <string name="home_grace_banner_body">Seo oma konto või telli %1$s jooksul, vastasel juhul see seanss katkestatakse.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

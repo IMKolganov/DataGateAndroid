@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Berlangganan — ini penting</string>
     <string name="home_telegram_channel_body">Saluran Telegram proyek: berita terbaru dan pengumuman jika layanan bermasalah.</string>
+    <string name="home_grace_banner_title">Tersambung — akses sementara</string>
+    <string name="home_grace_banner_body">Tautkan akun Anda atau berlangganan dalam %1$s atau sesi ini akan diputus.</string>
     <string name="stats_filters">Filter</string>
     <string name="stats_overview">Ringkasan</string>
     <string name="stats_chart_hint">Ketuk grafik · cubit untuk zoom · seret untuk gulir</string>

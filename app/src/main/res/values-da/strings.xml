@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Abonner — det er vigtigt</string>
     <string name="home_telegram_channel_body">Projektets Telegram-kanal: aktuelle nyheder og meddelelser ved serviceproblemer.</string>
+    <string name="home_grace_banner_title">Forbundet — midlertidig adgang</string>
+    <string name="home_grace_banner_body">Kobl din konto sammen eller abonnér inden for %1$s, ellers bliver denne session afbrudt.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">عضو شوید — مهم است</string>
     <string name="home_telegram_channel_body">کانال تلگرام پروژه: اخبار و اعلامیه‌ها در صورت مشکل سرویس.</string>
+    <string name="home_grace_banner_title">متصل — دسترسی موقت</string>
+    <string name="home_grace_banner_body">حساب خود را پیوند دهید یا در %1$s مشترک شوید، در غیر این صورت این جلسه قطع خواهد شد.</string>
     <string name="stats_filters">فیلترها</string>
     <string name="stats_overview">نمای کلی</string>
     <string name="stats_chart_hint">نمودار را لمس کنید · برای زوم بکشید · برای اسکرول بکشید</string>

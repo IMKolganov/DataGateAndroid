@@ -46,7 +46,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,6 +68,7 @@ import com.imkolganov.datagate.update.GitHubLatestRelease
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.VpnCommandContract
 import com.imkolganov.datagate.vpn.VpnStatusUiState
+import kotlinx.coroutines.delay
 
 @Composable
 fun VpnStatusScreen(
@@ -78,6 +81,7 @@ fun VpnStatusScreen(
     homeUpdateBanner: GitHubLatestRelease? = null,
     onHomeUpdateBannerAction: (GitHubLatestRelease) -> Unit = {},
     onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
+    graceExpiresAtUtcMs: Long? = null,
 ) {
     val context = LocalContext.current
     val supportEmail = stringResource(R.string.support_contact_email)
@@ -145,6 +149,23 @@ fun VpnStatusScreen(
     val scrollState = rememberScrollState()
     var showReportDialog by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
+
+    var graceSecondsLeft by remember { mutableIntStateOf(0) }
+    LaunchedEffect(graceExpiresAtUtcMs, isConnected) {
+        if (graceExpiresAtUtcMs == null || !isConnected) {
+            graceSecondsLeft = 0
+            return@LaunchedEffect
+        }
+        while (true) {
+            val remaining = ((graceExpiresAtUtcMs - System.currentTimeMillis()) / 1000L).toInt()
+            if (remaining <= 0) {
+                graceSecondsLeft = 0
+                break
+            }
+            graceSecondsLeft = remaining
+            delay(1000L)
+        }
+    }
 
     val onClick = {
         when {
@@ -258,6 +279,11 @@ fun VpnStatusScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
+                }
+
+                if (isConnected && graceSecondsLeft > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    HomeGraceBanner(secondsLeft = graceSecondsLeft)
                 }
 
                 Box(
@@ -454,6 +480,43 @@ private fun HomeBrandHeader() {
             fontWeight = FontWeight.SemiBold,
         )
     }
+}
+
+@Composable
+private fun HomeGraceBanner(secondsLeft: Int) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 520.dp)
+            .padding(horizontal = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.home_grace_banner_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.home_grace_banner_body, formatGraceCountdown(secondsLeft)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.9f),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+private fun formatGraceCountdown(totalSeconds: Int): String {
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "%d:%02d".format(minutes, seconds)
 }
 
 @Composable

@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Pretplatite se — važno je</string>
     <string name="home_telegram_channel_body">Telegram kanal projekta: vijesti i obavijesti o problemima usluge.</string>
+    <string name="home_grace_banner_title">Povezano — privremeni pristup</string>
+    <string name="home_grace_banner_body">Povežite račun ili se pretplatite unutar %1$s, inače će ova sesija biti prekinuta.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

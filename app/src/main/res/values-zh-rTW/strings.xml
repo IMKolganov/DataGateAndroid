@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">訂閱頻道 — 很重要</string>
     <string name="home_telegram_channel_body">專案 Telegram 頻道：最新消息與服務故障公告。</string>
+    <string name="home_grace_banner_title">已連線 — 臨時存取</string>
+    <string name="home_grace_banner_body">請在%1$s內綁定帳號或訂閱,否則此連線將被中斷。</string>
     <string name="stats_filters">篩選</string>
     <string name="stats_overview">概覽</string>
     <string name="stats_chart_hint">點按圖表 · 雙指縮放 · 拖曳捲動</string>

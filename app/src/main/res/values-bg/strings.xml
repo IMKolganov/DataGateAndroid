@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Абонирайте се — важно е</string>
     <string name="home_telegram_channel_body">Telegram каналът на проекта: актуални новини и съобщения при проблеми с услугата.</string>
+    <string name="home_grace_banner_title">Свързан — временен достъп</string>
+    <string name="home_grace_banner_body">Свържете акаунта си или се абонирайте до %1$s, иначе тази сесия ще бъде прекратена.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Odebírejte — je to důležité</string>
     <string name="home_telegram_channel_body">Telegram kanál projektu: aktuální novinky a oznámení při výpadcích služby.</string>
+    <string name="home_grace_banner_title">Připojeno — dočasný přístup</string>
+    <string name="home_grace_banner_body">Propojte účet nebo se přihlaste k odběru do %1$s, jinak bude toto připojení ukončeno.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

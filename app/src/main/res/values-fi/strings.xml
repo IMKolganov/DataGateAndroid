@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Tilaa — se on tärkeää</string>
     <string name="home_telegram_channel_body">Projektin Telegram-kanava: uutiset ja ilmoitukset palveluhäiriöistä.</string>
+    <string name="home_grace_banner_title">Yhdistetty — väliaikainen käyttöoikeus</string>
+    <string name="home_grace_banner_body">Liitä tilisi tai tilaa %1$s kuluessa, tai tämä istunto katkaistaan.</string>
     <string name="stats_filters">Suodattimet</string>
     <string name="stats_overview">Yleiskuva</string>
     <string name="stats_chart_hint">Napauta kaaviota · nipistä zoom · vedä vieritys</string>

@@ -95,50 +95,6 @@ class AuthRepositorySessionTest {
     ) = AuthRepository(api, store, autoLogin)
 }
 
-class LegacyAuthMigrationTest {
-    @Test
-    fun evaluate_freshInstallWithRestoredBackup_clearsSession() {
-        val decision = LegacyAuthMigration.evaluate(
-            LegacyAuthMigration.Input(
-                migrationAlreadyDone = false,
-                isAppUpdate = false,
-                isFreshInstall = true,
-                hasLegacySessionData = true,
-            )
-        )
-        assertTrue(decision.shouldClearSession)
-        assertTrue(decision.shouldMarkMigrationDone)
-    }
-
-    @Test
-    fun evaluate_freshInstallNoTokens_doesNotClear() {
-        val decision = LegacyAuthMigration.evaluate(
-            LegacyAuthMigration.Input(
-                migrationAlreadyDone = false,
-                isAppUpdate = false,
-                isFreshInstall = true,
-                hasLegacySessionData = false,
-            )
-        )
-        assertFalse(decision.shouldClearSession)
-        assertTrue(decision.shouldMarkMigrationDone)
-    }
-
-    @Test
-    fun evaluate_alreadyMigrated_isNoOp() {
-        val decision = LegacyAuthMigration.evaluate(
-            LegacyAuthMigration.Input(
-                migrationAlreadyDone = true,
-                isAppUpdate = true,
-                isFreshInstall = false,
-                hasLegacySessionData = true,
-            )
-        )
-        assertFalse(decision.shouldClearSession)
-        assertFalse(decision.shouldMarkMigrationDone)
-    }
-}
-
 private class FakeTokenStore(
     private var access: String? = null,
     private var refresh: String? = null,

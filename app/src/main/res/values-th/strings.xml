@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">สมัครติดตาม — สำคัญ</string>
     <string name="home_telegram_channel_body">ช่อง Telegram ของโปรเจกต์: ข่าวล่าสุดและประกาศเมื่อบริการมีปัญหา</string>
+    <string name="home_grace_banner_title">เชื่อมต่อแล้ว — การเข้าถึงชั่วคราว</string>
+    <string name="home_grace_banner_body">เชื่อมโยงบัญชีของคุณหรือสมัครสมาชิกภายใน %1$s มิฉะนั้นเซสชันนี้จะถูกตัดการเชื่อมต่อ</string>
     <string name="stats_filters">ตัวกรอง</string>
     <string name="stats_overview">ภาพรวม</string>
     <string name="stats_chart_hint">แตะกราฟ · บีบเพื่อซูม · ลากเพื่อเลื่อน</string>

@@ -38,6 +38,8 @@
 
     <string name="home_telegram_channel_title">Підпишіться — це важливо</string>
     <string name="home_telegram_channel_body">Telegram-канал проєкту: актуальні новини та оголошення при проблемах із сервісом.</string>
+    <string name="home_grace_banner_title">Підключено — тимчасовий доступ</string>
+    <string name="home_grace_banner_body">Прив\'яжіть акаунт або оформіть підписку протягом %1$s, інакше сесію буде відключено.</string>
 
     <string name="stats_filters">Фільтри</string>
     <string name="stats_overview">Огляд</string>

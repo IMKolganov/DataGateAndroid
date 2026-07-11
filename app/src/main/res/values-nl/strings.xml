@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Abonneer — het is belangrijk</string>
     <string name="home_telegram_channel_body">Telegram-kanaal van het project: nieuws en meldingen bij serviceproblemen.</string>
+    <string name="home_grace_banner_title">Verbonden — tijdelijke toegang</string>
+    <string name="home_grace_banner_body">Koppel je account of abonneer je binnen %1$s, anders wordt deze sessie verbroken.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overzicht</string>
     <string name="stats_chart_hint">Tik op de grafiek · knijpen om te zoomen · slepen om te scrollen</string>

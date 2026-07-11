@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Abone olun — önemli</string>
     <string name="home_telegram_channel_body">Projenin Telegram kanalı: güncel haberler ve hizmet sorunlarında duyurular.</string>
+    <string name="home_grace_banner_title">Bağlandı — geçici erişim</string>
+    <string name="home_grace_banner_body">%1$s içinde hesabını bağla veya abone ol, aksi halde bu oturum bağlantısı kesilecek.</string>
     <string name="stats_filters">Filtreler</string>
     <string name="stats_overview">Genel bakış</string>
     <string name="stats_chart_hint">Grafiğe dokunun · yakınlaştırmak için sıkıştırın · kaydırmak için sürükleyin</string>

@@ -188,4 +188,49 @@ class FreeTierOnboardingRulesTest {
         assertFalse(shouldWarnLinkCodeExpiringSoon(secondsLeft = 301))
         assertFalse(shouldWarnLinkCodeExpiringSoon(secondsLeft = 0))
     }
+
+    @Test
+    fun parseGraceExpiresAtMs_parsesUtcZFormat() {
+        assertEquals(1_783_800_900_000L, parseGraceExpiresAtMs("2026-07-11T20:15:00Z"))
+    }
+
+    @Test
+    fun parseGraceExpiresAtMs_parsesOffsetFormat() {
+        assertEquals(1_783_800_900_000L, parseGraceExpiresAtMs("2026-07-11T22:15:00+02:00"))
+    }
+
+    @Test
+    fun parseGraceExpiresAtMs_nullOrBlank_returnsNull() {
+        assertEquals(null, parseGraceExpiresAtMs(null))
+        assertEquals(null, parseGraceExpiresAtMs(""))
+    }
+
+    @Test
+    fun parseGraceExpiresAtMs_malformed_returnsNull() {
+        assertEquals(null, parseGraceExpiresAtMs("not-a-date"))
+    }
+
+    @Test
+    fun graceSecondsRemaining_computesWholeSecondsAndFloorsAtZero() {
+        assertEquals(60, graceSecondsRemaining(expiresAtMs = 60_000L, nowMs = 0L))
+        assertEquals(0, graceSecondsRemaining(expiresAtMs = 0L, nowMs = 60_000L))
+    }
+
+    @Test
+    fun isDisconnectAttributableToGraceExpiry_trueOnceExpired() {
+        assertTrue(isDisconnectAttributableToGraceExpiry(graceExpiresAtMs = 100_000L, nowMs = 100_000L))
+        // Backend enforcement runs on an admin-configurable interval (default 15 min), not
+        // immediately at expiry, so this must stay true arbitrarily long after expiry too.
+        assertTrue(isDisconnectAttributableToGraceExpiry(graceExpiresAtMs = 100_000L, nowMs = 100_000L + 3_600_000L))
+    }
+
+    @Test
+    fun isDisconnectAttributableToGraceExpiry_falseBeforeExpiry() {
+        assertFalse(isDisconnectAttributableToGraceExpiry(graceExpiresAtMs = 100_000L, nowMs = 50_000L))
+    }
+
+    @Test
+    fun isDisconnectAttributableToGraceExpiry_falseWhenNull() {
+        assertFalse(isDisconnectAttributableToGraceExpiry(graceExpiresAtMs = null, nowMs = 100_000L))
+    }
 }

@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Iratkozz fel — fontos</string>
     <string name="home_telegram_channel_body">A projekt Telegram-csatornája: hírek és közlemények szolgáltatásproblémák esetén.</string>
+    <string name="home_grace_banner_title">Csatlakozva — ideiglenes hozzáférés</string>
+    <string name="home_grace_banner_body">Kösd össze a fiókodat vagy fizess elő %1$s-en belül, különben ez a munkamenet megszakad.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

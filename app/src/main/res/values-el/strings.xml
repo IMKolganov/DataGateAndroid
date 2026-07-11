@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Εγγραφείτε — είναι σημαντικό</string>
     <string name="home_telegram_channel_body">Κανάλι Telegram του έργου: τρέχουσα ειδησεογραφία και ανακοινώσεις σε προβλήματα υπηρεσίας.</string>
+    <string name="home_grace_banner_title">Συνδέθηκε — προσωρινή πρόσβαση</string>
+    <string name="home_grace_banner_body">Συνδέστε τον λογαριασμό σας ή εγγραφείτε συνδρομητής εντός %1$s, αλλιώς αυτή η σύνδεση θα διακοπεί.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

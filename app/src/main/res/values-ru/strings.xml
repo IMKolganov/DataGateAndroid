@@ -121,6 +121,8 @@
 
     <string name="home_telegram_channel_title">Подпишитесь — это важно</string>
     <string name="home_telegram_channel_body">Telegram-канал проекта: актуальные новости и объявления при проблемах с сервисом.</string>
+    <string name="home_grace_banner_title">Подключено — временный доступ</string>
+    <string name="home_grace_banner_body">Свяжите аккаунт или оформите подписку в течение %1$s, иначе сессия будет отключена.</string>
 
     <string name="stats_filters">Фильтры</string>
     <string name="stats_overview">Обзор</string>

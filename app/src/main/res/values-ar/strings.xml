@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">اشترك — هذا مهم</string>
     <string name="home_telegram_channel_body">انضم إلى قناة Telegram للحصول على آخر الأخبار وإعلانات انقطاع الخدمة.</string>
+    <string name="home_grace_banner_title">متصل — وصول مؤقت</string>
+    <string name="home_grace_banner_body">اربط حسابك أو اشترك خلال %1$s وإلا سيتم قطع هذا الاتصال.</string>
     <string name="stats_filters">عوامل التصفية</string>
     <string name="stats_overview">نظرة عامة</string>
     <string name="stats_chart_hint">المس الرسم · قرص للتكبير · اسحب للتمرير</string>

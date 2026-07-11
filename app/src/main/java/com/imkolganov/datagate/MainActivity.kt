@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var accessViewModel: AccessViewModel
     private lateinit var statsViewModel: StatsViewModel
 
+    private var reconnectJob: kotlinx.coroutines.Job? = null
     private var pendingOpenUpdateFromNotification by mutableStateOf(false)
 
     private val notificationsPermissionLauncher =
@@ -173,7 +174,8 @@ class MainActivity : AppCompatActivity() {
                     onRequestPause = { vpnController.requestPause() },
                     onRequestResume = { vpnController.requestResume() },
                     onReconnectVpn = {
-                        lifecycleScope.launch {
+                        reconnectJob?.cancel()
+                        reconnectJob = lifecycleScope.launch {
                             vpnController.requestDisconnect()
                             delay(2500)
                             connectInteractor.connect(VpnConnectSource.Access)

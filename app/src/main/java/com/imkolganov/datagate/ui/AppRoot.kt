@@ -145,6 +145,7 @@ fun AppRoot(
             FreeTierOnboardingHost(
                 adminTotpGate = authState.adminTotpGate,
                 freeTierApi = freeTierApi,
+                isVpnConnected = vpnState.isVpnConnected,
             )
         }
     } else {

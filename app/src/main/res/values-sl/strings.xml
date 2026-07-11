@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Naročite se — pomembno je</string>
     <string name="home_telegram_channel_body">Telegram kanal projekta: novice in obvestila ob težavah s storitvijo.</string>
+    <string name="home_grace_banner_title">Povezano — začasni dostop</string>
+    <string name="home_grace_banner_body">Povežite račun ali se naročite v %1$s, sicer bo ta seja prekinjena.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

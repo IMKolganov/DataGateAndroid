@@ -11,4 +11,6 @@ data class FreeTierAccessStatusResponse(
     val canRequestAccountLinkCode: Boolean,
     val activePlanName: String?,
     val requiredChannel: String?,
+    /** ISO-8601 UTC timestamp when the grace window ends; null unless [isGracePeriod] is true. */
+    val graceExpiresAtUtc: String? = null,
 )

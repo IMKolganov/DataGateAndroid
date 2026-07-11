@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Prenumeruokite — tai svarbu</string>
     <string name="home_telegram_channel_body">Projekto Telegram kanalas: naujienos ir pranešimai apie trikdžius.</string>
+    <string name="home_grace_banner_title">Prisijungta — laikina prieiga</string>
+    <string name="home_grace_banner_body">Susiekite paskyrą arba užsiprenumeruokite per %1$s, kitaip šis seansas bus atjungtas.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

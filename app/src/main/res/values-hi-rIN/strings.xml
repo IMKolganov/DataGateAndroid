@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">सब्सक्राइब करें — यह महत्वपूर्ण है</string>
     <string name="home_telegram_channel_body">प्रोजेक्ट का Telegram चैनल: ताज़ा समाचार और सेवा समस्या की घोषणाएँ।</string>
+    <string name="home_grace_banner_title">कनेक्टेड — अस्थायी पहुंच</string>
+    <string name="home_grace_banner_body">%1$s के भीतर अपना खाता लिंक करें या सदस्यता लें, अन्यथा यह सत्र डिस्कनेक्ट हो जाएगा।</string>
     <string name="stats_filters">फ़िल्टर</string>
     <string name="stats_overview">अवलोकन</string>
     <string name="stats_chart_hint">चार्ट पर टैप करें · ज़ूम के लिए पिंच · स्क्रॉल के लिए खींचें</string>

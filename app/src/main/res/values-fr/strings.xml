@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Abonnez-vous — c\'est important</string>
     <string name="home_telegram_channel_body">Canal Telegram du projet : actualités et annonces en cas de problème de service.</string>
+    <string name="home_grace_banner_title">Connecté — accès temporaire</string>
+    <string name="home_grace_banner_body">Associez votre compte ou abonnez-vous dans %1$s, sinon cette session sera déconnectée.</string>
     <string name="stats_filters">Filtres</string>
     <string name="stats_overview">Aperçu</string>
     <string name="stats_chart_hint">Touchez le graphique · pincer pour zoomer · faire défiler</string>

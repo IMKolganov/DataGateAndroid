@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Mag-subscribe — mahalaga ito</string>
     <string name="home_telegram_channel_body">Telegram channel ng proyekto: balita at anunsyo kapag may problema sa serbisyo.</string>
+    <string name="home_grace_banner_title">Nakakonekta — pansamantalang access</string>
+    <string name="home_grace_banner_body">I-link ang iyong account o mag-subscribe sa loob ng %1$s o mapuputol ang session na ito.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Abonējiet — tas ir svarīgi</string>
     <string name="home_telegram_channel_body">Projekta Telegram kanāls: jaunumi un paziņojumi par pakalpojuma problēmām.</string>
+    <string name="home_grace_banner_title">Savienots — pagaidu piekļuve</string>
+    <string name="home_grace_banner_body">Sasaistiet savu kontu vai abonējiet %1$s laikā, citādi šī sesija tiks atvienota.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

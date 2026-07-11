@@ -2,6 +2,9 @@ package com.imkolganov.datagate.freetier
 
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.format.DateTimeParseException
 
 const val FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS = 45_000L
 
@@ -96,3 +99,37 @@ fun shouldWarnLinkCodeExpiringSoon(
     secondsLeft: Int,
     warningThresholdSeconds: Int = FREE_TIER_LINK_CODE_EXPIRY_WARNING_SECONDS,
 ): Boolean = secondsLeft in 1..warningThresholdSeconds
+
+/** Parses the backend's `graceExpiresAtUtc` ISO-8601 string into epoch millis, or null if absent/unparseable. */
+fun parseGraceExpiresAtMs(iso: String?): Long? {
+    if (iso.isNullOrBlank()) return null
+    return try {
+        Instant.parse(iso).toEpochMilli()
+    } catch (_: DateTimeParseException) {
+        try {
+            OffsetDateTime.parse(iso).toInstant().toEpochMilli()
+        } catch (_: DateTimeParseException) {
+            null
+        }
+    }
+}
+
+fun graceSecondsRemaining(expiresAtMs: Long, nowMs: Long): Int =
+    ((expiresAtMs - nowMs) / 1000L).toInt().coerceAtLeast(0)
+
+/**
+ * True once a tracked grace window has passed its expiry — the backend's enforcement job runs on
+ * an admin-configurable interval (`EnforcementIntervalMinutes`, default 15 min), not immediately
+ * at expiry, so a grace-triggered disconnect can land anywhere from seconds to many minutes after
+ * [graceExpiresAtMs]. There's no way to distinguish "server killed us for non-compliance" from an
+ * unrelated network blip once grace has expired — but if the user is still non-compliant, that
+ * distinction doesn't matter: enforcement will just kill any new connection again on its next
+ * pass, so we shouldn't auto-reconnect either way.
+ *
+ * Used to suppress OpenVpn3Service's normal auto-reconnect-on-disconnect: retrying blindly would
+ * just churn through more short grace windows without fixing the underlying non-compliance.
+ */
+fun isDisconnectAttributableToGraceExpiry(graceExpiresAtMs: Long?, nowMs: Long): Boolean {
+    if (graceExpiresAtMs == null) return false
+    return nowMs >= graceExpiresAtMs
+}

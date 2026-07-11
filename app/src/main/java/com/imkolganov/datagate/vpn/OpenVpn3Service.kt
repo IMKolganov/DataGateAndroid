@@ -20,6 +20,8 @@ import androidx.core.app.NotificationCompat
 import com.imkolganov.datagate.DataGateApp
 import com.imkolganov.datagate.MainActivity
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.freetier.FreeTierComplianceController
+import com.imkolganov.datagate.freetier.isDisconnectAttributableToGraceExpiry
 import com.imkolganov.datagate.logger.CrashLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +54,23 @@ class OpenVpn3Service : VpnService() {
         const val EXTRA_LINK_PROTOCOL = "com.imkolganov.datagate.vpn.EXTRA_LINK_PROTOCOL"
         const val EXTRA_SERVER_DISPLAY_NAME = "com.imkolganov.datagate.vpn.EXTRA_SERVER_DISPLAY_NAME"
 
+        /** False when this device's ABI has no bundled libovpncli.so (see jniLibs). */
+        @Volatile
+        var isNativeLibraryLoaded: Boolean = false
+            private set
+
         init {
-            System.loadLibrary("ovpncli")
+            isNativeLibraryLoaded = try {
+                System.loadLibrary("ovpncli")
+                true
+            } catch (t: UnsatisfiedLinkError) {
+                Log.e(
+                    "OpenVPN3",
+                    "libovpncli.so unavailable for ABIs ${Build.SUPPORTED_ABIS.joinToString()}",
+                    t
+                )
+                false
+            }
         }
 
         private const val TAG = "OpenVPN3"
@@ -289,9 +306,9 @@ class OpenVpn3Service : VpnService() {
         else -> "Connecting..."
     }
 
-    private fun postPersistentNotification(fallbackText: String = notificationFallbackText()) {
+    private fun postPersistentNotification(fallbackText: String = notificationFallbackText(), force: Boolean = false) {
         val notification = buildNotification(fallbackText)
-        if (!requiresForegroundNotification()) {
+        if (!force && !requiresForegroundNotification()) {
             getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification)
             stopNotificationWatchdog()
             return
@@ -380,6 +397,15 @@ class OpenVpn3Service : VpnService() {
         if (runtimeState == VpnRuntimeState.CONNECTING || runtimeState == VpnRuntimeState.CONNECTED) {
             logCommandDropped("CONNECT", "already_$runtimeState")
             broadcastStatus(lastEventName, lastEventInfo)
+            return
+        }
+
+        if (!isNativeLibraryLoaded) {
+            desiredConnection = false
+            pendingConnectRequest = null
+            transitionState(VpnRuntimeState.ERROR, "native_library_unavailable")
+            broadcastStatus("ERROR", "VPN engine is not available on this device (${Build.SUPPORTED_ABIS.joinToString()})")
+            stopSelf()
             return
         }
 
@@ -647,7 +673,15 @@ class OpenVpn3Service : VpnService() {
                     )
                 }
 
-                if (!isStopping && desiredConnection) {
+                // A grace-period forced disconnect looks like any other core DISCONNECTED event —
+                // without this check we'd auto-reconnect and just churn through another short grace
+                // window instead of prompting the user to actually link/subscribe.
+                val graceExpired = isDisconnectAttributableToGraceExpiry(
+                    graceExpiresAtMs = FreeTierComplianceController.graceExpiresAtUtcMs.value,
+                    nowMs = System.currentTimeMillis(),
+                )
+
+                if (!isStopping && desiredConnection && !graceExpired) {
                     if (networkAvailable) {
                         transitionState(VpnRuntimeState.CONNECTING, "core_disconnected_reconnect")
                         broadcastStatus("RECONNECTING", info.ifBlank { "Connection lost, reconnecting..." })
@@ -657,6 +691,12 @@ class OpenVpn3Service : VpnService() {
                         broadcastStatus("WAITING_NETWORK", "Waiting for network...")
                     }
                 } else {
+                    if (graceExpired) {
+                        Log.w(TAG, "Not auto-reconnecting: disconnect attributed to grace-period expiry")
+                        desiredConnection = false
+                        pendingConnectRequest = null
+                        FreeTierComplianceController.setGraceExpiresAtUtcMs(null)
+                    }
                     transitionState(VpnRuntimeState.IDLE, "core_disconnected")
                     broadcastStatus(name, info)
                 }
@@ -1156,8 +1196,17 @@ class OpenVpn3Service : VpnService() {
                 ?.trim()
                 ?.takeIf { it.isNotEmpty() }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && requiresForegroundNotification()) {
-            postPersistentNotification()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (action == ACTION_CONNECT) {
+                // VpnController starts CONNECT via startForegroundService(); the platform
+                // requires startForeground() before this call returns, even if processConnect
+                // is about to reject the attempt (missing config, missing native lib, etc.)
+                // and stop the service right away. Skipping this throws
+                // ForegroundServiceDidNotStartInTimeException and kills the whole app.
+                postPersistentNotification(force = true)
+            } else if (requiresForegroundNotification()) {
+                postPersistentNotification()
+            }
         }
 
         when (action) {

@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">チャンネル登録を — 重要です</string>
     <string name="home_telegram_channel_body">プロジェクトの Telegram チャンネル：最新ニュースとサービス障害のお知らせ。</string>
+    <string name="home_grace_banner_title">接続済み — 一時的なアクセス</string>
+    <string name="home_grace_banner_body">%1$s以内にアカウントを連携するか登録しないと、この接続は切断されます。</string>
     <string name="stats_filters">フィルター</string>
     <string name="stats_overview">概要</string>
     <string name="stats_chart_hint">チャートをタップ · ピンチで拡大 · ドラッグでスクロール</string>

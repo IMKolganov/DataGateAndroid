@@ -9,5 +9,5 @@ data class VpnStatusUiState(
     val selectedServerName: String? = null,
     val lastMessage: String = "",
     val selectedServerId: Int? = null,
-    val hasVpnPermission: Boolean = true
+    val hasVpnPermission: Boolean = false
 )

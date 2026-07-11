@@ -80,10 +80,10 @@ class VpnControllerPermissionTest {
     }
 
     @Test
-    fun onPermissionDenied_updatesPermissionState() {
+    fun onPermissionDenied_updatesPermissionState_andResetsConnectRequested() {
         ShadowVpnService.setPrepareResult(Intent())
         val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
-        var state = VpnStatusUiState(hasVpnPermission = true)
+        var state = VpnStatusUiState(hasVpnPermission = true, isConnectRequested = true)
         val controller = VpnController(
             activity = activity,
             permissionLauncher = noopLauncher,
@@ -94,5 +94,6 @@ class VpnControllerPermissionTest {
         controller.onPermissionDenied()
 
         assertFalse(state.hasVpnPermission)
+        assertFalse(state.isConnectRequested)
     }
 }

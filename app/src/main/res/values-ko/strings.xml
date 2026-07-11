@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">구독하세요 — 중요합니다</string>
     <string name="home_telegram_channel_body">프로젝트 Telegram 채널: 최신 소식 및 서비스 장애 공지.</string>
+    <string name="home_grace_banner_title">연결됨 — 임시 액세스</string>
+    <string name="home_grace_banner_body">%1$s 이내에 계정을 연결하거나 구독하지 않으면 이 세션이 연결 해제됩니다.</string>
     <string name="stats_filters">필터</string>
     <string name="stats_overview">개요</string>
     <string name="stats_chart_hint">차트 탭 · 핀치로 확대 · 드래그로 스크롤</string>

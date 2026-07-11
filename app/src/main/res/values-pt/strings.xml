@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Inscreva-se — é importante</string>
     <string name="home_telegram_channel_body">Canal Telegram do projeto: notícias e avisos em caso de problemas no serviço.</string>
+    <string name="home_grace_banner_title">Ligado — acesso temporário</string>
+    <string name="home_grace_banner_body">Associe a sua conta ou subscreva dentro de %1$s, ou esta sessão será desligada.</string>
     <string name="stats_filters">Filtros</string>
     <string name="stats_overview">Resumo</string>
     <string name="stats_chart_hint">Toque no gráfico · belisque para zoom · arraste para deslocar</string>

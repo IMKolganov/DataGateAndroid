@@ -76,6 +76,7 @@ fun MainScreen(
         UpdatePreferences.homeBannerReleaseFlow(context, BuildConfig.VERSION_NAME)
     }
     val homeUpdateBanner by bannerFlow.collectAsState(initial = null)
+    val graceExpiresAtUtcMs by FreeTierComplianceController.graceExpiresAtUtcMs.collectAsState()
 
     var selectedTabKey by rememberSaveable { mutableStateOf(BottomTab.Home.name) }
     val selectedTab = BottomTab.entries.find { it.name == selectedTabKey } ?: BottomTab.Home
@@ -143,6 +144,7 @@ fun MainScreen(
                             UpdatePreferences.dismissRelease(context, release.tagName)
                         }
                     },
+                    graceExpiresAtUtcMs = graceExpiresAtUtcMs,
                 )
                 BottomTab.Access -> AccessScreen(
                     state = accessState,

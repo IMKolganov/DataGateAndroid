@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Đăng ký theo dõi — rất quan trọng</string>
     <string name="home_telegram_channel_body">Kênh Telegram của dự án: tin mới và thông báo khi dịch vụ gặp sự cố.</string>
+    <string name="home_grace_banner_title">Đã kết nối — quyền truy cập tạm thời</string>
+    <string name="home_grace_banner_body">Liên kết tài khoản hoặc đăng ký trong vòng %1$s, nếu không phiên này sẽ bị ngắt kết nối.</string>
     <string name="stats_filters">Bộ lọc</string>
     <string name="stats_overview">Tổng quan</string>
     <string name="stats_chart_hint">Chạm biểu đồ · chụm để phóng to · kéo để cuộn</string>

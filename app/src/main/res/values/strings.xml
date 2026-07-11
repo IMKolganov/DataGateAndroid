@@ -125,6 +125,9 @@
     <string name="home_telegram_channel_title">Subscribe — it\'s important</string>
     <string name="home_telegram_channel_body">Join our Telegram channel for the latest news and service outage announcements.</string>
 
+    <string name="home_grace_banner_title">Connected — temporary access</string>
+    <string name="home_grace_banner_body">Link your account or subscribe within %1$s or this session will be disconnected.</string>
+
     <string name="support_contact_email" translatable="false">imkolganov@gmail.com</string>
     <string name="support_telegram_bot_url" translatable="false">https://t.me/DataGateVPNBot</string>
     <string name="project_github_issues_url" translatable="false">https://github.com/IMKolganov/DataGateAndroid/issues</string>
@@ -400,9 +403,9 @@
     <string name="vpn_error_permission_denied">VPN permission denied</string>
     <string name="vpn_disconnecting">Disconnecting…</string>
     <string name="vpn_connecting_generic">Connecting…</string>
-    <string name="vpn_permission_dialog_title">VPN Permission Required</string>
-    <string name="vpn_permission_dialog_body">To secure your connection, DataGate needs permission to set up a VPN tunnel. This is a standard Android request for all VPN apps.</string>
-    <string name="vpn_permission_dialog_grant">Grant permission</string>
+    <string name="vpn_permission_dialog_title" translatable="false">VPN Permission Required</string>
+    <string name="vpn_permission_dialog_body" translatable="false">To secure your connection, DataGate needs permission to set up a VPN tunnel. This is a standard Android request for all VPN apps.</string>
+    <string name="vpn_permission_dialog_grant" translatable="false">Grant permission</string>
     <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
     <string name="vpn_requires_xray_client">This app cannot connect to XRay servers. Server: %1$s.\n\nPlease use a different client.</string>
     <string name="vpn_requires_unsupported_server_type">This app does not support this server type. Server: %1$s.\n\nPlease use a different client.</string>

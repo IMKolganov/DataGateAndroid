@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Liostáil — tá sé tábhachtach</string>
     <string name="home_telegram_channel_body">Cainéal Telegram an tionscadail: nuacht agus fógraí nuair a bhíonn fadhbanna seirbhíse.</string>
+    <string name="home_grace_banner_title">Ceangailte — rochtain shealadach</string>
+    <string name="home_grace_banner_body">Nasc do chuntas nó liostáil laistigh de %1$s nó dícheanglófar an seisiún seo.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

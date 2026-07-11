@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Abbona — huwa importanti</string>
     <string name="home_telegram_channel_body">Kanal Telegram tal-proġett: aħbarijiet u avviżi f\'każ ta\' problemi tas-servizz.</string>
+    <string name="home_grace_banner_title">Konness — aċċess temporanju</string>
+    <string name="home_grace_banner_body">Orbot il-kont tiegħek jew abbona fi żmien %1$s jew din is-sessjoni tiġi skonnessa.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
