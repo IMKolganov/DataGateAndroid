@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Naročite se — pomembno je</string>
     <string name="home_telegram_channel_body">Telegram kanal projekta: novice in obvestila ob težavah s storitvijo.</string>
+    <string name="home_grace_banner_title">Povezano — začasni dostop</string>
+    <string name="home_grace_banner_body">Povežite račun ali se naročite v %1$s, sicer bo ta seja prekinjena.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -325,6 +327,15 @@ Odprete lahko stran izdaje ali prenesete APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Ponovna overitev Googlovega računa ni uspela. Preverite Google račun na tej napravi, posodobite storitve Google Play in ponovno poskusite prijavo.</string>
     <string name="error_google_account_reauth_fallback_failed">Prijava z Googlom ni uspela, preden je aplikacija stopila v stik z zaledjem. Pri ponovnem overjanju sta oba toka Googlovega Credential Managerja spodletevala. Če je na napravi Google račun, preverite ime paketa OAuth Android klienta ter SHA‑1/SHA‑256 za to gradnjo.</string>
+    <string name="error_google_signin_cancelled">Prijava je bila preklicana. Če na tej napravi ni Googlovega računa, ga dodajte v nastavitvah in poskusite znova.</string>
+    <string name="error_google_no_account">Na tej napravi ni bilo mogoče najti Googlovega računa. Dodajte Googlov račun v nastavitvah in poskusite znova.</string>
+    <string name="error_google_signin_config">Prijava z Googlom na tej napravi ni pravilno konfigurirana. Posodobite storitve Google Play in poskusite znova.</string>
+    <string name="error_google_signin_unsupported">Prijava z Googlom na tej napravi ni podprta.</string>
+    <string name="error_google_signin_failed">Prijava z Googlom ni uspela. Poskusite znova.</string>
+    <string name="error_network_no_internet">Ni internetne povezave. Preverite omrežje in poskusite znova.</string>
+    <string name="error_network_timeout">Povezava je potekla. Poskusite znova.</string>
+    <string name="error_network_interrupted">Omrežna povezava je bila prekinjena. Poskusite znova.</string>
+    <string name="error_network_tls">Varne povezave ni bilo mogoče vzpostaviti. Preverite omrežje ali nastavitve VPN in poskusite znova.</string>
     <string name="home_quick_actions_title">Pomoč in jezik</string>
     <string name="login_logo_cd">Logotip DataGate</string>
     <string name="login_tagline">Varen VPN dostop do vaših strežnikov</string>
@@ -406,11 +417,6 @@ Odprete lahko stran izdaje ali prenesete APK.</string>
     <string name="free_tier_link_code_failed">Kode za povezavo ni bilo mogoče pridobiti.</string>
     <string name="free_tier_status_error_title">Dostopa ni bilo mogoče preveriti</string>
     <string name="free_tier_status_check_failed">Dostopa do paketa Free ni bilo mogoče preveriti. Preverite povezavo in poskusite znova.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -423,4 +429,15 @@ Odprete lahko stran izdaje ali prenesete APK.</string>
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

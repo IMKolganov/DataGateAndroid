@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Abonați-vă — este important</string>
     <string name="home_telegram_channel_body">Canalul Telegram al proiectului: știri și anunțuri la probleme de serviciu.</string>
+    <string name="home_grace_banner_title">Conectat — acces temporar</string>
+    <string name="home_grace_banner_body">Conectează-ți contul sau abonează-te în %1$s, altfel această sesiune va fi deconectată.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -325,6 +327,15 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Reautentificarea contului Google a eșuat. Verifică contul Google pe acest dispozitiv, actualizează serviciile Google Play, apoi încearcă din nou autentificarea.</string>
     <string name="error_google_account_reauth_fallback_failed">Autentificarea Google a eșuat înainte de a contacta backend-ul. Ambele fluxuri Google Credential Manager au eșuat la reautentificare. Dacă există un cont Google pe dispozitiv, verifică numele pachetului clientului OAuth Android și SHA-1/SHA-256 pentru această build.</string>
+    <string name="error_google_signin_cancelled">Autentificarea a fost anulată. Dacă pe acest dispozitiv nu există un cont Google, adaugă unul din Setări și încearcă din nou.</string>
+    <string name="error_google_no_account">Nu a fost găsit niciun cont Google pe acest dispozitiv. Adaugă un cont Google din Setări, apoi încearcă din nou.</string>
+    <string name="error_google_signin_config">Autentificarea cu Google nu este configurată corect pe acest dispozitiv. Actualizează serviciile Google Play și încearcă din nou.</string>
+    <string name="error_google_signin_unsupported">Autentificarea cu Google nu este acceptată pe acest dispozitiv.</string>
+    <string name="error_google_signin_failed">Autentificarea cu Google a eșuat. Încearcă din nou.</string>
+    <string name="error_network_no_internet">Nu există conexiune la internet. Verifică rețeaua și încearcă din nou.</string>
+    <string name="error_network_timeout">Conexiunea a expirat. Încearcă din nou.</string>
+    <string name="error_network_interrupted">Conexiunea la rețea a fost întreruptă. Încearcă din nou.</string>
+    <string name="error_network_tls">Nu s-a putut stabili o conexiune securizată. Verifică rețeaua sau setările VPN și încearcă din nou.</string>
     <string name="home_quick_actions_title">Ajutor și limbă</string>
     <string name="login_logo_cd">Logo DataGate</string>
     <string name="login_tagline">Acces VPN securizat la serverele tale</string>
@@ -406,11 +417,6 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="free_tier_link_code_failed">Nu s-a putut solicita codul de legătură.</string>
     <string name="free_tier_status_error_title">Nu s-a putut verifica accesul</string>
     <string name="free_tier_status_check_failed">Nu s-a putut verifica accesul la planul Free. Verificați conexiunea și încercați din nou.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -423,4 +429,15 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

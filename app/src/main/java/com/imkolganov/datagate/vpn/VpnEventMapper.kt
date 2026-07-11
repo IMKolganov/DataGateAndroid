@@ -14,6 +14,9 @@ object VpnEventMapper {
         if (previous.isVpnPaused && !isAuthoritativeWhilePaused(eventName)) {
             return previous
         }
+        if (previous.pendingUserCommand != null && !VpnCommandContract.isAuthoritativeTunnelEvent(eventName)) {
+            return previous
+        }
         return when (eventName) {
 
             "SELECTING_SERVER" -> previous.copy(
@@ -74,6 +77,7 @@ object VpnEventMapper {
             "RECONNECTING" -> previous.copy(
                 isConnectRequested = true,
                 isVpnConnected = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
@@ -99,6 +103,7 @@ object VpnEventMapper {
             "WAITING_NETWORK" -> previous.copy(
                 isConnectRequested = true,
                 isVpnConnected = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_msg_reconnecting)
             )
 
@@ -106,6 +111,7 @@ object VpnEventMapper {
                 isConnectRequested = false,
                 isVpnConnected = false,
                 isVpnPaused = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_disconnecting)
             )
 
@@ -113,6 +119,7 @@ object VpnEventMapper {
                 isConnectRequested = true,
                 isVpnConnected = false,
                 isVpnPaused = true,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_msg_paused)
             )
 
@@ -120,6 +127,7 @@ object VpnEventMapper {
                 isConnectRequested = true,
                 isVpnConnected = false,
                 isVpnPaused = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_msg_resuming)
             )
 
@@ -129,6 +137,7 @@ object VpnEventMapper {
                     isConnectRequested = true,
                     isVpnConnected = true,
                     isVpnPaused = false,
+                    pendingUserCommand = null,
                     lastMessage = if (name != null) {
                         res.getString(R.string.vpn_msg_connected_to, name)
                     } else {
@@ -142,6 +151,7 @@ object VpnEventMapper {
                 isVpnConnected = false,
                 isVpnPaused = false,
                 selectedServerId = null,
+                selectedServerName = null,
                 lastMessage = res.getString(R.string.vpn_msg_disconnected)
             )
 
@@ -149,6 +159,7 @@ object VpnEventMapper {
                 isConnectRequested = false,
                 isVpnConnected = false,
                 isVpnPaused = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_msg_tunnel_failed)
             )
 
@@ -156,6 +167,7 @@ object VpnEventMapper {
                 isConnectRequested = false,
                 isVpnConnected = false,
                 isVpnPaused = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(
                     R.string.vpn_connect_failed,
                     eventInfo.trim().ifBlank { eventName }

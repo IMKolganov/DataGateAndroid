@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">عضو شوید — مهم است</string>
     <string name="home_telegram_channel_body">کانال تلگرام پروژه: اخبار و اعلامیه‌ها در صورت مشکل سرویس.</string>
+    <string name="home_grace_banner_title">متصل — دسترسی موقت</string>
+    <string name="home_grace_banner_body">حساب خود را پیوند دهید یا در %1$s مشترک شوید، در غیر این صورت این جلسه قطع خواهد شد.</string>
     <string name="stats_filters">فیلترها</string>
     <string name="stats_overview">نمای کلی</string>
     <string name="stats_chart_hint">نمودار را لمس کنید · برای زوم بکشید · برای اسکرول بکشید</string>
@@ -307,6 +309,15 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">احراز هویت مجدد حساب Google انجام نشد. حساب Google روی این دستگاه را بررسی کنید، سرویس‌های Google Play را به‌روز کنید، سپس دوباره وارد شوید.</string>
     <string name="error_google_account_reauth_fallback_failed">ورود با Google پیش از تماس با بک‌اند ناموفق بود. هر دو جریان Google Credential Manager در هنگام بازاحراز هویت حساب شکست خورد. اگر حساب Google روی دستگاه وجود دارد، نام بستهٔ کلاینت OAuth اندروید و SHA-1/SHA-256 این بیلد را بررسی کنید.</string>
+    <string name="error_google_signin_cancelled">ورود لغو شد. اگر حساب Google روی این دستگاه وجود ندارد، آن را در تنظیمات اضافه کنید و دوباره تلاش کنید.</string>
+    <string name="error_google_no_account">هیچ حساب Google روی این دستگاه پیدا نشد. یک حساب Google در تنظیمات اضافه کنید، سپس دوباره تلاش کنید.</string>
+    <string name="error_google_signin_config">ورود با Google روی این دستگاه به‌درستی پیکربندی نشده است. سرویس‌های Google Play را به‌روزرسانی کنید و دوباره تلاش کنید.</string>
+    <string name="error_google_signin_unsupported">ورود با Google روی این دستگاه پشتیبانی نمی‌شود.</string>
+    <string name="error_google_signin_failed">ورود با Google ناموفق بود. دوباره تلاش کنید.</string>
+    <string name="error_network_no_internet">اتصال اینترنت وجود ندارد. شبکه را بررسی کنید و دوباره تلاش کنید.</string>
+    <string name="error_network_timeout">زمان اتصال به پایان رسید. دوباره تلاش کنید.</string>
+    <string name="error_network_interrupted">اتصال شبکه قطع شد. دوباره تلاش کنید.</string>
+    <string name="error_network_tls">برقراری اتصال امن ممکن نشد. شبکه یا تنظیمات VPN را بررسی کنید و دوباره تلاش کنید.</string>
     <string name="home_quick_actions_title">راهنما و زبان</string>
     <string name="login_logo_cd">لوگوی DataGate</string>
     <string name="login_tagline">دسترسی VPN امن به سرورهای شما</string>
@@ -388,11 +399,6 @@
     <string name="free_tier_link_code_failed">درخواست کد پیوند ناموفق بود.</string>
     <string name="free_tier_status_error_title">بررسی دسترسی ناموفق بود</string>
     <string name="free_tier_status_check_failed">دسترسی طرح Free تأیید نشد. اتصال را بررسی و دوباره تلاش کنید.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -405,4 +411,15 @@
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

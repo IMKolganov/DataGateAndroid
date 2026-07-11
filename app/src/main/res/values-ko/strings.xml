@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">구독하세요 — 중요합니다</string>
     <string name="home_telegram_channel_body">프로젝트 Telegram 채널: 최신 소식 및 서비스 장애 공지.</string>
+    <string name="home_grace_banner_title">연결됨 — 임시 액세스</string>
+    <string name="home_grace_banner_body">%1$s 이내에 계정을 연결하거나 구독하지 않으면 이 세션이 연결 해제됩니다.</string>
     <string name="stats_filters">필터</string>
     <string name="stats_overview">개요</string>
     <string name="stats_chart_hint">차트 탭 · 핀치로 확대 · 드래그로 스크롤</string>
@@ -307,6 +309,15 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google 계정 재인증에 실패했습니다. 이 기기의 Google 계정을 확인하고 Google Play 서비스를 업데이트한 뒤 다시 로그인하세요.</string>
     <string name="error_google_account_reauth_fallback_failed">백엔드에 연결하기 전에 Google 로그인이 실패했습니다. 계정 재인증 중 두 Google Credential Manager 흐름이 모두 실패했습니다. 기기에 Google 계정이 있으면 이 빌드의 OAuth Android 클라이언트 패키지 이름과 SHA-1/SHA-256을 확인하세요.</string>
+    <string name="error_google_signin_cancelled">로그인이 취소되었습니다. 이 기기에 Google 계정이 없다면 설정에서 계정을 추가한 뒤 다시 시도하세요.</string>
+    <string name="error_google_no_account">이 기기에서 Google 계정을 찾을 수 없습니다. 설정에서 Google 계정을 추가한 뒤 다시 시도하세요.</string>
+    <string name="error_google_signin_config">이 기기에서 Google 로그인이 올바르게 설정되지 않았습니다. Google Play 서비스를 업데이트한 뒤 다시 시도하세요.</string>
+    <string name="error_google_signin_unsupported">이 기기에서는 Google 로그인이 지원되지 않습니다.</string>
+    <string name="error_google_signin_failed">Google 로그인에 실패했습니다. 다시 시도하세요.</string>
+    <string name="error_network_no_internet">인터넷에 연결되어 있지 않습니다. 네트워크를 확인한 후 다시 시도하세요.</string>
+    <string name="error_network_timeout">연결 시간이 초과되었습니다. 다시 시도하세요.</string>
+    <string name="error_network_interrupted">네트워크 연결이 끊어졌습니다. 다시 시도하세요.</string>
+    <string name="error_network_tls">보안 연결을 설정할 수 없습니다. 네트워크 또는 VPN 설정을 확인한 후 다시 시도하세요.</string>
     <string name="home_quick_actions_title">도움말 및 언어</string>
     <string name="login_logo_cd">DataGate 로고</string>
     <string name="login_tagline">서버로의 안전한 VPN 접속</string>
@@ -388,11 +399,6 @@
     <string name="free_tier_link_code_failed">연결 코드를 요청할 수 없습니다.</string>
     <string name="free_tier_status_error_title">액세스를 확인할 수 없음</string>
     <string name="free_tier_status_check_failed">Free 요금제 액세스를 확인할 수 없습니다. 연결을 확인하고 다시 시도하세요.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -405,4 +411,15 @@
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

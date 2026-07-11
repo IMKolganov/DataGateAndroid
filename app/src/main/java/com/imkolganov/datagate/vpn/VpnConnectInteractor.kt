@@ -8,7 +8,6 @@ import android.util.Log
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.servers.ManualServerResolve
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
-import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
 import java.util.concurrent.atomic.AtomicBoolean
@@ -181,12 +180,20 @@ class VpnConnectInteractor(
                 android12OvpnRouteLimit = ipListSettings.android12OvpnRouteLimit,
                 supportsAndroidRouteExclusion = supportsAndroidRouteExclusion
             )
+            IpListEstablishRoutePolicy.establishBudgetViolation(routePlan, ipListSettings.coverageMode)?.let { violation ->
+                Log.w("OpenVPN3", "excludeRoute establish budget violation: $violation")
+            }
             Log.d(
                 "OpenVPN3",
                 "IP list routes prepared: applied=${routePlan.appliedRouteCount}/${bypassRoutes.size}, " +
                     "selected=${routePlan.selectedRouteCount}, mode=" +
                     if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
-                        "android-excludeRoute/${ipListSettings.coverageMode}"
+                        "android-excludeRoute/${ipListSettings.coverageMode}" +
+                            if (routePlan.reachedEstablishRouteLimit) {
+                                "(capped=${IpListRouteConfig.androidExcludeRouteLimitFor(ipListSettings.coverageMode)})"
+                            } else {
+                                ""
+                            }
                     } else {
                         "ovpn-route-emulation(limit=${ipListSettings.android12OvpnRouteLimit}, " +
                             "profileLimit=${routePlan.reachedProfileSizeLimit})"
@@ -195,7 +202,7 @@ class VpnConnectInteractor(
             if (bypassRoutes.isNotEmpty()) {
                 vpnController.showStatus(
                     "IP_LIST_READY",
-                    if (routePlan.reachedProfileSizeLimit) {
+                    if (routePlan.reachedProfileSizeLimit || routePlan.reachedEstablishRouteLimit) {
                         res.getString(R.string.vpn_ip_list_ready_limited, routePlan.appliedRouteCount)
                     } else {
                         res.getString(R.string.vpn_ip_list_ready, routePlan.appliedRouteCount)
@@ -215,8 +222,7 @@ class VpnConnectInteractor(
             )
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
-            val raw = t.deepMessageForApiError().ifBlank { t.message.orEmpty() }
-            val detail = appContext.resources.userFriendlyApiError(raw)
+            val detail = appContext.resources.userFriendlyApiError(t)
                 .ifBlank { t.javaClass.simpleName }
             vpnController.showError(
                 appContext.getString(R.string.vpn_connect_failed, detail)

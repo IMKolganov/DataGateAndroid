@@ -8,7 +8,6 @@ import com.imkolganov.datagate.json.optIntOrNull
 import com.imkolganov.datagate.json.optStringOrNull
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
-import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeRequest
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeResponse
 import executeSuspending
 import okhttp3.MediaType.Companion.toMediaType
@@ -43,11 +42,33 @@ class FreeTierApi(
         }
     }
 
-    suspend fun requestAccountLinkCode(
-        request: RequestTelegramAccountLinkCodeRequest,
-    ): ApiResponse<RequestTelegramAccountLinkCodeResponse> {
+    /**
+     * Starts (or refreshes) the grace window for a direct OpenVPN connection. Call once, right
+     * after the tunnel is confirmed up — not on a timer or status poll (repeated calls re-audit
+     * compliance server-side).
+     */
+    suspend fun notifyVpnConnected(): ApiResponse<FreeTierAccessStatusResponse> {
+        val url = baseUrl.trimEnd('/') + ApiConfig.FREE_TIER_ACCESS_CONNECT_PATH
+        val req = Request.Builder()
+            .url(url)
+            .post("{}".toRequestBody(jsonMediaType))
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json")
+            .build()
+
+        http.executeSuspending(req).use { resp ->
+            val code = resp.code
+            val body = resp.body.string().orEmpty()
+            if (code !in 200..299) {
+                throw IOException(formatHttpErrorDetail("Free tier access connect failed", code, body))
+            }
+            return parseAccessStatusResponse(body)
+        }
+    }
+
+    suspend fun requestAccountLinkCode(): ApiResponse<RequestTelegramAccountLinkCodeResponse> {
         val url = baseUrl.trimEnd('/') + ApiConfig.TELEGRAM_REQUEST_ACCOUNT_LINK_CODE_PATH
-        val bodyJson = buildAccountLinkCodeRequestBody(request.telegramId)
+        val bodyJson = buildAccountLinkCodeRequestBody()
         val req = Request.Builder()
             .url(url)
             .post(bodyJson.toRequestBody(jsonMediaType))
@@ -65,8 +86,7 @@ class FreeTierApi(
         }
     }
 
-    internal fun buildAccountLinkCodeRequestBody(telegramId: Long): String =
-        JSONObject().apply { put("telegramId", telegramId) }.toString()
+    internal fun buildAccountLinkCodeRequestBody(): String = "{}"
 
     internal fun parseAccessStatusResponse(body: String): ApiResponse<FreeTierAccessStatusResponse> {
         val root = JSONObject(body)
@@ -103,6 +123,7 @@ class FreeTierApi(
             canRequestAccountLinkCode = o.bool("canRequestAccountLinkCode", "CanRequestAccountLinkCode"),
             activePlanName = o.optStringOrNull("activePlanName") ?: o.optStringOrNull("ActivePlanName"),
             requiredChannel = o.optStringOrNull("requiredChannel") ?: o.optStringOrNull("RequiredChannel"),
+            graceExpiresAtUtc = o.optStringOrNull("graceExpiresAtUtc") ?: o.optStringOrNull("GraceExpiresAtUtc"),
         )
     }
 

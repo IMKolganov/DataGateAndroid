@@ -1,10 +1,15 @@
 package com.imkolganov.datagate.freetier
 
+import com.imkolganov.datagate.configs.ApiConfig
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -84,6 +89,129 @@ class FreeTierApiTest {
     }
 
     @Test
+    fun parseAccessStatusResponse_readsGraceExpiresAtUtc_camelCase() {
+        val response = api.parseAccessStatusResponse(
+            """
+            {
+              "success": true,
+              "data": {
+                "isApplicable": true,
+                "isCompliant": true,
+                "isMergedAccount": false,
+                "isChannelSubscribed": false,
+                "isGracePeriod": true,
+                "isLinkedToTelegram": false,
+                "canRequestAccountLinkCode": true,
+                "activePlanName": "Free",
+                "requiredChannel": "@DataGateVPNBot",
+                "graceExpiresAtUtc": "2026-07-11T20:15:00Z"
+              }
+            }
+            """.trimIndent()
+        )
+
+        val status = requireNotNull(response.data)
+        assertTrue(status.isGracePeriod)
+        assertEquals("2026-07-11T20:15:00Z", status.graceExpiresAtUtc)
+    }
+
+    @Test
+    fun parseAccessStatusResponse_readsGraceExpiresAtUtc_pascalCase() {
+        val response = api.parseAccessStatusResponse(
+            """
+            {
+              "Success": true,
+              "Data": {
+                "IsApplicable": true,
+                "IsCompliant": true,
+                "IsMergedAccount": false,
+                "IsChannelSubscribed": false,
+                "IsGracePeriod": true,
+                "IsLinkedToTelegram": false,
+                "CanRequestAccountLinkCode": true,
+                "ActivePlanName": "Free",
+                "RequiredChannel": "@DataGateVPNBot",
+                "GraceExpiresAtUtc": "2026-07-11T20:15:00Z"
+              }
+            }
+            """.trimIndent()
+        )
+
+        val status = requireNotNull(response.data)
+        assertEquals("2026-07-11T20:15:00Z", status.graceExpiresAtUtc)
+    }
+
+    @Test
+    fun parseAccessStatusResponse_graceExpiresAtUtcAbsent_isNull() {
+        val response = api.parseAccessStatusResponse(
+            """
+            {
+              "success": true,
+              "data": {
+                "isApplicable": true,
+                "isCompliant": true,
+                "isMergedAccount": false,
+                "isChannelSubscribed": false,
+                "isGracePeriod": false,
+                "isLinkedToTelegram": false,
+                "canRequestAccountLinkCode": true,
+                "activePlanName": "Free",
+                "requiredChannel": "@DataGateVPNBot"
+              }
+            }
+            """.trimIndent()
+        )
+
+        val status = requireNotNull(response.data)
+        assertNull(status.graceExpiresAtUtc)
+    }
+
+    @Test
+    fun notifyVpnConnected_postsEmptyBodyToConnectPath() = runBlocking {
+        MockWebServer().use { server ->
+            server.start()
+            server.enqueue(
+                MockResponse().setResponseCode(200).setBody(
+                    """
+                    {
+                      "success": true,
+                      "data": {
+                        "isApplicable": true,
+                        "isCompliant": true,
+                        "isMergedAccount": false,
+                        "isChannelSubscribed": false,
+                        "isGracePeriod": true,
+                        "isLinkedToTelegram": false,
+                        "canRequestAccountLinkCode": true,
+                        "activePlanName": "Free",
+                        "requiredChannel": "@DataGateVPNBot",
+                        "graceExpiresAtUtc": "2026-07-11T20:15:00Z"
+                      }
+                    }
+                    """.trimIndent()
+                )
+            )
+
+            val client = FreeTierApi(
+                http = OkHttpClient(),
+                baseUrl = server.url("/").toString().trimEnd('/')
+            )
+
+            val response = client.notifyVpnConnected()
+
+            val request = server.takeRequest()
+            assertEquals("POST", request.method)
+            assertTrue(request.path!!.endsWith(ApiConfig.FREE_TIER_ACCESS_CONNECT_PATH))
+            assertEquals("{}", request.body.readUtf8())
+
+            assertTrue(response.success)
+            val status = requireNotNull(response.data)
+            assertTrue(status.isGracePeriod)
+            assertEquals("2026-07-11T20:15:00Z", status.graceExpiresAtUtc)
+        }
+    }
+
+    @Test
     fun parseAccessStatusResponse_returnsFailureWithoutData() {
         val response = api.parseAccessStatusResponse(
             """
@@ -157,10 +285,10 @@ class FreeTierApiTest {
     }
 
     @Test
-    fun buildAccountLinkCodeRequestBody_includesTelegramId() {
+    fun buildAccountLinkCodeRequestBody_isEmptyObject() {
         assertEquals(
-            """{"telegramId":123456789}""",
-            api.buildAccountLinkCodeRequestBody(123456789L)
+            "{}",
+            api.buildAccountLinkCodeRequestBody()
         )
     }
 

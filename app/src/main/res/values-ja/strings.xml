@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">チャンネル登録を — 重要です</string>
     <string name="home_telegram_channel_body">プロジェクトの Telegram チャンネル：最新ニュースとサービス障害のお知らせ。</string>
+    <string name="home_grace_banner_title">接続済み — 一時的なアクセス</string>
+    <string name="home_grace_banner_body">%1$s以内にアカウントを連携するか登録しないと、この接続は切断されます。</string>
     <string name="stats_filters">フィルター</string>
     <string name="stats_overview">概要</string>
     <string name="stats_chart_hint">チャートをタップ · ピンチで拡大 · ドラッグでスクロール</string>
@@ -307,6 +309,15 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google アカウントの再認証に失敗しました。この端末の Google アカウントを確認し、Google Play 開発者サービスを更新してから再度サインインしてください。</string>
     <string name="error_google_account_reauth_fallback_failed">バックエンドに接する前に Google サインインが失敗しました。アカウント再認証中に両方の Google Credential Manager のフローが失敗しました。端末に Google アカウントがある場合は、このビルドの OAuth Android クライアントのパッケージ名と SHA-1/SHA-256 を確認してください。</string>
+    <string name="error_google_signin_cancelled">サインインがキャンセルされました。この端末に Google アカウントがない場合は、設定でアカウントを追加してから再度お試しください。</string>
+    <string name="error_google_no_account">この端末に Google アカウントが見つかりません。設定で Google アカウントを追加してから、もう一度お試しください。</string>
+    <string name="error_google_signin_config">この端末では Google サインインが正しく設定されていません。Google Play 開発者サービスを更新してから再度お試しください。</string>
+    <string name="error_google_signin_unsupported">この端末では Google サインインに対応していません。</string>
+    <string name="error_google_signin_failed">Google サインインに失敗しました。もう一度お試しください。</string>
+    <string name="error_network_no_internet">インターネットに接続していません。ネットワークを確認して再試行してください。</string>
+    <string name="error_network_timeout">接続がタイムアウトしました。再試行してください。</string>
+    <string name="error_network_interrupted">ネットワーク接続が中断されました。再試行してください。</string>
+    <string name="error_network_tls">安全な接続を確立できませんでした。ネットワークまたは VPN の設定を確認して再試行してください。</string>
     <string name="home_quick_actions_title">ヘルプと言語</string>
     <string name="login_logo_cd">DataGate ロゴ</string>
     <string name="login_tagline">サーバーへの安全な VPN アクセス</string>
@@ -388,11 +399,6 @@
     <string name="free_tier_link_code_failed">連携コードを取得できませんでした。</string>
     <string name="free_tier_status_error_title">アクセスを確認できませんでした</string>
     <string name="free_tier_status_check_failed">Free プランのアクセスを確認できませんでした。接続を確認して再試行してください。</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -405,4 +411,15 @@
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

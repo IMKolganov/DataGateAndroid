@@ -200,4 +200,54 @@ class OpenVpnRuntimePolicyTest {
             )
         )
     }
+
+    @Test
+    fun restoreCachedStatus_pausedIsDowngradedToDisconnectedSnapshot() {
+        val restored = OpenVpnRuntimePolicy.restoreCachedStatus(
+            cachedName = "PAUSED",
+            cachedInfo = "Paused by user"
+        )
+
+        assertEquals("DISCONNECTED", restored.eventName)
+        assertTrue(restored.shouldPersist)
+    }
+
+    @Test
+    fun restoreCachedStatus_reconnectingIsDowngradedToDisconnectedSnapshot() {
+        val restored = OpenVpnRuntimePolicy.restoreCachedStatus(
+            cachedName = "RECONNECTING",
+            cachedInfo = "Connection lost"
+        )
+
+        assertEquals("DISCONNECTED", restored.eventName)
+        assertTrue(restored.shouldPersist)
+    }
+
+    @Test
+    fun shouldAwaitNativeStopOnCallerThread_avoidsDeadlockWhileConnectBlocksNativeExecutor() {
+        assertFalse(
+            OpenVpnRuntimePolicy.shouldAwaitNativeStopOnCallerThread(
+                runsOnNativeThread = false,
+                nativeVpnJobActive = true,
+            )
+        )
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldAwaitNativeStopOnCallerThread(
+                runsOnNativeThread = true,
+                nativeVpnJobActive = true,
+            )
+        )
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldAwaitNativeStopOnCallerThread(
+                runsOnNativeThread = false,
+                nativeVpnJobActive = false,
+            )
+        )
+    }
+
+    @Test
+    fun shouldSchedulePauseResumeOnForeignThread_always() {
+        assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(true))
+        assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(false))
+    }
 }

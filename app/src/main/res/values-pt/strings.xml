@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Inscreva-se — é importante</string>
     <string name="home_telegram_channel_body">Canal Telegram do projeto: notícias e avisos em caso de problemas no serviço.</string>
+    <string name="home_grace_banner_title">Ligado — acesso temporário</string>
+    <string name="home_grace_banner_body">Associe a sua conta ou subscreva dentro de %1$s, ou esta sessão será desligada.</string>
     <string name="stats_filters">Filtros</string>
     <string name="stats_overview">Resumo</string>
     <string name="stats_chart_hint">Toque no gráfico · belisque para zoom · arraste para deslocar</string>
@@ -307,6 +309,15 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">A reautenticação da conta Google falhou. Verifique a conta Google neste dispositivo, atualize os Google Play services e tente iniciar sessão novamente.</string>
     <string name="error_google_account_reauth_fallback_failed">O início de sessão com Google falhou antes de contactar o backend. Ambos os fluxos do Google Credential Manager falharam na reautenticação. Se existir uma conta Google no dispositivo, verifique o nome do pacote do cliente OAuth Android e os SHA-1/SHA-256 desta compilação.</string>
+    <string name="error_google_signin_cancelled">O início de sessão foi cancelado. Se não existir uma conta Google neste dispositivo, adicione uma nas Definições e tente novamente.</string>
+    <string name="error_google_no_account">Não foi encontrada nenhuma conta Google neste dispositivo. Adicione uma conta Google nas Definições e tente novamente.</string>
+    <string name="error_google_signin_config">O início de sessão com a Google não está configurado corretamente neste dispositivo. Atualize os Google Play services e tente novamente.</string>
+    <string name="error_google_signin_unsupported">O início de sessão com a Google não é suportado neste dispositivo.</string>
+    <string name="error_google_signin_failed">O início de sessão com a Google falhou. Tente novamente.</string>
+    <string name="error_network_no_internet">Sem ligação à internet. Verifique a sua rede e tente novamente.</string>
+    <string name="error_network_timeout">A ligação expirou. Tente novamente.</string>
+    <string name="error_network_interrupted">A ligação de rede foi interrompida. Tente novamente.</string>
+    <string name="error_network_tls">Não foi possível estabelecer uma ligação segura. Verifique a rede ou as definições de VPN e tente novamente.</string>
     <string name="home_quick_actions_title">Ajuda e idioma</string>
     <string name="login_logo_cd">Logótipo DataGate</string>
     <string name="login_tagline">Acesso VPN seguro aos seus servidores</string>
@@ -388,11 +399,6 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="free_tier_link_code_failed">Não foi possível pedir um código de ligação.</string>
     <string name="free_tier_status_error_title">Não foi possível verificar o acesso</string>
     <string name="free_tier_status_check_failed">Não foi possível verificar o acesso ao plano Free. Verifique a ligação e tente novamente.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -405,4 +411,15 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

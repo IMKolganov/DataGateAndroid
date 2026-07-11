@@ -39,7 +39,7 @@ data class IpListAppendResult(
 
 enum class IpListRouteDelivery {
     ANDROID_EXCLUDE_ROUTE,
-    OVPN_PROFILE
+    OVPN_PROFILE,
 }
 
 data class IpListConnectionRoutePlan(
@@ -48,19 +48,57 @@ data class IpListConnectionRoutePlan(
     val selectedRouteCount: Int,
     val appliedRouteCount: Int,
     val reachedProfileSizeLimit: Boolean,
+    /** True when Android 13+ excludeRoute list was truncated to [MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT]. */
+    val reachedEstablishRouteLimit: Boolean = false,
     val delivery: IpListRouteDelivery
 )
 
 object IpListRouteConfig {
     const val MAX_ROUTES = 12_000
-    const val MAX_ANDROID_EXCLUDED_ROUTES = 3_000
+    /**
+     * Cap for [IpListCoverageMode.FAST]. Measured on-device: the system VPN icon appears
+     * ~2s after connect at this size (vs. ~3.7s at [MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT]).
+     */
+    const val MAX_ANDROID_EXCLUDED_ROUTES = 1_500
+    /**
+     * Cap for Android 13+ [android.net.VpnService.Builder.excludeRoute] at establish.
+     *
+     * The framework's route processing scales worse than linearly with the excludeRoute() count
+     * (consistent with AOSP's [VpnTest.testDoesNotLockUpWithTooManyRoutes] O(n²) safeguard at 4000
+     * routes): on-device measurements showed the system VPN status bar icon taking ~0.4s to appear
+     * at 500 routes, ~3.7s at 2000, ~5.6s at 3000, ~8.5s at 3500, and still not appearing after 36s+
+     * at ~10800 (uncapped). 2000 was chosen as the production default because it keeps the icon
+     * appearing within a few seconds, which is the practical UX requirement — "eventually appears"
+     * is not good enough for a status indicator users rely on.
+     */
+    const val MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT = 2_000
     const val DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT = 800
     const val MIN_ANDROID12_OVPN_ROUTE_LIMIT = 50
     const val MAX_ANDROID12_OVPN_ROUTE_LIMIT = 3_000
     const val MAX_OPENVPN_PROFILE_BYTES = 240 * 1024
 
-    fun selectAndroidExcludedRoutes(routes: List<IpCidrRoute>): List<IpCidrRoute> {
-        return selectBroadestRoutes(routes, MAX_ANDROID_EXCLUDED_ROUTES)
+    /** The `excludeRoute()` cap that applies for a given [coverageMode] — see [prepareConnectionRoutes]. */
+    fun androidExcludeRouteLimitFor(coverageMode: IpListCoverageMode): Int = when (coverageMode) {
+        IpListCoverageMode.FAST -> MAX_ANDROID_EXCLUDED_ROUTES
+        IpListCoverageMode.FULL -> MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+    }
+
+    fun selectAndroidExcludedRoutes(
+        routes: List<IpCidrRoute>,
+        maxRoutes: Int = MAX_ANDROID_EXCLUDED_ROUTES
+    ): List<IpCidrRoute> {
+        return selectBroadestRoutes(routes, maxRoutes)
+    }
+
+    fun selectAndroid13FullExcludedRoutes(
+        routes: List<IpCidrRoute>,
+        maxRoutes: Int = MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+    ): List<IpCidrRoute> {
+        return selectBroadestRoutes(
+            routes = routes,
+            maxRoutes = maxRoutes,
+            sortAlways = true,
+        )
     }
 
     fun selectAndroid12OvpnRoutes(routes: List<IpCidrRoute>, limit: Int): List<IpCidrRoute> {
@@ -84,19 +122,21 @@ object IpListRouteConfig {
         val selectedRoutes = if (supportsAndroidRouteExclusion) {
             when (coverageMode) {
                 IpListCoverageMode.FAST -> selectAndroidExcludedRoutes(routes)
-                IpListCoverageMode.FULL -> routes
+                IpListCoverageMode.FULL -> selectAndroid13FullExcludedRoutes(routes)
             }
         } else {
             selectAndroid12OvpnRoutes(routes, android12OvpnRouteLimit)
         }
 
         if (supportsAndroidRouteExclusion) {
+            val truncated = routes.size > selectedRoutes.size
             return IpListConnectionRoutePlan(
                 config = config,
                 androidExcludedRoutes = selectedRoutes,
                 selectedRouteCount = selectedRoutes.size,
                 appliedRouteCount = selectedRoutes.size,
                 reachedProfileSizeLimit = false,
+                reachedEstablishRouteLimit = truncated,
                 delivery = IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
             )
         }
@@ -108,10 +148,23 @@ object IpListRouteConfig {
             selectedRouteCount = selectedRoutes.size,
             appliedRouteCount = appendResult.appliedRouteCount,
             reachedProfileSizeLimit = appendResult.reachedProfileSizeLimit,
+            reachedEstablishRouteLimit = false,
             delivery = IpListRouteDelivery.OVPN_PROFILE
         )
     }
 
+
+    /**
+     * Picks which CIDR blocks matter most when a source list is bigger than [maxRoutes]: sorts by
+     * prefix length ascending (IPv4 before IPv6) so the broadest blocks — the huge allocations that
+     * belong to major ISPs, hosting providers, CDNs and, in practice, government/state services that
+     * run on their own large ranges — are kept first, then takes the top [maxRoutes]. There is no
+     * per-entity "government"/"big company" tag in the source lists (just ISP-provided country CIDR
+     * blocks), so widest-block-first is the best available proxy: it maximizes covered IP space per
+     * excludeRoute() call, which is what actually determines whether traffic to a given destination
+     * bypasses the tunnel. Narrow /32-ish entries (small businesses, individual hosts) are dropped
+     * first when the budget is exceeded.
+     */
     private fun selectBroadestRoutes(
         routes: List<IpCidrRoute>,
         maxRoutes: Int,

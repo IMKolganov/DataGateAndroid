@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Liostáil — tá sé tábhachtach</string>
     <string name="home_telegram_channel_body">Cainéal Telegram an tionscadail: nuacht agus fógraí nuair a bhíonn fadhbanna seirbhíse.</string>
+    <string name="home_grace_banner_title">Ceangailte — rochtain shealadach</string>
+    <string name="home_grace_banner_body">Nasc do chuntas nó liostáil laistigh de %1$s nó dícheanglófar an seisiún seo.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -325,6 +327,15 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Theip ar athfhíordheimhniú cuntais Google. Seiceáil an cuntas Google ar an ngléas seo, nuashonraigh seirbhísí Google Play, ansin bain triail eile as síniú isteach.</string>
     <string name="error_google_account_reauth_fallback_failed">Theip ar shíniú Google sular cuireadh teagmháil leis an mbuninneall. Theip ar an dá shruth Google Credential Manager agus an cuntas á athfhíordheimhniú. Más ann do chuntas Google ar an ngléas, seiceáil ainm pacáiste an chliaint OAuth Android agus SHA-1/SHA-256 don thógáil seo.</string>
+    <string name="error_google_signin_cancelled">Cuireadh an síniú isteach ar ceal. Mura bhfuil cuntas Google ar an ngléas seo, cuir ceann leis sna Socruithe agus bain triail eile as.</string>
+    <string name="error_google_no_account">Níor aimsíodh cuntas Google ar an ngléas seo. Cuir cuntas Google leis sna Socruithe, ansin bain triail eile as.</string>
+    <string name="error_google_signin_config">Níl an síniú isteach le Google cumraithe i gceart ar an ngléas seo. Nuashonraigh seirbhísí Google Play agus bain triail eile as.</string>
+    <string name="error_google_signin_unsupported">Ní thacaítear leis an síniú isteach le Google ar an ngléas seo.</string>
+    <string name="error_google_signin_failed">Theip ar an síniú isteach le Google. Bain triail eile as.</string>
+    <string name="error_network_no_internet">Níl aon nasc idirlín ann. Seiceáil do líonra agus bain triail eile as.</string>
+    <string name="error_network_timeout">Chuaigh an nasc thar am. Bain triail eile as.</string>
+    <string name="error_network_interrupted">Cuireadh isteach ar an nasc líonra. Bain triail eile as.</string>
+    <string name="error_network_tls">Níorbh fhéidir nasc slán a bhunú. Seiceáil do líonra nó socruithe VPN agus bain triail eile as.</string>
     <string name="home_quick_actions_title">Cabhair &amp; teanga</string>
     <string name="login_logo_cd">Lógó DataGate</string>
     <string name="login_tagline">Rochtain VPN shábháilte ar do fhreastalaithe</string>
@@ -406,11 +417,6 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="free_tier_link_code_failed">Níorbh fhéidir cód ceangail a iarraidh.</string>
     <string name="free_tier_status_error_title">Níorbh fhéidir rochtain a sheiceáil</string>
     <string name="free_tier_status_check_failed">Níorbh fhéidir rochtain plean Free a fhíorú. Seiceáil an nasc agus bain triail eile as.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -423,4 +429,15 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

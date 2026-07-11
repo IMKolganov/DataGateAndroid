@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Tilaa — se on tärkeää</string>
     <string name="home_telegram_channel_body">Projektin Telegram-kanava: uutiset ja ilmoitukset palveluhäiriöistä.</string>
+    <string name="home_grace_banner_title">Yhdistetty — väliaikainen käyttöoikeus</string>
+    <string name="home_grace_banner_body">Liitä tilisi tai tilaa %1$s kuluessa, tai tämä istunto katkaistaan.</string>
     <string name="stats_filters">Suodattimet</string>
     <string name="stats_overview">Yleiskuva</string>
     <string name="stats_chart_hint">Napauta kaaviota · nipistä zoom · vedä vieritys</string>
@@ -307,6 +309,15 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google-tilin uudelleentunnistautuminen epäonnistui. Tarkista Google-tili tässä laitteessa, päivitä Google Play -palvelut ja yritä kirjautua uudelleen.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-kirjautuminen epäonnistui ennen taustajärjestelmään yhteyttä. Molemmat Google Credential Manager -virrat epäonnistuivat tilin uudelleentunnistautumisessa. Jos laitteella on Google-tili, tarkista OAuth Android -asiakkaan paketin nimi ja tämän version SHA-1/SHA-256.</string>
+    <string name="error_google_signin_cancelled">Kirjautuminen peruutettiin. Jos tässä laitteessa ei ole Google-tiliä, lisää yksi asetuksista ja yritä uudelleen.</string>
+    <string name="error_google_no_account">Tästä laitteesta ei löytynyt Google-tiliä. Lisää Google-tili asetuksissa ja yritä uudelleen.</string>
+    <string name="error_google_signin_config">Google-kirjautumista ei ole määritetty oikein tässä laitteessa. Päivitä Google Play -palvelut ja yritä uudelleen.</string>
+    <string name="error_google_signin_unsupported">Google-kirjautumista ei tueta tässä laitteessa.</string>
+    <string name="error_google_signin_failed">Google-kirjautuminen epäonnistui. Yritä uudelleen.</string>
+    <string name="error_network_no_internet">Ei internetyhteyttä. Tarkista verkkoyhteys ja yritä uudelleen.</string>
+    <string name="error_network_timeout">Yhteys aikakatkaistiin. Yritä uudelleen.</string>
+    <string name="error_network_interrupted">Verkkoyhteys katkesi. Yritä uudelleen.</string>
+    <string name="error_network_tls">Suojattua yhteyttä ei voitu muodostaa. Tarkista verkko- tai VPN-asetukset ja yritä uudelleen.</string>
     <string name="home_quick_actions_title">Ohje ja kieli</string>
     <string name="login_logo_cd">DataGate-logo</string>
     <string name="login_tagline">Turvallinen VPN-yhteys palvelimiisi</string>
@@ -388,11 +399,6 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="free_tier_link_code_failed">Linkityskoodia ei voitu pyytää.</string>
     <string name="free_tier_status_error_title">Käyttöoikeutta ei voitu tarkistaa</string>
     <string name="free_tier_status_check_failed">Free-sopimuksen käyttöoikeutta ei voitu vahvistaa. Tarkista yhteys ja yritä uudelleen.</string>
-    <string name="free_tier_telegram_id_label">Telegram user ID</string>
-    <string name="free_tier_telegram_id_hint">Numeric ID of the Telegram account that will enter the code in the bot</string>
-    <string name="free_tier_telegram_id_required">Enter your Telegram user ID.</string>
-    <string name="free_tier_telegram_id_invalid">Enter a valid numeric Telegram user ID.</string>
-    <string name="free_tier_register_bot_hint">Open the bot and send /register if needed. Use the same Telegram account that will enter the link code.</string>
 
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
@@ -405,4 +411,15 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="settings_bridge_ports_saved">Bridge port settings saved. Reconnect VPN to apply.</string>
     <string name="settings_bridge_ports_reset">Reset to defaults</string>
 
+
+    <string name="free_tier_telegram_blocked_hint">If Telegram does not open, connect VPN first (Access tab), then open the bot or channel.</string>
+    <string name="free_tier_code_expires_soon">Code expires soon (%1$s). Connect VPN and open the bot, or request a new code.</string>
+    <string name="free_tier_code_expired">Link code expired. Tap Get link code to request a new one.</string>
+
+    <string name="free_tier_copy_code">Copy code</string>
+    <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
+    <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

@@ -1,13 +1,25 @@
 package com.imkolganov.datagate.ui.freetier
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,38 +33,38 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.activity.compose.LocalActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.AdminTotpGate
 import com.imkolganov.datagate.freetier.FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS
+import com.imkolganov.datagate.freetier.FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS
+import com.imkolganov.datagate.freetier.FREE_TIER_STATUS_FETCH_RETRY_DELAY_MS
 import com.imkolganov.datagate.freetier.FreeTierApi
 import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import com.imkolganov.datagate.freetier.FreeTierOnboardingCopyMode
 import com.imkolganov.datagate.freetier.FreeTierStatusFetchOutcome
+import com.imkolganov.datagate.freetier.FreeTierStatusFetchResult
 import com.imkolganov.datagate.freetier.evaluateFreeTierStatusFetch
 import com.imkolganov.datagate.freetier.freeTierOnboardingCopyMode
-import com.imkolganov.datagate.freetier.FreeTierStatusFetchResult
-import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.freetier.isFreeTierLinkCodeExpired
+import com.imkolganov.datagate.freetier.parseGraceExpiresAtMs
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnPoll
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnResume
+import com.imkolganov.datagate.freetier.shouldWarnLinkCodeExpiringSoon
 import com.imkolganov.datagate.freetier.telegramChannelUrl
+import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
-import com.imkolganov.datagate.freetier.parseTelegramUserId
-import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeRequest
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeResponse
 import com.imkolganov.datagate.update.ApkUpdateInstaller
-import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -65,6 +77,7 @@ import kotlinx.coroutines.withContext
 fun FreeTierOnboardingHost(
     adminTotpGate: AdminTotpGate,
     freeTierApi: FreeTierApi,
+    isVpnConnected: Boolean = false,
 ) {
     if (adminTotpGate != AdminTotpGate.Allowed) {
         FreeTierComplianceController.setOnboardingVisible(false)
@@ -84,7 +97,7 @@ fun FreeTierOnboardingHost(
     var statusLoading by remember { mutableStateOf(false) }
     var linkCodeLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var telegramIdInput by remember { mutableStateOf("") }
+    var linkCodeExpiredNotice by remember { mutableStateOf(false) }
 
     var lastStatusFetchMs by remember { mutableLongStateOf(0L) }
     var refreshOnNextResume by remember { mutableStateOf(false) }
@@ -109,7 +122,7 @@ fun FreeTierOnboardingHost(
                 codeExpiresAtMs = 0L
                 codeSecondsLeft = 0
                 errorMessage = null
-                telegramIdInput = ""
+                linkCodeExpiredNotice = false
             }
             FreeTierStatusFetchOutcome.ShowOnboarding -> {
                 statusErrorVisible = false
@@ -126,6 +139,29 @@ fun FreeTierOnboardingHost(
         }
     }
 
+    /**
+     * Transient network blips (e.g. "Socket closed" while the VPN tunnel is coming up or down)
+     * shouldn't surface an error dialog on the first failure — retry quietly first. Applies to any
+     * free-tier-access call, not just the status poll: [notifyVpnConnected] fires at exactly the
+     * moment the tunnel comes up, which is the least stable point for the network stack.
+     */
+    suspend fun withStatusFetchRetry(
+        call: suspend () -> ApiResponse<FreeTierAccessStatusResponse>
+    ): ApiResponse<FreeTierAccessStatusResponse> {
+        var lastError: Exception? = null
+        repeat(FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS) { attempt ->
+            try {
+                return withContext(Dispatchers.IO) { call() }
+            } catch (e: Exception) {
+                lastError = e
+                if (attempt < FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS - 1) {
+                    delay(FREE_TIER_STATUS_FETCH_RETRY_DELAY_MS)
+                }
+            }
+        }
+        throw lastError ?: IllegalStateException("Free tier status fetch failed with no exception recorded")
+    }
+
     suspend fun fetchStatus(force: Boolean = false) {
         if (!force) {
             val now = System.currentTimeMillis()
@@ -138,7 +174,7 @@ fun FreeTierOnboardingHost(
             }
             statusLoading = true
             try {
-                val response = withContext(Dispatchers.IO) { freeTierApi.getAccessStatus() }
+                val response = withStatusFetchRetry { freeTierApi.getAccessStatus() }
                 lastStatusFetchMs = System.currentTimeMillis()
                 applyFetchResult(evaluateFreeTierStatusFetch(response))
             } catch (e: Exception) {
@@ -146,14 +182,64 @@ fun FreeTierOnboardingHost(
                 applyFetchResult(
                     evaluateFreeTierStatusFetch(
                         response = ApiResponse(success = false, message = null, data = null),
-                        apiFailureMessage = appContext.resources.userFriendlyApiError(
-                            e.deepMessageForApiError()
-                        ),
+                        apiFailureMessage = appContext.resources.userFriendlyApiError(e),
                     )
                 )
             } finally {
                 statusLoading = false
             }
+        }
+    }
+
+    /**
+     * Starts/refreshes the grace window for a direct OpenVPN connection. Called once right after
+     * the tunnel comes up (see the `isVpnConnected` [LaunchedEffect] below) — never on a timer or
+     * poll, since repeated calls re-audit compliance server-side. Retries transient network
+     * failures (see [withStatusFetchRetry]) rather than immediately popping the error dialog.
+     */
+    suspend fun notifyVpnConnected() {
+        fetchMutex.withLock {
+            statusLoading = true
+            try {
+                val response = withStatusFetchRetry { freeTierApi.notifyVpnConnected() }
+                lastStatusFetchMs = System.currentTimeMillis()
+                applyFetchResult(evaluateFreeTierStatusFetch(response))
+            } catch (e: Exception) {
+                lastStatusFetchMs = System.currentTimeMillis()
+                applyFetchResult(
+                    evaluateFreeTierStatusFetch(
+                        response = ApiResponse(success = false, message = null, data = null),
+                        apiFailureMessage = appContext.resources.userFriendlyApiError(e),
+                    )
+                )
+            } finally {
+                statusLoading = false
+            }
+        }
+    }
+
+    suspend fun requestLinkCode() {
+        linkCodeLoading = true
+        errorMessage = null
+        linkCodeExpiredNotice = false
+        try {
+            val response = withContext(Dispatchers.IO) { freeTierApi.requestAccountLinkCode() }
+            if (response.success) {
+                val data = response.data
+                if (data != null && data.code.isNotBlank()) {
+                    linkCode = data
+                    codeExpiresAtMs = System.currentTimeMillis() + data.expiresInSeconds * 1000L
+                } else {
+                    errorMessage = appContext.getString(R.string.free_tier_link_code_failed)
+                }
+            } else {
+                errorMessage = response.message?.ifBlank { null }
+                    ?: appContext.getString(R.string.free_tier_link_code_failed)
+            }
+        } catch (e: Exception) {
+            errorMessage = appContext.resources.userFriendlyApiError(e)
+        } finally {
+            linkCodeLoading = false
         }
     }
 
@@ -178,6 +264,18 @@ fun FreeTierOnboardingHost(
     LaunchedEffect(statusRefreshNonce) {
         if (adminTotpGate != AdminTotpGate.Allowed || statusRefreshNonce == 0) return@LaunchedEffect
         fetchStatus(force = false)
+    }
+
+    LaunchedEffect(isVpnConnected) {
+        if (adminTotpGate != AdminTotpGate.Allowed || !isVpnConnected) return@LaunchedEffect
+        notifyVpnConnected()
+    }
+
+    LaunchedEffect(status) {
+        val s = status
+        FreeTierComplianceController.setGraceExpiresAtUtcMs(
+            if (s != null && s.isGracePeriod) parseGraceExpiresAtMs(s.graceExpiresAtUtc) else null
+        )
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -211,6 +309,8 @@ fun FreeTierOnboardingHost(
             if (isFreeTierLinkCodeExpired(codeExpiresAtMs, now)) {
                 codeSecondsLeft = 0
                 linkCode = null
+                linkCodeExpiredNotice = true
+                codeExpiresAtMs = 0L
                 break
             }
             codeSecondsLeft = ((codeExpiresAtMs - now) / 1000L).toInt()
@@ -274,7 +374,7 @@ fun FreeTierOnboardingHost(
             )
         },
         text = {
-            Column {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = when (copyMode) {
                         FreeTierOnboardingCopyMode.LinkAccount ->
@@ -284,66 +384,97 @@ fun FreeTierOnboardingHost(
                         FreeTierOnboardingCopyMode.Generic ->
                             stringResource(R.string.free_tier_body_generic, channelLabel)
                     },
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyLarge,
                 )
 
-                if (copyMode == FreeTierOnboardingCopyMode.LinkAccount && linkCode == null) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = telegramIdInput,
-                        onValueChange = {
-                            telegramIdInput = it
-                            errorMessage = null
-                        },
-                        label = { Text(stringResource(R.string.free_tier_telegram_id_label)) },
-                        supportingText = { Text(stringResource(R.string.free_tier_telegram_id_hint)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(R.string.free_tier_telegram_blocked_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                if (linkCodeExpiredNotice && linkCode == null) {
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = stringResource(R.string.free_tier_register_bot_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = stringResource(R.string.free_tier_code_expired),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
 
                 linkCode?.let { code ->
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = code.code,
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (codeSecondsLeft > 0) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                    SelectionContainer(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = stringResource(
-                                R.string.free_tier_code_expires,
-                                formatCountdown(codeSecondsLeft)
+                            text = code.code,
+                            style = MaterialTheme.typography.displaySmall.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
                             ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.free_tier_code_instruction_1),
-                        style = MaterialTheme.typography.bodySmall
+                        text = stringResource(R.string.free_tier_code_paste_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                     )
-                    Text(
-                        text = stringResource(R.string.free_tier_code_instruction_2, code.code),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = stringResource(R.string.free_tier_code_instruction_3),
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    if (codeSecondsLeft > 0) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val expiryText = if (shouldWarnLinkCodeExpiringSoon(codeSecondsLeft)) {
+                            stringResource(
+                                R.string.free_tier_code_expires_soon,
+                                formatCountdown(codeSecondsLeft),
+                            )
+                        } else {
+                            stringResource(
+                                R.string.free_tier_code_expires,
+                                formatCountdown(codeSecondsLeft),
+                            )
+                        }
+                        Text(
+                            text = expiryText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (shouldWarnLinkCodeExpiringSoon(codeSecondsLeft)) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                copyLinkCodeToClipboard(appContext, code.code)
+                                Toast.makeText(
+                                    appContext,
+                                    appContext.getString(R.string.copied),
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Icon(Icons.Outlined.ContentCopy, contentDescription = null)
+                            Spacer(modifier = Modifier.size(4.dp))
+                            Text(stringResource(R.string.free_tier_copy_code))
+                        }
+                        Button(
+                            onClick = { openTelegramUrl(botUrl) },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(stringResource(R.string.free_tier_open_bot))
+                        }
+                    }
                 }
 
                 errorMessage?.let { err ->
@@ -351,84 +482,32 @@ fun FreeTierOnboardingHost(
                     Text(
                         text = err,
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 TextButton(
                     enabled = !statusLoading,
                     onClick = { scope.launch { fetchStatus(force = true) } },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
                         if (statusLoading) {
                             stringResource(R.string.free_tier_check_again_loading)
                         } else {
-                            stringResource(R.string.free_tier_check_again)
+                            stringResource(R.string.free_tier_done_check)
                         }
                     )
-                }
-                if (copyMode != FreeTierOnboardingCopyMode.Generic) {
-                    TextButton(
-                        onClick = { openTelegramUrl(channelUrl) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.free_tier_open_channel))
-                    }
                 }
             }
         },
         confirmButton = {
             when {
                 copyMode == FreeTierOnboardingCopyMode.LinkAccount && linkCode == null -> {
-                    TextButton(
+                    Button(
                         enabled = !linkCodeLoading && !statusLoading,
-                        onClick = {
-                            val telegramId = parseTelegramUserId(telegramIdInput)
-                            if (telegramId == null) {
-                                errorMessage = appContext.getString(
-                                    if (telegramIdInput.isBlank()) {
-                                        R.string.free_tier_telegram_id_required
-                                    } else {
-                                        R.string.free_tier_telegram_id_invalid
-                                    }
-                                )
-                                return@TextButton
-                            }
-                            scope.launch {
-                                linkCodeLoading = true
-                                errorMessage = null
-                                try {
-                                    val response = withContext(Dispatchers.IO) {
-                                        freeTierApi.requestAccountLinkCode(
-                                            RequestTelegramAccountLinkCodeRequest(telegramId = telegramId)
-                                        )
-                                    }
-                                    if (response.success) {
-                                        val data = response.data
-                                        if (data != null && data.code.isNotBlank()) {
-                                            linkCode = data
-                                            codeExpiresAtMs =
-                                                System.currentTimeMillis() + data.expiresInSeconds * 1000L
-                                        } else {
-                                            errorMessage =
-                                                appContext.getString(R.string.free_tier_link_code_failed)
-                                        }
-                                    } else {
-                                        errorMessage = response.message?.ifBlank { null }
-                                            ?: appContext.getString(R.string.free_tier_link_code_failed)
-                                    }
-                                } catch (e: Exception) {
-                                    errorMessage =
-                                        appContext.resources.userFriendlyApiError(
-                                            e.deepMessageForApiError()
-                                        )
-                                } finally {
-                                    linkCodeLoading = false
-                                }
-                            }
-                        }
+                        onClick = { scope.launch { requestLinkCode() } },
                     ) {
                         Text(
                             if (linkCodeLoading) {
@@ -439,13 +518,8 @@ fun FreeTierOnboardingHost(
                         )
                     }
                 }
-                linkCode != null -> {
-                    TextButton(onClick = { openTelegramUrl(botUrl) }) {
-                        Text(stringResource(R.string.free_tier_open_bot))
-                    }
-                }
-                else -> {
-                    TextButton(onClick = { openTelegramUrl(channelUrl) }) {
+                copyMode != FreeTierOnboardingCopyMode.Generic -> {
+                    OutlinedButton(onClick = { openTelegramUrl(channelUrl) }) {
                         Text(stringResource(R.string.free_tier_open_channel))
                     }
                 }
@@ -455,7 +529,7 @@ fun FreeTierOnboardingHost(
             TextButton(onClick = { onboardingVisible = false }) {
                 Text(stringResource(R.string.free_tier_close))
             }
-        }
+        },
     )
 }
 
@@ -463,4 +537,9 @@ private fun formatCountdown(totalSeconds: Int): String {
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     return "%d:%02d".format(minutes, seconds)
+}
+
+internal fun copyLinkCodeToClipboard(context: Context, code: String) {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    clipboard.setPrimaryClip(ClipData.newPlainText("datagate-link-code", code))
 }
