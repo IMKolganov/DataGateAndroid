@@ -77,6 +77,12 @@ object IpListRouteConfig {
     const val MAX_ANDROID12_OVPN_ROUTE_LIMIT = 3_000
     const val MAX_OPENVPN_PROFILE_BYTES = 240 * 1024
 
+    /** The `excludeRoute()` cap that applies for a given [coverageMode] — see [prepareConnectionRoutes]. */
+    fun androidExcludeRouteLimitFor(coverageMode: IpListCoverageMode): Int = when (coverageMode) {
+        IpListCoverageMode.FAST -> MAX_ANDROID_EXCLUDED_ROUTES
+        IpListCoverageMode.FULL -> MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+    }
+
     fun selectAndroidExcludedRoutes(
         routes: List<IpCidrRoute>,
         maxRoutes: Int = MAX_ANDROID_EXCLUDED_ROUTES

@@ -23,10 +23,4 @@ object LegacyAuthMigration {
         val shouldClear = (input.isAppUpdate || input.isFreshInstall) && input.hasLegacySessionData
         return Decision(shouldClearSession = shouldClear, shouldMarkMigrationDone = true)
     }
-
-    fun shouldClearSessionOnFreshInstallWithRestoredBackup(
-        isFreshInstall: Boolean,
-        hasAccessToken: Boolean,
-        hasRefreshToken: Boolean,
-    ): Boolean = isFreshInstall && (hasAccessToken || hasRefreshToken)
 }

@@ -137,24 +137,6 @@ class LegacyAuthMigrationTest {
         assertFalse(decision.shouldClearSession)
         assertFalse(decision.shouldMarkMigrationDone)
     }
-
-    @Test
-    fun shouldClearSessionOnFreshInstallWithRestoredBackup_detectsTokens() {
-        assertTrue(
-            LegacyAuthMigration.shouldClearSessionOnFreshInstallWithRestoredBackup(
-                isFreshInstall = true,
-                hasAccessToken = true,
-                hasRefreshToken = false,
-            )
-        )
-        assertFalse(
-            LegacyAuthMigration.shouldClearSessionOnFreshInstallWithRestoredBackup(
-                isFreshInstall = false,
-                hasAccessToken = true,
-                hasRefreshToken = true,
-            )
-        )
-    }
 }
 
 private class FakeTokenStore(

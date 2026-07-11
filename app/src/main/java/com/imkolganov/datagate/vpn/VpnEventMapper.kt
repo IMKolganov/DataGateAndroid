@@ -109,6 +109,7 @@ object VpnEventMapper {
                 isConnectRequested = false,
                 isVpnConnected = false,
                 isVpnPaused = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_disconnecting)
             )
 
@@ -156,6 +157,7 @@ object VpnEventMapper {
                 isConnectRequested = false,
                 isVpnConnected = false,
                 isVpnPaused = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(R.string.vpn_msg_tunnel_failed)
             )
 
@@ -163,6 +165,7 @@ object VpnEventMapper {
                 isConnectRequested = false,
                 isVpnConnected = false,
                 isVpnPaused = false,
+                pendingUserCommand = null,
                 lastMessage = res.getString(
                     R.string.vpn_connect_failed,
                     eventInfo.trim().ifBlank { eventName }

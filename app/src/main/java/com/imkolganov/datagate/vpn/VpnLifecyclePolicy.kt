@@ -101,30 +101,6 @@ object VpnLifecyclePolicy {
         return state
     }
 
-    fun pauseCommandDropReason(hasActiveSession: Boolean, vpnClientPresent: Boolean): String? {
-        val decision = VpnCommandContract.evaluatePause(
-            VpnCommandContract.VpnServiceSnapshot(
-                runtimeState = "UNKNOWN",
-                hasActiveSession = hasActiveSession,
-                vpnClientPresent = vpnClientPresent,
-                isPaused = false,
-            )
-        )
-        return (decision as? VpnCommandContract.CommandDecision.Reject)?.reason
-    }
-
-    fun resumeCommandDropReason(isPaused: Boolean): String? {
-        val decision = VpnCommandContract.evaluateResume(
-            VpnCommandContract.VpnServiceSnapshot(
-                runtimeState = "UNKNOWN",
-                hasActiveSession = false,
-                vpnClientPresent = false,
-                isPaused = isPaused,
-            )
-        )
-        return (decision as? VpnCommandContract.CommandDecision.Reject)?.reason
-    }
-
     fun shouldDisconnectVpnOnLogout(
         isVpnConnected: Boolean,
         isConnectRequested: Boolean,

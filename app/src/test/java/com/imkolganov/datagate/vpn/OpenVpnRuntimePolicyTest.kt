@@ -246,11 +246,6 @@ class OpenVpnRuntimePolicyTest {
     }
 
     @Test
-    fun mustNotSchedulePauseResumeOnNativeExecutor_whenScheduledOnNative() {
-        assertFalse(OpenVpnRuntimePolicy.mustNotSchedulePauseResumeOnNativeExecutor(true))
-    }
-
-    @Test
     fun shouldSchedulePauseResumeOnForeignThread_always() {
         assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(true))
         assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(false))

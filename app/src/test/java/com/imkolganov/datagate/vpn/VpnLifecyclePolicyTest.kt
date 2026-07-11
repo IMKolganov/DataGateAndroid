@@ -1,12 +1,35 @@
 package com.imkolganov.datagate.vpn
 
+import android.app.Application
+import android.content.res.Resources
+import androidx.test.core.app.ApplicationProvider
+import com.imkolganov.datagate.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+/**
+ * Uses the real [VpnEventMapper.map] (via Robolectric resources) rather than a hand-rolled mock
+ * mapper — a previous mock duplicated [VpnEventMapper]'s event-handling logic and silently drifted
+ * out of sync with it, which is exactly how the "pendingUserCommand never clears on ERROR" bug went
+ * unnoticed. See [VpnCommandContractIntegrationTest] for pendingUserCommand-specific coverage.
+ */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33], application = Application::class)
 class VpnLifecyclePolicyTest {
+
+    private val resources: Resources
+        get() = ApplicationProvider.getApplicationContext<Application>().resources
+
+    private fun map(state: VpnStatusUiState, name: String, info: String = ""): VpnStatusUiState =
+        VpnEventMapper.map(resources, state, name, info)
+
+    private val mapper: (VpnStatusUiState, String, String) -> VpnStatusUiState = ::map
 
     @Test
     fun supportedAndroidApiLevels_documentedForLifecycleCoverage() {
@@ -16,7 +39,6 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun connectPauseResumeDisconnect_fullLifecycle() {
-        val mapper = VpnLifecycleTestMapper.identity()
         var state = VpnStatusUiState()
 
         state = VpnLifecyclePolicy.foldStatusBroadcasts(
@@ -52,7 +74,6 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun appReopen_afterProcessDeathWhilePaused_restoresDisconnectedNotPaused() {
-        val mapper = VpnLifecycleTestMapper.identity()
         val restored = VpnLifecyclePolicy.restoreUiStateOnAppStart(
             current = VpnStatusUiState(),
             cached = VpnLifecyclePolicy.CachedPrefsSnapshot(
@@ -73,7 +94,6 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun appReopen_afterProcessDeathWhileConnecting_thenServiceQuery_acceptsDisconnected() {
-        val mapper = VpnLifecycleTestMapper.identity()
         val restored = VpnLifecyclePolicy.restoreUiStateOnAppStart(
             current = VpnStatusUiState(),
             cached = VpnLifecyclePolicy.CachedPrefsSnapshot(
@@ -101,7 +121,6 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun appReopen_whileLiveConnectInSameSession_idleQueryDisconnectedIsIgnored() {
-        val mapper = VpnLifecycleTestMapper.identity()
         var state = VpnStatusUiState()
         state = mapper(state, "CONNECTING", "")
 
@@ -118,12 +137,11 @@ class VpnLifecyclePolicyTest {
         )
 
         assertTrue(afterIgnoredQuery.isConnectRequested)
-        assertEquals("CONNECTING", afterIgnoredQuery.lastMessage)
+        assertEquals(resources.getString(R.string.vpn_msg_connecting), afterIgnoredQuery.lastMessage)
     }
 
     @Test
     fun appReopen_serviceStillConnected_queryReturnsConnected() {
-        val mapper = VpnLifecycleTestMapper.identity()
         val restored = VpnLifecyclePolicy.restoreUiStateOnAppStart(
             current = VpnStatusUiState(selectedServerName = "Paris"),
             cached = VpnLifecyclePolicy.CachedPrefsSnapshot(
@@ -212,7 +230,6 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun applyRestoredCachedEvent_processRestartPreservesServerChoice() {
-        val mapper = VpnLifecycleTestMapper.identity()
         val normalized = OpenVpnRuntimePolicy.restoreCachedStatus("PAUSED", "")
         val restored = VpnLifecyclePolicy.applyRestoredCachedEvent(
             current = VpnStatusUiState(selectedServerName = "Frankfurt", selectedServerId = 7),
@@ -226,7 +243,6 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun closeAndReopenApp_preservesServerSelectionButNotTunnelState() {
-        val mapper = VpnLifecycleTestMapper.identity()
         val connected = VpnLifecyclePolicy.foldStatusBroadcasts(
             VpnStatusUiState(selectedServerName = "Tokyo", selectedServerId = 9),
             listOf(VpnLifecyclePolicy.StatusBroadcast("CONNECTED")),
@@ -246,58 +262,5 @@ class VpnLifecyclePolicyTest {
         assertFalse(afterReopen.isVpnConnected)
         assertEquals("Tokyo", afterReopen.selectedServerName)
         assertEquals(9, afterReopen.selectedServerId)
-    }
-}
-
-/**
- * Lightweight mapper for lifecycle tests without Android resources.
- * Mirrors [VpnEventMapper] flag semantics.
- */
-internal object VpnLifecycleTestMapper {
-    fun identity(): (VpnStatusUiState, String, String) -> VpnStatusUiState = { state, name, _ ->
-        when (name.uppercase()) {
-            "CONNECTING", "RECONNECTING", "WAITING_NETWORK" -> state.copy(
-                isConnectRequested = true,
-                isVpnConnected = false,
-                isVpnPaused = false,
-                lastMessage = name,
-            )
-            "RESUMED" -> state.copy(
-                isConnectRequested = true,
-                isVpnConnected = false,
-                isVpnPaused = false,
-                pendingUserCommand = null,
-                lastMessage = name,
-            )
-            "CONNECTED" -> state.copy(
-                isConnectRequested = true,
-                isVpnConnected = true,
-                isVpnPaused = false,
-                pendingUserCommand = null,
-                lastMessage = name,
-            )
-            "PAUSED" -> state.copy(
-                isConnectRequested = true,
-                isVpnConnected = false,
-                isVpnPaused = true,
-                pendingUserCommand = null,
-                lastMessage = name,
-            )
-            "DISCONNECTING" -> state.copy(
-                isConnectRequested = false,
-                isVpnConnected = false,
-                isVpnPaused = false,
-                lastMessage = name,
-            )
-            "DISCONNECTED" -> state.copy(
-                isConnectRequested = false,
-                isVpnConnected = false,
-                isVpnPaused = false,
-                selectedServerId = null,
-                selectedServerName = null,
-                lastMessage = name,
-            )
-            else -> state.copy(lastMessage = name)
-        }
     }
 }

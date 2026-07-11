@@ -110,9 +110,7 @@ fun AppRoot(
                     onCancelSetup = { authViewModel.cancelAdminTotpSetup() },
                     onConfirm = { authViewModel.confirmAdminTotpSetup(appContext.resources, it) },
                     onLogout = {
-                        onRequestDisconnect()
-                        authViewModel.logout()
-                        onAuthChanged()
+                        performLogout(vpnState, onRequestDisconnect, authViewModel::logout, onAuthChanged)
                     },
                 )
                 return
@@ -130,8 +128,7 @@ fun AppRoot(
                 onRequestResume = onRequestResume,
                 onReconnectVpn = onReconnectVpn,
                 onLogout = {
-                    authViewModel.logout()
-                    onAuthChanged()
+                    performLogout(vpnState, onRequestDisconnect, authViewModel::logout, onAuthChanged)
                 },
                 authViewModel = authViewModel,
                 tokenStore = tokenStore,

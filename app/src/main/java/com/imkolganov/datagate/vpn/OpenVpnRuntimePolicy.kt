@@ -98,8 +98,4 @@ internal object OpenVpnRuntimePolicy {
      * ovpncli can [thread_safe_pause] into the running io_context.
      */
     fun shouldSchedulePauseResumeOnForeignThread(nativeVpnJobActive: Boolean): Boolean = true
-
-    /** Guard: scheduling pause/resume on the native executor behind connect always deadlocks. */
-    fun mustNotSchedulePauseResumeOnNativeExecutor(scheduledOnNativeExecutor: Boolean): Boolean =
-        !scheduledOnNativeExecutor
 }

@@ -5,6 +5,29 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IpListRouteConfigTest {
+
+    /**
+     * Regression: the "IP list routes prepared" debug log always reported
+     * [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] as the applied cap even when
+     * [IpListCoverageMode.FAST] (capped at [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES]) truncated
+     * the list — misleading anyone debugging route counts in FAST mode.
+     */
+    @Test
+    fun androidExcludeRouteLimitFor_fastMode_returnsFastCap() {
+        assertEquals(
+            IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES,
+            IpListRouteConfig.androidExcludeRouteLimitFor(IpListCoverageMode.FAST)
+        )
+    }
+
+    @Test
+    fun androidExcludeRouteLimitFor_fullMode_returnsFullCap() {
+        assertEquals(
+            IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT,
+            IpListRouteConfig.androidExcludeRouteLimitFor(IpListCoverageMode.FULL)
+        )
+    }
+
     @Test
     fun parseIpv4CidrRoutes_acceptsHostRoute32() {
         val routes = IpListRouteConfig.parseIpv4CidrRoutes("1.2.3.4/32")

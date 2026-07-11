@@ -12,12 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class OpenVpnNativePauseResumeSchedulingTest {
 
     @Test
-    fun policy_mustNotSchedulePauseResumeOnNativeExecutor() {
-        assertTrue(OpenVpnRuntimePolicy.mustNotSchedulePauseResumeOnNativeExecutor(false))
-        assertFalse(OpenVpnRuntimePolicy.mustNotSchedulePauseResumeOnNativeExecutor(true))
-    }
-
-    @Test
     fun policy_pauseResumeAlwaysUsesForeignThreadWhileConnectActive() {
         assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(nativeVpnJobActive = true))
         assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(nativeVpnJobActive = false))

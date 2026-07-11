@@ -187,7 +187,7 @@ class VpnConnectInteractor(
                     if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
                         "android-excludeRoute/${ipListSettings.coverageMode}" +
                             if (routePlan.reachedEstablishRouteLimit) {
-                                "(capped=${IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT})"
+                                "(capped=${IpListRouteConfig.androidExcludeRouteLimitFor(ipListSettings.coverageMode)})"
                             } else {
                                 ""
                             }

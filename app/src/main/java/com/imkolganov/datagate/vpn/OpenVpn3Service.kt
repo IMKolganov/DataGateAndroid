@@ -590,8 +590,7 @@ class OpenVpn3Service : VpnService() {
 
     private fun processCoreEvent(name: String, info: String) {
         when {
-            name.equals("PAUSE", ignoreCase = true) -> {
-                if (!OpenVpnPauseBroadcastPolicy.shouldBroadcastPausedOnCoreEvent(name)) return
+            OpenVpnPauseBroadcastPolicy.shouldBroadcastPausedOnCoreEvent(name) -> {
                 isPaused = true
                 hasActiveSession = false
                 connectInProgress = false
@@ -600,8 +599,7 @@ class OpenVpn3Service : VpnService() {
                     info.takeIf { it.isNotBlank() } ?: getString(R.string.vpn_msg_paused)
                 )
             }
-            name.equals("RESUME", ignoreCase = true) -> {
-                if (!OpenVpnPauseBroadcastPolicy.shouldBroadcastResumedOnCoreEvent(name)) return
+            OpenVpnPauseBroadcastPolicy.shouldBroadcastResumedOnCoreEvent(name) -> {
                 isPaused = false
                 connectInProgress = true
                 transitionState(VpnRuntimeState.CONNECTING, "core_resume")
