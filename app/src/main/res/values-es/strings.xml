@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Suscríbete — es importante</string>
     <string name="home_telegram_channel_body">Canal de Telegram del proyecto: noticias y avisos en caso de problemas del servicio.</string>
+    <string name="home_grace_banner_title">Conectado — acceso temporal</string>
+    <string name="home_grace_banner_body">Vincula tu cuenta o suscríbete en %1$s o esta sesión se desconectará.</string>
     <string name="stats_filters">Filtros</string>
     <string name="stats_overview">Resumen</string>
     <string name="stats_chart_hint">Toca el gráfico · pellizca para ampliar · arrastra para desplazar</string>
@@ -307,6 +309,15 @@ Puedes abrir la página de la versión o descargar el APK. Usa la opción de aba
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Falló la nueva autenticación de la cuenta de Google. Compruebe la cuenta de Google en este dispositivo, actualice los Servicios de Google Play e intente iniciar sesión de nuevo.</string>
     <string name="error_google_account_reauth_fallback_failed">El inicio de sesión con Google falló antes de contactar con el backend. Ambos flujos de Google Credential Manager fallaron al volver a autenticar la cuenta. Si hay una cuenta de Google en el dispositivo, compruebe el nombre del paquete del cliente OAuth para Android y SHA-1/SHA-256 de esta compilación.</string>
+    <string name="error_google_signin_cancelled">Se canceló el inicio de sesión. Si no hay ninguna cuenta de Google en este dispositivo, añada una en Ajustes e inténtelo de nuevo.</string>
+    <string name="error_google_no_account">No se encontró ninguna cuenta de Google en este dispositivo. Añada una cuenta de Google en Ajustes y vuelva a intentarlo.</string>
+    <string name="error_google_signin_config">El inicio de sesión de Google no está configurado correctamente en este dispositivo. Actualice los Servicios de Google Play e inténtelo de nuevo.</string>
+    <string name="error_google_signin_unsupported">El inicio de sesión con Google no es compatible con este dispositivo.</string>
+    <string name="error_google_signin_failed">No se pudo iniciar sesión con Google. Inténtelo de nuevo.</string>
+    <string name="error_network_no_internet">No hay conexión a internet. Compruebe su red e inténtelo de nuevo.</string>
+    <string name="error_network_timeout">La conexión ha superado el tiempo de espera. Inténtelo de nuevo.</string>
+    <string name="error_network_interrupted">La conexión de red se ha interrumpido. Inténtelo de nuevo.</string>
+    <string name="error_network_tls">No se pudo establecer una conexión segura. Compruebe su red o la configuración de VPN e inténtelo de nuevo.</string>
     <string name="home_quick_actions_title">Ayuda e idioma</string>
     <string name="login_logo_cd">Logotipo de DataGate</string>
     <string name="login_tagline">Acceso VPN seguro a sus servidores</string>
@@ -408,4 +419,7 @@ Puedes abrir la página de la versión o descargar el APK. Usa la opción de aba
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

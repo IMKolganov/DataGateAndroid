@@ -38,6 +38,8 @@
 
     <string name="home_telegram_channel_title">Підпишіться — це важливо</string>
     <string name="home_telegram_channel_body">Telegram-канал проєкту: актуальні новини та оголошення при проблемах із сервісом.</string>
+    <string name="home_grace_banner_title">Підключено — тимчасовий доступ</string>
+    <string name="home_grace_banner_body">Прив\'яжіть акаунт або оформіть підписку протягом %1$s, інакше сесію буде відключено.</string>
 
     <string name="stats_filters">Фільтри</string>
     <string name="stats_overview">Огляд</string>
@@ -323,6 +325,15 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Не вдалося повторно автентифікувати обліковий запис Google. Перевірте обліковий запис Google на цьому пристрої, оновіть сервіси Google Play, потім спробуйте ввійти знову.</string>
     <string name="error_google_account_reauth_fallback_failed">Вхід через Google не вдався до звернення до бекенда. Обидва потоки Google Credential Manager завершилися помилкою під час повторної автентифікації облікового запису. Якщо на пристрої є обліковий запис Google, перевірте ім’я пакета клієнта OAuth для Android та SHA-1/SHA-256 для цієї збірки.</string>
+    <string name="error_google_signin_cancelled">Вхід скасовано. Якщо на цьому пристрої немає облікового запису Google, додайте його в налаштуваннях і спробуйте ще раз.</string>
+    <string name="error_google_no_account">На цьому пристрої не знайдено облікового запису Google. Додайте облік Google у налаштуваннях і спробуйте ще раз.</string>
+    <string name="error_google_signin_config">Вхід через Google налаштовано неправильно на цьому пристрої. Оновіть сервіси Google Play і спробуйте ще раз.</string>
+    <string name="error_google_signin_unsupported">Вхід через Google не підтримується на цьому пристрої.</string>
+    <string name="error_google_signin_failed">Не вдалося виконати вхід через Google. Спробуйте ще раз.</string>
+    <string name="error_network_no_internet">Немає підключення до інтернету. Перевірте мережу і спробуйте ще раз.</string>
+    <string name="error_network_timeout">Час очікування з\'єднання минув. Спробуйте ще раз.</string>
+    <string name="error_network_interrupted">Мережеве з\'єднання було перервано. Спробуйте ще раз.</string>
+    <string name="error_network_tls">Не вдалося встановити безпечне з\'єднання. Перевірте мережу або налаштування VPN і спробуйте ще раз.</string>
     <string name="home_quick_actions_title">Довідка та мова</string>
     <string name="login_logo_cd">Логотип DataGate</string>
     <string name="login_tagline">Безпечний VPN-доступ до ваших серверів</string>
@@ -422,4 +433,7 @@
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

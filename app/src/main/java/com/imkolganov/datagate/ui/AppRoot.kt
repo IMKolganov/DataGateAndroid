@@ -39,6 +39,7 @@ fun AppRoot(
     vpnState: VpnStatusUiState,
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
+    onRequestVpnPermission: () -> Unit,
     onRequestDisconnect: () -> Unit,
     onRequestPause: () -> Unit = {},
     onRequestResume: () -> Unit = {},
@@ -110,8 +111,7 @@ fun AppRoot(
                     onCancelSetup = { authViewModel.cancelAdminTotpSetup() },
                     onConfirm = { authViewModel.confirmAdminTotpSetup(appContext.resources, it) },
                     onLogout = {
-                        authViewModel.logout()
-                        onAuthChanged()
+                        performLogout(vpnState, onRequestDisconnect, authViewModel::logout, onAuthChanged)
                     },
                 )
                 return
@@ -124,13 +124,13 @@ fun AppRoot(
                 vpnState = vpnState,
                 onConnectFromHome = onConnectFromHome,
                 onConnectFromAccess = onConnectFromAccess,
+                onRequestVpnPermission = onRequestVpnPermission,
                 onRequestDisconnect = onRequestDisconnect,
                 onRequestPause = onRequestPause,
                 onRequestResume = onRequestResume,
                 onReconnectVpn = onReconnectVpn,
                 onLogout = {
-                    authViewModel.logout()
-                    onAuthChanged()
+                    performLogout(vpnState, onRequestDisconnect, authViewModel::logout, onAuthChanged)
                 },
                 authViewModel = authViewModel,
                 tokenStore = tokenStore,
@@ -145,6 +145,7 @@ fun AppRoot(
             FreeTierOnboardingHost(
                 adminTotpGate = authState.adminTotpGate,
                 freeTierApi = freeTierApi,
+                isVpnConnected = vpnState.isVpnConnected,
             )
         }
     } else {

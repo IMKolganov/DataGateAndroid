@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Abonneer — het is belangrijk</string>
     <string name="home_telegram_channel_body">Telegram-kanaal van het project: nieuws en meldingen bij serviceproblemen.</string>
+    <string name="home_grace_banner_title">Verbonden — tijdelijke toegang</string>
+    <string name="home_grace_banner_body">Koppel je account of abonneer je binnen %1$s, anders wordt deze sessie verbroken.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overzicht</string>
     <string name="stats_chart_hint">Tik op de grafiek · knijpen om te zoomen · slepen om te scrollen</string>
@@ -307,6 +309,15 @@ Je kunt de releasepagina openen of de APK downloaden.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Opnieuw authenticeren van het Google-account is mislukt. Controleer het Google-account op dit apparaat, werk Google Play-services bij en probeer opnieuw in te loggen.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-aanmelding mislukt vóór contact met de backend. Beide Google Credential Manager-stromen mislukten bij opnieuw authenticeren. Als er een Google-account op het apparaat staat, controleer dan de OAuth Android-client pakketnaam en SHA-1/SHA-256 voor deze build.</string>
+    <string name="error_google_signin_cancelled">Aanmelden is geannuleerd. Als er geen Google-account op dit apparaat staat, voeg er een toe in Instellingen en probeer het opnieuw.</string>
+    <string name="error_google_no_account">Geen Google-account gevonden op dit apparaat. Voeg een Google-account toe in Instellingen en probeer het opnieuw.</string>
+    <string name="error_google_signin_config">Google-aanmelding is niet juist geconfigureerd op dit apparaat. Werk Google Play-services bij en probeer het opnieuw.</string>
+    <string name="error_google_signin_unsupported">Google-aanmelding wordt niet ondersteund op dit apparaat.</string>
+    <string name="error_google_signin_failed">Aanmelden met Google is mislukt. Probeer het opnieuw.</string>
+    <string name="error_network_no_internet">Geen internetverbinding. Controleer je netwerk en probeer het opnieuw.</string>
+    <string name="error_network_timeout">De verbinding is verlopen (time-out). Probeer het opnieuw.</string>
+    <string name="error_network_interrupted">De netwerkverbinding is onderbroken. Probeer het opnieuw.</string>
+    <string name="error_network_tls">Er kon geen beveiligde verbinding tot stand worden gebracht. Controleer je netwerk of VPN-instellingen en probeer het opnieuw.</string>
     <string name="home_quick_actions_title">Help en taal</string>
     <string name="login_logo_cd">DataGate-logo</string>
     <string name="login_tagline">Veilige VPN-toegang tot je servers</string>
@@ -408,4 +419,7 @@ Je kunt de releasepagina openen of de APK downloaden.</string>
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

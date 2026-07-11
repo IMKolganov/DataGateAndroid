@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Абонирайте се — важно е</string>
     <string name="home_telegram_channel_body">Telegram каналът на проекта: актуални новини и съобщения при проблеми с услугата.</string>
+    <string name="home_grace_banner_title">Свързан — временен достъп</string>
+    <string name="home_grace_banner_body">Свържете акаунта си или се абонирайте до %1$s, иначе тази сесия ще бъде прекратена.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -325,6 +327,15 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Повторното удостоверяване на Google акаунта не успя. Проверете Google акаунта на устройството, актуализирайте Google Play услуги и опитайте отново да влезете.</string>
     <string name="error_google_account_reauth_fallback_failed">Влизането с Google не успя преди свързване с бекенда. И двата потока на Google Credential Manager не успяха при повторно удостоверяване. Ако на устройството има Google акаунт, проверете OAuth Android клиента за име на пакет и SHA-1/SHA-256 за тази сборка.</string>
+    <string name="error_google_signin_cancelled">Влизането беше отменено. Ако на устройството няма Google акаунт, добавете такъв в настройките и опитайте отново.</string>
+    <string name="error_google_no_account">На това устройство не е намерен Google акаунт. Добавете Google акаунт в настройките и опитайте отново.</string>
+    <string name="error_google_signin_config">Влизането с Google не е правилно конфигурирано на това устройство. Актуализирайте Google Play услуги и опитайте отново.</string>
+    <string name="error_google_signin_unsupported">Влизането с Google не се поддържа на това устройство.</string>
+    <string name="error_google_signin_failed">Влизането с Google не бе успешно. Опитайте отново.</string>
+    <string name="error_network_no_internet">Няма връзка с интернет. Проверете мрежата и опитайте отново.</string>
+    <string name="error_network_timeout">Връзката изтече. Опитайте отново.</string>
+    <string name="error_network_interrupted">Мрежовата връзка беше прекъсната. Опитайте отново.</string>
+    <string name="error_network_tls">Не може да се установи защитена връзка. Проверете мрежата или настройките на VPN и опитайте отново.</string>
     <string name="home_quick_actions_title">Помощ и език</string>
     <string name="login_logo_cd">Лого на DataGate</string>
     <string name="login_tagline">Сигурен VPN достъп до вашите сървъри</string>
@@ -425,4 +436,7 @@
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

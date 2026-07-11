@@ -46,6 +46,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.AdminTotpGate
 import com.imkolganov.datagate.freetier.FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS
+import com.imkolganov.datagate.freetier.FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS
+import com.imkolganov.datagate.freetier.FREE_TIER_STATUS_FETCH_RETRY_DELAY_MS
 import com.imkolganov.datagate.freetier.FreeTierApi
 import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import com.imkolganov.datagate.freetier.FreeTierOnboardingCopyMode
@@ -54,6 +56,7 @@ import com.imkolganov.datagate.freetier.FreeTierStatusFetchResult
 import com.imkolganov.datagate.freetier.evaluateFreeTierStatusFetch
 import com.imkolganov.datagate.freetier.freeTierOnboardingCopyMode
 import com.imkolganov.datagate.freetier.isFreeTierLinkCodeExpired
+import com.imkolganov.datagate.freetier.parseGraceExpiresAtMs
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnPoll
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnResume
 import com.imkolganov.datagate.freetier.shouldWarnLinkCodeExpiringSoon
@@ -62,7 +65,6 @@ import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeResponse
 import com.imkolganov.datagate.update.ApkUpdateInstaller
-import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -75,6 +77,7 @@ import kotlinx.coroutines.withContext
 fun FreeTierOnboardingHost(
     adminTotpGate: AdminTotpGate,
     freeTierApi: FreeTierApi,
+    isVpnConnected: Boolean = false,
 ) {
     if (adminTotpGate != AdminTotpGate.Allowed) {
         FreeTierComplianceController.setOnboardingVisible(false)
@@ -136,6 +139,29 @@ fun FreeTierOnboardingHost(
         }
     }
 
+    /**
+     * Transient network blips (e.g. "Socket closed" while the VPN tunnel is coming up or down)
+     * shouldn't surface an error dialog on the first failure — retry quietly first. Applies to any
+     * free-tier-access call, not just the status poll: [notifyVpnConnected] fires at exactly the
+     * moment the tunnel comes up, which is the least stable point for the network stack.
+     */
+    suspend fun withStatusFetchRetry(
+        call: suspend () -> ApiResponse<FreeTierAccessStatusResponse>
+    ): ApiResponse<FreeTierAccessStatusResponse> {
+        var lastError: Exception? = null
+        repeat(FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS) { attempt ->
+            try {
+                return withContext(Dispatchers.IO) { call() }
+            } catch (e: Exception) {
+                lastError = e
+                if (attempt < FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS - 1) {
+                    delay(FREE_TIER_STATUS_FETCH_RETRY_DELAY_MS)
+                }
+            }
+        }
+        throw lastError ?: IllegalStateException("Free tier status fetch failed with no exception recorded")
+    }
+
     suspend fun fetchStatus(force: Boolean = false) {
         if (!force) {
             val now = System.currentTimeMillis()
@@ -148,7 +174,7 @@ fun FreeTierOnboardingHost(
             }
             statusLoading = true
             try {
-                val response = withContext(Dispatchers.IO) { freeTierApi.getAccessStatus() }
+                val response = withStatusFetchRetry { freeTierApi.getAccessStatus() }
                 lastStatusFetchMs = System.currentTimeMillis()
                 applyFetchResult(evaluateFreeTierStatusFetch(response))
             } catch (e: Exception) {
@@ -156,9 +182,34 @@ fun FreeTierOnboardingHost(
                 applyFetchResult(
                     evaluateFreeTierStatusFetch(
                         response = ApiResponse(success = false, message = null, data = null),
-                        apiFailureMessage = appContext.resources.userFriendlyApiError(
-                            e.deepMessageForApiError()
-                        ),
+                        apiFailureMessage = appContext.resources.userFriendlyApiError(e),
+                    )
+                )
+            } finally {
+                statusLoading = false
+            }
+        }
+    }
+
+    /**
+     * Starts/refreshes the grace window for a direct OpenVPN connection. Called once right after
+     * the tunnel comes up (see the `isVpnConnected` [LaunchedEffect] below) — never on a timer or
+     * poll, since repeated calls re-audit compliance server-side. Retries transient network
+     * failures (see [withStatusFetchRetry]) rather than immediately popping the error dialog.
+     */
+    suspend fun notifyVpnConnected() {
+        fetchMutex.withLock {
+            statusLoading = true
+            try {
+                val response = withStatusFetchRetry { freeTierApi.notifyVpnConnected() }
+                lastStatusFetchMs = System.currentTimeMillis()
+                applyFetchResult(evaluateFreeTierStatusFetch(response))
+            } catch (e: Exception) {
+                lastStatusFetchMs = System.currentTimeMillis()
+                applyFetchResult(
+                    evaluateFreeTierStatusFetch(
+                        response = ApiResponse(success = false, message = null, data = null),
+                        apiFailureMessage = appContext.resources.userFriendlyApiError(e),
                     )
                 )
             } finally {
@@ -186,7 +237,7 @@ fun FreeTierOnboardingHost(
                     ?: appContext.getString(R.string.free_tier_link_code_failed)
             }
         } catch (e: Exception) {
-            errorMessage = appContext.resources.userFriendlyApiError(e.deepMessageForApiError())
+            errorMessage = appContext.resources.userFriendlyApiError(e)
         } finally {
             linkCodeLoading = false
         }
@@ -213,6 +264,18 @@ fun FreeTierOnboardingHost(
     LaunchedEffect(statusRefreshNonce) {
         if (adminTotpGate != AdminTotpGate.Allowed || statusRefreshNonce == 0) return@LaunchedEffect
         fetchStatus(force = false)
+    }
+
+    LaunchedEffect(isVpnConnected) {
+        if (adminTotpGate != AdminTotpGate.Allowed || !isVpnConnected) return@LaunchedEffect
+        notifyVpnConnected()
+    }
+
+    LaunchedEffect(status) {
+        val s = status
+        FreeTierComplianceController.setGraceExpiresAtUtcMs(
+            if (s != null && s.isGracePeriod) parseGraceExpiresAtMs(s.graceExpiresAtUtc) else null
+        )
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current

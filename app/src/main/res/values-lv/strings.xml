@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Abonējiet — tas ir svarīgi</string>
     <string name="home_telegram_channel_body">Projekta Telegram kanāls: jaunumi un paziņojumi par pakalpojuma problēmām.</string>
+    <string name="home_grace_banner_title">Savienots — pagaidu piekļuve</string>
+    <string name="home_grace_banner_body">Sasaistiet savu kontu vai abonējiet %1$s laikā, citādi šī sesija tiks atvienota.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -325,6 +327,15 @@ Varat atvērt laidiena lapu vai lejupielādēt APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google konta atkārtota autentificēšana neizdevās. Pārbaudiet Google kontu šajā ierīcē, atjauniniet Google Play pakalpojumus un mēģiniet pierakstīties atkārtoti.</string>
     <string name="error_google_account_reauth_fallback_failed">Google pierakstīšanās neizdevās pirms saziņas ar aizmugursistēmu. Abi Google Credential Manager plūdi neizdevās atkārtotas autentificēšanas laikā. Ja ierīcē ir Google konts, pārbaudiet OAuth Android klienta pakotnes nosaukumu un šīs versijas SHA‑1/SHA‑256.</string>
+    <string name="error_google_signin_cancelled">Pierakstīšanās tika atcelta. Ja šajā ierīcē nav Google konta, pievienojiet to iestatījumos un mēģiniet vēlreiz.</string>
+    <string name="error_google_no_account">Šajā ierīcē nav atrasts Google konts. Pievienojiet Google kontu iestatījumos un mēģiniet vēlreiz.</string>
+    <string name="error_google_signin_config">Pierakstīšanās ar Google šajā ierīcē nav pareizi konfigurēta. Atjauniniet Google Play pakalpojumus un mēģiniet vēlreiz.</string>
+    <string name="error_google_signin_unsupported">Pierakstīšanās ar Google šajā ierīcē netiek atbalstīta.</string>
+    <string name="error_google_signin_failed">Pierakstīšanās ar Google neizdevās. Mēģiniet vēlreiz.</string>
+    <string name="error_network_no_internet">Nav interneta savienojuma. Pārbaudiet tīklu un mēģiniet vēlreiz.</string>
+    <string name="error_network_timeout">Iestājās savienojuma noildze. Mēģiniet vēlreiz.</string>
+    <string name="error_network_interrupted">Tīkla savienojums tika pārtraukts. Mēģiniet vēlreiz.</string>
+    <string name="error_network_tls">Nevarēja izveidot drošu savienojumu. Pārbaudiet tīklu vai VPN iestatījumus un mēģiniet vēlreiz.</string>
     <string name="home_quick_actions_title">Palīdzība un valoda</string>
     <string name="login_logo_cd">DataGate logotips</string>
     <string name="login_tagline">Droša VPN piekļuve jūsu serveriem</string>
@@ -426,4 +437,7 @@ Varat atvērt laidiena lapu vai lejupielādēt APK.</string>
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

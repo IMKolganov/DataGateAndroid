@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">सब्सक्राइब करें — यह महत्वपूर्ण है</string>
     <string name="home_telegram_channel_body">प्रोजेक्ट का Telegram चैनल: ताज़ा समाचार और सेवा समस्या की घोषणाएँ।</string>
+    <string name="home_grace_banner_title">कनेक्टेड — अस्थायी पहुंच</string>
+    <string name="home_grace_banner_body">%1$s के भीतर अपना खाता लिंक करें या सदस्यता लें, अन्यथा यह सत्र डिस्कनेक्ट हो जाएगा।</string>
     <string name="stats_filters">फ़िल्टर</string>
     <string name="stats_overview">अवलोकन</string>
     <string name="stats_chart_hint">चार्ट पर टैप करें · ज़ूम के लिए पिंच · स्क्रॉल के लिए खींचें</string>
@@ -307,6 +309,15 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google खाता पुनः प्रमाणीकरण विफल। इस डिवाइस पर Google खाता जाँचें, Google Play सेवाएँ अपडेट करें, फिर पुनः साइन इन करने का प्रयास करें।</string>
     <string name="error_google_account_reauth_fallback_failed">बैकएंड से संपर्क से पहले Google साइन-इन विफल। खाता पुनः प्रमाणीकरण के दौरान दोनों Google Credential Manager प्रवाह विफल। यदि डिवाइस पर Google खाता है, तो इस बिल्ड के लिए OAuth Android क्लाइंट पैकेज नाम तथा SHA-1/SHA-256 जाँचें।</string>
+    <string name="error_google_signin_cancelled">साइन-इन रद्द कर दिया गया। यदि इस डिवाइस पर कोई Google खाता नहीं है, तो सेटिंग्स में एक जोड़ें और फिर से प्रयास करें।</string>
+    <string name="error_google_no_account">इस डिवाइस पर कोई Google खाता नहीं मिला। सेटिंग्स में Google खाता जोड़ें, फिर से प्रयास करें।</string>
+    <string name="error_google_signin_config">इस डिवाइस पर Google साइन-इन सही तरीके से कॉन्फ़िगर नहीं है। Google Play सेवाएँ अपडेट करें और फिर से प्रयास करें।</string>
+    <string name="error_google_signin_unsupported">इस डिवाइस पर Google साइन-इन समर्थित नहीं है।</string>
+    <string name="error_google_signin_failed">Google साइन-इन विफल हुआ। कृपया फिर से प्रयास करें।</string>
+    <string name="error_network_no_internet">इंटरनेट कनेक्शन नहीं है। अपना नेटवर्क जाँचें और फिर से प्रयास करें।</string>
+    <string name="error_network_timeout">कनेक्शन का समय समाप्त हो गया। फिर से प्रयास करें।</string>
+    <string name="error_network_interrupted">नेटवर्क कनेक्शन बाधित हो गया। फिर से प्रयास करें।</string>
+    <string name="error_network_tls">सुरक्षित कनेक्शन स्थापित नहीं हो सका। अपना नेटवर्क या VPN सेटिंग्स जाँचें और फिर से प्रयास करें।</string>
     <string name="home_quick_actions_title">सहायता और भाषा</string>
     <string name="login_logo_cd">DataGate लोगो</string>
     <string name="login_tagline">आपके सर्वरों पर सुरक्षित VPN पहुँच</string>
@@ -408,4 +419,7 @@
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Iscriviti — è importante</string>
     <string name="home_telegram_channel_body">Canale Telegram del progetto: notizie e annunci in caso di problemi al servizio.</string>
+    <string name="home_grace_banner_title">Connesso — accesso temporaneo</string>
+    <string name="home_grace_banner_body">Collega il tuo account o abbonati entro %1$s, altrimenti questa sessione verrà disconnessa.</string>
     <string name="stats_filters">Filtri</string>
     <string name="stats_overview">Panoramica</string>
     <string name="stats_chart_hint">Tocca il grafico · pizzica per zoom · trascina per scorrere</string>
@@ -307,6 +309,15 @@ Puoi aprire la pagina della release o scaricare l’APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Riautenticazione dell’account Google non riuscita. Controlla l’account Google su questo dispositivo, aggiorna Google Play services e riprova ad accedere.</string>
     <string name="error_google_account_reauth_fallback_failed">Accesso Google non riuscito prima di raggiungere il backend. Entrambi i flussi di Google Credential Manager sono falliti durante la riautenticazione. Se è presente un account Google sul dispositivo, verifica il nome pacchetto del client OAuth Android e gli SHA‑1/SHA‑256 di questa build.</string>
+    <string name="error_google_signin_cancelled">L\'accesso è stato annullato. Se su questo dispositivo non è presente un account Google, aggiungine uno nelle Impostazioni e riprova.</string>
+    <string name="error_google_no_account">Nessun account Google trovato su questo dispositivo. Aggiungi un account Google nelle Impostazioni, quindi riprova.</string>
+    <string name="error_google_signin_config">L\'accesso con Google non è configurato correttamente su questo dispositivo. Aggiorna Google Play services e riprova.</string>
+    <string name="error_google_signin_unsupported">L\'accesso con Google non è supportato su questo dispositivo.</string>
+    <string name="error_google_signin_failed">Accesso con Google non riuscito. Riprova.</string>
+    <string name="error_network_no_internet">Nessuna connessione a internet. Verifica la rete e riprova.</string>
+    <string name="error_network_timeout">La connessione è scaduta. Riprova.</string>
+    <string name="error_network_interrupted">La connessione di rete è stata interrotta. Riprova.</string>
+    <string name="error_network_tls">Impossibile stabilire una connessione sicura. Verifica la rete o le impostazioni VPN e riprova.</string>
     <string name="home_quick_actions_title">Aiuto e lingua</string>
     <string name="login_logo_cd">Logo DataGate</string>
     <string name="login_tagline">Accesso VPN sicuro ai tuoi server</string>
@@ -408,4 +419,7 @@ Puoi aprire la pagina della release o scaricare l’APK.</string>
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

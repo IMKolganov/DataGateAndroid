@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">Abone olun — önemli</string>
     <string name="home_telegram_channel_body">Projenin Telegram kanalı: güncel haberler ve hizmet sorunlarında duyurular.</string>
+    <string name="home_grace_banner_title">Bağlandı — geçici erişim</string>
+    <string name="home_grace_banner_body">%1$s içinde hesabını bağla veya abone ol, aksi halde bu oturum bağlantısı kesilecek.</string>
     <string name="stats_filters">Filtreler</string>
     <string name="stats_overview">Genel bakış</string>
     <string name="stats_chart_hint">Grafiğe dokunun · yakınlaştırmak için sıkıştırın · kaydırmak için sürükleyin</string>
@@ -307,6 +309,15 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google hesabı yeniden kimlik doğrulaması başarısız. Bu cihazdaki Google hesabını kontrol edin, Google Play hizmetlerini güncelleyin ve tekrar oturum açmayı deneyin.</string>
     <string name="error_google_account_reauth_fallback_failed">Google oturum açma, arka uçla iletişim kurmadan önce başarısız oldu. Hesap yeniden kimlik doğrulanırken her iki Google Credential Manager akışı da başarısız oldu. Cihazda bir Google hesabı varsa bu derleme için OAuth Android istemci paket adını ve SHA-1/SHA-256 değerlerini kontrol edin.</string>
+    <string name="error_google_signin_cancelled">Oturum açma iptal edildi. Bu cihazda Google hesabı yoksa Ayarlar\'dan bir hesap ekleyip tekrar deneyin.</string>
+    <string name="error_google_no_account">Bu cihazda Google hesabı bulunamadı. Ayarlar\'dan bir Google hesabı ekleyin, ardından tekrar deneyin.</string>
+    <string name="error_google_signin_config">Google ile oturum açma bu cihazda doğru şekilde yapılandırılmamış. Google Play hizmetlerini güncelleyip tekrar deneyin.</string>
+    <string name="error_google_signin_unsupported">Google ile oturum açma bu cihazda desteklenmiyor.</string>
+    <string name="error_google_signin_failed">Google ile oturum açma başarısız oldu. Lütfen tekrar deneyin.</string>
+    <string name="error_network_no_internet">İnternet bağlantısı yok. Ağınızı kontrol edin ve tekrar deneyin.</string>
+    <string name="error_network_timeout">Bağlantı zaman aşımına uğradı. Tekrar deneyin.</string>
+    <string name="error_network_interrupted">Ağ bağlantısı kesildi. Tekrar deneyin.</string>
+    <string name="error_network_tls">Güvenli bağlantı kurulamadı. Ağ veya VPN ayarlarınızı kontrol edin ve tekrar deneyin.</string>
     <string name="home_quick_actions_title">Yardım ve dil</string>
     <string name="login_logo_cd">DataGate logosu</string>
     <string name="login_tagline">Sunucularınıza güvenli VPN erişimi</string>
@@ -408,4 +419,7 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

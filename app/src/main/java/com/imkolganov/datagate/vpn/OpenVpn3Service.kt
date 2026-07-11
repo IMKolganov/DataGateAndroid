@@ -20,6 +20,8 @@ import androidx.core.app.NotificationCompat
 import com.imkolganov.datagate.DataGateApp
 import com.imkolganov.datagate.MainActivity
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.freetier.FreeTierComplianceController
+import com.imkolganov.datagate.freetier.isDisconnectAttributableToGraceExpiry
 import com.imkolganov.datagate.logger.CrashLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +54,23 @@ class OpenVpn3Service : VpnService() {
         const val EXTRA_LINK_PROTOCOL = "com.imkolganov.datagate.vpn.EXTRA_LINK_PROTOCOL"
         const val EXTRA_SERVER_DISPLAY_NAME = "com.imkolganov.datagate.vpn.EXTRA_SERVER_DISPLAY_NAME"
 
+        /** False when this device's ABI has no bundled libovpncli.so (see jniLibs). */
+        @Volatile
+        var isNativeLibraryLoaded: Boolean = false
+            private set
+
         init {
-            System.loadLibrary("ovpncli")
+            isNativeLibraryLoaded = try {
+                System.loadLibrary("ovpncli")
+                true
+            } catch (t: UnsatisfiedLinkError) {
+                Log.e(
+                    "OpenVPN3",
+                    "libovpncli.so unavailable for ABIs ${Build.SUPPORTED_ABIS.joinToString()}",
+                    t
+                )
+                false
+            }
         }
 
         private const val TAG = "OpenVPN3"
@@ -144,6 +161,7 @@ class OpenVpn3Service : VpnService() {
     private var vpnClient: OpenVpn3Client? = null
     private var vpnJob: Job? = null
     private var notificationWatchdogJob: Job? = null
+    private var vpnHealthRecheckJob: Job? = null
 
     private val crashLogger: CrashLogger
         get() = (application as DataGateApp).crashLogger
@@ -288,9 +306,9 @@ class OpenVpn3Service : VpnService() {
         else -> "Connecting..."
     }
 
-    private fun postPersistentNotification(fallbackText: String = notificationFallbackText()) {
+    private fun postPersistentNotification(fallbackText: String = notificationFallbackText(), force: Boolean = false) {
         val notification = buildNotification(fallbackText)
-        if (!requiresForegroundNotification()) {
+        if (!force && !requiresForegroundNotification()) {
             getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification)
             stopNotificationWatchdog()
             return
@@ -382,6 +400,15 @@ class OpenVpn3Service : VpnService() {
             return
         }
 
+        if (!isNativeLibraryLoaded) {
+            desiredConnection = false
+            pendingConnectRequest = null
+            transitionState(VpnRuntimeState.ERROR, "native_library_unavailable")
+            broadcastStatus("ERROR", "VPN engine is not available on this device (${Build.SUPPORTED_ABIS.joinToString()})")
+            stopSelf()
+            return
+        }
+
         val configPath = intent.getStringExtra(EXTRA_OVPN_CONFIG_PATH)
         val excludedRoutesPath = intent.getStringExtra(EXTRA_EXCLUDED_ROUTES_PATH)
         val configText = intent.getStringExtra(EXTRA_OVPN_CONFIG)
@@ -455,6 +482,8 @@ class OpenVpn3Service : VpnService() {
         transitionState(VpnRuntimeState.IDLE, "disconnect_completed")
 
         stopNotificationWatchdog()
+        vpnHealthRecheckJob?.cancel()
+        vpnHealthRecheckJob = null
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             stopForeground(STOP_FOREGROUND_REMOVE)
@@ -497,8 +526,16 @@ class OpenVpn3Service : VpnService() {
     }
 
     private fun processPause() {
-        if (!hasActiveSession && vpnClient == null) {
-            logCommandDropped("PAUSE", "no_active_session")
+        val decision = VpnCommandContract.evaluatePause(
+            VpnCommandContract.VpnServiceSnapshot(
+                hasActiveSession = hasActiveSession,
+                vpnClientPresent = vpnClient != null,
+                isPaused = isPaused,
+            )
+        )
+        if (decision is VpnCommandContract.CommandDecision.Reject) {
+            logCommandDropped("PAUSE", decision.reason)
+            broadcastStatus("PAUSE_REJECTED", decision.reason)
             return
         }
         isPaused = true
@@ -506,32 +543,64 @@ class OpenVpn3Service : VpnService() {
         hasActiveSession = false
         connectInProgress = false
         transitionState(VpnRuntimeState.PAUSED, "pause_command")
-        vpnClient?.let { client ->
-            serviceScope.launch(ovpnNativeDispatcher) {
-                runCatching { client.pause("user") }
-                    .onFailure { Log.w(TAG, "client.pause() failed", it) }
-            }
+        val client = vpnClient
+        if (client != null) {
+            val nativeJobActive = vpnJob?.isActive == true
+            OpenVpnNativePauseResumeScheduling.schedulePauseOrResume(
+                scope = serviceScope,
+                nativeVpnJobActive = nativeJobActive,
+                action = { client.pause("user") },
+                onFailure = { error ->
+                    Log.w(TAG, "client.pause() scheduling failed", error)
+                    rollbackPauseCommand(error.message ?: "pause_failed")
+                },
+            )
+        } else {
+            broadcastPauseConfirmed(getString(R.string.vpn_msg_paused))
         }
+    }
+
+    private fun rollbackPauseCommand(reason: String) {
+        isPaused = false
+        hasActiveSession = true
+        connectInProgress = false
+        transitionState(VpnRuntimeState.CONNECTED, "pause_rollback")
+        broadcastStatus("PAUSE_REJECTED", reason)
+    }
+
+    private fun broadcastPauseConfirmed(info: String) {
         updateNotification(getString(R.string.vpn_status_paused))
-        broadcastStatus("PAUSED", getString(R.string.vpn_msg_paused))
+        broadcastStatus(OpenVpnPauseBroadcastPolicy.uiBroadcastEventForCorePause(), info)
     }
 
     private fun processResume() {
-        if (!isPaused) {
-            logCommandDropped("RESUME", "not_paused")
+        val decision = VpnCommandContract.evaluateResume(
+            VpnCommandContract.VpnServiceSnapshot(
+                hasActiveSession = hasActiveSession,
+                vpnClientPresent = vpnClient != null,
+                isPaused = isPaused,
+            )
+        )
+        if (decision is VpnCommandContract.CommandDecision.Reject) {
+            logCommandDropped("RESUME", decision.reason)
+            broadcastStatus("RESUME_REJECTED", decision.reason)
             return
         }
         isPaused = false
         val client = vpnClient
         if (client != null) {
-            serviceScope.launch(ovpnNativeDispatcher) {
-                runCatching { client.resume() }
-                    .onFailure { Log.w(TAG, "client.resume() failed", it) }
-            }
+            val nativeJobActive = vpnJob?.isActive == true
             transitionState(VpnRuntimeState.CONNECTING, "resume_command")
             connectInProgress = true
-            updateNotification(getString(R.string.vpn_msg_resuming))
-            broadcastStatus("RESUMED", getString(R.string.vpn_msg_resuming))
+            OpenVpnNativePauseResumeScheduling.schedulePauseOrResume(
+                scope = serviceScope,
+                nativeVpnJobActive = nativeJobActive,
+                action = { client.resume() },
+                onFailure = { error ->
+                    Log.w(TAG, "client.resume() scheduling failed", error)
+                    rollbackResumeCommand(error.message ?: "resume_failed")
+                },
+            )
         } else if (pendingConnectRequest != null) {
             startPendingConnectIfPossible("resume_command", enforceBackoff = false)
         } else {
@@ -540,8 +609,34 @@ class OpenVpn3Service : VpnService() {
         }
     }
 
+    private fun rollbackResumeCommand(reason: String) {
+        isPaused = true
+        connectInProgress = false
+        transitionState(VpnRuntimeState.PAUSED, "resume_rollback")
+        broadcastStatus("RESUME_REJECTED", reason)
+    }
+
     private fun processCoreEvent(name: String, info: String) {
         when {
+            OpenVpnPauseBroadcastPolicy.shouldBroadcastPausedOnCoreEvent(name) -> {
+                isPaused = true
+                hasActiveSession = false
+                connectInProgress = false
+                transitionState(VpnRuntimeState.PAUSED, "core_pause")
+                broadcastPauseConfirmed(
+                    info.takeIf { it.isNotBlank() } ?: getString(R.string.vpn_msg_paused)
+                )
+            }
+            OpenVpnPauseBroadcastPolicy.shouldBroadcastResumedOnCoreEvent(name) -> {
+                isPaused = false
+                connectInProgress = true
+                transitionState(VpnRuntimeState.CONNECTING, "core_resume")
+                updateNotification(getString(R.string.vpn_msg_resuming))
+                broadcastStatus(
+                    OpenVpnPauseBroadcastPolicy.uiBroadcastEventForCoreResume(),
+                    info.takeIf { it.isNotBlank() } ?: getString(R.string.vpn_msg_resuming)
+                )
+            }
             name.equals("CONNECTED", ignoreCase = true) -> {
                 ensureForegroundForVpn()
                 hasActiveSession = true
@@ -551,6 +646,7 @@ class OpenVpn3Service : VpnService() {
                 updateNotification("Connected")
                 broadcastStatus(name, info)
                 runSystemVpnHealthCheck("core_connected")
+                scheduleSystemVpnHealthRecheck()
             }
             name.equals("DISCONNECTED", ignoreCase = true) -> {
                 hasActiveSession = false
@@ -558,6 +654,9 @@ class OpenVpn3Service : VpnService() {
 
                 if (isPaused) {
                     transitionState(VpnRuntimeState.PAUSED, "core_disconnected_while_paused")
+                    broadcastPauseConfirmed(
+                        info.takeIf { it.isNotBlank() } ?: getString(R.string.vpn_msg_paused)
+                    )
                 } else {
                 isPaused = false
 
@@ -574,7 +673,15 @@ class OpenVpn3Service : VpnService() {
                     )
                 }
 
-                if (!isStopping && desiredConnection) {
+                // A grace-period forced disconnect looks like any other core DISCONNECTED event —
+                // without this check we'd auto-reconnect and just churn through another short grace
+                // window instead of prompting the user to actually link/subscribe.
+                val graceExpired = isDisconnectAttributableToGraceExpiry(
+                    graceExpiresAtMs = FreeTierComplianceController.graceExpiresAtUtcMs.value,
+                    nowMs = System.currentTimeMillis(),
+                )
+
+                if (!isStopping && desiredConnection && !graceExpired) {
                     if (networkAvailable) {
                         transitionState(VpnRuntimeState.CONNECTING, "core_disconnected_reconnect")
                         broadcastStatus("RECONNECTING", info.ifBlank { "Connection lost, reconnecting..." })
@@ -584,6 +691,12 @@ class OpenVpn3Service : VpnService() {
                         broadcastStatus("WAITING_NETWORK", "Waiting for network...")
                     }
                 } else {
+                    if (graceExpired) {
+                        Log.w(TAG, "Not auto-reconnecting: disconnect attributed to grace-period expiry")
+                        desiredConnection = false
+                        pendingConnectRequest = null
+                        FreeTierComplianceController.setGraceExpiresAtUtcMs(null)
+                    }
                     transitionState(VpnRuntimeState.IDLE, "core_disconnected")
                     broadcastStatus(name, info)
                 }
@@ -755,6 +868,18 @@ class OpenVpn3Service : VpnService() {
                 "system_vpn_transport_mismatch trigger=$trigger state=$runtimeState " +
                     "activeTransport=${snapshot.activeTransport}"
             )
+        }
+    }
+
+    private fun scheduleSystemVpnHealthRecheck() {
+        vpnHealthRecheckJob?.cancel()
+        vpnHealthRecheckJob = serviceScope.launch {
+            delay(2_000)
+            if (!hasActiveSession) return@launch
+            runSystemVpnHealthCheck("post_connected_2s")
+            delay(3_000)
+            if (!hasActiveSession) return@launch
+            runSystemVpnHealthCheck("post_connected_5s")
         }
     }
 
@@ -1071,8 +1196,17 @@ class OpenVpn3Service : VpnService() {
                 ?.trim()
                 ?.takeIf { it.isNotEmpty() }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && requiresForegroundNotification()) {
-            postPersistentNotification()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (action == ACTION_CONNECT) {
+                // VpnController starts CONNECT via startForegroundService(); the platform
+                // requires startForeground() before this call returns, even if processConnect
+                // is about to reject the attempt (missing config, missing native lib, etc.)
+                // and stop the service right away. Skipping this throws
+                // ForegroundServiceDidNotStartInTimeException and kills the whole app.
+                postPersistentNotification(force = true)
+            } else if (requiresForegroundNotification()) {
+                postPersistentNotification()
+            }
         }
 
         when (action) {

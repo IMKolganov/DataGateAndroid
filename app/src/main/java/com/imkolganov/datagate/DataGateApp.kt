@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.edit
+import com.imkolganov.datagate.auth.LegacyAuthMigration
 import com.imkolganov.datagate.logger.CrashLogger
 import com.imkolganov.datagate.logger.CrashUploadWorkScheduler
 import com.imkolganov.datagate.ui.theme.LanguagePreferenceStore
@@ -27,23 +28,21 @@ class DataGateApp : Application() {
 
     private fun migrateLegacyAuthSessionIfNeeded() {
         val prefs = getSharedPreferences("auth_store", MODE_PRIVATE)
-        if (prefs.getBoolean(KEY_LEGACY_AUTH_MIGRATION_DONE, false)) {
-            return
-        }
-
-        val packageInfo = getPackageInfoCompat() ?: run {
-            prefs.edit { putBoolean(KEY_LEGACY_AUTH_MIGRATION_DONE, true) }
-            return
-        }
-        val isAppUpdate = packageInfo.lastUpdateTime > packageInfo.firstInstallTime
-        val isFreshInstall = packageInfo.lastUpdateTime == packageInfo.firstInstallTime
+        val packageInfo = getPackageInfoCompat()
+        val isAppUpdate = packageInfo?.let { it.lastUpdateTime > it.firstInstallTime } == true
+        val isFreshInstall = packageInfo?.let { it.lastUpdateTime == it.firstInstallTime } == true
         val hasLegacySessionData = !prefs.getString(KEY_ACCESS_TOKEN, null).isNullOrBlank() ||
             !prefs.getString(KEY_REFRESH_TOKEN, null).isNullOrBlank()
 
-        // Two problematic scenarios:
-        // 1) App update with legacy auth schema/state.
-        // 2) Fresh reinstall where Android backup restored old auth prefs.
-        if ((isAppUpdate || isFreshInstall) && hasLegacySessionData) {
+        val decision = LegacyAuthMigration.evaluate(
+            LegacyAuthMigration.Input(
+                migrationAlreadyDone = prefs.getBoolean(KEY_LEGACY_AUTH_MIGRATION_DONE, false),
+                isAppUpdate = isAppUpdate,
+                isFreshInstall = isFreshInstall,
+                hasLegacySessionData = hasLegacySessionData,
+            )
+        )
+        if (decision.shouldClearSession) {
             prefs.edit {
                 remove(KEY_ACCESS_TOKEN)
                 remove(KEY_REFRESH_TOKEN)
@@ -52,8 +51,9 @@ class DataGateApp : Application() {
                 putBoolean(KEY_AUTO_LOGIN_ENABLED, false)
             }
         }
-
-        prefs.edit { putBoolean(KEY_LEGACY_AUTH_MIGRATION_DONE, true) }
+        if (decision.shouldMarkMigrationDone) {
+            prefs.edit { putBoolean(KEY_LEGACY_AUTH_MIGRATION_DONE, true) }
+        }
     }
 
     private fun getPackageInfoCompat(): PackageInfo? {

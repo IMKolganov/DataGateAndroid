@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">اشترك — هذا مهم</string>
     <string name="home_telegram_channel_body">انضم إلى قناة Telegram للحصول على آخر الأخبار وإعلانات انقطاع الخدمة.</string>
+    <string name="home_grace_banner_title">متصل — وصول مؤقت</string>
+    <string name="home_grace_banner_body">اربط حسابك أو اشترك خلال %1$s وإلا سيتم قطع هذا الاتصال.</string>
     <string name="stats_filters">عوامل التصفية</string>
     <string name="stats_overview">نظرة عامة</string>
     <string name="stats_chart_hint">المس الرسم · قرص للتكبير · اسحب للتمرير</string>
@@ -312,6 +314,15 @@
     <string name="settings_ip_lists_android_12_warning">يتطلب تجاوز قائمة IP نظام Android 13 أو إصدارًا أحدث. في نظام التشغيل Android 12 والإصدارات الأقدم، يتم تعطيل وضع التوجيه هذا لأن واجهة VPN API لا يمكنها استبعاد قوائم المسارات الكبيرة بأمان.</string>
     <string name="error_google_account_reauth_failed">فشلت إعادة مصادقة حساب Google. تحقق من حساب Google على هذا الجهاز، وقم بتحديث خدمات Google Play، ثم حاول تسجيل الدخول مرة أخرى.</string>
     <string name="error_google_account_reauth_fallback_failed">فشل تسجيل الدخول إلى Google قبل الاتصال بالواجهة الخلفية. فشل كلا تدفقي مدير بيانات الاعتماد في Google أثناء إعادة مصادقة الحساب. إذا كان حساب Google موجودًا على الجهاز، فتحقق من اسم حزمة عميل OAuth Android وSHA-1/SHA-256 لهذا الإصدار.</string>
+    <string name="error_google_signin_cancelled">تم إلغاء تسجيل الدخول. إذا لم يكن هناك حساب Google على هذا الجهاز، فأضف حسابًا من الإعدادات وحاول مرة أخرى.</string>
+    <string name="error_google_no_account">لم يتم العثور على حساب Google على هذا الجهاز. أضف حساب Google من الإعدادات، ثم حاول مرة أخرى.</string>
+    <string name="error_google_signin_config">تسجيل الدخول إلى Google غير مهيأ بشكل صحيح على هذا الجهاز. حدّث خدمات Google Play وحاول مرة أخرى.</string>
+    <string name="error_google_signin_unsupported">تسجيل الدخول إلى Google غير مدعوم على هذا الجهاز.</string>
+    <string name="error_google_signin_failed">فشل تسجيل الدخول إلى Google. حاول مرة أخرى.</string>
+    <string name="error_network_no_internet">لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.</string>
+    <string name="error_network_timeout">انتهت مهلة الاتصال. حاول مرة أخرى.</string>
+    <string name="error_network_interrupted">انقطع الاتصال بالشبكة. حاول مرة أخرى.</string>
+    <string name="error_network_tls">تعذر إنشاء اتصال آمن. تحقق من إعدادات الشبكة أو VPN وحاول مرة أخرى.</string>
     <string name="vpn_ip_list_requires_android_13">يتطلب تجاوز قائمة IP نظام Android 13 أو إصدارًا أحدث. قم بتعطيل توجيه قائمة IP أو قم بتحديث Android للاتصال بهذا الوضع.</string>
     <string name="access_quota_traffic_title">حصة المرور</string>
     <string name="access_quota_period_month">هذا الشهر التقويمي</string>
@@ -407,4 +418,7 @@
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

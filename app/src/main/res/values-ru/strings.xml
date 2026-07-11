@@ -121,6 +121,8 @@
 
     <string name="home_telegram_channel_title">Подпишитесь — это важно</string>
     <string name="home_telegram_channel_body">Telegram-канал проекта: актуальные новости и объявления при проблемах с сервисом.</string>
+    <string name="home_grace_banner_title">Подключено — временный доступ</string>
+    <string name="home_grace_banner_body">Свяжите аккаунт или оформите подписку в течение %1$s, иначе сессия будет отключена.</string>
 
     <string name="stats_filters">Фильтры</string>
     <string name="stats_overview">Обзор</string>
@@ -305,6 +307,15 @@
     <string name="error_http_proxy_html">Вместо данных пришла страница ошибки. Возможно, сервис перезапускается.</string>
     <string name="error_google_account_reauth_failed">Не удалось повторно авторизовать Google-аккаунт. Проверьте аккаунт Google на устройстве, обновите Google Play services и попробуйте войти снова.</string>
     <string name="error_google_account_reauth_fallback_failed">Вход через Google не дошёл до backend. Оба варианта Google Credential Manager упали при повторной авторизации аккаунта. Если Google-аккаунт есть на устройстве, проверьте package name и SHA-1/SHA-256 Android OAuth-клиента для этой сборки.</string>
+    <string name="error_google_signin_cancelled">Вход отменён. Если на устройстве нет Google-аккаунта, добавьте его в настройках и попробуйте снова.</string>
+    <string name="error_google_no_account">На этом устройстве не найден Google-аккаунт. Добавьте Google-аккаунт в настройках и попробуйте снова.</string>
+    <string name="error_google_signin_config">Вход через Google настроен неправильно на этом устройстве. Обновите Google Play services и попробуйте снова.</string>
+    <string name="error_google_signin_unsupported">Вход через Google не поддерживается на этом устройстве.</string>
+    <string name="error_google_signin_failed">Не удалось выполнить вход через Google. Попробуйте снова.</string>
+    <string name="error_network_no_internet">Нет подключения к интернету. Проверьте сеть и попробуйте снова.</string>
+    <string name="error_network_timeout">Истекло время ожидания соединения. Попробуйте снова.</string>
+    <string name="error_network_interrupted">Сетевое соединение было прервано. Попробуйте снова.</string>
+    <string name="error_network_tls">Не удалось установить безопасное соединение. Проверьте сеть или настройки VPN и попробуйте снова.</string>
 
     <string name="vpn_selecting_best_server">Выбор лучшего сервера</string>
     <string name="vpn_resolving_server">Поиск сервера</string>
@@ -327,6 +338,9 @@
     <string name="vpn_error_permission_denied">Разрешение VPN отклонено</string>
     <string name="vpn_disconnecting">Отключение…</string>
     <string name="vpn_connecting_generic">Подключение…</string>
+    <string name="vpn_permission_dialog_title">Требуется разрешение на VPN</string>
+    <string name="vpn_permission_dialog_body">Для защиты вашего соединения DataGate необходимо разрешение на создание VPN-туннеля. Это стандартный запрос Android для всех VPN-приложений.</string>
+    <string name="vpn_permission_dialog_grant">Предоставить доступ</string>
     <string name="vpn_requires_openvpn_connect">Сервер «%1$s» не поддерживает подключение в этом приложении (нужен WSS). Подключайтесь через официальное приложение OpenVPN Connect с профилем этого сервера.\n\nВ странах с жёстким государственным контролем сети (например Россия, Иран) соединение всё равно может не работать.</string>
     <string name="vpn_requires_xray_client">Это приложение не позволяет подключаться к серверам типа XRay. Сервер: %1$s.\n\nПожалуйста, используйте другой клиент.</string>
     <string name="vpn_requires_unsupported_server_type">Это приложение не поддерживает данный тип сервера. Сервер: %1$s.\n\nПожалуйста, используйте другой клиент.</string>
@@ -420,4 +434,7 @@
 
     <string name="free_tier_code_paste_hint">Отправьте этот код нашему боту в личные сообщения.</string>
     <string name="free_tier_done_check">Готово? Проверить</string>
+    <string name="vpn_status_pausing">Пауза…</string>
+    <string name="vpn_status_resuming">Возобновление…</string>
+    <string name="vpn_msg_command_rejected">Команда VPN не выполнена (%1$s)</string>
 </resources>

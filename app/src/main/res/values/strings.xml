@@ -96,6 +96,9 @@
     <string name="vpn_status_connecting">Connecting…</string>
     <string name="vpn_status_disconnected">Disconnected</string>
     <string name="vpn_status_paused">Paused</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
     <string name="vpn_msg_paused">VPN paused</string>
     <string name="vpn_msg_resuming">Resuming VPN…</string>
     <string name="vpn_waiting_events">Waiting for VPN events…</string>
@@ -121,6 +124,9 @@
 
     <string name="home_telegram_channel_title">Subscribe — it\'s important</string>
     <string name="home_telegram_channel_body">Join our Telegram channel for the latest news and service outage announcements.</string>
+
+    <string name="home_grace_banner_title">Connected — temporary access</string>
+    <string name="home_grace_banner_body">Link your account or subscribe within %1$s or this session will be disconnected.</string>
 
     <string name="support_contact_email" translatable="false">imkolganov@gmail.com</string>
     <string name="support_telegram_bot_url" translatable="false">https://t.me/DataGateVPNBot</string>
@@ -365,6 +371,15 @@
     <string name="error_http_proxy_html">The server returned an error page instead of data. The service may be restarting.</string>
     <string name="error_google_account_reauth_failed">Google account re-authentication failed. Check the Google account on this device, update Google Play services, then try signing in again.</string>
     <string name="error_google_account_reauth_fallback_failed">Google sign-in failed before contacting the backend. Both Google Credential Manager flows failed while re-authenticating the account. If a Google account is present on the device, check the OAuth Android client package name and SHA-1/SHA-256 for this build.</string>
+    <string name="error_google_signin_cancelled">Sign-in was cancelled. If there\'s no Google account on this device, add one in Settings and try again.</string>
+    <string name="error_google_no_account">No Google account found on this device. Add a Google account in Settings, then try again.</string>
+    <string name="error_google_signin_config">Google sign-in isn\'t configured correctly on this device. Update Google Play services and try again.</string>
+    <string name="error_google_signin_unsupported">Google sign-in isn\'t supported on this device.</string>
+    <string name="error_google_signin_failed">Google sign-in failed. Please try again.</string>
+    <string name="error_network_no_internet">No internet connection. Check your network and try again.</string>
+    <string name="error_network_timeout">The connection timed out. Try again.</string>
+    <string name="error_network_interrupted">The network connection was interrupted. Try again.</string>
+    <string name="error_network_tls">Couldn\'t establish a secure connection. Check your network or VPN settings and try again.</string>
 
     <!-- VPN connect flow (VpnConnectInteractor / VpnController) -->
     <string name="vpn_selecting_best_server">Selecting best server</string>
@@ -388,6 +403,9 @@
     <string name="vpn_error_permission_denied">VPN permission denied</string>
     <string name="vpn_disconnecting">Disconnecting…</string>
     <string name="vpn_connecting_generic">Connecting…</string>
+    <string name="vpn_permission_dialog_title" translatable="false">VPN Permission Required</string>
+    <string name="vpn_permission_dialog_body" translatable="false">To secure your connection, DataGate needs permission to set up a VPN tunnel. This is a standard Android request for all VPN apps.</string>
+    <string name="vpn_permission_dialog_grant" translatable="false">Grant permission</string>
     <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
     <string name="vpn_requires_xray_client">This app cannot connect to XRay servers. Server: %1$s.\n\nPlease use a different client.</string>
     <string name="vpn_requires_unsupported_server_type">This app does not support this server type. Server: %1$s.\n\nPlease use a different client.</string>

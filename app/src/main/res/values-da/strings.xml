@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Abonner — det er vigtigt</string>
     <string name="home_telegram_channel_body">Projektets Telegram-kanal: aktuelle nyheder og meddelelser ved serviceproblemer.</string>
+    <string name="home_grace_banner_title">Forbundet — midlertidig adgang</string>
+    <string name="home_grace_banner_body">Kobl din konto sammen eller abonnér inden for %1$s, ellers bliver denne session afbrudt.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -325,6 +327,15 @@ Du kan åbne udgivelsessiden eller downloade APK’en. Brug indstillingen nedenf
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Gen-godkendelse af Google-konto mislykkedes. Kontroller Google-kontoen på denne enhed, opdater Google Play-tjenester og prøv at logge ind igen.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-log ind mislykkedes før kontakt til backenden. Begge Google Credential Manager-forløb mislykkedes ved gen-godkendelse af kontoen. Hvis der er en Google-konto på enheden, skal du kontrollere OAuth Android-klientens pakkenavn og SHA-1/SHA-256 for denne build.</string>
+    <string name="error_google_signin_cancelled">Login blev annulleret. Hvis der ikke er en Google-konto på denne enhed, skal du tilføje en i indstillingerne og forsøge igen.</string>
+    <string name="error_google_no_account">Ingen Google-konto blev fundet på denne enhed. Tilføj en Google-konto i indstillingerne, og prøv igen.</string>
+    <string name="error_google_signin_config">Google-login er ikke konfigureret korrekt på denne enhed. Opdater Google Play-tjenester, og prøv igen.</string>
+    <string name="error_google_signin_unsupported">Google-login understøttes ikke på denne enhed.</string>
+    <string name="error_google_signin_failed">Google-login mislykkedes. Prøv igen.</string>
+    <string name="error_network_no_internet">Ingen internetforbindelse. Kontrollér dit netværk, og forsøg igen.</string>
+    <string name="error_network_timeout">Forbindelsen fik timeout. Forsøg igen.</string>
+    <string name="error_network_interrupted">Netværksforbindelsen blev afbrudt. Forsøg igen.</string>
+    <string name="error_network_tls">Der kunne ikke etableres en sikker forbindelse. Kontrollér dit netværk eller VPN-indstillinger, og forsøg igen.</string>
     <string name="home_quick_actions_title">Hjælp og sprog</string>
     <string name="login_logo_cd">DataGate-logo</string>
     <string name="login_tagline">Sikker VPN-adgang til dine servere</string>
@@ -426,4 +437,7 @@ Du kan åbne udgivelsessiden eller downloade APK’en. Brug indstillingen nedenf
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

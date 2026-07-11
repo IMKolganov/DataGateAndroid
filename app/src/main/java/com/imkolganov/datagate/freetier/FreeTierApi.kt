@@ -42,6 +42,30 @@ class FreeTierApi(
         }
     }
 
+    /**
+     * Starts (or refreshes) the grace window for a direct OpenVPN connection. Call once, right
+     * after the tunnel is confirmed up — not on a timer or status poll (repeated calls re-audit
+     * compliance server-side).
+     */
+    suspend fun notifyVpnConnected(): ApiResponse<FreeTierAccessStatusResponse> {
+        val url = baseUrl.trimEnd('/') + ApiConfig.FREE_TIER_ACCESS_CONNECT_PATH
+        val req = Request.Builder()
+            .url(url)
+            .post("{}".toRequestBody(jsonMediaType))
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json")
+            .build()
+
+        http.executeSuspending(req).use { resp ->
+            val code = resp.code
+            val body = resp.body.string().orEmpty()
+            if (code !in 200..299) {
+                throw IOException(formatHttpErrorDetail("Free tier access connect failed", code, body))
+            }
+            return parseAccessStatusResponse(body)
+        }
+    }
+
     suspend fun requestAccountLinkCode(): ApiResponse<RequestTelegramAccountLinkCodeResponse> {
         val url = baseUrl.trimEnd('/') + ApiConfig.TELEGRAM_REQUEST_ACCOUNT_LINK_CODE_PATH
         val bodyJson = buildAccountLinkCodeRequestBody()
@@ -99,6 +123,7 @@ class FreeTierApi(
             canRequestAccountLinkCode = o.bool("canRequestAccountLinkCode", "CanRequestAccountLinkCode"),
             activePlanName = o.optStringOrNull("activePlanName") ?: o.optStringOrNull("ActivePlanName"),
             requiredChannel = o.optStringOrNull("requiredChannel") ?: o.optStringOrNull("RequiredChannel"),
+            graceExpiresAtUtc = o.optStringOrNull("graceExpiresAtUtc") ?: o.optStringOrNull("GraceExpiresAtUtc"),
         )
     }
 

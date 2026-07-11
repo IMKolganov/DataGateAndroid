@@ -39,6 +39,8 @@
 
     <string name="home_telegram_channel_title">Prenumeruokite — tai svarbu</string>
     <string name="home_telegram_channel_body">Projekto Telegram kanalas: naujienos ir pranešimai apie trikdžius.</string>
+    <string name="home_grace_banner_title">Prisijungta — laikina prieiga</string>
+    <string name="home_grace_banner_body">Susiekite paskyrą arba užsiprenumeruokite per %1$s, kitaip šis seansas bus atjungtas.</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -325,6 +327,15 @@ Galite atidaryti leidimo puslapį arba atsisiųsti APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google paskyrą iš naujo autentifikuoti nepavyko. Patikrinkite Google paskyrą šiame įrenginyje, atnaujinkite „Google Play“ paslaugas ir bandykite prisijungti dar kartą.</string>
     <string name="error_google_account_reauth_fallback_failed">„Google“ prisijungimas nepavyko prieš susisiekiant su serveriu. Abu „Google Credential Manager“ srautai nepavyko iš naujo autentifikuojant. Jei įrenginyje yra Google paskyra, patikrinkite OAuth „Android“ kliento paketo pavadinimą ir SHA‑1/SHA‑256 šiai versijai.</string>
+    <string name="error_google_signin_cancelled">Prisijungimas atšauktas. Jei šiame įrenginyje nėra Google paskyros, pridėkite ją nustatymuose ir bandykite dar kartą.</string>
+    <string name="error_google_no_account">Šiame įrenginyje nerasta Google paskyros. Pridėkite Google paskyrą nustatymuose ir bandykite dar kartą.</string>
+    <string name="error_google_signin_config">Prisijungimas su Google šiame įrenginyje sukonfigūruotas netinkamai. Atnaujinkite „Google Play“ paslaugas ir bandykite dar kartą.</string>
+    <string name="error_google_signin_unsupported">Prisijungimas su Google šiame įrenginyje nepalaikomas.</string>
+    <string name="error_google_signin_failed">Prisijungti su Google nepavyko. Bandykite dar kartą.</string>
+    <string name="error_network_no_internet">Nėra interneto ryšio. Patikrinkite tinklą ir bandykite dar kartą.</string>
+    <string name="error_network_timeout">Baigėsi ryšio laukimo laikas. Bandykite dar kartą.</string>
+    <string name="error_network_interrupted">Tinklo ryšys buvo nutrauktas. Bandykite dar kartą.</string>
+    <string name="error_network_tls">Nepavyko sukurti saugaus ryšio. Patikrinkite tinklą arba VPN nustatymus ir bandykite dar kartą.</string>
     <string name="home_quick_actions_title">Žinynas ir kalba</string>
     <string name="login_logo_cd">DataGate logotipas</string>
     <string name="login_tagline">Saugus VPN prieiga prie jūsų serverių</string>
@@ -426,4 +437,7 @@ Galite atidaryti leidimo puslapį arba atsisiųsti APK.</string>
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

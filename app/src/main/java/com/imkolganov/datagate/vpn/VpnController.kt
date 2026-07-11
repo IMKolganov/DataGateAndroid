@@ -31,51 +31,64 @@ class VpnController(
         private const val KEY_SESSION_SERVER_ID = "vpn_session_server_id"
     }
 
+    private var pendingCommandRollback: VpnStatusUiState? = null
+
     private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo, fromQuery ->
         val current = getState()
-        if (OpenVpnRuntimePolicy.shouldIgnoreIdleQueryDisconnected(
-                fromQuery,
-                eventName,
-                current.isConnectRequested,
-                current.isVpnConnected
-            )
-        ) {
+        VpnCommandContract.parseRejectedCommand(eventName)?.let { rejected ->
+            val rollback = pendingCommandRollback ?: current
+            pendingCommandRollback = null
+            val next = VpnCommandContract.applyCommandRejected(rollback, rejected, eventInfo)
+            onStateChange(next)
+            Log.w(TAG, "VPN command rejected: $eventName ($eventInfo), rolled back UI")
+            return@VpnStatusBroadcastReceiver
+        }
+        val broadcast = VpnLifecyclePolicy.StatusBroadcast(
+            eventName = eventName,
+            eventInfo = eventInfo,
+            fromQuery = fromQuery,
+        )
+        val mapped = VpnLifecyclePolicy.applyStatusBroadcast(
+            current = current,
+            broadcast = broadcast,
+            mapEvent = { state, name, info ->
+                VpnEventMapper.map(activity.resources, state, name, info)
+            },
+        )
+        if (mapped == null) {
             Log.d(TAG, "Ignoring idle query DISCONNECTED over in-flight connect UI")
             return@VpnStatusBroadcastReceiver
+        }
+        if (VpnCommandContract.isAuthoritativeTunnelEvent(eventName)) {
+            pendingCommandRollback = null
         }
         if (eventName == "DISCONNECTED" && !fromQuery) {
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
-        val newState = VpnEventMapper.map(activity.resources, current, eventName, eventInfo)
-        onStateChange(newState)
+        onStateChange(mapped)
         Log.d(TAG, "VPN status updated: $eventName - $eventInfo (fromQuery=$fromQuery)")
     }
 
     fun onStart() {
         registerReceiver()
+        updatePermissionState()
 
-        var next = getState()
-        var changed = false
-        val cachedName = prefs.getString("selected_server_name", null)
-        if (!cachedName.isNullOrBlank() && next.selectedServerName.isNullOrBlank()) {
-            next = next.copy(selectedServerName = cachedName)
-            changed = true
+        val cached = VpnLifecyclePolicy.CachedPrefsSnapshot(
+            selectedServerName = prefs.getString("selected_server_name", null),
+            sessionServerId = prefs.getInt(KEY_SESSION_SERVER_ID, -1).takeIf { it >= 0 },
+            lastEventName = prefs.getString(OpenVpn3Service.PREF_LAST_EVENT_NAME, null),
+            lastEventInfo = prefs.getString(OpenVpn3Service.PREF_LAST_EVENT_INFO, null),
+        )
+        val restored = VpnLifecyclePolicy.restoreUiStateOnAppStart(
+            current = getState(),
+            cached = cached,
+            mapEvent = { state, name, info ->
+                VpnEventMapper.map(activity.resources, state, name, info)
+            },
+        )
+        if (restored != getState()) {
+            onStateChange(restored)
         }
-        val cachedSessionId = prefs.getInt(KEY_SESSION_SERVER_ID, -1)
-        if (cachedSessionId >= 0 && next.selectedServerId == null) {
-            next = next.copy(selectedServerId = cachedSessionId)
-            changed = true
-        }
-        val cachedEventName = prefs.getString(OpenVpn3Service.PREF_LAST_EVENT_NAME, null)
-        if (!cachedEventName.isNullOrBlank()) {
-            val cachedEventInfo = prefs.getString(OpenVpn3Service.PREF_LAST_EVENT_INFO, "") ?: ""
-            val mapped = VpnEventMapper.map(activity.resources, next, cachedEventName, cachedEventInfo)
-            if (mapped != next) {
-                next = mapped
-                changed = true
-            }
-        }
-        if (changed) onStateChange(next)
         queryServiceStatus()
     }
 
@@ -185,6 +198,7 @@ class VpnController(
 
     fun onPermissionGranted() {
         Log.d(TAG, "VPN permission granted from launcher")
+        updatePermissionState()
 
         val cfg = pendingConfigText
         val wss = pendingWssLink
@@ -205,6 +219,7 @@ class VpnController(
 
     fun onPermissionDenied() {
         Log.w(TAG, "VPN permission denied from launcher")
+        updatePermissionState()
         pendingConfigText = null
         pendingWssLink = null
         pendingLinkProtocol = null
@@ -213,6 +228,7 @@ class VpnController(
     }
 
     fun requestDisconnect() {
+        pendingCommandRollback = null
         prefs.edit {
             remove("selected_server_name")
             remove(KEY_SESSION_SERVER_ID)
@@ -237,33 +253,31 @@ class VpnController(
     }
 
     fun requestPause() {
+        val current = getState()
+        if (!VpnCommandContract.canRequestPauseFromUi(current)) {
+            Log.w(TAG, "Ignoring pause request in state connected=${current.isVpnConnected} paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
+            return
+        }
+        pendingCommandRollback = current
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_PAUSE
         }
         startServiceCompat(intent)
-        onStateChange(
-            getState().copy(
-                isConnectRequested = true,
-                isVpnConnected = false,
-                isVpnPaused = true,
-                lastMessage = activity.getString(R.string.vpn_msg_paused)
-            )
-        )
+        onStateChange(VpnCommandContract.beginPauseRequest(current))
     }
 
     fun requestResume() {
+        val current = getState()
+        if (!VpnCommandContract.canRequestResumeFromUi(current)) {
+            Log.w(TAG, "Ignoring resume request in state paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
+            return
+        }
+        pendingCommandRollback = current
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_RESUME
         }
         startServiceCompat(intent)
-        onStateChange(
-            getState().copy(
-                isConnectRequested = true,
-                isVpnConnected = false,
-                isVpnPaused = false,
-                lastMessage = activity.getString(R.string.vpn_msg_resuming)
-            )
-        )
+        onStateChange(VpnCommandContract.beginResumeRequest(current))
     }
 
     fun sendTestBroadcast() {
@@ -361,6 +375,22 @@ class VpnController(
         }
 
         isReceiverRegistered = true
+    }
+
+    private fun updatePermissionState() {
+        val hasPermission = VpnService.prepare(activity) == null
+        if (getState().hasVpnPermission != hasPermission) {
+            onStateChange(getState().copy(hasVpnPermission = hasPermission))
+        }
+    }
+
+    fun requestVpnPermission() {
+        val prepareIntent = VpnService.prepare(activity)
+        if (prepareIntent != null) {
+            permissionLauncher.launch(prepareIntent)
+        } else {
+            updatePermissionState()
+        }
     }
 
     fun showError(message: String) {

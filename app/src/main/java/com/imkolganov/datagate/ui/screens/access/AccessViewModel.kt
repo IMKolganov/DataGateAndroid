@@ -98,7 +98,7 @@ open class AccessViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        errorText = appContext.resources.userFriendlyApiError(e.message)
+                        errorText = appContext.resources.userFriendlyApiError(e)
                     )
                 }
             }

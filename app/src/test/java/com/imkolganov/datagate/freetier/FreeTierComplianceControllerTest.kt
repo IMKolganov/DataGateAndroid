@@ -22,4 +22,13 @@ class FreeTierComplianceControllerTest {
         FreeTierComplianceController.requestStatusRefresh()
         assertEquals(before + 1, FreeTierComplianceController.statusRefreshNonce.value)
     }
+
+    @Test
+    fun setGraceExpiresAtUtcMs_updatesFlow() {
+        FreeTierComplianceController.setGraceExpiresAtUtcMs(123_456L)
+        assertEquals(123_456L, FreeTierComplianceController.graceExpiresAtUtcMs.value)
+
+        FreeTierComplianceController.setGraceExpiresAtUtcMs(null)
+        assertEquals(null, FreeTierComplianceController.graceExpiresAtUtcMs.value)
+    }
 }

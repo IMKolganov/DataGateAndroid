@@ -35,6 +35,8 @@
 
     <string name="home_telegram_channel_title">訂閱頻道 — 很重要</string>
     <string name="home_telegram_channel_body">專案 Telegram 頻道：最新消息與服務故障公告。</string>
+    <string name="home_grace_banner_title">已連線 — 臨時存取</string>
+    <string name="home_grace_banner_body">請在%1$s內綁定帳號或訂閱,否則此連線將被中斷。</string>
     <string name="stats_filters">篩選</string>
     <string name="stats_overview">概覽</string>
     <string name="stats_chart_hint">點按圖表 · 雙指縮放 · 拖曳捲動</string>
@@ -307,6 +309,15 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google 帳戶重新驗證失敗。請檢查此裝置上的 Google 帳戶，更新 Google Play 服務，然後再試一次登入。</string>
     <string name="error_google_account_reauth_fallback_failed">在聯絡後端之前 Google 登入失敗。重新驗證帳戶時，兩種 Google Credential Manager 流程皆失敗。若裝置上有 Google 帳戶，請檢查此建置的 OAuth Android 用戶端套件名稱以及 SHA-1/SHA-256。</string>
+    <string name="error_google_signin_cancelled">登入已取消。如果此裝置上沒有 Google 帳戶，請在設定中新增一個，然後再試一次。</string>
+    <string name="error_google_no_account">在此裝置上找不到 Google 帳戶。請在設定中新增 Google 帳戶，然後再試一次。</string>
+    <string name="error_google_signin_config">此裝置上的 Google 登入設定不正確。請更新 Google Play 服務，然後再試一次。</string>
+    <string name="error_google_signin_unsupported">此裝置不支援 Google 登入。</string>
+    <string name="error_google_signin_failed">Google 登入失敗，請再試一次。</string>
+    <string name="error_network_no_internet">沒有網路連線。請檢查網路後再試一次。</string>
+    <string name="error_network_timeout">連線逾時。請再試一次。</string>
+    <string name="error_network_interrupted">網路連線中斷。請再試一次。</string>
+    <string name="error_network_tls">無法建立安全連線。請檢查網路或 VPN 設定後再試一次。</string>
     <string name="home_quick_actions_title">說明與語言</string>
     <string name="login_logo_cd">DataGate 標誌</string>
     <string name="login_tagline">安全 VPN 存取您的伺服器</string>
@@ -408,4 +419,7 @@
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

@@ -55,6 +55,7 @@ fun MainScreen(
     vpnState: VpnStatusUiState,
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
+    onRequestVpnPermission: () -> Unit,
     onRequestDisconnect: () -> Unit,
     onRequestPause: () -> Unit = {},
     onRequestResume: () -> Unit = {},
@@ -75,6 +76,7 @@ fun MainScreen(
         UpdatePreferences.homeBannerReleaseFlow(context, BuildConfig.VERSION_NAME)
     }
     val homeUpdateBanner by bannerFlow.collectAsState(initial = null)
+    val graceExpiresAtUtcMs by FreeTierComplianceController.graceExpiresAtUtcMs.collectAsState()
 
     var selectedTabKey by rememberSaveable { mutableStateOf(BottomTab.Home.name) }
     val selectedTab = BottomTab.entries.find { it.name == selectedTabKey } ?: BottomTab.Home
@@ -129,6 +131,7 @@ fun MainScreen(
                 BottomTab.Home -> VpnStatusScreen(
                     state = vpnState,
                     onConnectClick = onConnectFromHome,
+                    onRequestPermissionClick = onRequestVpnPermission,
                     onDisconnectClick = onRequestDisconnect,
                     onPauseClick = onRequestPause,
                     onResumeClick = onRequestResume,
@@ -141,12 +144,14 @@ fun MainScreen(
                             UpdatePreferences.dismissRelease(context, release.tagName)
                         }
                     },
+                    graceExpiresAtUtcMs = graceExpiresAtUtcMs,
                 )
                 BottomTab.Access -> AccessScreen(
                     state = accessState,
                     vpnState = vpnState,
                     onEvent = accessViewModel::onEvent,
                     onConnectVpn = onConnectFromAccess,
+                    onRequestPermissionClick = onRequestVpnPermission,
                     onDisconnectVpn = onRequestDisconnect,
                     onPauseVpn = onRequestPause,
                     onResumeVpn = onRequestResume,
@@ -202,6 +207,7 @@ fun MainScreenPreview() {
             vpnState = VpnStatusUiState(),
             onConnectFromHome = {},
             onConnectFromAccess = {},
+            onRequestVpnPermission = {},
             onRequestDisconnect = {},
             onReconnectVpn = {},
             onLogout = {},

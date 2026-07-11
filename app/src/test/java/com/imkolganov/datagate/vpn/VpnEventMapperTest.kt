@@ -120,15 +120,17 @@ class VpnEventMapperTest {
     }
 
     @Test
-    fun map_disconnected_clearsSelectedServerId() {
+    fun map_disconnected_clearsSelectedServerIdAndName() {
         val previous = VpnStatusUiState(
             isConnectRequested = true,
             isVpnConnected = true,
-            selectedServerId = 42
+            selectedServerId = 42,
+            selectedServerName = "Frankfurt",
         )
         val next = VpnEventMapper.map(context.resources, previous, "DISCONNECTED", "")
 
         assertNull(next.selectedServerId)
+        assertNull(next.selectedServerName)
         assertFalse(next.isVpnPaused)
     }
 

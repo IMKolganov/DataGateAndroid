@@ -216,7 +216,7 @@ class AuthViewModel(
             try {
                 handleLoginOutcome(repo.loginWithGoogle(activity))
             } catch (e: Exception) {
-                val msg = activity.resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = activity.resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -233,7 +233,7 @@ class AuthViewModel(
             try {
                 handleLoginOutcome(repo.loginWithPassword(l, password))
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -258,7 +258,7 @@ class AuthViewModel(
                 val msg = if (expired) {
                     resources.getString(R.string.totp_challenge_expired)
                 } else {
-                    resources.userFriendlyApiError(raw)
+                    resources.userFriendlyApiError(e)
                 }
                 _state.update {
                     it.copy(
@@ -280,7 +280,7 @@ class AuthViewModel(
                     it.copy(isLoading = false, totpSetup = setup, infoMessage = null)
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -311,7 +311,7 @@ class AuthViewModel(
                     )
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update {
                     it.copy(totpSetupConfirmLoading = false, errorMessage = msg)
                 }
@@ -347,7 +347,7 @@ class AuthViewModel(
                     )
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -405,7 +405,7 @@ class AuthViewModel(
                     )
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -438,7 +438,7 @@ class AuthViewModel(
                     _state.update { it.copy(isLoading = false, errorMessage = msg) }
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -468,7 +468,7 @@ class AuthViewModel(
                     )
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -507,7 +507,7 @@ class AuthViewModel(
                     _state.update { it.copy(isLoading = false, errorMessage = msg) }
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
@@ -530,7 +530,7 @@ class AuthViewModel(
                     )
                 }
             } catch (e: Exception) {
-                val msg = resources.userFriendlyApiError(e.deepMessageForApiError())
+                val msg = resources.userFriendlyApiError(e)
                 _state.update { it.copy(isLoading = false, errorMessage = msg) }
             }
         }
