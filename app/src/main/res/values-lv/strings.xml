@@ -325,6 +325,10 @@ Varat atvērt laidiena lapu vai lejupielādēt APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google konta atkārtota autentificēšana neizdevās. Pārbaudiet Google kontu šajā ierīcē, atjauniniet Google Play pakalpojumus un mēģiniet pierakstīties atkārtoti.</string>
     <string name="error_google_account_reauth_fallback_failed">Google pierakstīšanās neizdevās pirms saziņas ar aizmugursistēmu. Abi Google Credential Manager plūdi neizdevās atkārtotas autentificēšanas laikā. Ja ierīcē ir Google konts, pārbaudiet OAuth Android klienta pakotnes nosaukumu un šīs versijas SHA‑1/SHA‑256.</string>
+    <string name="error_network_no_internet">Nav interneta savienojuma. Pārbaudiet tīklu un mēģiniet vēlreiz.</string>
+    <string name="error_network_timeout">Iestājās savienojuma noildze. Mēģiniet vēlreiz.</string>
+    <string name="error_network_interrupted">Tīkla savienojums tika pārtraukts. Mēģiniet vēlreiz.</string>
+    <string name="error_network_tls">Nevarēja izveidot drošu savienojumu. Pārbaudiet tīklu vai VPN iestatījumus un mēģiniet vēlreiz.</string>
     <string name="home_quick_actions_title">Palīdzība un valoda</string>
     <string name="login_logo_cd">DataGate logotips</string>
     <string name="login_tagline">Droša VPN piekļuve jūsu serveriem</string>

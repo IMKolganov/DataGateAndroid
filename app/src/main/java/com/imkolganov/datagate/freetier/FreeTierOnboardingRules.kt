@@ -5,6 +5,14 @@ import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
 
 const val FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS = 45_000L
 
+/**
+ * The status check can transiently fail with a network-level exception (e.g. "Socket closed") when
+ * it happens to run while the VPN tunnel is being torn down/re-established — that's not a real
+ * access-check failure, so we retry silently before surfacing an error dialog to the user.
+ */
+const val FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS = 10
+const val FREE_TIER_STATUS_FETCH_RETRY_DELAY_MS = 3_000L
+
 /** Warn when little time remains to connect VPN and open Telegram before the code expires. */
 const val FREE_TIER_LINK_CODE_EXPIRY_WARNING_SECONDS = 300
 

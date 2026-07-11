@@ -307,6 +307,10 @@ Bạn có thể mở trang phát hành hoặc tải APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Xác thực lại tài khoản Google thất bại. Kiểm tra tài khoản Google trên thiết bị này, cập nhật Dịch vụ Google Play, rồi thử đăng nhập lại.</string>
     <string name="error_google_account_reauth_fallback_failed">Đăng nhập Google thất bại trước khi liên hệ backend. Cả hai luồng Google Credential Manager đều thất bại khi xác thực lại tài khoản. Nếu có tài khoản Google trên thiết bị, hãy kiểm tra tên gói ứng dụng khách OAuth Android và SHA-1/SHA-256 cho bản build này.</string>
+    <string name="error_network_no_internet">Không có kết nối internet. Kiểm tra mạng của bạn và thử lại.</string>
+    <string name="error_network_timeout">Kết nối đã hết thời gian chờ. Thử lại.</string>
+    <string name="error_network_interrupted">Kết nối mạng đã bị ngắt. Thử lại.</string>
+    <string name="error_network_tls">Không thể thiết lập kết nối an toàn. Kiểm tra mạng hoặc cài đặt VPN và thử lại.</string>
     <string name="home_quick_actions_title">Trợ giúp &amp; ngôn ngữ</string>
     <string name="login_logo_cd">Logo DataGate</string>
     <string name="login_tagline">Truy cập VPN an toàn tới máy chủ của bạn</string>

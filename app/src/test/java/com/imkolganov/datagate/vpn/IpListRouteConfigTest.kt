@@ -197,7 +197,7 @@ class IpListRouteConfigTest {
     }
 
     @Test
-    fun selectAndroid13FullExcludedRoutes_capsAt4000AndPrefersBroadPrefixes() {
+    fun selectAndroid13FullExcludedRoutes_capsAt2000AndPrefersBroadPrefixes() {
         val narrowRoutes = (0 until 5_000).map {
             Ipv4CidrRoute("10.2.$it.0", "255.255.255.0", 24)
         }

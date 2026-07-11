@@ -307,6 +307,10 @@ Sie können die Release-Seite öffnen oder die APK herunterladen. Mit der Option
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Die erneute Google-Konto-Authentifizierung ist fehlgeschlagen. Prüfen Sie das Google-Konto auf diesem Gerät, aktualisieren Sie die Google Play-Dienste und versuchen Sie die Anmeldung erneut.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-Anmeldung ist fehlgeschlagen, bevor das Backend erreicht wurde. Beide Google Credential Manager-Abläufe sind bei der erneuten Kontobestätigung fehlgeschlagen. Falls ein Google-Konto auf dem Gerät vorhanden ist, prüfen Sie den Paketnamen und SHA-1/SHA-256 des OAuth-Android-Clients für diesen Build.</string>
+    <string name="error_network_no_internet">Keine Internetverbindung. Prüfen Sie Ihr Netzwerk und versuchen Sie es erneut.</string>
+    <string name="error_network_timeout">Zeitüberschreitung bei der Verbindung. Versuchen Sie es erneut.</string>
+    <string name="error_network_interrupted">Die Netzwerkverbindung wurde unterbrochen. Versuchen Sie es erneut.</string>
+    <string name="error_network_tls">Es konnte keine sichere Verbindung hergestellt werden. Prüfen Sie Ihr Netzwerk oder Ihre VPN-Einstellungen und versuchen Sie es erneut.</string>
     <string name="home_quick_actions_title">Hilfe &amp; Sprache</string>
     <string name="login_logo_cd">DataGate-Logo</string>
     <string name="login_tagline">Sicherer VPN-Zugang zu Ihren Servern</string>

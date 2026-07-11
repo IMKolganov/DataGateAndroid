@@ -325,6 +325,10 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Reautentificarea contului Google a eșuat. Verifică contul Google pe acest dispozitiv, actualizează serviciile Google Play, apoi încearcă din nou autentificarea.</string>
     <string name="error_google_account_reauth_fallback_failed">Autentificarea Google a eșuat înainte de a contacta backend-ul. Ambele fluxuri Google Credential Manager au eșuat la reautentificare. Dacă există un cont Google pe dispozitiv, verifică numele pachetului clientului OAuth Android și SHA-1/SHA-256 pentru această build.</string>
+    <string name="error_network_no_internet">Nu există conexiune la internet. Verifică rețeaua și încearcă din nou.</string>
+    <string name="error_network_timeout">Conexiunea a expirat. Încearcă din nou.</string>
+    <string name="error_network_interrupted">Conexiunea la rețea a fost întreruptă. Încearcă din nou.</string>
+    <string name="error_network_tls">Nu s-a putut stabili o conexiune securizată. Verifică rețeaua sau setările VPN și încearcă din nou.</string>
     <string name="home_quick_actions_title">Ajutor și limbă</string>
     <string name="login_logo_cd">Logo DataGate</string>
     <string name="login_tagline">Acces VPN securizat la serverele tale</string>

@@ -3,7 +3,8 @@ package com.imkolganov.datagate.vpn
 /**
  * Budget for [android.net.VpnService.Builder.excludeRoute] calls during [tun_builder_establish].
  *
- * AOSP stress-tests route evaluation at 4000 entries ([VpnTest.testDoesNotLockUpWithTooManyRoutes]).
+ * See [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] for the on-device measurements behind
+ * this budget (system VPN status bar icon appearance latency vs. excludeRoute() count).
  */
 internal object IpListEstablishRoutePolicy {
 

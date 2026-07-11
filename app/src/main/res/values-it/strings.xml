@@ -307,6 +307,10 @@ Puoi aprire la pagina della release o scaricare l’APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Riautenticazione dell’account Google non riuscita. Controlla l’account Google su questo dispositivo, aggiorna Google Play services e riprova ad accedere.</string>
     <string name="error_google_account_reauth_fallback_failed">Accesso Google non riuscito prima di raggiungere il backend. Entrambi i flussi di Google Credential Manager sono falliti durante la riautenticazione. Se è presente un account Google sul dispositivo, verifica il nome pacchetto del client OAuth Android e gli SHA‑1/SHA‑256 di questa build.</string>
+    <string name="error_network_no_internet">Nessuna connessione a internet. Verifica la rete e riprova.</string>
+    <string name="error_network_timeout">La connessione è scaduta. Riprova.</string>
+    <string name="error_network_interrupted">La connessione di rete è stata interrotta. Riprova.</string>
+    <string name="error_network_tls">Impossibile stabilire una connessione sicura. Verifica la rete o le impostazioni VPN e riprova.</string>
     <string name="home_quick_actions_title">Aiuto e lingua</string>
     <string name="login_logo_cd">Logo DataGate</string>
     <string name="login_tagline">Accesso VPN sicuro ai tuoi server</string>

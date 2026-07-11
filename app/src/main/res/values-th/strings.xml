@@ -307,6 +307,10 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">การยืนยันตัวตน Google อีกครั้งล้มเหลว ตรวจสอบบัญชี Google บนอุปกรณ์นี้ อัปเดต Google Play services แล้วลองเข้าสู่ระบบอีกครั้ง</string>
     <string name="error_google_account_reauth_fallback_failed">การเข้าสู่ระบบ Google ล้มเหลวก่อนติดต่อแบ็กเอนด์ ทั้งสองขั้นตอน Google Credential Manager ล้มเหลวขณะยืนยันตัวตนอีกครั้ง หากมีบัญชี Google บนอุปกรณ์ ให้ตรวจสอบชื่อแพ็กเกจไคลเอนต์ OAuth Android และ SHA-1/SHA-256 ของบิลด์นี้</string>
+    <string name="error_network_no_internet">ไม่มีการเชื่อมต่ออินเทอร์เน็ต ตรวจสอบเครือข่ายของคุณแล้วลองอีกครั้ง</string>
+    <string name="error_network_timeout">การเชื่อมต่อหมดเวลา ลองอีกครั้ง</string>
+    <string name="error_network_interrupted">การเชื่อมต่อเครือข่ายถูกขัดจังหวะ ลองอีกครั้ง</string>
+    <string name="error_network_tls">ไม่สามารถสร้างการเชื่อมต่อที่ปลอดภัยได้ ตรวจสอบเครือข่ายหรือการตั้งค่า VPN แล้วลองอีกครั้ง</string>
     <string name="home_quick_actions_title">ความช่วยเหลือและภาษา</string>
     <string name="login_logo_cd">โลโก้ DataGate</string>
     <string name="login_tagline">เข้าถึง VPN อย่างปลอดภัยไปยังเซิร์ฟเวอร์ของคุณ</string>

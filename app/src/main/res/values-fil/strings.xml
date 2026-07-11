@@ -325,6 +325,10 @@ Maaari mong buksan ang release page o i-download ang APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Nabigo ang muling pag-authenticate sa Google account. Suriin ang Google account sa device na ito, i-update ang Google Play services, pagkatapos subukang mag-sign in muli.</string>
     <string name="error_google_account_reauth_fallback_failed">Nabigo ang Google sign-in bago makontak ang backend. Nabigo ang parehong Google Credential Manager flow habang muling ine-authenticate ang account. Kung may Google account sa device, suriin ang package name ng OAuth Android client at SHA-1/SHA-256 para sa build na ito.</string>
+    <string name="error_network_no_internet">Walang koneksyon sa internet. Suriin ang iyong network at subukan ulit.</string>
+    <string name="error_network_timeout">Nag-timeout ang koneksyon. Subukan ulit.</string>
+    <string name="error_network_interrupted">Naputol ang koneksyon sa network. Subukan ulit.</string>
+    <string name="error_network_tls">Hindi maiestablish ang secure na koneksyon. Suriin ang network o VPN settings at subukan ulit.</string>
     <string name="home_quick_actions_title">Tulong at wika</string>
     <string name="login_logo_cd">Logo ng DataGate</string>
     <string name="login_tagline">Ligtas na VPN access sa iyong mga server</string>

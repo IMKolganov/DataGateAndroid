@@ -325,6 +325,10 @@ Odprete lahko stran izdaje ali prenesete APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Ponovna overitev Googlovega računa ni uspela. Preverite Google račun na tej napravi, posodobite storitve Google Play in ponovno poskusite prijavo.</string>
     <string name="error_google_account_reauth_fallback_failed">Prijava z Googlom ni uspela, preden je aplikacija stopila v stik z zaledjem. Pri ponovnem overjanju sta oba toka Googlovega Credential Managerja spodletevala. Če je na napravi Google račun, preverite ime paketa OAuth Android klienta ter SHA‑1/SHA‑256 za to gradnjo.</string>
+    <string name="error_network_no_internet">Ni internetne povezave. Preverite omrežje in poskusite znova.</string>
+    <string name="error_network_timeout">Povezava je potekla. Poskusite znova.</string>
+    <string name="error_network_interrupted">Omrežna povezava je bila prekinjena. Poskusite znova.</string>
+    <string name="error_network_tls">Varne povezave ni bilo mogoče vzpostaviti. Preverite omrežje ali nastavitve VPN in poskusite znova.</string>
     <string name="home_quick_actions_title">Pomoč in jezik</string>
     <string name="login_logo_cd">Logotip DataGate</string>
     <string name="login_tagline">Varen VPN dostop do vaših strežnikov</string>

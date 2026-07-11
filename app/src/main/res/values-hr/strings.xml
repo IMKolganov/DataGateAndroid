@@ -325,6 +325,10 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Ponovna autentikacija Google računa nije uspjela. Provjerite Google račun na ovom uređaju, ažurirajte Google Play usluge zatim pokušajte se ponovo prijaviti.</string>
     <string name="error_google_account_reauth_fallback_failed">Prijava Googleom nije uspjela prije kontakta s pozadinom. Oba tijeka Google Credential Managera nisu uspjela tijekom ponovne autentikacije. Ako je na uređaju prisutan Google račun, provjerite OAuth Android naziv paketa klijenta te SHA‑1/SHA‑256 ovog izdanja.</string>
+    <string name="error_network_no_internet">Nema internetske veze. Provjerite mrežu i pokušajte ponovno.</string>
+    <string name="error_network_timeout">Isteklo je vrijeme veze. Pokušajte ponovno.</string>
+    <string name="error_network_interrupted">Mrežna veza je prekinuta. Pokušajte ponovno.</string>
+    <string name="error_network_tls">Sigurna veza nije uspostavljena. Provjerite mrežu ili VPN postavke i pokušajte ponovno.</string>
     <string name="home_quick_actions_title">Pomoć i jezik</string>
     <string name="login_logo_cd">DataGate logotip</string>
     <string name="login_tagline">Siguran VPN pristup vašim poslužiteljima</string>

@@ -368,6 +368,10 @@
     <string name="error_http_proxy_html">The server returned an error page instead of data. The service may be restarting.</string>
     <string name="error_google_account_reauth_failed">Google account re-authentication failed. Check the Google account on this device, update Google Play services, then try signing in again.</string>
     <string name="error_google_account_reauth_fallback_failed">Google sign-in failed before contacting the backend. Both Google Credential Manager flows failed while re-authenticating the account. If a Google account is present on the device, check the OAuth Android client package name and SHA-1/SHA-256 for this build.</string>
+    <string name="error_network_no_internet">No internet connection. Check your network and try again.</string>
+    <string name="error_network_timeout">The connection timed out. Try again.</string>
+    <string name="error_network_interrupted">The network connection was interrupted. Try again.</string>
+    <string name="error_network_tls">Couldn\'t establish a secure connection. Check your network or VPN settings and try again.</string>
 
     <!-- VPN connect flow (VpnConnectInteractor / VpnController) -->
     <string name="vpn_selecting_best_server">Selecting best server</string>

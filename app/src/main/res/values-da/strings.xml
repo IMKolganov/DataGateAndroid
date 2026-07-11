@@ -325,6 +325,10 @@ Du kan åbne udgivelsessiden eller downloade APK’en. Brug indstillingen nedenf
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Gen-godkendelse af Google-konto mislykkedes. Kontroller Google-kontoen på denne enhed, opdater Google Play-tjenester og prøv at logge ind igen.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-log ind mislykkedes før kontakt til backenden. Begge Google Credential Manager-forløb mislykkedes ved gen-godkendelse af kontoen. Hvis der er en Google-konto på enheden, skal du kontrollere OAuth Android-klientens pakkenavn og SHA-1/SHA-256 for denne build.</string>
+    <string name="error_network_no_internet">Ingen internetforbindelse. Kontrollér dit netværk, og forsøg igen.</string>
+    <string name="error_network_timeout">Forbindelsen fik timeout. Forsøg igen.</string>
+    <string name="error_network_interrupted">Netværksforbindelsen blev afbrudt. Forsøg igen.</string>
+    <string name="error_network_tls">Der kunne ikke etableres en sikker forbindelse. Kontrollér dit netværk eller VPN-indstillinger, og forsøg igen.</string>
     <string name="home_quick_actions_title">Hjælp og sprog</string>
     <string name="login_logo_cd">DataGate-logo</string>
     <string name="login_tagline">Sikker VPN-adgang til dine servere</string>

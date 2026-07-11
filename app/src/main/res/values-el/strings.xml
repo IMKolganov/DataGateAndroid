@@ -325,6 +325,10 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Η επανάληψη ταυτοποίησης λογαριασμού Google απέτυχε. Ελέγξτε τον λογαριασμό Google σε αυτή τη συσκευή, ενημερώστε τις Υπηρεσίες Google Play και δοκιμάστε ξανά τη σύνδεση.</string>
     <string name="error_google_account_reauth_fallback_failed">Η σύνδεση με Google απέτυχε πριν επικοινωνήσει με το backend. Και τα δύο workflows του Google Credential Manager απέτυχαν κατά την επανάληψη ταυτοποίησης του λογαριασμού. Εάν υπάρχει λογαριασμός Google στη συσκευή, ελέγξτε το όνομα πακέτου του OAuth Android client και τα SHA-1/SHA-256 για αυτό το build.</string>
+    <string name="error_network_no_internet">Δεν υπάρχει σύνδεση στο διαδίκτυο. Ελέγξτε το δίκτυό σας και δοκιμάστε ξανά.</string>
+    <string name="error_network_timeout">Η σύνδεση έληξε (timeout). Δοκιμάστε ξανά.</string>
+    <string name="error_network_interrupted">Η σύνδεση δικτύου διακόπηκε. Δοκιμάστε ξανά.</string>
+    <string name="error_network_tls">Δεν ήταν δυνατή η δημιουργία ασφαλούς σύνδεσης. Ελέγξτε το δίκτυο ή τις ρυθμίσεις VPN και δοκιμάστε ξανά.</string>
     <string name="home_quick_actions_title">Βοήθεια και γλώσσα</string>
     <string name="login_logo_cd">Λογότυπο DataGate</string>
     <string name="login_tagline">Ασφαλής πρόσβαση VPN στους διακομιστές σας</string>

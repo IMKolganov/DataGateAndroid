@@ -307,6 +307,10 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google-tilin uudelleentunnistautuminen epäonnistui. Tarkista Google-tili tässä laitteessa, päivitä Google Play -palvelut ja yritä kirjautua uudelleen.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-kirjautuminen epäonnistui ennen taustajärjestelmään yhteyttä. Molemmat Google Credential Manager -virrat epäonnistuivat tilin uudelleentunnistautumisessa. Jos laitteella on Google-tili, tarkista OAuth Android -asiakkaan paketin nimi ja tämän version SHA-1/SHA-256.</string>
+    <string name="error_network_no_internet">Ei internetyhteyttä. Tarkista verkkoyhteys ja yritä uudelleen.</string>
+    <string name="error_network_timeout">Yhteys aikakatkaistiin. Yritä uudelleen.</string>
+    <string name="error_network_interrupted">Verkkoyhteys katkesi. Yritä uudelleen.</string>
+    <string name="error_network_tls">Suojattua yhteyttä ei voitu muodostaa. Tarkista verkko- tai VPN-asetukset ja yritä uudelleen.</string>
     <string name="home_quick_actions_title">Ohje ja kieli</string>
     <string name="login_logo_cd">DataGate-logo</string>
     <string name="login_tagline">Turvallinen VPN-yhteys palvelimiisi</string>

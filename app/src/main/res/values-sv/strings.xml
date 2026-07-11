@@ -325,6 +325,10 @@ Du kan öppna versionssidan eller ladda ner APK:n.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google-återautentisering misslyckades. Kontrollera Google-kontot på den här enheten, uppdatera Google Play-tjänster och försök logga in igen.</string>
     <string name="error_google_account_reauth_fallback_failed">Google-inloggning misslyckades innan backend nåddes. Båda Google Credential Manager-flödena misslyckades vid återautentisering. Om ett Google-konto finns på enheten, kontrollera OAuth Android-klientens paketnamn och SHA‑1/SHA‑256 för den här versionen.</string>
+    <string name="error_network_no_internet">Ingen internetanslutning. Kontrollera nätverket och försök igen.</string>
+    <string name="error_network_timeout">Anslutningen fick timeout. Försök igen.</string>
+    <string name="error_network_interrupted">Nätverksanslutningen avbröts. Försök igen.</string>
+    <string name="error_network_tls">Det gick inte att upprätta en säker anslutning. Kontrollera nätverket eller VPN-inställningarna och försök igen.</string>
     <string name="home_quick_actions_title">Hjälp och språk</string>
     <string name="login_logo_cd">DataGate-logotyp</string>
     <string name="login_tagline">Säker VPN-åtkomst till dina servrar</string>

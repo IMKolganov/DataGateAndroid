@@ -46,6 +46,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.AdminTotpGate
 import com.imkolganov.datagate.freetier.FREE_TIER_RESUME_REFRESH_MIN_INTERVAL_MS
+import com.imkolganov.datagate.freetier.FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS
+import com.imkolganov.datagate.freetier.FREE_TIER_STATUS_FETCH_RETRY_DELAY_MS
 import com.imkolganov.datagate.freetier.FreeTierApi
 import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import com.imkolganov.datagate.freetier.FreeTierOnboardingCopyMode
@@ -62,7 +64,6 @@ import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.freetier.FreeTierAccessStatusResponse
 import com.imkolganov.datagate.model.freetier.RequestTelegramAccountLinkCodeResponse
 import com.imkolganov.datagate.update.ApkUpdateInstaller
-import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -136,6 +137,23 @@ fun FreeTierOnboardingHost(
         }
     }
 
+    suspend fun fetchAccessStatusWithRetry(): ApiResponse<FreeTierAccessStatusResponse> {
+        var lastError: Exception? = null
+        repeat(FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS) { attempt ->
+            try {
+                return withContext(Dispatchers.IO) { freeTierApi.getAccessStatus() }
+            } catch (e: Exception) {
+                lastError = e
+                // Transient network blips (e.g. "Socket closed" while the VPN tunnel is coming up or
+                // down) shouldn't surface an error dialog on the first failure — retry quietly first.
+                if (attempt < FREE_TIER_STATUS_FETCH_MAX_ATTEMPTS - 1) {
+                    delay(FREE_TIER_STATUS_FETCH_RETRY_DELAY_MS)
+                }
+            }
+        }
+        throw lastError ?: IllegalStateException("Free tier status fetch failed with no exception recorded")
+    }
+
     suspend fun fetchStatus(force: Boolean = false) {
         if (!force) {
             val now = System.currentTimeMillis()
@@ -148,7 +166,7 @@ fun FreeTierOnboardingHost(
             }
             statusLoading = true
             try {
-                val response = withContext(Dispatchers.IO) { freeTierApi.getAccessStatus() }
+                val response = fetchAccessStatusWithRetry()
                 lastStatusFetchMs = System.currentTimeMillis()
                 applyFetchResult(evaluateFreeTierStatusFetch(response))
             } catch (e: Exception) {
@@ -156,9 +174,7 @@ fun FreeTierOnboardingHost(
                 applyFetchResult(
                     evaluateFreeTierStatusFetch(
                         response = ApiResponse(success = false, message = null, data = null),
-                        apiFailureMessage = appContext.resources.userFriendlyApiError(
-                            e.deepMessageForApiError()
-                        ),
+                        apiFailureMessage = appContext.resources.userFriendlyApiError(e),
                     )
                 )
             } finally {
@@ -186,7 +202,7 @@ fun FreeTierOnboardingHost(
                     ?: appContext.getString(R.string.free_tier_link_code_failed)
             }
         } catch (e: Exception) {
-            errorMessage = appContext.resources.userFriendlyApiError(e.deepMessageForApiError())
+            errorMessage = appContext.resources.userFriendlyApiError(e)
         } finally {
             linkCodeLoading = false
         }

@@ -8,7 +8,7 @@ import org.junit.Test
 import java.io.File
 
 /**
- * CIDR establish budget — FULL capped at [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] (4000).
+ * CIDR establish budget — FULL capped at [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] (2000).
  */
 class IpListEstablishRouteContractTest {
 
@@ -22,7 +22,7 @@ class IpListEstablishRouteContractTest {
     }
 
     @Test
-    fun fullCoverage_onAndroid13_capsAt4000_andFitsEstablishBudget() {
+    fun fullCoverage_onAndroid13_capsAt2000_andFitsEstablishBudget() {
         val routes = parseProductionFallbackLists()
         val plan = planForAndroid13(IpListCoverageMode.FULL, routes)
 
@@ -49,7 +49,7 @@ class IpListEstablishRouteContractTest {
     }
 
     @Test
-    fun fastCoverage_staysWithin3000_fullCapsAt4000() {
+    fun fastCoverage_staysWithin1500_fullCapsAt2000() {
         val routes = parseProductionFallbackLists()
         val fast = planForAndroid13(IpListCoverageMode.FAST, routes)
         val full = planForAndroid13(IpListCoverageMode.FULL, routes)
@@ -77,7 +77,7 @@ class IpListEstablishRouteContractTest {
     }
 
     @Test
-    fun app1_0_6_fullMode_wasUnbounded_currentCapsAt4000() {
+    fun app1_0_6_fullMode_wasUnbounded_currentCapsAt2000() {
         val routes = parseProductionFallbackLists()
         val app106Excluded = routes
         val current = planForAndroid13(IpListCoverageMode.FULL, routes)

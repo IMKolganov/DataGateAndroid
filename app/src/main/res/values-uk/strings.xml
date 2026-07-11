@@ -323,6 +323,10 @@
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Не вдалося повторно автентифікувати обліковий запис Google. Перевірте обліковий запис Google на цьому пристрої, оновіть сервіси Google Play, потім спробуйте ввійти знову.</string>
     <string name="error_google_account_reauth_fallback_failed">Вхід через Google не вдався до звернення до бекенда. Обидва потоки Google Credential Manager завершилися помилкою під час повторної автентифікації облікового запису. Якщо на пристрої є обліковий запис Google, перевірте ім’я пакета клієнта OAuth для Android та SHA-1/SHA-256 для цієї збірки.</string>
+    <string name="error_network_no_internet">Немає підключення до інтернету. Перевірте мережу і спробуйте ще раз.</string>
+    <string name="error_network_timeout">Час очікування з\'єднання минув. Спробуйте ще раз.</string>
+    <string name="error_network_interrupted">Мережеве з\'єднання було перервано. Спробуйте ще раз.</string>
+    <string name="error_network_tls">Не вдалося встановити безпечне з\'єднання. Перевірте мережу або налаштування VPN і спробуйте ще раз.</string>
     <string name="home_quick_actions_title">Довідка та мова</string>
     <string name="login_logo_cd">Логотип DataGate</string>
     <string name="login_tagline">Безпечний VPN-доступ до ваших серверів</string>

@@ -307,6 +307,10 @@ Vous pouvez ouvrir la page de version ou télécharger l’APK. Utilisez l’opt
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">La ré-authentification du compte Google a échoué. Vérifiez le compte Google sur cet appareil, mettez à jour les services Google Play, puis réessayez de vous connecter.</string>
     <string name="error_google_account_reauth_fallback_failed">La connexion Google a échoué avant d’atteindre le serveur. Les deux flux du gestionnaire d’identifiants Google ont échoué lors de la ré-authentification. Si un compte Google est présent sur l’appareil, vérifiez le nom du package OAuth Android et les empreintes SHA-1/SHA-256 pour cette compilation.</string>
+    <string name="error_network_no_internet">Aucune connexion internet. Vérifiez votre réseau et réessayez.</string>
+    <string name="error_network_timeout">La connexion a expiré. Réessayez.</string>
+    <string name="error_network_interrupted">La connexion réseau a été interrompue. Réessayez.</string>
+    <string name="error_network_tls">Impossible d’établir une connexion sécurisée. Vérifiez votre réseau ou les paramètres VPN et réessayez.</string>
     <string name="home_quick_actions_title">Aide et langue</string>
     <string name="login_logo_cd">Logo DataGate</string>
     <string name="login_tagline">Accès VPN sécurisé à vos serveurs</string>

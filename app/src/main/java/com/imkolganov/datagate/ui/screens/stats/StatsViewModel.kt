@@ -130,7 +130,7 @@ open class StatsViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = res.userFriendlyApiError(ex.message)
+                        error = res.userFriendlyApiError(ex)
                     )
                 }
             }

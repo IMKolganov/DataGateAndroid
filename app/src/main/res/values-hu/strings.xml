@@ -325,6 +325,10 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">A Google-fiók újbóli hitelesítése sikertelen. Ellenőrizd a Google-fiókot ezen az eszközön, frissítsd a Google Play szolgáltatásokat, majd próbáld újra a bejelentkezést.</string>
     <string name="error_google_account_reauth_fallback_failed">Google bejelentkezés a háttér elérése előtt meghiúsult. Mindkét Google Credential Manager folyamat sikertelen volt az újbóli hitelesítéskor. Ha van Google-fiók az eszközön, ellenőrizd az OAuth Android ügyfél csomagnevét és a build SHA‑1/SHA‑256 értékeit.</string>
+    <string name="error_network_no_internet">Nincs internetkapcsolat. Ellenőrizd a hálózatot, és próbáld újra.</string>
+    <string name="error_network_timeout">A kapcsolat túllépte az időkorlátot. Próbáld újra.</string>
+    <string name="error_network_interrupted">A hálózati kapcsolat megszakadt. Próbáld újra.</string>
+    <string name="error_network_tls">Nem sikerült biztonságos kapcsolatot létesíteni. Ellenőrizd a hálózatot vagy a VPN-beállításokat, és próbáld újra.</string>
     <string name="home_quick_actions_title">Súgó és nyelv</string>
     <string name="login_logo_cd">DataGate logó</string>
     <string name="login_tagline">Biztonságos VPN-hozzáférés a szervereidhez</string>

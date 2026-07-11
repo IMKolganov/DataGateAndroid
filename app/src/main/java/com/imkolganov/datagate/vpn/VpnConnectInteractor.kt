@@ -8,7 +8,6 @@ import android.util.Log
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.servers.ManualServerResolve
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
-import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
 import java.util.concurrent.atomic.AtomicBoolean
@@ -220,8 +219,7 @@ class VpnConnectInteractor(
             )
         } catch (t: Throwable) {
             Log.e("OpenVPN3", "Connect flow failed", t)
-            val raw = t.deepMessageForApiError().ifBlank { t.message.orEmpty() }
-            val detail = appContext.resources.userFriendlyApiError(raw)
+            val detail = appContext.resources.userFriendlyApiError(t)
                 .ifBlank { t.javaClass.simpleName }
             vpnController.showError(
                 appContext.getString(R.string.vpn_connect_failed, detail)

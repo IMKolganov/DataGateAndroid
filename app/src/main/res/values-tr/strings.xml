@@ -307,6 +307,10 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="auth_tab_google">Google</string>
     <string name="error_google_account_reauth_failed">Google hesabı yeniden kimlik doğrulaması başarısız. Bu cihazdaki Google hesabını kontrol edin, Google Play hizmetlerini güncelleyin ve tekrar oturum açmayı deneyin.</string>
     <string name="error_google_account_reauth_fallback_failed">Google oturum açma, arka uçla iletişim kurmadan önce başarısız oldu. Hesap yeniden kimlik doğrulanırken her iki Google Credential Manager akışı da başarısız oldu. Cihazda bir Google hesabı varsa bu derleme için OAuth Android istemci paket adını ve SHA-1/SHA-256 değerlerini kontrol edin.</string>
+    <string name="error_network_no_internet">İnternet bağlantısı yok. Ağınızı kontrol edin ve tekrar deneyin.</string>
+    <string name="error_network_timeout">Bağlantı zaman aşımına uğradı. Tekrar deneyin.</string>
+    <string name="error_network_interrupted">Ağ bağlantısı kesildi. Tekrar deneyin.</string>
+    <string name="error_network_tls">Güvenli bağlantı kurulamadı. Ağ veya VPN ayarlarınızı kontrol edin ve tekrar deneyin.</string>
     <string name="home_quick_actions_title">Yardım ve dil</string>
     <string name="login_logo_cd">DataGate logosu</string>
     <string name="login_tagline">Sunucularınıza güvenli VPN erişimi</string>
