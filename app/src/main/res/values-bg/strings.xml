@@ -425,4 +425,7 @@
     <string name="free_tier_copy_code">Copy code</string>
     <string name="free_tier_code_paste_hint">Send this code to our Telegram bot in a private message.</string>
     <string name="free_tier_done_check">Done? Check again</string>
+    <string name="vpn_status_pausing">Pausing…</string>
+    <string name="vpn_status_resuming">Resuming…</string>
+    <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
 </resources>

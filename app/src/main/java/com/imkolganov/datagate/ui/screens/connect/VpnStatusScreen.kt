@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.update.GitHubLatestRelease
 import com.imkolganov.datagate.util.userFriendlyApiError
+import com.imkolganov.datagate.vpn.VpnCommandContract
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
 @Composable
@@ -85,9 +86,13 @@ fun VpnStatusScreen(
     val githubIssuesUrl = stringResource(R.string.project_github_issues_url)
     val isConnected = state.isVpnConnected
     val isPaused = state.isVpnPaused
-    val isConnecting = state.isConnectRequested && !isConnected && !isPaused
+    val isPausing = state.pendingUserCommand == VpnCommandContract.PendingUserCommand.PAUSE
+    val isResuming = state.pendingUserCommand == VpnCommandContract.PendingUserCommand.RESUME
+    val isConnecting = state.isConnectRequested && !isConnected && !isPaused && !isPausing && !isResuming
 
     val statusTitle = when {
+        isPausing -> stringResource(R.string.vpn_status_pausing)
+        isResuming -> stringResource(R.string.vpn_status_resuming)
         isConnected -> stringResource(R.string.vpn_status_connected)
         isPaused -> stringResource(R.string.vpn_status_paused)
         isConnecting -> stringResource(R.string.vpn_status_connecting)
@@ -95,6 +100,8 @@ fun VpnStatusScreen(
     }
 
     val statusSubtitle = when {
+        isPausing -> stringResource(R.string.vpn_status_pausing)
+        isResuming -> stringResource(R.string.vpn_status_resuming)
         isPaused -> stringResource(R.string.vpn_msg_paused)
         state.lastMessage.isNotBlank() -> remember(state.lastMessage) {
             context.resources.userFriendlyApiError(state.lastMessage)
@@ -249,7 +256,7 @@ fun VpnStatusScreen(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (isConnected) {
+                    if (isConnected && !isPausing && !isResuming) {
                         TextButton(
                             onClick = onPauseClick,
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),

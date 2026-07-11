@@ -1,6 +1,6 @@
 package com.imkolganov.datagate.vpn
 
-internal data class CachedStatusRestoreResult(
+data class CachedStatusRestoreResult(
     val eventName: String?,
     val eventInfo: String?,
     val shouldPersist: Boolean
@@ -18,7 +18,11 @@ internal object OpenVpnRuntimePolicy {
 
         val wasActiveState = cachedName.equals("CONNECTED", ignoreCase = true) ||
             cachedName.equals("CONNECTING", ignoreCase = true) ||
-            cachedName.equals("DISCONNECTING", ignoreCase = true)
+            cachedName.equals("DISCONNECTING", ignoreCase = true) ||
+            cachedName.equals("PAUSED", ignoreCase = true) ||
+            cachedName.equals("RESUMED", ignoreCase = true) ||
+            cachedName.equals("RECONNECTING", ignoreCase = true) ||
+            cachedName.equals("WAITING_NETWORK", ignoreCase = true)
 
         return if (wasActiveState) {
             CachedStatusRestoreResult(
@@ -88,4 +92,14 @@ internal object OpenVpnRuntimePolicy {
         runsOnNativeThread: Boolean,
         nativeVpnJobActive: Boolean,
     ): Boolean = runsOnNativeThread || !nativeVpnJobActive
+
+    /**
+     * While [connect] holds [OvpnNativeThread], pause/resume must use a foreign thread so
+     * ovpncli can [thread_safe_pause] into the running io_context.
+     */
+    fun shouldSchedulePauseResumeOnForeignThread(nativeVpnJobActive: Boolean): Boolean = true
+
+    /** Guard: scheduling pause/resume on the native executor behind connect always deadlocks. */
+    fun mustNotSchedulePauseResumeOnNativeExecutor(scheduledOnNativeExecutor: Boolean): Boolean =
+        !scheduledOnNativeExecutor
 }

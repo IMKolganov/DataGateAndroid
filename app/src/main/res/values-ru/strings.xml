@@ -420,4 +420,7 @@
 
     <string name="free_tier_code_paste_hint">Отправьте этот код нашему боту в личные сообщения.</string>
     <string name="free_tier_done_check">Готово? Проверить</string>
+    <string name="vpn_status_pausing">Пауза…</string>
+    <string name="vpn_status_resuming">Возобновление…</string>
+    <string name="vpn_msg_command_rejected">Команда VPN не выполнена (%1$s)</string>
 </resources>

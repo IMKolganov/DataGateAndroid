@@ -110,6 +110,7 @@ fun AppRoot(
                     onCancelSetup = { authViewModel.cancelAdminTotpSetup() },
                     onConfirm = { authViewModel.confirmAdminTotpSetup(appContext.resources, it) },
                     onLogout = {
+                        onRequestDisconnect()
                         authViewModel.logout()
                         onAuthChanged()
                     },

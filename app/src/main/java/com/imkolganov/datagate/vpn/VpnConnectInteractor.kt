@@ -186,7 +186,12 @@ class VpnConnectInteractor(
                 "IP list routes prepared: applied=${routePlan.appliedRouteCount}/${bypassRoutes.size}, " +
                     "selected=${routePlan.selectedRouteCount}, mode=" +
                     if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
-                        "android-excludeRoute/${ipListSettings.coverageMode}"
+                        "android-excludeRoute/${ipListSettings.coverageMode}" +
+                            if (routePlan.reachedEstablishRouteLimit) {
+                                "(capped=${IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT})"
+                            } else {
+                                ""
+                            }
                     } else {
                         "ovpn-route-emulation(limit=${ipListSettings.android12OvpnRouteLimit}, " +
                             "profileLimit=${routePlan.reachedProfileSizeLimit})"
@@ -195,7 +200,7 @@ class VpnConnectInteractor(
             if (bypassRoutes.isNotEmpty()) {
                 vpnController.showStatus(
                     "IP_LIST_READY",
-                    if (routePlan.reachedProfileSizeLimit) {
+                    if (routePlan.reachedProfileSizeLimit || routePlan.reachedEstablishRouteLimit) {
                         res.getString(R.string.vpn_ip_list_ready_limited, routePlan.appliedRouteCount)
                     } else {
                         res.getString(R.string.vpn_ip_list_ready, routePlan.appliedRouteCount)

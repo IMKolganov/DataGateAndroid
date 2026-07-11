@@ -6,8 +6,11 @@ import java.net.BindException
 /**
  * Picks localhost ports for the OpenVPN → WSS bridge.
  *
- * Uses a configurable dedicated range on 127.0.0.1 (default 38400–38499) so we do not grab OS
- * ephemeral ports that companion apps may rely on.
+ * Architecture contract (see [LocalBridgePortContractTest]):
+ * - Bind only on 127.0.0.1 in [TcpToWssBridge] / [UdpToWssBridge] — never 0.0.0.0.
+ * - Never use port 0 (OS ephemeral); that collides with Galaxy Wearable and other companions.
+ * - Use a dedicated pool (default 38400–38499), not the OS ephemeral range.
+ * - Sockets are opened only when VPN connects, and [OpenVpn3Service.stopVpnInternal] must close them.
  */
 object LocalBridgePortPool {
 

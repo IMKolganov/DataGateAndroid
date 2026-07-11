@@ -39,7 +39,7 @@ data class IpListAppendResult(
 
 enum class IpListRouteDelivery {
     ANDROID_EXCLUDE_ROUTE,
-    OVPN_PROFILE
+    OVPN_PROFILE,
 }
 
 data class IpListConnectionRoutePlan(
@@ -48,12 +48,19 @@ data class IpListConnectionRoutePlan(
     val selectedRouteCount: Int,
     val appliedRouteCount: Int,
     val reachedProfileSizeLimit: Boolean,
+    /** True when Android 13+ excludeRoute list was truncated to [MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT]. */
+    val reachedEstablishRouteLimit: Boolean = false,
     val delivery: IpListRouteDelivery
 )
 
 object IpListRouteConfig {
     const val MAX_ROUTES = 12_000
     const val MAX_ANDROID_EXCLUDED_ROUTES = 3_000
+    /**
+     * Theoretical cap for Android 13+ [android.net.VpnService.Builder.excludeRoute] at establish.
+     * Aligned with AOSP [VpnTest.testDoesNotLockUpWithTooManyRoutes] (4000 routes, O(n²) safeguard).
+     */
+    const val MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT = 4_000
     const val DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT = 800
     const val MIN_ANDROID12_OVPN_ROUTE_LIMIT = 50
     const val MAX_ANDROID12_OVPN_ROUTE_LIMIT = 3_000
@@ -61,6 +68,14 @@ object IpListRouteConfig {
 
     fun selectAndroidExcludedRoutes(routes: List<IpCidrRoute>): List<IpCidrRoute> {
         return selectBroadestRoutes(routes, MAX_ANDROID_EXCLUDED_ROUTES)
+    }
+
+    fun selectAndroid13FullExcludedRoutes(routes: List<IpCidrRoute>): List<IpCidrRoute> {
+        return selectBroadestRoutes(
+            routes = routes,
+            maxRoutes = MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT,
+            sortAlways = true,
+        )
     }
 
     fun selectAndroid12OvpnRoutes(routes: List<IpCidrRoute>, limit: Int): List<IpCidrRoute> {
@@ -84,19 +99,21 @@ object IpListRouteConfig {
         val selectedRoutes = if (supportsAndroidRouteExclusion) {
             when (coverageMode) {
                 IpListCoverageMode.FAST -> selectAndroidExcludedRoutes(routes)
-                IpListCoverageMode.FULL -> routes
+                IpListCoverageMode.FULL -> selectAndroid13FullExcludedRoutes(routes)
             }
         } else {
             selectAndroid12OvpnRoutes(routes, android12OvpnRouteLimit)
         }
 
         if (supportsAndroidRouteExclusion) {
+            val truncated = routes.size > selectedRoutes.size
             return IpListConnectionRoutePlan(
                 config = config,
                 androidExcludedRoutes = selectedRoutes,
                 selectedRouteCount = selectedRoutes.size,
                 appliedRouteCount = selectedRoutes.size,
                 reachedProfileSizeLimit = false,
+                reachedEstablishRouteLimit = truncated,
                 delivery = IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
             )
         }
@@ -108,9 +125,11 @@ object IpListRouteConfig {
             selectedRouteCount = selectedRoutes.size,
             appliedRouteCount = appendResult.appliedRouteCount,
             reachedProfileSizeLimit = appendResult.reachedProfileSizeLimit,
+            reachedEstablishRouteLimit = false,
             delivery = IpListRouteDelivery.OVPN_PROFILE
         )
     }
+
 
     private fun selectBroadestRoutes(
         routes: List<IpCidrRoute>,

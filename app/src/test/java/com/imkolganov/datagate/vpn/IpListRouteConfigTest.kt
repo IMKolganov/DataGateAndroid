@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.vpn
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IpListRouteConfigTest {
@@ -196,6 +197,41 @@ class IpListRouteConfigTest {
     }
 
     @Test
+    fun selectAndroid13FullExcludedRoutes_capsAt4000AndPrefersBroadPrefixes() {
+        val narrowRoutes = (0 until 5_000).map {
+            Ipv4CidrRoute("10.2.$it.0", "255.255.255.0", 24)
+        }
+        val routes = listOf(
+            Ipv4CidrRoute("10.0.0.0", "255.0.0.0", 8),
+            Ipv4CidrRoute("10.1.0.0", "255.255.0.0", 16),
+        ) + narrowRoutes
+
+        val selected = IpListRouteConfig.selectAndroid13FullExcludedRoutes(routes)
+
+        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, selected.size)
+        assertEquals(Ipv4CidrRoute("10.0.0.0", "255.0.0.0", 8), selected.first())
+        assertEquals(Ipv4CidrRoute("10.1.0.0", "255.255.0.0", 16), selected[1])
+    }
+
+    @Test
+    fun prepareConnectionRoutes_onAndroid13Full_setsEstablishRouteLimitFlag() {
+        val routes = (0 until 5_000).map {
+            Ipv4CidrRoute("10.3.$it.0", "255.255.255.0", 24)
+        }
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = routes,
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+
+        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, plan.androidExcludedRoutes.size)
+        assertTrue(plan.reachedEstablishRouteLimit)
+    }
+
+    @Test
     fun prepareConnectionRoutes_onAndroid13KeepsConfigAndUsesExcludedRoutes() {
         val routes = listOf(Ipv4CidrRoute("10.0.0.0", "255.0.0.0", 8))
 
@@ -212,6 +248,7 @@ class IpListRouteConfigTest {
         assertEquals(1, plan.selectedRouteCount)
         assertEquals(1, plan.appliedRouteCount)
         assertEquals(false, plan.reachedProfileSizeLimit)
+        assertEquals(false, plan.reachedEstablishRouteLimit)
         assertEquals(IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE, plan.delivery)
     }
 
