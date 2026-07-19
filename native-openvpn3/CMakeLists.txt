@@ -32,7 +32,7 @@ set(ASIO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/asio/asio/include"
 
 # Override upstream openvpn/common/version.hpp default (IV_VER sent to server).
 # Keep in sync with app/build.gradle.kts versionName.
-set(DATAGATE_OPENVPN_VERSION "3.12_datagate_android_1.0.13" CACHE STRING "OpenVPN IV_VER string")
+set(DATAGATE_OPENVPN_VERSION "3.11.7_datagate_android_1.0.13" CACHE STRING "OpenVPN IV_VER string")
 # =========================================
 
 # Collect core sources (client + core), then exclude platform-specific agents

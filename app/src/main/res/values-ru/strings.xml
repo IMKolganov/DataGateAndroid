@@ -185,6 +185,21 @@
     <string name="settings_error_logs_count">%1$d файл(ов)</string>
     <string name="settings_share_logs">Поделиться логами</string>
     <string name="share_logs_chooser_title">Поделиться логами ошибок</string>
+    <string name="settings_debug_empty_preview">Лог пуст. Включите запись, воспроизведите проблему и нажмите «Обновить».</string>
+    <string name="settings_debug_preview_title">Просмотр лога VPN</string>
+    <string name="settings_copy_debug_path">Копировать путь</string>
+    <string name="settings_debug_log_refresh">Обновить</string>
+    <string name="settings_debug_log_preview">Просмотр</string>
+    <string name="settings_debug_log_path">Путь к файлу</string>
+    <string name="settings_vpn_debug_title">Лог отладки VPN</string>
+    <string name="settings_debug_mode">Писать сессию VPN в файл</string>
+    <string name="settings_debug_mode_subtitle">Пишет понятный EVENT-таймлайн (connect, reconnect, потеря bridge, сеть, OpenVPN core, исключения). После сбоя отправьте файл.</string>
+    <string name="settings_debug_logs_status">Размер: %1$s</string>
+    <string name="settings_share_debug_logs">Поделиться</string>
+    <string name="settings_clear_debug_logs">Очистить</string>
+    <string name="share_debug_logs_chooser_title">Отправить лог отладки VPN</string>
+    <string name="no_debug_logs">Логи отладки не найдены</string>
+    <string name="debug_logs_cleared">Логи отладки очищены</string>
 
     <string name="copied">Скопировано</string>
     <string name="no_error_logs">Логи ошибок не найдены</string>

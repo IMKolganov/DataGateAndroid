@@ -62,7 +62,10 @@ class TcpToWssBridge(
         val queue = java.util.concurrent.LinkedBlockingQueue<okio.ByteString>()
         val transportLostNotified = java.util.concurrent.atomic.AtomicBoolean(false)
         fun notifyTransportLost(reason: String) {
-            BridgeTransportLoss.notifyOnce(transportLostNotified, onTransportLost, reason)
+            BridgeTransportLoss.notifyOnce(transportLostNotified, { lostReason ->
+                com.imkolganov.datagate.logger.VpnDebugLogger.w("TcpWssBridge", "transport_lost: $lostReason")
+                onTransportLost?.invoke(lostReason)
+            }, reason)
         }
 
         val req = okhttp3.Request.Builder().url(wssUrl).build()

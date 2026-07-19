@@ -1,7 +1,7 @@
 package com.imkolganov.datagate.vpn
 
 import android.content.Context
-import android.util.Log
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -29,7 +29,7 @@ class IpListRoutesRepository(
     suspend fun getRoutesForConnection(): IpListConnectionRoutes {
         val settings = IpListPreferences.getSettings(appContext)
         if (!settings.cidrListsEnabled) {
-            Log.d("OpenVPN3", "CIDR IP lists disabled in settings; no bypass routes")
+            VpnDebugLogger.d("OpenVPN3", "CIDR IP lists disabled in settings; no bypass routes")
             return IpListConnectionRoutes(emptyList(), emptyList())
         }
 
@@ -60,7 +60,7 @@ class IpListRoutesRepository(
             result.reachedRouteLimit,
             priorityRouteCount = priorityRoutes.size
         )
-        Log.d(
+        VpnDebugLogger.d(
             "OpenVPN3",
             "IP list routes loaded: ${result.routes.size} general, ${priorityRoutes.size} priority"
         )
@@ -161,7 +161,7 @@ class IpListRoutesRepository(
             return Result.failure(IllegalStateException(errors.joinToString("; ")))
         }
         if (errors.isNotEmpty()) {
-            Log.w("OpenVPN3", "Some IP lists failed: ${errors.joinToString("; ")}")
+            VpnDebugLogger.w("OpenVPN3", "Some IP lists failed: ${errors.joinToString("; ")}")
         }
         return Result.success(contents.joinToString("\n"))
     }
@@ -176,21 +176,21 @@ class IpListRoutesRepository(
             http.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     val message = "IP list fetch failed: HTTP ${response.code}"
-                    Log.w("OpenVPN3", message)
+                    VpnDebugLogger.w("OpenVPN3", message)
                     return@withContext Result.failure(IllegalStateException(message))
                 }
 
                 val body = response.body.string()
                 if (body.length > MAX_BODY_CHARS) {
                     val message = "IP list ignored: too large (${body.length} chars)"
-                    Log.w("OpenVPN3", message)
+                    VpnDebugLogger.w("OpenVPN3", message)
                     return@withContext Result.failure(IllegalStateException(message))
                 }
 
                 Result.success(body)
             }
         } catch (t: Throwable) {
-            Log.w("OpenVPN3", "IP list fetch failed", t)
+            VpnDebugLogger.w("OpenVPN3", "IP list fetch failed", t)
             Result.failure(t)
         }
     }

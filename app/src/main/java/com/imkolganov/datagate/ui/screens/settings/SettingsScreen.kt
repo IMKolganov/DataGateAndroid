@@ -71,6 +71,8 @@ import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.JwtClaimsReader
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
+import com.imkolganov.datagate.logger.DebugPreferences
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.theme.AppLanguageDropdown
@@ -110,10 +112,19 @@ fun SettingsScreen(
     val context = LocalContext.current
     val uiLocale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
     val noErrorLogsLabel = stringResource(R.string.no_error_logs)
+    val noDebugLogsLabel = stringResource(R.string.no_debug_logs)
+    val debugLogsClearedLabel = stringResource(R.string.debug_logs_cleared)
     val projectWebsiteUrl = stringResource(R.string.project_website_url)
     val projectTelegramUrl = stringResource(R.string.project_telegram_url)
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
+    var vpnDebugModeEnabled by remember { mutableStateOf(false) }
+    var debugLogStatus by remember { mutableStateOf("0 B") }
+    var hasDebugLogs by remember { mutableStateOf(false) }
+    var debugLogPath by remember { mutableStateOf("") }
+    var debugLogPreview by remember { mutableStateOf("") }
+    var showDebugPreview by remember { mutableStateOf(false) }
+    var debugShareMessage by remember { mutableStateOf<String?>(null) }
     var githubUpdatesEnabled by remember { mutableStateOf(true) }
     var pushNotificationsForUpdates by remember { mutableStateOf(true) }
     var autoDownloadSuggest by remember { mutableStateOf(false) }
@@ -159,6 +170,16 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         crashFilesCount = withContext(Dispatchers.IO) {
             getCrashFiles(context.applicationContext).size
+        }
+        val appCtx = context.applicationContext
+        vpnDebugModeEnabled = withContext(Dispatchers.IO) {
+            DebugPreferences.isVpnDebugModeEnabled(appCtx)
+        }
+        refreshDebugLogUi(appCtx) { size, has, path, preview ->
+            debugLogStatus = size
+            hasDebugLogs = has
+            debugLogPath = path
+            debugLogPreview = preview
         }
     }
 
@@ -496,6 +517,196 @@ fun SettingsScreen(
                     )
                 }
             }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    stringResource(R.string.settings_vpn_debug_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_debug_mode_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.settings_debug_mode),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = vpnDebugModeEnabled,
+                        onCheckedChange = { enabled ->
+                            vpnDebugModeEnabled = enabled
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    DebugPreferences.setVpnDebugModeEnabled(
+                                        context.applicationContext,
+                                        enabled
+                                    )
+                                }
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                            }
+                        }
+                    )
+                }
+
+                KeyValueRow(
+                    stringResource(R.string.settings_debug_log_path),
+                    debugLogPath.ifBlank { "—" }
+                )
+                Text(
+                    stringResource(R.string.settings_debug_logs_status, debugLogStatus),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            showDebugPreview = true
+                            scope.launch {
+                                debugLogPreview = withContext(Dispatchers.IO) {
+                                    VpnDebugLogger.get()?.readTail()
+                                        ?: ""
+                                }.ifBlank {
+                                    context.getString(R.string.settings_debug_empty_preview)
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.settings_debug_log_preview))
+                    }
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.settings_debug_log_refresh))
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            val files = getDebugLogFiles(context.applicationContext)
+                            scope.launch {
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                            }
+                            if (files.isEmpty()) {
+                                debugShareMessage = noDebugLogsLabel
+                                return@Button
+                            }
+                            debugShareMessage = shareDebugLogFiles(context.applicationContext, files)
+                        },
+                        modifier = Modifier.weight(1f),
+                        enabled = hasDebugLogs
+                    ) {
+                        Text(stringResource(R.string.settings_share_debug_logs))
+                    }
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    VpnDebugLogger.get()?.clearLogs()
+                                }
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                                debugShareMessage = debugLogsClearedLabel
+                            }
+                        },
+                        enabled = hasDebugLogs || vpnDebugModeEnabled
+                    ) {
+                        Text(stringResource(R.string.settings_clear_debug_logs))
+                    }
+                }
+
+                TextButton(
+                    onClick = {
+                        val path = debugLogPath
+                        if (path.isNotBlank()) {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                                as android.content.ClipboardManager
+                            clipboard.setPrimaryClip(
+                                android.content.ClipData.newPlainText("vpn_debug_path", path)
+                            )
+                            debugShareMessage = context.getString(R.string.copied)
+                        }
+                    },
+                    enabled = debugLogPath.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.settings_copy_debug_path))
+                }
+
+                debugShareMessage?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        if (showDebugPreview) {
+            AlertDialog(
+                onDismissRequest = { showDebugPreview = false },
+                title = { Text(stringResource(R.string.settings_debug_preview_title)) },
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(
+                            debugLogPreview.ifBlank {
+                                stringResource(R.string.settings_debug_empty_preview)
+                            },
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDebugPreview = false }) {
+                        Text(stringResource(android.R.string.ok))
+                    }
+                }
+            )
         }
 
         Card(
@@ -1676,6 +1887,99 @@ private fun shareCrashFiles(
         null
     } catch (e: Exception) {
         android.util.Log.e("CrashShare", "Failed to start chooser", e)
+        e.message ?: context.getString(R.string.share_failed)
+    }
+}
+
+private fun getDebugLogFiles(context: android.content.Context): List<File> {
+    VpnDebugLogger.get()?.logFiles()?.let { files ->
+        return files.filter { it.isFile && it.length() > 0L }
+    }
+    val dir = File(context.noBackupFilesDir, VpnDebugLogger.DIR_NAME)
+    if (!dir.exists() || !dir.isDirectory) return emptyList()
+    return dir.listFiles()
+        ?.filter { it.isFile && it.length() > 0L && it.name.endsWith(".txt") }
+        ?.sortedByDescending { it.lastModified() }
+        ?: emptyList()
+}
+
+private fun formatDebugLogStatus(context: android.content.Context): String {
+    val bytes = VpnDebugLogger.get()?.totalBytes()
+        ?: getDebugLogFiles(context).sumOf { it.length() }
+    return when {
+        bytes < 1024 -> "$bytes B"
+        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
+        else -> String.format(Locale.US, "%.1f MB", bytes / (1024.0 * 1024.0))
+    }
+}
+
+private suspend fun refreshDebugLogUi(
+    context: android.content.Context,
+    apply: (size: String, has: Boolean, path: String, preview: String) -> Unit,
+) {
+    val snapshot = withContext(Dispatchers.IO) {
+        val logger = VpnDebugLogger.get()
+        val files = getDebugLogFiles(context)
+        val path = logger?.currentFilePath()
+            ?: File(context.noBackupFilesDir, "${VpnDebugLogger.DIR_NAME}/${VpnDebugLogger.CURRENT_FILE}").absolutePath
+        val preview = logger?.readTail()?.ifBlank { "" } ?: ""
+        Quad(
+            size = formatDebugLogStatus(context),
+            has = files.isNotEmpty(),
+            path = path,
+            preview = preview,
+        )
+    }
+    apply(snapshot.size, snapshot.has, snapshot.path, snapshot.preview)
+}
+
+private data class Quad(
+    val size: String,
+    val has: Boolean,
+    val path: String,
+    val preview: String,
+)
+
+private fun shareDebugLogFiles(
+    context: android.content.Context,
+    files: List<File>
+): String? {
+    val appContext = context.applicationContext
+    val authority = "${BuildConfig.APPLICATION_ID}.fileprovider"
+
+    val shareDir = File(appContext.cacheDir, "share/debug").apply { mkdirs() }
+    val uris = ArrayList<Uri>(files.size)
+
+    for (src in files) {
+        try {
+            val dst = File(shareDir, src.name)
+            src.copyTo(dst, overwrite = true)
+            uris.add(FileProvider.getUriForFile(appContext, authority, dst))
+        } catch (e: Exception) {
+            android.util.Log.e("DebugShare", "Failed to prepare share file: ${src.absolutePath}", e)
+        }
+    }
+
+    if (uris.isEmpty()) return context.getString(R.string.no_shareable_files)
+
+    val sendIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        type = "text/plain"
+        putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    val chooserIntent = Intent.createChooser(
+        sendIntent,
+        context.getString(R.string.share_debug_logs_chooser_title)
+    ).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    return try {
+        appContext.startActivity(chooserIntent)
+        null
+    } catch (e: Exception) {
+        android.util.Log.e("DebugShare", "Failed to start chooser", e)
         e.message ?: context.getString(R.string.share_failed)
     }
 }
