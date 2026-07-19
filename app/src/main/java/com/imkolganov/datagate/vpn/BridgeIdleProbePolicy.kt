@@ -23,9 +23,8 @@ internal object BridgeIdleProbePolicy {
         if (lastOutboundMs <= 0L) return false
         // Inbound caught up or is newer — no unanswered outbound.
         if (lastInboundMs >= lastOutboundMs) return false
-        // How long since the last reply (or since epoch if never replied after outbound).
-        val silentSince = if (lastInboundMs > 0L) lastInboundMs else lastOutboundMs
-        return nowMs - silentSince >= stallTimeoutMs
+        // Clock the wait from the unanswered outbound, not from an older inbound reply.
+        return nowMs - lastOutboundMs >= stallTimeoutMs
     }
 
     fun formatIdleReason(idleForMs: Long): String = "wss_stall:${idleForMs}ms"

@@ -46,13 +46,21 @@ class BridgeIdleProbePolicyTest {
             )
         )
 
-        // Last inbound older than last outbound and past timeout.
+        // Last inbound older than last outbound: clock from outbound, not old inbound.
+        assertFalse(
+            "Must wait full timeout after unanswered outbound, not from prior inbound",
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = t0 + 50_000L,
+                lastInboundMs = t0,
+                nowMs = t0 + 50_000L + timeout - 1,
+            ),
+        )
         assertTrue(
             BridgeIdleProbePolicy.shouldDeclareStall(
-                lastOutboundMs = t0 + 10_000L,
+                lastOutboundMs = t0 + 50_000L,
                 lastInboundMs = t0,
-                nowMs = t0 + 10_000L + timeout,
-            )
+                nowMs = t0 + 50_000L + timeout,
+            ),
         )
     }
 

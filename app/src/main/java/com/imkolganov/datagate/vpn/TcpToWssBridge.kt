@@ -151,8 +151,7 @@ class TcpToWssBridge(
                     val outbound = lastOutboundMs.get()
                     val inbound = lastInboundMs.get()
                     if (BridgeIdleProbePolicy.shouldDeclareStall(outbound, inbound, now)) {
-                        val silentSince = if (inbound > 0L) inbound else outbound
-                        notifyTransportLost(BridgeIdleProbePolicy.formatIdleReason(now - silentSince))
+                        notifyTransportLost(BridgeIdleProbePolicy.formatIdleReason(now - outbound))
                         break
                     }
                 }
