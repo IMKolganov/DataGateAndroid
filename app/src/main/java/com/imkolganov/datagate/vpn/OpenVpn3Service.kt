@@ -1087,12 +1087,16 @@ class OpenVpn3Service : VpnService() {
                         currentGeneration = vpnSessionGeneration
                     )
                 ) {
+                    if (OpenVpnSessionTeardownPolicy.shouldClearReconnectPendingOnStaleFinally()) {
+                        reconnectPendingAfterJob = false
+                    }
                     VpnDebugLogger.event(
                         category = "service.session",
                         action = "stale_finally_skipped",
                         details = mapOf(
                             "sessionGeneration" to sessionGeneration,
                             "currentGeneration" to vpnSessionGeneration,
+                            "clearedReconnectPending" to true,
                         ),
                     )
                     return@launch

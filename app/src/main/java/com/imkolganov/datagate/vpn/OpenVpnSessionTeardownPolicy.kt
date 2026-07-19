@@ -16,4 +16,11 @@ internal object OpenVpnSessionTeardownPolicy {
      */
     fun shouldDeferReconnectToBridgeLossFinally(reconnectPendingAfterJob: Boolean): Boolean =
         reconnectPendingAfterJob
+
+    /**
+     * A skipped (stale) finally must release [reconnectPendingAfterJob]. Leaving the flag set
+     * after a newer session already started makes that live session's DISCONNECTED defer forever
+     * to a finally that will never run.
+     */
+    fun shouldClearReconnectPendingOnStaleFinally(): Boolean = true
 }

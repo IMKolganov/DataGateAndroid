@@ -62,10 +62,8 @@ class TcpToWssBridge(
 
         val queue = java.util.concurrent.LinkedBlockingQueue<okio.ByteString>()
         val transportLostNotified = java.util.concurrent.atomic.AtomicBoolean(false)
-        val lastActivityMs = AtomicLong(System.currentTimeMillis())
-        fun touchActivity() {
-            lastActivityMs.set(System.currentTimeMillis())
-        }
+        val lastOutboundMs = AtomicLong(0L)
+        val lastInboundMs = AtomicLong(0L)
         fun notifyTransportLost(reason: String) {
             BridgeTransportLoss.notifyOnce(transportLostNotified, { lostReason ->
                 com.imkolganov.datagate.logger.VpnDebugLogger.w("TcpWssBridge", "transport_lost: $lostReason")
@@ -76,7 +74,7 @@ class TcpToWssBridge(
         val req = okhttp3.Request.Builder().url(wssUrl).build()
         val ws = http.newWebSocket(req, object : okhttp3.WebSocketListener() {
             override fun onMessage(webSocket: okhttp3.WebSocket, bytes: okio.ByteString) {
-                touchActivity()
+                lastInboundMs.set(System.currentTimeMillis())
                 queue.offer(bytes)
             }
             override fun onFailure(
@@ -123,12 +121,12 @@ class TcpToWssBridge(
                 while (true) {
                     val n = tcpIn.read(buf)
                     if (n <= 0) break
-                    touchActivity()
                     val accepted = ws.send(buf.toByteString(0, n))
                     if (BridgeTransportLoss.shouldTreatSendRejectedAsTransportLost(accepted)) {
                         notifyTransportLost(BridgeTransportLoss.formatSendRejectedReason())
                         break
                     }
+                    lastOutboundMs.set(System.currentTimeMillis())
                 }
             } catch (_: Throwable) {
             } finally {
@@ -144,17 +142,17 @@ class TcpToWssBridge(
                     if (bytes != null) {
                         // optional: poison-pill
                         if (bytes.size == 0) break
-                        touchActivity()
                         tcpOut.write(bytes.toByteArray())
                         tcpOut.flush()
                         continue
                     }
 
                     val now = System.currentTimeMillis()
-                    val last = lastActivityMs.get()
-                    if (BridgeIdleProbePolicy.shouldDeclareIdle(last, now)) {
-                        val idleFor = now - last
-                        notifyTransportLost(BridgeIdleProbePolicy.formatIdleReason(idleFor))
+                    val outbound = lastOutboundMs.get()
+                    val inbound = lastInboundMs.get()
+                    if (BridgeIdleProbePolicy.shouldDeclareStall(outbound, inbound, now)) {
+                        val silentSince = if (inbound > 0L) inbound else outbound
+                        notifyTransportLost(BridgeIdleProbePolicy.formatIdleReason(now - silentSince))
                         break
                     }
                 }

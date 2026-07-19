@@ -97,6 +97,20 @@ class OpenVpnSessionTeardownPolicyTest {
         assertEquals(null, mirror.tornDownGeneration)
         assertEquals(2, mirror.ownerGeneration)
         assertEquals(0, mirror.reconnectFromFinallyCount)
+        assertFalse(
+            "Stale finally must clear reconnectPendingAfterJob so live DISCONNECTED can reconnect",
+            mirror.reconnectPendingAfterJob,
+        )
+        assertFalse(
+            OpenVpnSessionTeardownPolicy.shouldDeferReconnectToBridgeLossFinally(
+                mirror.reconnectPendingAfterJob
+            )
+        )
+    }
+
+    @Test
+    fun staleFinally_policy_clearsReconnectPending() {
+        assertTrue(OpenVpnSessionTeardownPolicy.shouldClearReconnectPendingOnStaleFinally())
     }
 }
 

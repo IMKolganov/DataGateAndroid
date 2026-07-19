@@ -47,6 +47,9 @@ internal class OpenVpnSessionRaceMirror {
      */
     fun runFinally(sessionGeneration: Int): FinallyOutcome {
         if (!OpenVpnSessionTeardownPolicy.shouldRunVpnJobFinally(sessionGeneration, generation)) {
+            if (OpenVpnSessionTeardownPolicy.shouldClearReconnectPendingOnStaleFinally()) {
+                reconnectPendingAfterJob = false
+            }
             return FinallyOutcome.SKIPPED_STALE
         }
         tornDownGeneration = sessionGeneration

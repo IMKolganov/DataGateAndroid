@@ -8,48 +8,88 @@ import org.junit.Test
 class BridgeIdleProbePolicyTest {
 
     @Test
-    fun shouldDeclareIdle_false_until_timeout() {
-        val started = 1_000_000L
+    fun shouldDeclareStall_onlyWhenOutboundUnansweredPastTimeout() {
+        val t0 = 1_000_000L
+        val timeout = BridgeIdleProbePolicy.IDLE_TIMEOUT_MS
+
+        // Quiet tunnel — OkHttp ping owns liveness; no OpenVPN outbound.
         assertFalse(
-            BridgeIdleProbePolicy.shouldDeclareIdle(
-                lastActivityMs = started,
-                nowMs = started + BridgeIdleProbePolicy.IDLE_TIMEOUT_MS - 1,
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = 0L,
+                lastInboundMs = 0L,
+                nowMs = t0 + timeout,
             )
         )
+
+        // Outbound with timely inbound reply — healthy.
+        assertFalse(
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = t0,
+                lastInboundMs = t0 + 1_000L,
+                nowMs = t0 + timeout,
+            )
+        )
+
+        // Outbound then silence past timeout — stall.
         assertTrue(
-            BridgeIdleProbePolicy.shouldDeclareIdle(
-                lastActivityMs = started,
-                nowMs = started + BridgeIdleProbePolicy.IDLE_TIMEOUT_MS,
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = t0,
+                lastInboundMs = 0L,
+                nowMs = t0 + timeout,
+            )
+        )
+        assertFalse(
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = t0,
+                lastInboundMs = 0L,
+                nowMs = t0 + timeout - 1,
+            )
+        )
+
+        // Last inbound older than last outbound and past timeout.
+        assertTrue(
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = t0 + 10_000L,
+                lastInboundMs = t0,
+                nowMs = t0 + 10_000L + timeout,
             )
         )
     }
 
     @Test
-    fun shouldDeclareIdle_false_when_activity_never_started() {
-        assertFalse(BridgeIdleProbePolicy.shouldDeclareIdle(lastActivityMs = 0L, nowMs = 50_000L))
-        assertFalse(BridgeIdleProbePolicy.shouldDeclareIdle(lastActivityMs = -1L, nowMs = 50_000L))
+    fun quietTunnel_withOnlyInbound_isNotStall() {
+        val t0 = 1_000_000L
+        assertFalse(
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = 0L,
+                lastInboundMs = t0,
+                nowMs = t0 + BridgeIdleProbePolicy.IDLE_TIMEOUT_MS * 2,
+            )
+        )
     }
 
     @Test
     fun formatIdleReason_isStableForLogs() {
-        assertEquals("wss_idle:90000ms", BridgeIdleProbePolicy.formatIdleReason(90_000L))
-        assertEquals("wss_idle:90000ms", BridgeTransportLoss.formatIdleReason(90_000L))
+        assertEquals("wss_stall:90000ms", BridgeIdleProbePolicy.formatIdleReason(90_000L))
+        assertEquals("wss_stall:90000ms", BridgeTransportLoss.formatIdleReason(90_000L))
     }
 
     @Test
     fun customTimeout_honoured() {
         assertTrue(
-            BridgeIdleProbePolicy.shouldDeclareIdle(
-                lastActivityMs = 100L,
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = 100L,
+                lastInboundMs = 0L,
                 nowMs = 200L,
-                idleTimeoutMs = 100L,
+                stallTimeoutMs = 100L,
             )
         )
         assertFalse(
-            BridgeIdleProbePolicy.shouldDeclareIdle(
-                lastActivityMs = 100L,
+            BridgeIdleProbePolicy.shouldDeclareStall(
+                lastOutboundMs = 100L,
+                lastInboundMs = 0L,
                 nowMs = 199L,
-                idleTimeoutMs = 100L,
+                stallTimeoutMs = 100L,
             )
         )
     }
