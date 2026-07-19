@@ -30,11 +30,11 @@ class OpenVpn3Client(
 
     override fun log(info: ClientAPI_LogInfo) {
         val text = info.text ?: ""
-        VpnDebugLogger.event(
-            category = "core.log",
-            action = "line",
-            details = mapOf("text" to text),
-        )
+        // Always logcat; file only W/E-ish lines (core.log storms fill the 8MB debug file).
+        android.util.Log.d(TAG, "core log: $text")
+        if (OpenVpnCoreLogFilter.shouldPersistToDebugFile(text)) {
+            VpnDebugLogger.w(TAG, "core: $text")
+        }
     }
 
     override fun event(ev: ClientAPI_Event) {

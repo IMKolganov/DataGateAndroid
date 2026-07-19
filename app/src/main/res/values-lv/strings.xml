@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Pievienot prioritāro URL</string>
     <string name="settings_ip_lists_safe_limit_title">Ierobežot maršrutus sistēmas stabilitātei</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Notur apiešanas maršrutu skaitu pietiekami zemu, lai sistēmas VPN ikona parādītos ātri. Iepriekš minētās prioritārās vietnes nekad netiek izlaistas.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Izslēdzot šo, tiek noņemts maršrutu ierobežojums. Statusa joslas VPN ikonas parādīšanās var aizņemt daudz ilgāku laiku vai neparādīties vispār lielu IP sarakstu gadījumā.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP saraksta statuss</string>
     <string name="settings_ip_lists_last_updated">Pēdējoreiz atjaunināts</string>
     <string name="settings_ip_lists_last_updated_never">Nekad</string>
@@ -369,7 +370,7 @@ Varat atvērt laidiena lapu vai lejupielādēt APK.</string>
     <string name="settings_ip_lists_coverage_fast">Ātrs</string>
     <string name="settings_ip_lists_coverage_fast_description">Piemēro līdz %1$d plašiem maršrutiem. Tuneļa uzstādīšana ir ātrāka, bet mazi IP diapazoni joprojām var izmantot VPN.</string>
     <string name="settings_ip_lists_coverage_full">Pilna pārklāšana</string>
-    <string name="settings_ip_lists_coverage_full_description">Piemēro katru ielādēto maršrutu maksimālai pārklāšanai. Lielos sarakstos tuneļa uzstādīšana var ilgt vairākas sekundes.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Pārklāšanas režīms</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR saraksti ir izslēgti. Ieslēdziet slēdzīti augšāt, lai atkārtoti piemērotu maršruta izņēmumus.</string>
     <string name="settings_ip_lists_enable_subtitle">Kad izslēgts, sarakstu balstīti izņēmumi netiek piemēroti un saraksti netiek lejupielādēti—visa datplūsme iet caur VPN tuneli.</string>

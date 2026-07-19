@@ -104,6 +104,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">已複製</string>
@@ -222,7 +223,7 @@
     <string name="settings_ip_lists_priority_add_url">新增優先URL</string>
     <string name="settings_ip_lists_safe_limit_title">限制路由以確保系統穩定性</string>
     <string name="settings_ip_lists_safe_limit_subtitle">將繞過路由的數量保持在足夠低的水準,讓系統VPN圖示能快速出現。上方的優先網站永遠不會被捨棄。</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">關閉此選項會移除路由限制。在IP清單較大時,狀態列中的VPN圖示可能需要更長時間才能出現,甚至完全不出現。</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP 清單狀態</string>
     <string name="settings_ip_lists_last_updated">上次更新</string>
     <string name="settings_ip_lists_last_updated_never">從不</string>
@@ -351,7 +352,7 @@
     <string name="settings_ip_lists_coverage_fast">快速</string>
     <string name="settings_ip_lists_coverage_fast_description">最多套用 %1$d 條較寬路由。隧道建立較快，但較小的 IP 區段仍可能走 VPN。</string>
     <string name="settings_ip_lists_coverage_full">完整涵蓋</string>
-    <string name="settings_ip_lists_coverage_full_description">套用所有已載入路由以達最大涵蓋範圍。清單較大時隧道建立可能需要數秒。</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">涵蓋模式</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR 清單已關閉。開啟上方開關以再次套用路由例外。</string>
     <string name="settings_ip_lists_enable_subtitle">關閉時，不套用以清單為基礎的路由例外且不會下載清單；所有流量皆經過 VPN 隧道。</string>

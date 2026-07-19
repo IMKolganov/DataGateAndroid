@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Lisa prioriteetne URL</string>
     <string name="settings_ip_lists_safe_limit_title">Piira marsruute süsteemi stabiilsuse huvides</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Hoiab möödaviigumarsruutide arvu piisavalt madalal, et süsteemi VPN-ikoon ilmuks kiiresti. Ülal olevaid prioriteetseid saite ei jäeta kunagi välja.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Selle väljalülitamine eemaldab marsruutide piirangu. Olekuriba VPN-ikoon võib suurte IP-loendite korral ilmuda palju kauem või üldse mitte.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP-loendi olek</string>
     <string name="settings_ip_lists_last_updated">Viimati uuendatud</string>
     <string name="settings_ip_lists_last_updated_never">Mitte kunagi</string>
@@ -369,7 +370,7 @@ Võite avada väljalaske lehe või laadida APK alla.</string>
     <string name="settings_ip_lists_coverage_fast">Kiire</string>
     <string name="settings_ip_lists_coverage_fast_description">Rakendab kuni %1$d laia marsruuti. Tunneli seadistamine on kiirem, kuid väikesed IP-diapasonid võivad siiski VPN-i kasutada.</string>
     <string name="settings_ip_lists_coverage_full">Täielik katvus</string>
-    <string name="settings_ip_lists_coverage_full_description">Rakendab iga laaditud marsruuti maksimaalse katvuse jaoks. Tunneli seadistamine võib suurte loendite korral võtta mitu sekundit.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Katvusrežiim</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR-loendid on välja lülitatud. Lülitage ülemine lüliti sisse marsruudi erandite uuesti rakendamiseks.</string>
     <string name="settings_ip_lists_enable_subtitle">Kui välja lülitatud, ei rakendata loendipõhiseid marsruudi erandeid ja loendeid ei laadita; kogu liiklus läbib VPN tunneli.</string>

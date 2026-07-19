@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Tilføj prioritets-URL</string>
     <string name="settings_ip_lists_safe_limit_title">Begræns ruter for systemstabilitet</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Holder antallet af omgåelsesruter lavt nok til, at systemets VPN-ikon vises hurtigt. Prioriterede sider ovenfor bliver aldrig droppet.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Deaktivering af dette fjerner rutegrænsen. VPN-ikonet i statuslinjen kan tage meget længere tid om at vise sig, eller slet ikke vise sig, ved store IP-lister.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP-listestatus</string>
     <string name="settings_ip_lists_last_updated">Sidst opdateret</string>
     <string name="settings_ip_lists_last_updated_never">Aldrig</string>
@@ -369,7 +370,7 @@ Du kan åbne udgivelsessiden eller downloade APK’en. Brug indstillingen nedenf
     <string name="settings_ip_lists_coverage_fast">Hurtig</string>
     <string name="settings_ip_lists_coverage_fast_description">Anvender op til %1$d brede ruter. Tunnelopsætning er hurtigere, men små IP-intervaller kan stadig bruge VPN.</string>
     <string name="settings_ip_lists_coverage_full">Fuld dækning</string>
-    <string name="settings_ip_lists_coverage_full_description">Anvender alle indlæste ruter for maksimal dækning. Tunnelopsætning kan tage flere sekunder ved store lister.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Dækningstilstand</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR-lister er slået fra. Aktiver kontakten ovenfor for at anvende routingundtagelser igen.</string>
     <string name="settings_ip_lists_enable_subtitle">Når den er slået fra, anvendes ikke liste-baserede routingundtagelser og lister downloades ikke; al trafik går gennem VPN-tunnelen.</string>

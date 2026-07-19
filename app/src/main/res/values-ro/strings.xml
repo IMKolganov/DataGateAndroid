@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Adaugă URL prioritar</string>
     <string name="settings_ip_lists_safe_limit_title">Limitează rutele pentru stabilitatea sistemului</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Menține numărul de rute de ocolire suficient de mic încât pictograma VPN a sistemului să apară rapid. Site-urile prioritare de mai sus nu sunt niciodată eliminate.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Dezactivarea acestei opțiuni elimină limita de rute. Pictograma VPN din bara de stare poate dura mult mai mult să apară, sau poate să nu apară deloc, la liste IP mari.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Starea listei IP</string>
     <string name="settings_ip_lists_last_updated">Ultima actualizare</string>
     <string name="settings_ip_lists_last_updated_never">Niciodată</string>
@@ -369,7 +370,7 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="settings_ip_lists_coverage_fast">Rapid</string>
     <string name="settings_ip_lists_coverage_fast_description">Aplică până la %1$d rute largi. Configurarea tunelului e mai rapidă, dar intervale mici de IP pot folosi încă VPN.</string>
     <string name="settings_ip_lists_coverage_full">Acoperire completă</string>
-    <string name="settings_ip_lists_coverage_full_description">Aplică fiecare rută încărcată pentru acoperire maximă. Configurarea tunelului poate dura câteva secunde pe liste mari.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Mod acoperire</string>
     <string name="settings_ip_lists_detail_disabled_notice">Listele CIDR sunt oprite. Activează comutatorul de mai sus pentru a reaplica excepțiile de rutare.</string>
     <string name="settings_ip_lists_enable_subtitle">Când e oprit, excepțiile de rutare pe bază de liste nu se aplică și listele nu se descarcă; tot traficul trece prin tunelul VPN.</string>

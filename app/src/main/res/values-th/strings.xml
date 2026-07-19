@@ -104,6 +104,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">คัดลอกแล้ว</string>
@@ -222,7 +223,7 @@
     <string name="settings_ip_lists_priority_add_url">เพิ่ม URL ที่มีความสำคัญ</string>
     <string name="settings_ip_lists_safe_limit_title">จำกัดเส้นทางเพื่อความเสถียรของระบบ</string>
     <string name="settings_ip_lists_safe_limit_subtitle">รักษาจำนวนเส้นทางบายพาสให้ต่ำพอที่ไอคอน VPN ของระบบจะปรากฏขึ้นอย่างรวดเร็ว เว็บไซต์ที่มีความสำคัญด้านบนจะไม่ถูกตัดออกเลย</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">การปิดสิ่งนี้จะลบขีดจำกัดเส้นทาง ไอคอน VPN ในแถบสถานะอาจใช้เวลานานขึ้นมากในการปรากฏ หรืออาจไม่ปรากฏเลยเมื่อมีรายการ IP ขนาดใหญ่</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">สถานะรายการ IP</string>
     <string name="settings_ip_lists_last_updated">อัปเดตล่าสุด</string>
     <string name="settings_ip_lists_last_updated_never">ไม่เคย</string>
@@ -351,7 +352,7 @@
     <string name="settings_ip_lists_coverage_fast">เร็ว</string>
     <string name="settings_ip_lists_coverage_fast_description">ใช้เส้นทางกว้างได้สูงสุด %1$d เส้นทาง การตั้งค่าอุโมงค์เร็วขึ้น แต่ช่วง IP เล็กน้อยอาจยังใช้ VPN</string>
     <string name="settings_ip_lists_coverage_full">ครอบคลุมเต็มที่</string>
-    <string name="settings_ip_lists_coverage_full_description">ใช้ทุกเส้นทางที่โหลดเพื่อความครอบคลุมสูงสุด การตั้งค่าอุโมงค์อาจใช้เวลาหลายวินาทีเมื่อรายการใหญ่</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">โหมดความครอบคลุม</string>
     <string name="settings_ip_lists_detail_disabled_notice">รายการ CIDR ปิดอยู่ เปิดสวิตช์ด้านบนเพื่อใช้ข้อยกเว้นการเรียกเส้นทางอีกครั้ง</string>
     <string name="settings_ip_lists_enable_subtitle">เมื่อปิด จะไม่ใช้ข้อยกเว้นการเรียกเส้นทางแบบรายการและไม่ดาวน์โหลดรายการ ทราฟฟิกทั้งหมดผ่านอุโมงค์ VPN</string>

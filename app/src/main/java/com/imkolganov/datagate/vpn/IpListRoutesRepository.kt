@@ -46,7 +46,7 @@ class IpListRoutesRepository(
         }
 
         val resolvedContent = content ?: loadFallbackList()
-        val priorityRoutes = loadPriorityRoutes(settings.priorityUrls)
+        val priorityRoutes = loadPriorityRoutes(settings)
 
         if (resolvedContent.isNullOrBlank()) {
             IpListPreferences.savePriorityRouteCount(appContext, priorityRoutes.size)
@@ -79,7 +79,7 @@ class IpListRoutesRepository(
             )
         }
 
-        val priorityRoutes = loadPriorityRoutes(settings.priorityUrls)
+        val priorityRoutes = loadPriorityRoutes(settings)
         val priorityCount = priorityRoutes.size
 
         return fetchConfiguredLists(settings.sourceUrls).fold(
@@ -117,12 +117,29 @@ class IpListRoutesRepository(
         )
     }
 
-    private suspend fun loadPriorityRoutes(priorityUrls: List<String>): List<IpCidrRoute> {
-        val priorityContent = fetchConfiguredLists(priorityUrls).fold(
-            onSuccess = { it },
-            onFailure = { loadPriorityFallbackList() }
-        )
-        return priorityContent
+    private suspend fun loadPriorityRoutes(settings: IpListSettings): List<IpCidrRoute> {
+        val priorityContent = if (IpListPreferences.shouldRefreshCachedPriorityList(appContext, settings)) {
+            fetchConfiguredLists(settings.priorityUrls).fold(
+                onSuccess = { remote ->
+                    remote.also {
+                        val parsed = IpListRouteConfig.parseCidrRoutesResult(it)
+                        IpListPreferences.saveCachedPriorityList(
+                            appContext,
+                            content = it,
+                            priorityRouteCount = parsed.routes.size
+                        )
+                    }
+                },
+                onFailure = {
+                    IpListPreferences.getCachedPriorityList(appContext) ?: loadPriorityFallbackList()
+                }
+            )
+        } else {
+            IpListPreferences.getCachedPriorityList(appContext)
+        }
+
+        val resolved = priorityContent ?: loadPriorityFallbackList()
+        return resolved
             ?.let { IpListRouteConfig.parseCidrRoutesResult(it).routes }
             .orEmpty()
     }

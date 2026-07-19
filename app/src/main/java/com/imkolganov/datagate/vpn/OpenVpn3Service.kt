@@ -157,6 +157,8 @@ class OpenVpn3Service : VpnService() {
     private var lastReconnectAttemptAtMs: Long = 0L
     @Volatile private var reconnectPendingAfterJob = false
     private var isNetworkCallbackRegistered = false
+    /** Bumped on every [startVpn]; vpnJob.finally only tears down when generations still match. */
+    @Volatile private var vpnSessionGeneration = 0
 
     private var vpnClient: OpenVpn3Client? = null
     private var vpnJob: Job? = null
@@ -721,7 +723,16 @@ class OpenVpn3Service : VpnService() {
                 )
 
                 if (!isStopping && desiredConnection && !graceExpired) {
-                    if (networkAvailable) {
+                    if (OpenVpnSessionTeardownPolicy.shouldDeferReconnectToBridgeLossFinally(
+                            reconnectPendingAfterJob
+                        )
+                    ) {
+                        VpnDebugLogger.event(
+                            category = "service.reconnect",
+                            action = "deferred_to_bridge_loss_finally",
+                            details = mapOf("info" to info),
+                        )
+                    } else if (networkAvailable) {
                         transitionState(VpnRuntimeState.CONNECTING, "core_disconnected_reconnect")
                         broadcastStatus("RECONNECTING", info.ifBlank { "Connection lost, reconnecting..." })
                         startPendingConnectIfPossible("core_disconnected_reconnect", enforceBackoff = true)
@@ -1003,6 +1014,8 @@ class OpenVpn3Service : VpnService() {
         linkProtocol: VpnLinkProtocol,
         excludedRoutes: List<IpCidrRoute>
     ) {
+        // Bump before tearing down the previous job so its finally cannot clear this session.
+        val sessionGeneration = ++vpnSessionGeneration
         stopVpnInternal()
 
         vpnJob = serviceScope.launch(ovpnNativeDispatcher) {
@@ -1012,7 +1025,7 @@ class OpenVpn3Service : VpnService() {
 
                 val bridgePort = startBridgeWithRetry(http, wssUrl, linkProtocol)
 
-                VpnDebugLogger.d(TAG, "startVpn: building config")
+                VpnDebugLogger.d(TAG, "startVpn: building config gen=$sessionGeneration")
 
                 val patchedConfig = forceRemoteToLocalBridge(configText, bridgePort, linkProtocol)
 
@@ -1069,6 +1082,21 @@ class OpenVpn3Service : VpnService() {
                     commandQueue.trySend(VpnCommand.RetryConnect("start_vpn_exception"))
                 }
             } finally {
+                if (!OpenVpnSessionTeardownPolicy.shouldRunVpnJobFinally(
+                        sessionGeneration = sessionGeneration,
+                        currentGeneration = vpnSessionGeneration
+                    )
+                ) {
+                    VpnDebugLogger.event(
+                        category = "service.session",
+                        action = "stale_finally_skipped",
+                        details = mapOf(
+                            "sessionGeneration" to sessionGeneration,
+                            "currentGeneration" to vpnSessionGeneration,
+                        ),
+                    )
+                    return@launch
+                }
                 connectInProgress = false
                 stopVpnInternal()
                 val shouldReconnect = reconnectPendingAfterJob

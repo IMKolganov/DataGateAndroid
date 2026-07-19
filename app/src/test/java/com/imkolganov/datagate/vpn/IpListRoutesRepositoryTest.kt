@@ -35,12 +35,17 @@ class IpListRoutesRepositoryTest {
                 priorityUrls = IpListPreferences.DEFAULT_PRIORITY_URLS,
                 safeRouteLimitEnabled = true,
             )
-            // Clear general-list cache so MANUAL mode re-fetches in each test.
+            // Clear general + priority caches so MANUAL mode re-fetches in each test.
             IpListPreferences.saveCachedList(
                 context = context,
                 content = "",
                 routeCount = 0,
                 reachedRouteLimit = false,
+                priorityRouteCount = 0,
+            )
+            IpListPreferences.saveCachedPriorityList(
+                context = context,
+                content = "",
                 priorityRouteCount = 0,
             )
         }
@@ -88,6 +93,15 @@ class IpListRoutesRepositoryTest {
             val status = IpListPreferences.getStatus(context)
             assertEquals(1, status.loadedRouteCount)
             assertEquals(1, status.priorityRouteCount)
+
+            // Second connect must use priority cache (no extra HTTP) while MANUAL still
+            // re-fetches blank-cleared general… cache is warm after first success, so MANUAL
+            // keeps cached general too until Update now / frequency refresh.
+            server.enqueue(MockResponse().setBody("should-not-be-fetched\n"))
+            val again = repo.getRoutesForConnection()
+            assertEquals(routes.generalRoutes, again.generalRoutes)
+            assertEquals(routes.priorityRoutes, again.priorityRoutes)
+            assertEquals(2, server.requestCount)
         }
     }
 

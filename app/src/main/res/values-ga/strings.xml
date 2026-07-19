@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Cuir URL tosaíochta leis</string>
     <string name="settings_ip_lists_safe_limit_title">Teorannaigh bealaí ar mhaithe le cobhsaíocht an chórais</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Coinníonn sé líon na mbealaí seachbhóthair íseal go leor go dtaispeánfaidh deilbhín VPN an chórais go tapa. Ní scriosfar riamh na suímh tosaíochta thuas.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Má mhúchtar é seo, bainfear an teorainn bealaí. D\'fhéadfadh i bhfad níos faide a thógáil ar dheilbhín VPN an bharra stádais le feiceáil, nó b\'fhéidir nach bhfeicfear ar chor ar bith é, le liostaí móra IP.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Stádas an liosta IP</string>
     <string name="settings_ip_lists_last_updated">Nuashonraithe go deireanach</string>
     <string name="settings_ip_lists_last_updated_never">Riamh</string>
@@ -369,7 +370,7 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="settings_ip_lists_coverage_fast">Tapa</string>
     <string name="settings_ip_lists_coverage_fast_description">Cuirtear suas le %1$d slí leathan i bhfeidhm. Tá socrú tolláin níos tapúla, ach féidir le raonta IP beaga VPN a úsáid fós.</string>
     <string name="settings_ip_lists_coverage_full">Clúdach iomlán</string>
-    <string name="settings_ip_lists_coverage_full_description">Cuirtear gach lódáilte slí i bhfeidhm le clúdach is fearr. Féadfaidh socrú tollán cúpla soicind a ghlacadh ar liostaí móra.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Mód clúdach</string>
     <string name="settings_ip_lists_detail_disabled_notice">Tá liostaí CIDR as. Cumasaigh an mléid thuas chun eisceachtaí róstaireachta a chur i bhfeidhm arís.</string>
     <string name="settings_ip_lists_enable_subtitle">Nuair atá as, ní chuirtear eisceachtaí róstaireachta bunaithe ar liosta i bhfeidhm agus níl liostaí á n-íoslódáil; téann gach trácht tríd an tollán VPN.</string>

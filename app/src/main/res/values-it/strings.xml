@@ -104,6 +104,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">Copiato</string>
@@ -222,7 +223,7 @@
     <string name="settings_ip_lists_priority_add_url">Aggiungi URL prioritario</string>
     <string name="settings_ip_lists_safe_limit_title">Limita le rotte per la stabilità del sistema</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Mantiene basso il numero di rotte di bypass in modo che l\'icona VPN di sistema appaia rapidamente. I siti prioritari sopra non vengono mai eliminati.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Disattivandolo si rimuove il limite di rotte. L\'icona VPN nella barra di stato potrebbe metterci molto più tempo ad apparire, o non apparire affatto, con elenchi IP grandi.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Stato elenco IP</string>
     <string name="settings_ip_lists_last_updated">Ultimo aggiornamento</string>
     <string name="settings_ip_lists_last_updated_never">Mai</string>
@@ -351,7 +352,7 @@ Puoi aprire la pagina della release o scaricare l’APK.</string>
     <string name="settings_ip_lists_coverage_fast">Veloce</string>
     <string name="settings_ip_lists_coverage_fast_description">Applica fino a %1$d route ampie. L’avvio del tunnel è più veloce, ma piccoli intervalli IP possono comunque usare la VPN.</string>
     <string name="settings_ip_lists_coverage_full">Copertura completa</string>
-    <string name="settings_ip_lists_coverage_full_description">Applica ogni route caricata per la massima copertura. L’avvio del tunnel può richiedere diversi secondi con elenchi grandi.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Modalità di copertura</string>
     <string name="settings_ip_lists_detail_disabled_notice">Le liste CIDR sono disattivate. Attiva l’interruttore sopra per riapplicare le eccezioni di routing.</string>
     <string name="settings_ip_lists_enable_subtitle">Se disattivato, le eccezioni basate su liste non si applicano e le liste non vengono scaricate; tutto il traffico passa nel tunnel VPN.</string>

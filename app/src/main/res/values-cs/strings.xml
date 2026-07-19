@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Přidat prioritní URL</string>
     <string name="settings_ip_lists_safe_limit_title">Omezit trasy kvůli stabilitě systému</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Udržuje počet obchozích tras dostatečně nízký, aby se ikona VPN systému rychle zobrazila. Prioritní weby výše nejsou nikdy vynechány.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Vypnutím se odstraní limit tras. Ikona VPN na stavovém řádku se může zobrazovat mnohem déle nebo se nemusí zobrazit vůbec u velkých seznamů IP.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Stav seznamu IP</string>
     <string name="settings_ip_lists_last_updated">Naposledy aktualizováno</string>
     <string name="settings_ip_lists_last_updated_never">Nikdy</string>
@@ -369,7 +370,7 @@ Můžete otevřít stránku vydání nebo stáhnout APK. Pomocí volby níže po
     <string name="settings_ip_lists_coverage_fast">Rychlé</string>
     <string name="settings_ip_lists_coverage_fast_description">Aplikuje až %1$d široké trasy. Nastavení tunelu je rychlejší, ale malé rozsahy IP mohou stále používat VPN.</string>
     <string name="settings_ip_lists_coverage_full">Úplné pokrytí</string>
-    <string name="settings_ip_lists_coverage_full_description">Aplikuje každou načtenou trasu pro maximální pokrytí. Nastavení tunelu u velkých seznamů může trvat několik sekund.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Režim pokrytí</string>
     <string name="settings_ip_lists_detail_disabled_notice">Seznamy CIDR jsou vypnuté. Zapněte přepínač výše pro opětovné použití výjimek směrování.</string>
     <string name="settings_ip_lists_enable_subtitle">Když je vypnuto, výjimky směrování podle seznamů se nepoužívají a seznamy se nestahují; veškerý provoz jde přes VPN tunel.</string>

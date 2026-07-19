@@ -55,6 +55,8 @@ object IpListPreferences {
     private val KEY_SAFE_ROUTE_LIMIT_ENABLED = booleanPreferencesKey("safe_route_limit_enabled")
     private val KEY_CACHED_LIST = stringPreferencesKey("cached_list")
     private val KEY_CACHED_AT_MS = longPreferencesKey("cached_at_epoch_ms")
+    private val KEY_CACHED_PRIORITY_LIST = stringPreferencesKey("cached_priority_list")
+    private val KEY_CACHED_PRIORITY_AT_MS = longPreferencesKey("cached_priority_at_epoch_ms")
     private val KEY_LOADED_ROUTE_COUNT = intPreferencesKey("loaded_route_count")
     private val KEY_PRIORITY_ROUTE_COUNT = intPreferencesKey("priority_route_count")
     private val KEY_LAST_ERROR = stringPreferencesKey("last_error")
@@ -156,6 +158,11 @@ object IpListPreferences {
     suspend fun getCachedList(context: Context): String? =
         context.ipListDataStore.data.map { it[KEY_CACHED_LIST]?.takeIf(String::isNotBlank) }.first()
 
+    suspend fun getCachedPriorityList(context: Context): String? =
+        context.ipListDataStore.data
+            .map { it[KEY_CACHED_PRIORITY_LIST]?.takeIf(String::isNotBlank) }
+            .first()
+
     fun statusFlow(context: Context): Flow<IpListStatus> =
         context.ipListDataStore.data
             .map { prefs ->
@@ -182,6 +189,18 @@ object IpListPreferences {
         return System.currentTimeMillis() - last >= intervalMs
     }
 
+    suspend fun shouldRefreshCachedPriorityList(context: Context, settings: IpListSettings): Boolean {
+        if (settings.updateFrequency == IpListUpdateFrequency.MANUAL) {
+            return getCachedPriorityList(context).isNullOrBlank()
+        }
+        val prefs = context.ipListDataStore.data.first()
+        val last = prefs[KEY_CACHED_PRIORITY_AT_MS] ?: 0L
+        val cached = prefs[KEY_CACHED_PRIORITY_LIST]
+        if (cached.isNullOrBlank()) return true
+        val intervalMs = settings.updateFrequency.hours * 60L * 60L * 1000L
+        return System.currentTimeMillis() - last >= intervalMs
+    }
+
     suspend fun saveCachedList(
         context: Context,
         content: String,
@@ -198,6 +217,18 @@ object IpListPreferences {
                 prefs[KEY_PRIORITY_ROUTE_COUNT] = priorityRouteCount
             }
             prefs.remove(KEY_LAST_ERROR)
+        }
+    }
+
+    suspend fun saveCachedPriorityList(
+        context: Context,
+        content: String,
+        priorityRouteCount: Int
+    ) {
+        context.ipListDataStore.edit { prefs ->
+            prefs[KEY_CACHED_PRIORITY_LIST] = content
+            prefs[KEY_CACHED_PRIORITY_AT_MS] = System.currentTimeMillis()
+            prefs[KEY_PRIORITY_ROUTE_COUNT] = priorityRouteCount
         }
     }
 

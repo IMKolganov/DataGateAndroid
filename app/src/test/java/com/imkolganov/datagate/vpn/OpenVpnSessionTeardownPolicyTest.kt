@@ -1,0 +1,60 @@
+package com.imkolganov.datagate.vpn
+
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+class OpenVpnSessionTeardownPolicyTest {
+
+    @Test
+    fun finally_runs_only_for_current_generation() {
+        assertTrue(OpenVpnSessionTeardownPolicy.shouldRunVpnJobFinally(3, 3))
+        assertFalse(OpenVpnSessionTeardownPolicy.shouldRunVpnJobFinally(2, 3))
+        assertFalse(OpenVpnSessionTeardownPolicy.shouldRunVpnJobFinally(4, 3))
+    }
+
+    @Test
+    fun disconnected_defers_when_bridge_loss_owns_reconnect() {
+        assertTrue(
+            OpenVpnSessionTeardownPolicy.shouldDeferReconnectToBridgeLossFinally(
+                reconnectPendingAfterJob = true
+            )
+        )
+        assertFalse(
+            OpenVpnSessionTeardownPolicy.shouldDeferReconnectToBridgeLossFinally(
+                reconnectPendingAfterJob = false
+            )
+        )
+    }
+}
+
+class OpenVpnCoreLogFilterTest {
+
+    @Before
+    fun reset() {
+        OpenVpnCoreLogFilter.resetRateLimitForTests()
+    }
+
+    @Test
+    fun persists_warn_and_error_lines_only() {
+        assertTrue(OpenVpnCoreLogFilter.shouldPersistToDebugFile("ERROR: auth failed", nowMs = 1_000L))
+        assertTrue(OpenVpnCoreLogFilter.shouldPersistToDebugFile("WARN: slow path", nowMs = 1_000L))
+        assertTrue(OpenVpnCoreLogFilter.shouldPersistToDebugFile("Fatal: abort", nowMs = 1_000L))
+        assertFalse(OpenVpnCoreLogFilter.shouldPersistToDebugFile("Tunnel Options: ...", nowMs = 1_000L))
+        assertFalse(OpenVpnCoreLogFilter.shouldPersistToDebugFile("EVENT: CONNECTED", nowMs = 1_000L))
+    }
+
+    @Test
+    fun rate_limits_bursts_within_window() {
+        val t0 = 10_000L
+        repeat(8) {
+            assertTrue(
+                "line $it should pass",
+                OpenVpnCoreLogFilter.shouldPersistToDebugFile("ERROR: $it", nowMs = t0)
+            )
+        }
+        assertFalse(OpenVpnCoreLogFilter.shouldPersistToDebugFile("ERROR: overflow", nowMs = t0 + 100))
+        assertTrue(OpenVpnCoreLogFilter.shouldPersistToDebugFile("ERROR: next window", nowMs = t0 + 1_000))
+    }
+}

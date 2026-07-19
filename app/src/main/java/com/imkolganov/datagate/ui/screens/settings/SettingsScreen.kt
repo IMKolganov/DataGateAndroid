@@ -664,6 +664,12 @@ fun SettingsScreen(
                     }
                 }
 
+                Text(
+                    stringResource(R.string.settings_debug_share_disclaimer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
                 TextButton(
                     onClick = {
                         val path = debugLogPath
@@ -1539,7 +1545,10 @@ private fun IpListCoverageModeSelector(
                     R.string.settings_ip_lists_coverage_fast_description,
                     IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES
                 )
-                IpListCoverageMode.FULL -> stringResource(R.string.settings_ip_lists_coverage_full_description)
+                IpListCoverageMode.FULL -> stringResource(
+                    R.string.settings_ip_lists_coverage_full_description,
+                    IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+                )
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant

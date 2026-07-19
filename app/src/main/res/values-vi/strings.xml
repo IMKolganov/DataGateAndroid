@@ -104,6 +104,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">Đã sao chép</string>
@@ -222,7 +223,7 @@
     <string name="settings_ip_lists_priority_add_url">Thêm URL ưu tiên</string>
     <string name="settings_ip_lists_safe_limit_title">Giới hạn tuyến đường để ổn định hệ thống</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Giữ số lượng tuyến bỏ qua đủ thấp để biểu tượng VPN hệ thống xuất hiện nhanh chóng. Các trang web ưu tiên ở trên không bao giờ bị loại bỏ.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Tắt tùy chọn này sẽ loại bỏ giới hạn tuyến đường. Biểu tượng VPN trên thanh trạng thái có thể mất nhiều thời gian hơn để xuất hiện, hoặc không xuất hiện, với danh sách IP lớn.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Trạng thái danh sách IP</string>
     <string name="settings_ip_lists_last_updated">Cập nhật lần cuối</string>
     <string name="settings_ip_lists_last_updated_never">Chưa bao giờ</string>
@@ -351,7 +352,7 @@ Bạn có thể mở trang phát hành hoặc tải APK.</string>
     <string name="settings_ip_lists_coverage_fast">Nhanh</string>
     <string name="settings_ip_lists_coverage_fast_description">Áp dụng tối đa %1$d tuyến rộng. Thiết lập đường hầm nhanh hơn nhưng các dải IP nhỏ vẫn có thể dùng VPN.</string>
     <string name="settings_ip_lists_coverage_full">Phủ đầy đủ</string>
-    <string name="settings_ip_lists_coverage_full_description">Áp dụng mọi tuyến đã tải để phủ tối đa. Thiết lập đường hầm có thể mất vài giây với danh sách lớn.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Chế độ phủ</string>
     <string name="settings_ip_lists_detail_disabled_notice">Danh sách CIDR đang tắt. Bật công tắc phía trên để áp dụng lại ngoại lệ định tuyến.</string>
     <string name="settings_ip_lists_enable_subtitle">Khi tắt, ngoại lệ định tuyến theo danh sách không được áp dụng và danh sách không được tải; toàn bộ lưu lượng đi qua đường hầm VPN.</string>

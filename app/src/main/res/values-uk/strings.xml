@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -271,7 +272,7 @@
     <string name="settings_ip_lists_priority_add_url">Додати пріоритетний URL</string>
     <string name="settings_ip_lists_safe_limit_title">Обмежувати маршрути для стабільності системи</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Утримує кількість маршрутів в обхід достатньо низькою, щоб значок VPN системи з\'являвся швидко. Пріоритетні сайти вище ніколи не відкидаються.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Вимкнення цього знімає обмеження маршрутів. Значок VPN у статус-барі може з\'являтися значно довше або не з\'явитися взагалі при великих списках IP.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Статус IP-списку</string>
     <string name="settings_ip_lists_last_updated">Останнє оновлення</string>
     <string name="settings_ip_lists_last_updated_never">Ніколи</string>
@@ -367,7 +368,7 @@
     <string name="settings_ip_lists_coverage_fast">Швидко</string>
     <string name="settings_ip_lists_coverage_fast_description">Застосовує до %1$d широких маршрутів. Налаштування тунелю швидше, але невеликі діапазони IP можуть усе ще йти через VPN.</string>
     <string name="settings_ip_lists_coverage_full">Повне покриття</string>
-    <string name="settings_ip_lists_coverage_full_description">Застосовує кожен завантажений маршрут для максимального покриття. На великих списках налаштування тунелю може зайняти кілька секунд.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Режим покриття</string>
     <string name="settings_ip_lists_detail_disabled_notice">Списки CIDR вимкнено. Увімкніть перемикач вище, щоб знову застосувати винятки маршрутизації.</string>
     <string name="settings_ip_lists_enable_subtitle">Коли вимкнено, винятки маршрутизації на основі списків не застосовуються й списки не завантажуються; увесь трафік проходить через VPN-тунель.</string>

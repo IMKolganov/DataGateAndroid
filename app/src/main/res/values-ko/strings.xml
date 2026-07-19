@@ -104,6 +104,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">복사됨</string>
@@ -222,7 +223,7 @@
     <string name="settings_ip_lists_priority_add_url">우선순위 URL 추가</string>
     <string name="settings_ip_lists_safe_limit_title">시스템 안정성을 위해 경로 제한</string>
     <string name="settings_ip_lists_safe_limit_subtitle">시스템 VPN 아이콘이 빠르게 나타나도록 우회 경로 수를 충분히 낮게 유지합니다. 위의 우선순위 사이트는 절대 삭제되지 않습니다.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">이 옵션을 끄면 경로 제한이 사라집니다. IP 목록이 클 경우 상태 표시줄의 VPN 아이콘이 나타나는 데 훨씬 오래 걸리거나 전혀 나타나지 않을 수 있습니다.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP 목록 상태</string>
     <string name="settings_ip_lists_last_updated">마지막 업데이트</string>
     <string name="settings_ip_lists_last_updated_never">없음</string>
@@ -351,7 +352,7 @@
     <string name="settings_ip_lists_coverage_fast">빠름</string>
     <string name="settings_ip_lists_coverage_fast_description">최대 %1$d개의 넓은 경로를 적용합니다. 터널 설정은 더 빠르지만 작은 IP 대역은 여전히 VPN을 사용할 수 있습니다.</string>
     <string name="settings_ip_lists_coverage_full">전체 적용</string>
-    <string name="settings_ip_lists_coverage_full_description">로드된 모든 경로를 적용하여 최대 적용 범위를 제공합니다. 큰 목록에서는 터널 설정에 몇 초 걸릴 수 있습니다.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">적용 범위 모드</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR 목록이 꺼져 있습니다. 위 스위치를 켜서 라우팅 예외를 다시 적용하세요.</string>
     <string name="settings_ip_lists_enable_subtitle">꺼져 있으면 목록 기반 라우팅 예외가 적용되지 않고 목록도 다운로드되지 않으며 모든 트래픽이 VPN 터널을 통과합니다.</string>

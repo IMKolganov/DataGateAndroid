@@ -104,6 +104,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">Kopyalandı</string>
@@ -222,7 +223,7 @@
     <string name="settings_ip_lists_priority_add_url">Öncelikli URL ekle</string>
     <string name="settings_ip_lists_safe_limit_title">Sistem kararlılığı için rotaları sınırla</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Sistem VPN simgesinin hızlıca görünmesi için baypas rota sayısını yeterince düşük tutar. Yukarıdaki öncelikli siteler asla kaldırılmaz.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Bunu kapatmak rota sınırını kaldırır. Büyük IP listelerinde durum çubuğundaki VPN simgesi görünmesi çok daha uzun sürebilir veya hiç görünmeyebilir.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP listesi durumu</string>
     <string name="settings_ip_lists_last_updated">Son güncelleme</string>
     <string name="settings_ip_lists_last_updated_never">Hiçbir zaman</string>
@@ -351,7 +352,7 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="settings_ip_lists_coverage_fast">Hızlı</string>
     <string name="settings_ip_lists_coverage_fast_description">En fazla %1$d geniş rota uygulanır. Tünel kurulumu daha hızlıdır ancak küçük IP aralıkları yine VPN kullanabilir.</string>
     <string name="settings_ip_lists_coverage_full">Tam kapsam</string>
-    <string name="settings_ip_lists_coverage_full_description">Maksimum kapsam için yüklenen her rota uygulanır. Büyük listelerde tünel kurulumu birkaç saniye sürebilir.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Kapsam modu</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR listeleri kapalı. Yönlendirme istisnalarını yeniden uygulamak için yukarıdaki anahtarı açın.</string>
     <string name="settings_ip_lists_enable_subtitle">Kapalıyken liste tabanlı yönlendirme istisnaları uygulanmaz ve listeler indirilmez; tüm trafik VPN tünelinden geçer.</string>

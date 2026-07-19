@@ -56,10 +56,10 @@ data class IpListConnectionRoutePlan(
 object IpListRouteConfig {
     const val MAX_ROUTES = 12_000
     /**
-     * Cap for [IpListCoverageMode.FAST]. Measured on-device: the system VPN icon appears
-     * ~2s after connect at this size (vs. ~3.7s at [MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT]).
+     * Cap for [IpListCoverageMode.FAST]. Kept at the 1.0.13 budget (~2s icon) after raising to
+     * 2200 without fresh hang measurements proved risky.
      */
-    const val MAX_ANDROID_EXCLUDED_ROUTES = 2_200
+    const val MAX_ANDROID_EXCLUDED_ROUTES = 1_500
     /**
      * Cap for Android 13+ [android.net.VpnService.Builder.excludeRoute] at establish, used when
      * [IpListSettings.safeRouteLimitEnabled] is true (the default).
@@ -68,14 +68,13 @@ object IpListRouteConfig {
      * (consistent with AOSP's [VpnTest.testDoesNotLockUpWithTooManyRoutes] O(n²) safeguard at 4000
      * routes): on-device measurements showed the system VPN status bar icon taking ~0.4s to appear
      * at 500 routes, ~3.7s at 2000, ~5.6s at 3000, ~8.5s at 3500, and still not appearing after 36s+
-     * at ~10800 (uncapped). 3000 keeps the icon appearing within a few seconds — the highest budget
-     * that still felt like "connected" rather than "stuck" — while [selectRoutesWithPriority] makes
-     * sure a small curated priority list (e.g. specific sites that break under VPN) always survives
-     * truncation regardless of how broad the general list's blocks are. Turning off the safe limit
-     * (see [IpListSettings.safeRouteLimitEnabled]) removes this cap entirely, trading the icon delay
-     * back for full [MAX_ROUTES] coverage — that's a user-accepted risk, not the default.
+     * at ~10800 (uncapped). Release 1.0.13 standardized on 2000 as the safe FULL budget; do not
+     * raise without new establish timings. [selectRoutesWithPriority] keeps a small curated
+     * priority list (e.g. sites that break under VPN) inside that budget. Turning off the safe
+     * limit (see [IpListSettings.safeRouteLimitEnabled]) removes this cap entirely — user-accepted
+     * hang risk, not the default.
      */
-    const val MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT = 3_000
+    const val MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT = 2_000
     const val DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT = 800
     const val MIN_ANDROID12_OVPN_ROUTE_LIMIT = 50
     const val MAX_ANDROID12_OVPN_ROUTE_LIMIT = 3_000

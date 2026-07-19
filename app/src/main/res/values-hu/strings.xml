@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Kiemelt URL hozzáadása</string>
     <string name="settings_ip_lists_safe_limit_title">Útvonalak korlátozása a rendszer stabilitása érdekében</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Elég alacsonyan tartja a megkerülő útvonalak számát ahhoz, hogy a rendszer VPN-ikonja gyorsan megjelenjen. A fenti kiemelt webhelyek soha nem esnek ki.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Ennek kikapcsolása eltávolítja az útvonalkorlátot. A státuszsor VPN-ikonja nagy IP-listák esetén sokkal tovább tarthat, amíg megjelenik, vagy egyáltalán meg sem jelenhet.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP-lista állapota</string>
     <string name="settings_ip_lists_last_updated">Utolsó frissítés</string>
     <string name="settings_ip_lists_last_updated_never">Soha</string>
@@ -369,7 +370,7 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="settings_ip_lists_coverage_fast">Gyors</string>
     <string name="settings_ip_lists_coverage_fast_description">Legfeljebb %1$d széles útvonalat alkalmaz. A tunnel gyorsabban feláll, de kis IP-tartományok továbbra is VPN-en mehetnek.</string>
     <string name="settings_ip_lists_coverage_full">Teljes lefedés</string>
-    <string name="settings_ip_lists_coverage_full_description">Minden betöltött útvonalat alkalmaz a maximális lefedésért. Nagy listáknál a tunnel felállása több másodpercig is tarthat.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Lefedési mód</string>
     <string name="settings_ip_lists_detail_disabled_notice">A CIDR listák ki vannak kapcsolva. Kapcsold be a fenti kapcsolót az útválasztási kivételek visszaállításához.</string>
     <string name="settings_ip_lists_enable_subtitle">Ha ki van kapcsolva, a listaalapú kivételek nem kerülnek alkalmazásra és a listák nem töltődnek le—a forgalom a VPN alagúton halad.</string>

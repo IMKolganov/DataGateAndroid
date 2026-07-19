@@ -115,6 +115,7 @@
     <string name="settings_share_debug_logs">Share</string>
     <string name="settings_clear_debug_logs">Clear</string>
     <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
     <string name="no_debug_logs">No debug logs found</string>
     <string name="debug_logs_cleared">Debug logs cleared</string>
 
@@ -240,7 +241,7 @@
     <string name="settings_ip_lists_priority_add_url">Magdagdag ng priority URL</string>
     <string name="settings_ip_lists_safe_limit_title">Limitahan ang mga ruta para sa katatagan ng sistema</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Pinapanatiling mababa ang bilang ng mga bypass route para agad lumitaw ang icon ng VPN ng sistema. Hindi kailanman tinatanggal ang mga priority site sa itaas.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">Ang pag-off nito ay nag-aalis sa limitasyon ng ruta. Ang icon ng VPN sa status bar ay maaaring tumagal nang mas matagal para lumitaw, o hindi lumitaw, sa malalaking listahan ng IP.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Status ng IP list</string>
     <string name="settings_ip_lists_last_updated">Huling na-update</string>
     <string name="settings_ip_lists_last_updated_never">Hindi pa</string>
@@ -369,7 +370,7 @@ Maaari mong buksan ang release page o i-download ang APK.</string>
     <string name="settings_ip_lists_coverage_fast">Mabilis</string>
     <string name="settings_ip_lists_coverage_fast_description">Ina-apply hanggang %1$d malawak na ruta. Mas mabilis ang tunnel setup, ngunit maaaring gumamit pa rin ng VPN ang maliliit na saklaw ng IP.</string>
     <string name="settings_ip_lists_coverage_full">Buong saklaw</string>
-    <string name="settings_ip_lists_coverage_full_description">Ina-apply ang bawat na-load na ruta para sa pinakamataas na saklaw. Maaaring tumagal ng ilang segundo ang tunnel setup sa malalaking listahan.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Coverage mode</string>
     <string name="settings_ip_lists_detail_disabled_notice">Naka-off ang CIDR lists. Paganahin ang switch sa itaas para muling ilapat ang mga routing exception.</string>
     <string name="settings_ip_lists_enable_subtitle">Kapag naka-off, hindi ina-apply ang list-based routing exceptions at hindi na-da-download ang mga listahan; lahat ng trapiko ay dumadaan sa VPN tunnel.</string>

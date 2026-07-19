@@ -198,6 +198,7 @@
     <string name="settings_share_debug_logs">Поделиться</string>
     <string name="settings_clear_debug_logs">Очистить</string>
     <string name="share_debug_logs_chooser_title">Отправить лог отладки VPN</string>
+    <string name="settings_debug_share_disclaimer">В логе могут быть имена VPN-хостов, серверов и модель устройства. Не публикуйте файл в открытый доступ.</string>
     <string name="no_debug_logs">Логи отладки не найдены</string>
     <string name="debug_logs_cleared">Логи отладки очищены</string>
 
@@ -241,7 +242,7 @@
     <string name="settings_ip_lists_coverage_fast">Быстро</string>
     <string name="settings_ip_lists_coverage_full">Полное покрытие</string>
     <string name="settings_ip_lists_coverage_fast_description">Применяет до %1$d широких маршрутов. Туннель устанавливается быстрее, но мелкие IP-диапазоны могут всё ещё идти через VPN.</string>
-    <string name="settings_ip_lists_coverage_full_description">Применяет все загруженные маршруты для максимального покрытия. На больших списках установка туннеля может занимать несколько секунд.</string>
+    <string name="settings_ip_lists_coverage_full_description">Применяет до %1$d маршрутов обхода при включённом безопасном лимите (не все загруженные). Приоритетные сайты всегда сохраняются при обрезке. На больших списках установка туннеля может занимать несколько секунд.</string>
     <string name="settings_ip_lists_saved">Настройки IP-списка сохранены.</string>
     <string name="settings_ip_lists_priority_title">Приоритетные сайты</string>
     <string name="settings_ip_lists_priority_subtitle">CIDR-диапазоны отсюда всегда идут в обход VPN, даже если общий список выше был обрезан. Используйте это для конкретных сайтов, которые ломаются при работе через VPN.</string>
@@ -249,7 +250,7 @@
     <string name="settings_ip_lists_priority_add_url">Добавить приоритетный URL</string>
     <string name="settings_ip_lists_safe_limit_title">Ограничивать маршруты для стабильности системы</string>
     <string name="settings_ip_lists_safe_limit_subtitle">Не даёт числу маршрутов в обход VPN вырасти настолько, что значок VPN в системе перестанет быстро появляться. Приоритетные сайты выше никогда не отбрасываются.</string>
-    <string name="settings_ip_lists_safe_limit_disabled_warning">При отключении лимит маршрутов снимается. Значок VPN в статус-баре может появляться намного дольше или не появиться вовсе при больших списках IP.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Внимание: отключение может надолго заморозить установку VPN (или повесить её) на больших списках IP (~10 000 маршрутов). Отключайте только если принимаете этот риск.</string>
     <string name="settings_ip_lists_android_12_warning">Обход по IP-списку требует Android 13 или новее. На Android 12 и старше этот режим маршрутизации отключён, потому что VPN API не умеет безопасно исключать большие списки маршрутов.</string>
     <string name="settings_ip_lists_android_12_notice">На Android 12 используется компактная маршрутизация через OVPN-профиль, потому что системное исключение маршрутов доступно только на Android 13+.</string>
     <string name="settings_ip_lists_android_12_title">Совместимость с Android 12</string>
