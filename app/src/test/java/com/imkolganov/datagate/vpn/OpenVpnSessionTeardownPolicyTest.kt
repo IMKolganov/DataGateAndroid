@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.vpn
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -58,6 +59,44 @@ class OpenVpnSessionTeardownPolicyTest {
                 isPaused = false,
             )
         )
+    }
+
+    @Test
+    fun mirror_fixedPath_bridgeLoss_finallyOwnsSingleReconnect() {
+        val mirror = OpenVpnSessionRaceMirror()
+        val sessionA = mirror.startSession()
+
+        mirror.onBridgeTransportLost()
+        assertFalse(
+            "DISCONNECTED must defer while reconnectPendingAfterJob is armed",
+            mirror.onCoreDisconnected(),
+        )
+        assertEquals(0, mirror.reconnectFromDisconnectedCount)
+
+        val outcome = mirror.runFinally(sessionA)
+        assertEquals(OpenVpnSessionRaceMirror.FinallyOutcome.TEARDOWN_AND_RECONNECT, outcome)
+        assertEquals(1, mirror.reconnectFromFinallyCount)
+        assertEquals(2, mirror.generation)
+        assertEquals(2, mirror.ownerGeneration)
+        assertFalse(mirror.reconnectPendingAfterJob)
+    }
+
+    @Test
+    fun mirror_staleFinally_doesNotTearDownReplacementOwner() {
+        val mirror = OpenVpnSessionRaceMirror()
+        val sessionA = mirror.startSession()
+        mirror.onBridgeTransportLost()
+
+        // Replacement claims globals before A's finally (the race DISCONNECTED used to cause).
+        val sessionB = mirror.startSession()
+        assertEquals(2, sessionB)
+        assertEquals(2, mirror.ownerGeneration)
+
+        val outcomeA = mirror.runFinally(sessionA)
+        assertEquals(OpenVpnSessionRaceMirror.FinallyOutcome.SKIPPED_STALE, outcomeA)
+        assertEquals(null, mirror.tornDownGeneration)
+        assertEquals(2, mirror.ownerGeneration)
+        assertEquals(0, mirror.reconnectFromFinallyCount)
     }
 }
 

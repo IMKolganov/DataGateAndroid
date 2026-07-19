@@ -2,6 +2,7 @@ package com.imkolganov.datagate.vpn
 
 import android.net.VpnService
 import okio.ByteString.Companion.toByteString
+import java.util.concurrent.atomic.AtomicLong
 
 class TcpToWssBridge(
     private val service: VpnService,
@@ -61,6 +62,10 @@ class TcpToWssBridge(
 
         val queue = java.util.concurrent.LinkedBlockingQueue<okio.ByteString>()
         val transportLostNotified = java.util.concurrent.atomic.AtomicBoolean(false)
+        val lastActivityMs = AtomicLong(System.currentTimeMillis())
+        fun touchActivity() {
+            lastActivityMs.set(System.currentTimeMillis())
+        }
         fun notifyTransportLost(reason: String) {
             BridgeTransportLoss.notifyOnce(transportLostNotified, { lostReason ->
                 com.imkolganov.datagate.logger.VpnDebugLogger.w("TcpWssBridge", "transport_lost: $lostReason")
@@ -71,6 +76,7 @@ class TcpToWssBridge(
         val req = okhttp3.Request.Builder().url(wssUrl).build()
         val ws = http.newWebSocket(req, object : okhttp3.WebSocketListener() {
             override fun onMessage(webSocket: okhttp3.WebSocket, bytes: okio.ByteString) {
+                touchActivity()
                 queue.offer(bytes)
             }
             override fun onFailure(
@@ -117,6 +123,7 @@ class TcpToWssBridge(
                 while (true) {
                     val n = tcpIn.read(buf)
                     if (n <= 0) break
+                    touchActivity()
                     val accepted = ws.send(buf.toByteString(0, n))
                     if (BridgeTransportLoss.shouldTreatSendRejectedAsTransportLost(accepted)) {
                         notifyTransportLost(BridgeTransportLoss.formatSendRejectedReason())
@@ -131,19 +138,30 @@ class TcpToWssBridge(
 
         val t2 = Thread {
             try {
+                val pollMs = 5_000L
                 while (!tcp.isClosed) {
-                    val bytes = queue.poll(5, java.util.concurrent.TimeUnit.SECONDS)
-                        ?: continue
+                    val bytes = queue.poll(pollMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+                    if (bytes != null) {
+                        // optional: poison-pill
+                        if (bytes.size == 0) break
+                        touchActivity()
+                        tcpOut.write(bytes.toByteArray())
+                        tcpOut.flush()
+                        continue
+                    }
 
-                    // optional: poison-pill
-                    if (bytes.size == 0) break
-
-                    tcpOut.write(bytes.toByteArray())
-                    tcpOut.flush()
+                    val now = System.currentTimeMillis()
+                    val last = lastActivityMs.get()
+                    if (BridgeIdleProbePolicy.shouldDeclareIdle(last, now)) {
+                        val idleFor = now - last
+                        notifyTransportLost(BridgeIdleProbePolicy.formatIdleReason(idleFor))
+                        break
+                    }
                 }
             } catch (_: Throwable) {
             } finally {
                 try { tcp.close() } catch (_: Throwable) {}
+                try { ws.cancel() } catch (_: Throwable) {}
             }
         }
 

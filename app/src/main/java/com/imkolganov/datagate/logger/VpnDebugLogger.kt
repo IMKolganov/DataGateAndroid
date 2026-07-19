@@ -15,13 +15,20 @@ import java.util.concurrent.atomic.AtomicBoolean
  * [Context.getNoBackupFilesDir]/`debug/vpn_debug.txt` (rotates to `.prev.txt`).
  * Share/preview/clear from the same Settings card. Never auto-uploads.
  */
-class VpnDebugLogger(context: Context) {
+class VpnDebugLogger(
+    context: Context,
+    queueCapacity: Int = VpnDebugLogWriter.DEFAULT_QUEUE_CAPACITY,
+) {
 
     private val appContext = context.applicationContext
     private val enabled = AtomicBoolean(false)
 
     private val dir: File by lazy {
         File(appContext.noBackupFilesDir, DIR_NAME).apply { mkdirs() }
+    }
+
+    private val writer: VpnDebugLogWriter by lazy {
+        VpnDebugLogWriter(dir = dir, queueCapacity = queueCapacity)
     }
 
     fun isEnabled(): Boolean = enabled.get()
@@ -73,6 +80,7 @@ class VpnDebugLogger(context: Context) {
     fun e(tag: String, message: String, error: Throwable? = null) = append("E", tag, message, error)
 
     fun logFiles(): List<File> {
+        writer.flush()
         if (!dir.isDirectory) return emptyList()
         return dir.listFiles { f -> f.isFile && f.name.endsWith(".txt") }
             ?.sortedByDescending { it.lastModified() }
@@ -82,8 +90,8 @@ class VpnDebugLogger(context: Context) {
     fun totalBytes(): Long = logFiles().sumOf { it.length() }
 
     /** Last [maxChars] of the active log for in-app preview. */
-    @Synchronized
     fun readTail(maxChars: Int = 12_000): String {
+        writer.flush()
         val file = currentFile()
         if (!file.isFile || file.length() == 0L) return ""
         return runCatching {
@@ -93,15 +101,17 @@ class VpnDebugLogger(context: Context) {
         }.getOrDefault("")
     }
 
-    @Synchronized
     fun clearLogs() {
-        logFiles().forEach { runCatching { it.delete() } }
+        writer.clearAndAwait()
         Log.i(TAG, "debug logs cleared")
         if (enabled.get()) {
             writeSessionHeader()
             event("debug", "cleared_and_restarted", mapOf("path" to currentFilePath()))
         }
     }
+
+    /** Test / diagnostics: lines dropped because the async queue was full. */
+    fun droppedCount(): Long = writer.droppedCount()
 
     private fun writeSessionHeader() {
         val header = buildString {
@@ -139,16 +149,8 @@ class VpnDebugLogger(context: Context) {
         )
     }
 
-    @Synchronized
     private fun appendRaw(text: String) {
-        runCatching {
-            dir.mkdirs()
-            val file = File(dir, CURRENT_FILE)
-            if (file.exists() && VpnDebugLogRotation.shouldRotate(file.length())) {
-                VpnDebugLogRotation.rotate(dir, file)
-            }
-            File(dir, CURRENT_FILE).appendText(text)
-        }
+        writer.enqueue(text)
     }
 
     companion object {

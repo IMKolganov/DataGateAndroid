@@ -142,6 +142,46 @@ class IpListRoutesRepositoryTest {
     }
 
     @Test
+    fun getRoutesForConnection_priorityHttpFails_usesWarmStaleCacheNotAsset() = runBlocking {
+        MockWebServer().use { server ->
+            server.enqueue(MockResponse().setBody("10.0.0.0/8\n"))
+            server.enqueue(MockResponse().setResponseCode(500))
+            server.start()
+
+            val generalUrl = server.url("/general.txt").toString()
+            val priorityUrl = server.url("/priority.txt").toString()
+            IpListPreferences.saveSettings(
+                context = context,
+                sourceUrls = listOf(generalUrl),
+                updateFrequency = IpListUpdateFrequency.DAILY,
+                coverageMode = IpListCoverageMode.FULL,
+                android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+                cidrListsEnabled = true,
+                priorityUrls = listOf(priorityUrl),
+                safeRouteLimitEnabled = true,
+            )
+            IpListPreferences.saveCachedPriorityList(
+                context = context,
+                content = "203.0.113.0/24\n",
+                priorityRouteCount = 1,
+                cachedAtEpochMs = System.currentTimeMillis() - 48L * 60L * 60L * 1000L,
+            )
+
+            val repo = IpListRoutesRepository(context, OkHttpClient())
+            val routes = repo.getRoutesForConnection()
+
+            assertEquals(
+                listOf(Ipv4CidrRoute("203.0.113.0", "255.255.255.0", 24)),
+                routes.priorityRoutes,
+            )
+            assertTrue(
+                "Must not fall through to bundled asset when warm cache exists",
+                routes.priorityRoutes.none { it.toCidrString() == "185.73.192.0/22" },
+            )
+        }
+    }
+
+    @Test
     fun getRoutesForConnection_partialGeneralUrlFailure_stillUsesSuccessfulUrl() = runBlocking {
         MockWebServer().use { server ->
             server.enqueue(MockResponse().setBody("10.0.0.0/8\n"))

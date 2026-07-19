@@ -12,6 +12,9 @@ internal object BridgeTransportLoss {
 
     fun formatSendRejectedReason(): String = "wss_send_rejected"
 
+    fun formatIdleReason(idleForMs: Long): String =
+        BridgeIdleProbePolicy.formatIdleReason(idleForMs)
+
     /**
      * OkHttp [okhttp3.WebSocket.send] returns false when the outbound queue is saturated or the
      * socket is already closing. Ignoring that leaves OpenVPN's local TCP to the bridge open

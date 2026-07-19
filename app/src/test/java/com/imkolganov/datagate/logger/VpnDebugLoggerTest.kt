@@ -56,4 +56,48 @@ class VpnDebugLoggerTest {
             line,
         )
     }
+
+    @Test(timeout = 5_000)
+    fun writer_storm_completesQuickly_withoutHang() {
+        val dir = createTempDirectory("vpn-debug-storm").toFile()
+        val writer = VpnDebugLogWriter(dir = dir, queueCapacity = 256)
+        try {
+            repeat(1_000) { i ->
+                writer.enqueue("line-$i\n")
+            }
+            assertTrue(writer.flush(timeoutMs = 3_000))
+            val file = File(dir, VpnDebugLogger.CURRENT_FILE)
+            assertTrue(file.isFile)
+            assertTrue(file.length() > 0L)
+            assertTrue(
+                "Expected some lines persisted under storm",
+                file.readText().contains("line-"),
+            )
+        } finally {
+            writer.shutdown()
+            dir.deleteRecursively()
+        }
+    }
+
+    @Test(timeout = 5_000)
+    fun writer_tinyQueue_dropsNewestUnderStorm() {
+        val dir = createTempDirectory("vpn-debug-drop").toFile()
+        val writer = VpnDebugLogWriter(dir = dir, queueCapacity = 2)
+        try {
+            // Overwhelm before the writer thread drains.
+            repeat(200) { i ->
+                writer.enqueue("storm-$i\n")
+            }
+            assertTrue(
+                "Tiny queue must drop newest under storm",
+                writer.droppedCount() > 0L,
+            )
+            assertTrue(writer.flush(timeoutMs = 3_000))
+            val body = File(dir, VpnDebugLogger.CURRENT_FILE).readText()
+            assertTrue(body.contains("storm-"))
+        } finally {
+            writer.shutdown()
+            dir.deleteRecursively()
+        }
+    }
 }

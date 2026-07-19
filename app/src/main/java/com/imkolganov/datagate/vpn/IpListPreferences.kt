@@ -223,11 +223,13 @@ object IpListPreferences {
     suspend fun saveCachedPriorityList(
         context: Context,
         content: String,
-        priorityRouteCount: Int
+        priorityRouteCount: Int,
+        /** Override for tests that need a stale-but-warm priority cache. */
+        cachedAtEpochMs: Long = System.currentTimeMillis(),
     ) {
         context.ipListDataStore.edit { prefs ->
             prefs[KEY_CACHED_PRIORITY_LIST] = content
-            prefs[KEY_CACHED_PRIORITY_AT_MS] = System.currentTimeMillis()
+            prefs[KEY_CACHED_PRIORITY_AT_MS] = cachedAtEpochMs
             prefs[KEY_PRIORITY_ROUTE_COUNT] = priorityRouteCount
         }
     }
