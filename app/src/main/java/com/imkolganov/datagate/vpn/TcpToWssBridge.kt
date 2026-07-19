@@ -114,7 +114,11 @@ class TcpToWssBridge(
                 while (true) {
                     val n = tcpIn.read(buf)
                     if (n <= 0) break
-                    ws.send(buf.toByteString(0, n))
+                    val accepted = ws.send(buf.toByteString(0, n))
+                    if (BridgeTransportLoss.shouldTreatSendRejectedAsTransportLost(accepted)) {
+                        notifyTransportLost(BridgeTransportLoss.formatSendRejectedReason())
+                        break
+                    }
                 }
             } catch (_: Throwable) {
             } finally {

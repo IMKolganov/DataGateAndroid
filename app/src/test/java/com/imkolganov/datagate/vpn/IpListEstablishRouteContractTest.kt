@@ -8,7 +8,7 @@ import org.junit.Test
 import java.io.File
 
 /**
- * CIDR establish budget — FULL capped at [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] (2000).
+ * CIDR establish budget — FULL capped at [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT].
  */
 class IpListEstablishRouteContractTest {
 
@@ -22,7 +22,7 @@ class IpListEstablishRouteContractTest {
     }
 
     @Test
-    fun fullCoverage_onAndroid13_capsAt2000_andFitsEstablishBudget() {
+    fun fullCoverage_onAndroid13_capsAtLimit_andFitsEstablishBudget() {
         val routes = parseProductionFallbackLists()
         val plan = planForAndroid13(IpListCoverageMode.FULL, routes)
 
@@ -49,7 +49,7 @@ class IpListEstablishRouteContractTest {
     }
 
     @Test
-    fun fastCoverage_staysWithin1500_fullCapsAt2000() {
+    fun fastCoverage_staysWithinFastLimit_fullCapsAtFullLimit() {
         val routes = parseProductionFallbackLists()
         val fast = planForAndroid13(IpListCoverageMode.FAST, routes)
         val full = planForAndroid13(IpListCoverageMode.FULL, routes)
@@ -77,7 +77,7 @@ class IpListEstablishRouteContractTest {
     }
 
     @Test
-    fun app1_0_6_fullMode_wasUnbounded_currentCapsAt2000() {
+    fun app1_0_6_fullMode_wasUnbounded_currentCapsAtLimit() {
         val routes = parseProductionFallbackLists()
         val app106Excluded = routes
         val current = planForAndroid13(IpListCoverageMode.FULL, routes)
@@ -85,6 +85,56 @@ class IpListEstablishRouteContractTest {
         assertTrue(app106Excluded.size > IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT)
         assertFalse(app106Excluded.size == current.androidExcludedRoutes.size)
         assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, current.androidExcludedRoutes.size)
+    }
+
+    @Test
+    fun productionPriorityFallback_survivesTruncationAgainstProductionGeneralList() {
+        // Regression for the Ozon/Wildberries-style complaint: on the real bundled RU general list,
+        // broadest-first truncation alone drops narrow single-company blocks. The priority fallback
+        // list must survive regardless of where its entries would otherwise rank.
+        val generalRoutes = parseProductionFallbackLists()
+        val priorityRoutes = parseProductionPriorityFallbackList()
+        assertTrue("Priority fallback list should not be empty", priorityRoutes.isNotEmpty())
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = generalRoutes,
+            priorityRoutes = priorityRoutes,
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+
+        for (priorityRoute in priorityRoutes) {
+            assertTrue(
+                "Priority route ${priorityRoute.toCidrString()} was dropped",
+                plan.androidExcludedRoutes.contains(priorityRoute),
+            )
+        }
+    }
+
+    @Test
+    fun defaultPrioritySourceUrl_pointsAtImKolganovGitHubRawList() {
+        assertTrue(
+            IpListPreferences.DEFAULT_PRIORITY_SOURCE_URL.contains(
+                "/IMKolganov/DataGateAndroid/main/ip-lists/ru_priority_sites.txt",
+            ),
+        )
+        assertEquals(
+            "https://raw.githubusercontent.com/IMKolganov/DataGateAndroid/main/ip-lists/ru_priority_sites.txt",
+            IpListPreferences.DEFAULT_PRIORITY_SOURCE_URL,
+        )
+    }
+
+    @Test
+    fun priorityFallbackAsset_matchesRepoCanonicalList() {
+        val asset = readRepoAsset("ip_lists/ru_priority_fallback.txt")
+        val repoList = readRepoRootFile("ip-lists/ru_priority_sites.txt")
+        assertEquals(
+            "Bundled priority fallback must stay in sync with ip-lists/ru_priority_sites.txt",
+            repoList,
+            asset,
+        )
     }
 
     @Test
@@ -122,6 +172,9 @@ class IpListEstablishRouteContractTest {
         return IpListRouteConfig.parseCidrRoutesResult(content).routes
     }
 
+    private fun parseProductionPriorityFallbackList(): List<IpCidrRoute> =
+        IpListRouteConfig.parseCidrRoutesResult(readRepoAsset("ip_lists/ru_priority_fallback.txt")).routes
+
     private fun readRepoAsset(relativePath: String): String {
         val candidates = listOf(
             File("src/main/assets/$relativePath"),
@@ -130,6 +183,17 @@ class IpListEstablishRouteContractTest {
         )
         val file = candidates.firstOrNull { it.isFile }
             ?: error("Missing asset $relativePath; tried ${candidates.map { it.absolutePath }}")
+        return file.readText()
+    }
+
+    private fun readRepoRootFile(relativePath: String): String {
+        val candidates = listOf(
+            File(relativePath),
+            File("../$relativePath"),
+            File("../../$relativePath"),
+        )
+        val file = candidates.firstOrNull { it.isFile }
+            ?: error("Missing repo file $relativePath; tried ${candidates.map { it.absolutePath }}")
         return file.readText()
     }
 }

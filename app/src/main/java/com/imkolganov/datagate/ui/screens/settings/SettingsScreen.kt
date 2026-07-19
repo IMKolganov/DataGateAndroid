@@ -541,7 +541,7 @@ fun SettingsScreen(
 
 private sealed interface IpListUpdateMessage {
     data class Failed(val error: String, val usedFallback: Boolean) : IpListUpdateMessage
-    data class Ready(val routeCount: Int) : IpListUpdateMessage
+    data class Ready(val routeCount: Int, val priorityRouteCount: Int) : IpListUpdateMessage
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -554,6 +554,9 @@ private fun IpListSettingsScreen(
 
     var sourceUrls by remember { mutableStateOf(IpListPreferences.DEFAULT_SOURCE_URLS) }
     var newSourceUrl by remember { mutableStateOf("") }
+    var priorityUrls by remember { mutableStateOf(IpListPreferences.DEFAULT_PRIORITY_URLS) }
+    var newPriorityUrl by remember { mutableStateOf("") }
+    var safeRouteLimitEnabled by remember { mutableStateOf(true) }
     var updateFrequency by remember { mutableStateOf(IpListUpdateFrequency.DAILY) }
     var coverageMode by remember { mutableStateOf(IpListCoverageMode.FULL) }
     var android12OvpnRouteLimitText by remember {
@@ -565,6 +568,7 @@ private fun IpListSettingsScreen(
             IpListStatus(
                 lastUpdatedEpochMs = null,
                 loadedRouteCount = 0,
+                priorityRouteCount = 0,
                 lastError = null,
                 reachedRouteLimit = false
             )
@@ -587,6 +591,8 @@ private fun IpListSettingsScreen(
         }
         val settings = loaded.first
         sourceUrls = settings.sourceUrls
+        priorityUrls = settings.priorityUrls
+        safeRouteLimitEnabled = settings.safeRouteLimitEnabled
         updateFrequency = settings.updateFrequency
         coverageMode = settings.coverageMode
         android12OvpnRouteLimitText = settings.android12OvpnRouteLimit.toString()
@@ -598,11 +604,17 @@ private fun IpListSettingsScreen(
     val newUrlError = remember(trimmedNewSourceUrl) {
         trimmedNewSourceUrl.isNotEmpty() && !isHttpUrl(trimmedNewSourceUrl)
     }
+    val trimmedNewPriorityUrl = newPriorityUrl.trim()
+    val newPriorityUrlError = remember(trimmedNewPriorityUrl) {
+        trimmedNewPriorityUrl.isNotEmpty() && !isHttpUrl(trimmedNewPriorityUrl)
+    }
     val android12OvpnRouteLimit = android12OvpnRouteLimitText.toIntOrNull()
     val android12OvpnRouteLimitError = android12OvpnRouteLimit == null ||
         android12OvpnRouteLimit !in IpListRouteConfig.MIN_ANDROID12_OVPN_ROUTE_LIMIT..IpListRouteConfig.MAX_ANDROID12_OVPN_ROUTE_LIMIT
     val hasSourceUrlError = sourceUrls.any { !isHttpUrl(it) }
-    val canSaveSources = sourceUrls.isNotEmpty() && !hasSourceUrlError && !android12OvpnRouteLimitError
+    val hasPriorityUrlError = priorityUrls.any { !isHttpUrl(it) }
+    val canSaveSources = sourceUrls.isNotEmpty() && !hasSourceUrlError &&
+        !hasPriorityUrlError && !android12OvpnRouteLimitError
 
     Column(
         modifier = Modifier
@@ -796,6 +808,123 @@ private fun IpListSettingsScreen(
                     )
                 }
 
+                HorizontalDivider()
+
+                Text(
+                    stringResource(R.string.settings_ip_lists_priority_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_ip_lists_priority_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    priorityUrls.forEachIndexed { index, url ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier.weight(1f),
+                                value = url,
+                                onValueChange = { value ->
+                                    priorityUrls = priorityUrls.toMutableList().also {
+                                        it[index] = value
+                                    }
+                                    savedMessageVisible = false
+                                },
+                                label = { Text(stringResource(R.string.settings_ip_lists_url_label)) },
+                                isError = url.isNotBlank() && !isHttpUrl(url),
+                                singleLine = true
+                            )
+                            TextButton(
+                                onClick = {
+                                    priorityUrls = priorityUrls.toMutableList().also {
+                                        it.removeAt(index)
+                                    }
+                                    savedMessageVisible = false
+                                }
+                            ) {
+                                Text(stringResource(R.string.action_delete))
+                            }
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = newPriorityUrl,
+                    onValueChange = {
+                        newPriorityUrl = it
+                        savedMessageVisible = false
+                    },
+                    label = { Text(stringResource(R.string.settings_ip_lists_priority_add_url_label)) },
+                    supportingText = {
+                        Text(
+                            if (newPriorityUrlError) {
+                                stringResource(R.string.settings_ip_lists_url_error)
+                            } else {
+                                stringResource(R.string.settings_ip_lists_url_hint)
+                            }
+                        )
+                    },
+                    isError = newPriorityUrlError,
+                    singleLine = true
+                )
+                Button(
+                    onClick = {
+                        priorityUrls = (priorityUrls + trimmedNewPriorityUrl).map { it.trim() }
+                            .filter { it.isNotEmpty() }
+                            .distinct()
+                        newPriorityUrl = ""
+                        savedMessageVisible = false
+                    },
+                    enabled = trimmedNewPriorityUrl.isNotEmpty() && !newPriorityUrlError,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = AppCards.shape
+                ) {
+                    Text(stringResource(R.string.settings_ip_lists_priority_add_url))
+                }
+
+                HorizontalDivider()
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_ip_lists_safe_limit_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            stringResource(R.string.settings_ip_lists_safe_limit_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = safeRouteLimitEnabled,
+                        onCheckedChange = { v ->
+                            safeRouteLimitEnabled = v
+                            savedMessageVisible = false
+                        }
+                    )
+                }
+                if (!safeRouteLimitEnabled) {
+                    Text(
+                        stringResource(R.string.settings_ip_lists_safe_limit_disabled_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
                 Button(
                     onClick = {
                         scope.launch {
@@ -806,7 +935,9 @@ private fun IpListSettingsScreen(
                                 coverageMode,
                                 android12OvpnRouteLimit
                                     ?: IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
-                                cidrListsEnabled
+                                cidrListsEnabled,
+                                priorityUrls,
+                                safeRouteLimitEnabled
                             )
                             savedMessageVisible = true
                         }
@@ -859,6 +990,13 @@ private fun IpListSettingsScreen(
                     stringResource(R.string.settings_ip_lists_loaded_routes_value, status.loadedRouteCount)
                 )
                 KeyValueRow(
+                    stringResource(R.string.settings_ip_lists_loaded_priority_routes),
+                    stringResource(
+                        R.string.settings_ip_lists_loaded_priority_routes_value,
+                        status.priorityRouteCount
+                    )
+                )
+                KeyValueRow(
                     stringResource(R.string.settings_ip_lists_last_error),
                     status.lastError ?: stringResource(R.string.settings_ip_lists_last_error_none)
                 )
@@ -896,7 +1034,10 @@ private fun IpListSettingsScreen(
                             }
                             updateMessage = result.error
                                 ?.let { IpListUpdateMessage.Failed(it, result.usedFallback) }
-                                ?: IpListUpdateMessage.Ready(result.routeCount)
+                                ?: IpListUpdateMessage.Ready(
+                                    result.routeCount,
+                                    result.priorityRouteCount
+                                )
                             updateInProgress = false
                         }
                     },
@@ -933,7 +1074,8 @@ private fun IpListSettingsScreen(
                             is IpListUpdateMessage.Ready -> {
                                 stringResource(
                                     R.string.settings_ip_lists_update_ready,
-                                    message.routeCount
+                                    message.routeCount,
+                                    message.priorityRouteCount
                                 )
                             }
                         },

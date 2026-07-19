@@ -171,14 +171,17 @@ class VpnConnectInteractor(
                     res.getString(R.string.vpn_updating_ip_list)
                 )
             }
-            val bypassRoutes = ipListRoutesRepository.getRoutesForConnection()
+            val connectionRoutes = ipListRoutesRepository.getRoutesForConnection()
+            val bypassRoutes = connectionRoutes.generalRoutes + connectionRoutes.priorityRoutes
             val supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
             val routePlan = IpListRouteConfig.prepareConnectionRoutes(
                 config = configText,
-                routes = bypassRoutes,
+                routes = connectionRoutes.generalRoutes,
+                priorityRoutes = connectionRoutes.priorityRoutes,
                 coverageMode = ipListSettings.coverageMode,
                 android12OvpnRouteLimit = ipListSettings.android12OvpnRouteLimit,
-                supportsAndroidRouteExclusion = supportsAndroidRouteExclusion
+                supportsAndroidRouteExclusion = supportsAndroidRouteExclusion,
+                safeRouteLimitEnabled = ipListSettings.safeRouteLimitEnabled
             )
             IpListEstablishRoutePolicy.establishBudgetViolation(routePlan, ipListSettings.coverageMode)?.let { violation ->
                 Log.w("OpenVPN3", "excludeRoute establish budget violation: $violation")

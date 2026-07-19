@@ -1,6 +1,8 @@
 package com.imkolganov.datagate.vpn
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
@@ -48,5 +50,18 @@ class BridgeTransportLossTest {
         val notified = AtomicBoolean(false)
         BridgeTransportLoss.notifyOnce(notified, null, "ignored")
         assertEquals(true, notified.get())
+    }
+
+    @Test
+    fun formatSendRejectedReason_isStableForLogs() {
+        assertEquals("wss_send_rejected", BridgeTransportLoss.formatSendRejectedReason())
+    }
+
+    @Test
+    fun shouldTreatSendRejectedAsTransportLost_onlyWhenSendReturnsFalse() {
+        // TCP↔WSS silent stall: OkHttp queue full / closing socket returns false from send().
+        // Ignoring that left OpenVPN CONNECTED with a live local TCP while frames were dropped.
+        assertTrue(BridgeTransportLoss.shouldTreatSendRejectedAsTransportLost(sendAccepted = false))
+        assertFalse(BridgeTransportLoss.shouldTreatSendRejectedAsTransportLost(sendAccepted = true))
     }
 }

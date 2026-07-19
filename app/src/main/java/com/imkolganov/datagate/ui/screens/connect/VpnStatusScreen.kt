@@ -74,7 +74,6 @@ import kotlinx.coroutines.delay
 fun VpnStatusScreen(
     state: VpnStatusUiState,
     onConnectClick: () -> Unit,
-    onRequestPermissionClick: () -> Unit,
     onDisconnectClick: () -> Unit,
     onPauseClick: () -> Unit = {},
     onResumeClick: () -> Unit = {},
@@ -452,8 +451,12 @@ fun VpnStatusScreen(
             text = { Text(stringResource(R.string.vpn_permission_dialog_body)) },
             confirmButton = {
                 TextButton(onClick = {
+                    // Route through the normal connect entry point (not a bare permission
+                    // request): startWithConfig() stores the pending config before launching the
+                    // system dialog, so granting permission here resumes straight into connecting
+                    // instead of leaving the user stuck on a "config is missing" error.
                     showPermissionDialog = false
-                    onRequestPermissionClick()
+                    onConnectClick()
                 }) {
                     Text(stringResource(R.string.vpn_permission_dialog_grant))
                 }
@@ -603,7 +606,6 @@ fun VpnStatusScreenPreview_Connected() {
                 lastMessage = "Connected to DataGate VPN (10.0.0.2)"
             ),
             onConnectClick = {},
-            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }
@@ -620,7 +622,6 @@ fun VpnStatusScreenPreview_Connecting() {
                 lastMessage = "Connecting to server..."
             ),
             onConnectClick = {},
-            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }
@@ -636,7 +637,6 @@ fun VpnStatusScreenPreview_Disconnected() {
                 lastMessage = ""
             ),
             onConnectClick = {},
-            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }

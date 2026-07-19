@@ -22,12 +22,24 @@ data class IpListSettings(
     val coverageMode: IpListCoverageMode,
     val android12OvpnRouteLimit: Int,
     /** When false, CIDR lists are not loaded or applied (all traffic via VPN). */
-    val cidrListsEnabled: Boolean = true
+    val cidrListsEnabled: Boolean = true,
+    /** Curated CIDR ranges (e.g. specific sites) that always survive route-count truncation. */
+    val priorityUrls: List<String> = emptyList(),
+    /**
+     * When true (default), the Android 13+ excludeRoute() count is capped at
+     * [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] (or the FAST-mode equivalent) so the
+     * system VPN status bar icon appears promptly. Turning this off removes the cap — up to
+     * [IpListRouteConfig.MAX_ROUTES] routes get pushed to excludeRoute() uncapped, trading full
+     * coverage for a system VPN icon that may take much longer to appear (or not appear at all).
+     */
+    val safeRouteLimitEnabled: Boolean = true
 )
 
 data class IpListStatus(
     val lastUpdatedEpochMs: Long?,
     val loadedRouteCount: Int,
+    /** Last known count of curated priority bypass routes (fetched on connect / Update now). */
+    val priorityRouteCount: Int = 0,
     val lastError: String?,
     val reachedRouteLimit: Boolean
 )
@@ -35,13 +47,16 @@ data class IpListStatus(
 object IpListPreferences {
     private val KEY_SOURCE_URL = stringPreferencesKey("source_url")
     private val KEY_SOURCE_URLS = stringPreferencesKey("source_urls")
+    private val KEY_PRIORITY_URLS = stringPreferencesKey("priority_urls")
     private val KEY_UPDATE_FREQUENCY = stringPreferencesKey("update_frequency")
     private val KEY_COVERAGE_MODE = stringPreferencesKey("coverage_mode")
     private val KEY_ANDROID12_OVPN_ROUTE_LIMIT = intPreferencesKey("android12_ovpn_route_limit")
     private val KEY_CIDR_LISTS_ENABLED = booleanPreferencesKey("cidr_lists_enabled")
+    private val KEY_SAFE_ROUTE_LIMIT_ENABLED = booleanPreferencesKey("safe_route_limit_enabled")
     private val KEY_CACHED_LIST = stringPreferencesKey("cached_list")
     private val KEY_CACHED_AT_MS = longPreferencesKey("cached_at_epoch_ms")
     private val KEY_LOADED_ROUTE_COUNT = intPreferencesKey("loaded_route_count")
+    private val KEY_PRIORITY_ROUTE_COUNT = intPreferencesKey("priority_route_count")
     private val KEY_LAST_ERROR = stringPreferencesKey("last_error")
     private val KEY_REACHED_ROUTE_LIMIT = booleanPreferencesKey("reached_route_limit")
 
@@ -51,6 +66,12 @@ object IpListPreferences {
         "https://raw.githubusercontent.com/ipverse/country-ip-blocks/master/country/ru/ipv6-aggregated.txt"
     val DEFAULT_SOURCE_URLS: List<String>
         get() = listOf(DEFAULT_SOURCE_URL, DEFAULT_IPV6_SOURCE_URL)
+
+    /** Curated "must always bypass" CIDR list — see app/../assets/ip_lists and ip-lists/ in the repo root. */
+    const val DEFAULT_PRIORITY_SOURCE_URL =
+        "https://raw.githubusercontent.com/IMKolganov/DataGateAndroid/main/ip-lists/ru_priority_sites.txt"
+    val DEFAULT_PRIORITY_URLS: List<String>
+        get() = listOf(DEFAULT_PRIORITY_SOURCE_URL)
 
     fun settingsFlow(context: Context): Flow<IpListSettings> =
         context.ipListDataStore.data
@@ -65,7 +86,9 @@ object IpListPreferences {
                         prefs[KEY_ANDROID12_OVPN_ROUTE_LIMIT]
                             ?: IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT
                     ),
-                    cidrListsEnabled = prefs[KEY_CIDR_LISTS_ENABLED] ?: true
+                    cidrListsEnabled = prefs[KEY_CIDR_LISTS_ENABLED] ?: true,
+                    priorityUrls = decodePriorityUrls(prefs[KEY_PRIORITY_URLS]),
+                    safeRouteLimitEnabled = prefs[KEY_SAFE_ROUTE_LIMIT_ENABLED] ?: true
                 )
             }
             .distinctUntilChanged()
@@ -79,16 +102,20 @@ object IpListPreferences {
         updateFrequency: IpListUpdateFrequency,
         coverageMode: IpListCoverageMode,
         android12OvpnRouteLimit: Int,
-        cidrListsEnabled: Boolean
+        cidrListsEnabled: Boolean,
+        priorityUrls: List<String> = DEFAULT_PRIORITY_URLS,
+        safeRouteLimitEnabled: Boolean = true
     ) {
         context.ipListDataStore.edit { prefs ->
             prefs[KEY_SOURCE_URLS] = encodeSourceUrls(sourceUrls)
             prefs.remove(KEY_SOURCE_URL)
+            prefs[KEY_PRIORITY_URLS] = encodeSourceUrls(priorityUrls)
             prefs[KEY_UPDATE_FREQUENCY] = updateFrequency.storageValue
             prefs[KEY_COVERAGE_MODE] = coverageMode.storageValue
             prefs[KEY_ANDROID12_OVPN_ROUTE_LIMIT] =
                 IpListRouteConfig.sanitizeAndroid12OvpnRouteLimit(android12OvpnRouteLimit)
             prefs[KEY_CIDR_LISTS_ENABLED] = cidrListsEnabled
+            prefs[KEY_SAFE_ROUTE_LIMIT_ENABLED] = safeRouteLimitEnabled
         }
     }
 
@@ -110,6 +137,16 @@ object IpListPreferences {
         return urls.ifEmpty { DEFAULT_SOURCE_URLS }
     }
 
+    private fun decodePriorityUrls(value: String?): List<String> {
+        if (value == null) return DEFAULT_PRIORITY_URLS
+        val urls = value.lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .toList()
+        return urls.ifEmpty { DEFAULT_PRIORITY_URLS }
+    }
+
     private fun encodeSourceUrls(urls: List<String>): String =
         urls.map { it.trim() }
             .filter { it.isNotEmpty() }
@@ -125,6 +162,7 @@ object IpListPreferences {
                 IpListStatus(
                     lastUpdatedEpochMs = prefs[KEY_CACHED_AT_MS]?.takeIf { it > 0L },
                     loadedRouteCount = prefs[KEY_LOADED_ROUTE_COUNT] ?: 0,
+                    priorityRouteCount = prefs[KEY_PRIORITY_ROUTE_COUNT] ?: 0,
                     lastError = prefs[KEY_LAST_ERROR]?.takeIf(String::isNotBlank),
                     reachedRouteLimit = prefs[KEY_REACHED_ROUTE_LIMIT] ?: false
                 )
@@ -148,13 +186,17 @@ object IpListPreferences {
         context: Context,
         content: String,
         routeCount: Int,
-        reachedRouteLimit: Boolean
+        reachedRouteLimit: Boolean,
+        priorityRouteCount: Int? = null
     ) {
         context.ipListDataStore.edit { prefs ->
             prefs[KEY_CACHED_LIST] = content
             prefs[KEY_CACHED_AT_MS] = System.currentTimeMillis()
             prefs[KEY_LOADED_ROUTE_COUNT] = routeCount
             prefs[KEY_REACHED_ROUTE_LIMIT] = reachedRouteLimit
+            if (priorityRouteCount != null) {
+                prefs[KEY_PRIORITY_ROUTE_COUNT] = priorityRouteCount
+            }
             prefs.remove(KEY_LAST_ERROR)
         }
     }
@@ -162,11 +204,21 @@ object IpListPreferences {
     suspend fun saveStatus(
         context: Context,
         routeCount: Int,
-        reachedRouteLimit: Boolean
+        reachedRouteLimit: Boolean,
+        priorityRouteCount: Int? = null
     ) {
         context.ipListDataStore.edit { prefs ->
             prefs[KEY_LOADED_ROUTE_COUNT] = routeCount
             prefs[KEY_REACHED_ROUTE_LIMIT] = reachedRouteLimit
+            if (priorityRouteCount != null) {
+                prefs[KEY_PRIORITY_ROUTE_COUNT] = priorityRouteCount
+            }
+        }
+    }
+
+    suspend fun savePriorityRouteCount(context: Context, priorityRouteCount: Int) {
+        context.ipListDataStore.edit { prefs ->
+            prefs[KEY_PRIORITY_ROUTE_COUNT] = priorityRouteCount
         }
     }
 

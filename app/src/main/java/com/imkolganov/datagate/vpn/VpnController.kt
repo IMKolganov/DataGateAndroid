@@ -384,15 +384,6 @@ class VpnController(
         }
     }
 
-    fun requestVpnPermission() {
-        val prepareIntent = VpnService.prepare(activity)
-        if (prepareIntent != null) {
-            permissionLauncher.launch(prepareIntent)
-        } else {
-            updatePermissionState()
-        }
-    }
-
     fun showError(message: String) {
         prefs.edit {
             remove("selected_server_name")

@@ -236,6 +236,13 @@
     <string name="settings_ip_lists_coverage_fast_description">Applies up to %1$d broad routes. Tunnel setup is faster, but small IP ranges may still use VPN.</string>
     <string name="settings_ip_lists_coverage_full_description">Applies every loaded route for maximum coverage. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_saved">IP list settings saved.</string>
+    <string name="settings_ip_lists_priority_title">Priority sites</string>
+    <string name="settings_ip_lists_priority_subtitle">CIDR ranges here always bypass the VPN, even if the general list above gets truncated. Use this for specific sites that break when routed through VPN.</string>
+    <string name="settings_ip_lists_priority_add_url_label">Add priority list URL</string>
+    <string name="settings_ip_lists_priority_add_url">Add priority URL</string>
+    <string name="settings_ip_lists_safe_limit_title">Limit routes for system stability</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">Keeps the number of bypass routes low enough that the system VPN icon appears promptly. Priority sites above are never dropped.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Turning this off removes the route limit. The system VPN status bar icon may take much longer to appear, or may not appear at all, with large IP lists.</string>
     <string name="settings_ip_lists_android_12_warning">IP list bypass requires Android 13 or newer. On Android 12 and older, this routing mode is disabled because the VPN API cannot exclude large route lists safely.</string>
     <string name="settings_ip_lists_android_12_notice" tools:ignore="MissingTranslation">Android 12 uses compact OVPN profile routes because system route exclusion is only available on Android 13+.</string>
     <string name="settings_ip_lists_android_12_title" tools:ignore="MissingTranslation">Android 12 compatibility</string>
@@ -248,13 +255,15 @@
     <string name="settings_ip_lists_last_updated_never">Never</string>
     <string name="settings_ip_lists_loaded_routes">Loaded routes</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d routes</string>
+    <string name="settings_ip_lists_loaded_priority_routes">Priority routes</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d routes</string>
     <string name="settings_ip_lists_last_error">Last load error</string>
     <string name="settings_ip_lists_last_error_none">None</string>
     <string name="settings_ip_lists_route_limit_notice">Up to %1$d routes are loaded; the broadest routes are applied during VPN setup for faster tunnel establishment.</string>
     <string name="settings_ip_lists_route_limit_warning">The list reached the %1$d route limit. Extra routes were ignored.</string>
     <string name="settings_ip_lists_update_now">Update now</string>
     <string name="settings_ip_lists_update_now_loading">Updating…</string>
-    <string name="settings_ip_lists_update_ready">IP list updated: %1$d routes loaded.</string>
+    <string name="settings_ip_lists_update_ready">IP list updated: %1$d general, %2$d priority routes.</string>
     <string name="settings_ip_lists_update_failed_prefix">Update failed</string>
     <string name="settings_ip_lists_update_failed">Update failed: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Update failed: %1$s. Using cached or built-in list.</string>

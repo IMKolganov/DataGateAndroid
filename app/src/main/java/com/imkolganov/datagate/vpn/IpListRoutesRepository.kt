@@ -9,20 +9,28 @@ import okhttp3.Request
 
 data class IpListUpdateResult(
     val routeCount: Int,
+    val priorityRouteCount: Int = 0,
     val reachedRouteLimit: Boolean,
     val usedFallback: Boolean,
     val error: String?
+)
+
+/** General (broad country list) and priority (curated "must always bypass") routes, kept separate
+ *  so priority entries can survive truncation regardless of how the general list sorts. */
+data class IpListConnectionRoutes(
+    val generalRoutes: List<IpCidrRoute>,
+    val priorityRoutes: List<IpCidrRoute>,
 )
 
 class IpListRoutesRepository(
     private val appContext: Context,
     private val http: OkHttpClient
 ) {
-    suspend fun getRoutesForConnection(): List<IpCidrRoute> {
+    suspend fun getRoutesForConnection(): IpListConnectionRoutes {
         val settings = IpListPreferences.getSettings(appContext)
         if (!settings.cidrListsEnabled) {
             Log.d("OpenVPN3", "CIDR IP lists disabled in settings; no bypass routes")
-            return emptyList()
+            return IpListConnectionRoutes(emptyList(), emptyList())
         }
 
         val content = if (IpListPreferences.shouldRefreshCachedList(appContext, settings)) {
@@ -38,13 +46,25 @@ class IpListRoutesRepository(
         }
 
         val resolvedContent = content ?: loadFallbackList()
-        if (resolvedContent.isNullOrBlank()) return emptyList()
+        val priorityRoutes = loadPriorityRoutes(settings.priorityUrls)
+
+        if (resolvedContent.isNullOrBlank()) {
+            IpListPreferences.savePriorityRouteCount(appContext, priorityRoutes.size)
+            return IpListConnectionRoutes(emptyList(), priorityRoutes)
+        }
 
         val result = IpListRouteConfig.parseCidrRoutesResult(resolvedContent)
-        IpListPreferences.saveStatus(appContext, result.routes.size, result.reachedRouteLimit)
-        val routes = result.routes
-        Log.d("OpenVPN3", "IP list routes loaded: ${routes.size}")
-        return routes
+        IpListPreferences.saveStatus(
+            appContext,
+            result.routes.size,
+            result.reachedRouteLimit,
+            priorityRouteCount = priorityRoutes.size
+        )
+        Log.d(
+            "OpenVPN3",
+            "IP list routes loaded: ${result.routes.size} general, ${priorityRoutes.size} priority"
+        )
+        return IpListConnectionRoutes(generalRoutes = result.routes, priorityRoutes = priorityRoutes)
     }
 
     suspend fun updateNow(): IpListUpdateResult {
@@ -52,16 +72,22 @@ class IpListRoutesRepository(
         if (!settings.cidrListsEnabled) {
             return IpListUpdateResult(
                 routeCount = 0,
+                priorityRouteCount = 0,
                 reachedRouteLimit = false,
                 usedFallback = false,
                 error = null
             )
         }
+
+        val priorityRoutes = loadPriorityRoutes(settings.priorityUrls)
+        val priorityCount = priorityRoutes.size
+
         return fetchConfiguredLists(settings.sourceUrls).fold(
             onSuccess = {
-                val result = saveParsedList(it)
+                val result = saveParsedList(it, priorityRouteCount = priorityCount)
                 IpListUpdateResult(
                     routeCount = result.routes.size,
+                    priorityRouteCount = priorityCount,
                     reachedRouteLimit = result.reachedRouteLimit,
                     usedFallback = false,
                     error = null
@@ -72,11 +98,17 @@ class IpListRoutesRepository(
                 val result = fallback
                     ?.let { IpListRouteConfig.parseCidrRoutesResult(it) }
                     ?: IpListParseResult(emptyList(), reachedRouteLimit = false)
-                IpListPreferences.saveStatus(appContext, result.routes.size, result.reachedRouteLimit)
+                IpListPreferences.saveStatus(
+                    appContext,
+                    result.routes.size,
+                    result.reachedRouteLimit,
+                    priorityRouteCount = priorityCount
+                )
                 val message = error.message ?: "IP list fetch failed"
                 IpListPreferences.saveLastError(appContext, message)
                 IpListUpdateResult(
                     routeCount = result.routes.size,
+                    priorityRouteCount = priorityCount,
                     reachedRouteLimit = result.reachedRouteLimit,
                     usedFallback = fallback != null,
                     error = message
@@ -85,13 +117,27 @@ class IpListRoutesRepository(
         )
     }
 
-    private suspend fun saveParsedList(content: String): IpListParseResult {
+    private suspend fun loadPriorityRoutes(priorityUrls: List<String>): List<IpCidrRoute> {
+        val priorityContent = fetchConfiguredLists(priorityUrls).fold(
+            onSuccess = { it },
+            onFailure = { loadPriorityFallbackList() }
+        )
+        return priorityContent
+            ?.let { IpListRouteConfig.parseCidrRoutesResult(it).routes }
+            .orEmpty()
+    }
+
+    private suspend fun saveParsedList(
+        content: String,
+        priorityRouteCount: Int? = null
+    ): IpListParseResult {
         val result = IpListRouteConfig.parseCidrRoutesResult(content)
         IpListPreferences.saveCachedList(
             context = appContext,
             content = content,
             routeCount = result.routes.size,
-            reachedRouteLimit = result.reachedRouteLimit
+            reachedRouteLimit = result.reachedRouteLimit,
+            priorityRouteCount = priorityRouteCount
         )
         return result
     }
@@ -155,6 +201,10 @@ class IpListRoutesRepository(
         listOfNotNull(ipv4, ipv6).joinToString("\n").takeIf { it.isNotBlank() }
     }
 
+    private suspend fun loadPriorityFallbackList(): String? = withContext(Dispatchers.IO) {
+        readAsset(PRIORITY_FALLBACK_ASSET)
+    }
+
     private fun readAsset(path: String): String? =
         runCatching {
             appContext.assets.open(path).bufferedReader().use { it.readText() }
@@ -164,5 +214,6 @@ class IpListRoutesRepository(
         const val MAX_BODY_CHARS = 1_000_000
         const val FALLBACK_IPV4_ASSET = "ip_lists/ru_ipv4_fallback.txt"
         const val FALLBACK_IPV6_ASSET = "ip_lists/ru_ipv6_fallback.txt"
+        const val PRIORITY_FALLBACK_ASSET = "ip_lists/ru_priority_fallback.txt"
     }
 }

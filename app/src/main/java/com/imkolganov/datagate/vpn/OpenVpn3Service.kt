@@ -736,10 +736,14 @@ class OpenVpn3Service : VpnService() {
             broadcastStatus("WAITING_NETWORK", "Waiting for network...")
         }
 
-        serviceScope.launch(ovpnNativeDispatcher) {
-            runCatching { vpnClient?.stop() }
-                .onFailure { Log.w(TAG, "client.stop() after bridge transport loss", it) }
-        }
+        // Must not use ovpnNativeDispatcher: stop would queue behind blocking connect() and the
+        // TUN would stay up while tunneled traffic blackholes (see OpenVpnNativeBridgeLossStopScheduling).
+        OpenVpnNativeBridgeLossStopScheduling.scheduleStop(
+            scope = serviceScope,
+            nativeVpnJobActive = vpnJob?.isActive == true,
+            stopAction = { vpnClient?.stop() },
+            onFailure = { Log.w(TAG, "client.stop() after bridge transport loss", it) },
+        )
     }
 
     private fun processNetworkChanged(source: String, transport: String) {

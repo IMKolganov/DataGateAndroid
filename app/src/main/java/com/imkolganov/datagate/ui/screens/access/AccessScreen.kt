@@ -63,7 +63,6 @@ fun AccessScreen(
     vpnState: VpnStatusUiState,
     onEvent: (AccessContract.UiEvent) -> Unit,
     onConnectVpn: () -> Unit,
-    onRequestPermissionClick: () -> Unit,
     onDisconnectVpn: () -> Unit,
     onPauseVpn: () -> Unit = {},
     onResumeVpn: () -> Unit = {},
@@ -269,8 +268,13 @@ fun AccessScreen(
             text = { Text(stringResource(R.string.vpn_permission_dialog_body)) },
             confirmButton = {
                 TextButton(onClick = {
+                    // Route through the normal connect entry point (not a bare permission
+                    // request): the target server was already selected above, and
+                    // VpnController.startWithConfig() stores the pending config before launching
+                    // the system dialog, so granting permission here resumes straight into
+                    // connecting instead of leaving the user stuck on a "config is missing" error.
                     showPermissionDialog = false
-                    onRequestPermissionClick()
+                    onConnectVpn()
                 }) {
                     Text(stringResource(R.string.vpn_permission_dialog_grant))
                 }
