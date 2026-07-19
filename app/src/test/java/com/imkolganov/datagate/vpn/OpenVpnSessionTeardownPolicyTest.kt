@@ -112,6 +112,34 @@ class OpenVpnSessionTeardownPolicyTest {
     fun staleFinally_policy_clearsReconnectPending() {
         assertTrue(OpenVpnSessionTeardownPolicy.shouldClearReconnectPendingOnStaleFinally())
     }
+
+    @Test
+    fun pendingConnect_deferredWhileBridgeLossOwnsReconnect_exceptFinallyRetry() {
+        assertTrue(
+            OpenVpnSessionTeardownPolicy.shouldDeferPendingConnectWhileBridgeLossOwnsReconnect(
+                reconnectPendingAfterJob = true,
+                reason = "network_available",
+            )
+        )
+        assertTrue(
+            OpenVpnSessionTeardownPolicy.shouldDeferPendingConnectWhileBridgeLossOwnsReconnect(
+                reconnectPendingAfterJob = true,
+                reason = "core_disconnected_reconnect",
+            )
+        )
+        assertFalse(
+            OpenVpnSessionTeardownPolicy.shouldDeferPendingConnectWhileBridgeLossOwnsReconnect(
+                reconnectPendingAfterJob = true,
+                reason = OpenVpnSessionTeardownPolicy.BRIDGE_TRANSPORT_LOST_RETRY_REASON,
+            )
+        )
+        assertFalse(
+            OpenVpnSessionTeardownPolicy.shouldDeferPendingConnectWhileBridgeLossOwnsReconnect(
+                reconnectPendingAfterJob = false,
+                reason = "network_available",
+            )
+        )
+    }
 }
 
 class OpenVpnCoreLogFilterTest {

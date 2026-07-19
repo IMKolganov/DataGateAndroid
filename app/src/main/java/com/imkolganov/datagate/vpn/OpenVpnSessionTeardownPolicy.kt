@@ -18,6 +18,19 @@ internal object OpenVpnSessionTeardownPolicy {
         reconnectPendingAfterJob
 
     /**
+     * While bridge-loss finally owns reconnect, other entry points (network change, core
+     * DISCONNECTED, etc.) must not call [OpenVpn3Service.startPendingConnectIfPossible] —
+     * except the finally's own [RetryConnect] with reason `bridge_transport_lost`.
+     */
+    fun shouldDeferPendingConnectWhileBridgeLossOwnsReconnect(
+        reconnectPendingAfterJob: Boolean,
+        reason: String,
+    ): Boolean =
+        reconnectPendingAfterJob && reason != BRIDGE_TRANSPORT_LOST_RETRY_REASON
+
+    const val BRIDGE_TRANSPORT_LOST_RETRY_REASON = "bridge_transport_lost"
+
+    /**
      * A skipped (stale) finally must release [reconnectPendingAfterJob]. Leaving the flag set
      * after a newer session already started makes that live session's DISCONNECTED defer forever
      * to a finally that will never run.

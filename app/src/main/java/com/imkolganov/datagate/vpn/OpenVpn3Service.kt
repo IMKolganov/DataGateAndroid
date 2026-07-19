@@ -799,10 +799,12 @@ class OpenVpn3Service : VpnService() {
 
         // Must not use ovpnNativeDispatcher: stop would queue behind blocking connect() and the
         // TUN would stay up while tunneled traffic blackholes (see OpenVpnNativeBridgeLossStopScheduling).
+        // Capture the client now — a later startVpn must not make this stop() hit the replacement.
+        val clientToStop = vpnClient
         OpenVpnNativeBridgeLossStopScheduling.scheduleStop(
             scope = serviceScope,
             nativeVpnJobActive = vpnJob?.isActive == true,
-            stopAction = { vpnClient?.stop() },
+            stopAction = { clientToStop?.stop() },
             onFailure = { VpnDebugLogger.w(TAG, "client.stop() after bridge transport loss", it) },
         )
     }
@@ -844,6 +846,18 @@ class OpenVpn3Service : VpnService() {
     private fun startPendingConnectIfPossible(reason: String, enforceBackoff: Boolean) {
         if (!desiredConnection || isPaused) return
         if (connectInProgress || hasActiveSession) return
+        if (OpenVpnSessionTeardownPolicy.shouldDeferPendingConnectWhileBridgeLossOwnsReconnect(
+                reconnectPendingAfterJob = reconnectPendingAfterJob,
+                reason = reason,
+            )
+        ) {
+            VpnDebugLogger.event(
+                category = "service.reconnect",
+                action = "deferred_pending_connect_bridge_loss",
+                details = mapOf("reason" to reason),
+            )
+            return
+        }
 
         val request = pendingConnectRequest ?: return
         if (!networkAvailable) {
@@ -1112,7 +1126,11 @@ class OpenVpn3Service : VpnService() {
                         isStopping = isStopping,
                         isPaused = isPaused
                     ) -> {
-                        commandQueue.trySend(VpnCommand.RetryConnect("bridge_transport_lost"))
+                        commandQueue.trySend(
+                            VpnCommand.RetryConnect(
+                                OpenVpnSessionTeardownPolicy.BRIDGE_TRANSPORT_LOST_RETRY_REASON
+                            )
+                        )
                     }
                     !desiredConnection || isStopping -> stopSelf()
                 }
