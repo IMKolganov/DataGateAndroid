@@ -13,6 +13,17 @@ import java.io.File
 class IpListEstablishRouteContractTest {
 
     @Test
+    fun release_1_0_13_safeCaps_arePinned() {
+        // Do not raise without fresh on-device establish timings — O(n²) excludeRoute hang.
+        assertEquals(2_000, IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT)
+        assertEquals(1_500, IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES)
+        assertEquals(
+            IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT,
+            IpListEstablishRoutePolicy.SAFE_ESTABLISH_EXCLUDE_ROUTE_BUDGET,
+        )
+    }
+
+    @Test
     fun productionRuFallback_parsesThousandsOfRoutes() {
         val routes = parseProductionFallbackLists()
         assertTrue(

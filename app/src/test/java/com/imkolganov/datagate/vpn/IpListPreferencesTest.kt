@@ -130,4 +130,40 @@ class IpListPreferencesTest {
         assertEquals(100, status.loadedRouteCount)
         assertEquals(5, status.priorityRouteCount)
     }
+
+    @Test
+    fun priorityCache_manualMode_refreshesOnlyWhenBlank() = runBlocking {
+        val settings = IpListPreferences.getSettings(context).copy(
+            updateFrequency = IpListUpdateFrequency.MANUAL,
+        )
+        IpListPreferences.saveCachedPriorityList(context, content = "", priorityRouteCount = 0)
+        assertTrue(IpListPreferences.shouldRefreshCachedPriorityList(context, settings))
+
+        IpListPreferences.saveCachedPriorityList(
+            context,
+            content = "203.0.113.0/24\n",
+            priorityRouteCount = 1,
+        )
+        assertFalse(IpListPreferences.shouldRefreshCachedPriorityList(context, settings))
+        assertEquals("203.0.113.0/24", IpListPreferences.getCachedPriorityList(context)?.trim())
+    }
+
+    @Test
+    fun priorityCache_dailyMode_refreshesWhenStaleOrMissing() = runBlocking {
+        val settings = IpListPreferences.getSettings(context).copy(
+            updateFrequency = IpListUpdateFrequency.DAILY,
+        )
+        IpListPreferences.saveCachedPriorityList(context, content = "", priorityRouteCount = 0)
+        assertTrue(IpListPreferences.shouldRefreshCachedPriorityList(context, settings))
+
+        IpListPreferences.saveCachedPriorityList(
+            context,
+            content = "198.51.100.0/24\n",
+            priorityRouteCount = 1,
+        )
+        assertFalse(
+            "Fresh priority cache must not refetch on every connect",
+            IpListPreferences.shouldRefreshCachedPriorityList(context, settings),
+        )
+    }
 }

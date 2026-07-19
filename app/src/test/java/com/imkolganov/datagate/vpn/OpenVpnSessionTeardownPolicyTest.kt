@@ -27,6 +27,38 @@ class OpenVpnSessionTeardownPolicyTest {
             )
         )
     }
+
+    @Test
+    fun race_bridgeLoss_then_coreDisconnected_then_newStart_staleFinallySkipped() {
+        // Mirrors the High finding: foreign-thread stop → DISCONNECTED may startVpn (gen++)
+        // before the dying job's finally. Stale finally must not teardown; DISCONNECTED must
+        // not also reconnect while reconnectPendingAfterJob is armed.
+        var generation = 1
+        val dyingSession = generation
+        val reconnectPendingAfterJob = true
+
+        assertTrue(
+            OpenVpnSessionTeardownPolicy.shouldDeferReconnectToBridgeLossFinally(
+                reconnectPendingAfterJob
+            )
+        )
+
+        // Replacement session claims the globals.
+        generation++
+        val liveSession = generation
+        assertTrue(OpenVpnSessionTeardownPolicy.shouldRunVpnJobFinally(liveSession, generation))
+        assertFalse(OpenVpnSessionTeardownPolicy.shouldRunVpnJobFinally(dyingSession, generation))
+
+        // Dying job's finally owns reconnect when flag was armed before gen bump.
+        assertTrue(
+            OpenVpnRuntimePolicy.shouldReconnectAfterBridgeTransportLost(
+                reconnectPendingAfterJob = true,
+                desiredConnection = true,
+                isStopping = false,
+                isPaused = false,
+            )
+        )
+    }
 }
 
 class OpenVpnCoreLogFilterTest {

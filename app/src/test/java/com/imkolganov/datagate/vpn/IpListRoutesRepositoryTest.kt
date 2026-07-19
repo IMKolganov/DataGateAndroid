@@ -93,10 +93,12 @@ class IpListRoutesRepositoryTest {
             val status = IpListPreferences.getStatus(context)
             assertEquals(1, status.loadedRouteCount)
             assertEquals(1, status.priorityRouteCount)
+            assertEquals(
+                "203.0.113.0/24",
+                IpListPreferences.getCachedPriorityList(context)?.trim(),
+            )
 
-            // Second connect must use priority cache (no extra HTTP) while MANUAL still
-            // re-fetches blank-cleared general… cache is warm after first success, so MANUAL
-            // keeps cached general too until Update now / frequency refresh.
+            // Second connect must use caches (no extra HTTP).
             server.enqueue(MockResponse().setBody("should-not-be-fetched\n"))
             val again = repo.getRoutesForConnection()
             assertEquals(routes.generalRoutes, again.generalRoutes)
