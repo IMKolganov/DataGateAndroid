@@ -188,22 +188,37 @@ class VpnConnectInteractor(
             IpListEstablishRoutePolicy.establishBudgetViolation(routePlan, ipListSettings.coverageMode)?.let { violation ->
                 VpnDebugLogger.w("OpenVPN3", "excludeRoute establish budget violation: $violation")
             }
-            VpnDebugLogger.d(
-                "OpenVPN3",
-                "IP list routes prepared: applied=${routePlan.appliedRouteCount}/${bypassRoutes.size}, " +
-                    "selected=${routePlan.selectedRouteCount}, mode=" +
-                    if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
-                        "android-excludeRoute/${ipListSettings.coverageMode}" +
-                            if (routePlan.reachedEstablishRouteLimit) {
-                                "(capped=${IpListRouteConfig.androidExcludeRouteLimitFor(ipListSettings.coverageMode)})"
-                            } else {
-                                ""
-                            }
-                    } else {
-                        "ovpn-route-emulation(limit=${ipListSettings.android12OvpnRouteLimit}, " +
-                            "profileLimit=${routePlan.reachedProfileSizeLimit})"
-                    }
-            )
+            val droppedAfterNormalize =
+                (routePlan.normalizedCandidateCount - routePlan.appliedRouteCount).coerceAtLeast(0)
+            if (
+                routePlan.delivery == ANDROID_EXCLUDE_ROUTE &&
+                routePlan.reachedEstablishRouteLimit
+            ) {
+                VpnDebugLogger.w(
+                    "OpenVPN3",
+                    "Android excluded-route list truncated:\n" +
+                        "mode=${ipListSettings.coverageMode}\n" +
+                        "raw=${routePlan.rawCandidateCount}\n" +
+                        "normalized=${routePlan.normalizedCandidateCount}\n" +
+                        "applied=${routePlan.appliedRouteCount}\n" +
+                        "dropped=$droppedAfterNormalize\n" +
+                        "coverageTruncated=true"
+                )
+            } else {
+                VpnDebugLogger.d(
+                    "OpenVPN3",
+                    "IP list routes prepared: raw=${routePlan.rawCandidateCount}, " +
+                        "normalized=${routePlan.normalizedCandidateCount}, " +
+                        "applied=${routePlan.appliedRouteCount}, dropped=$droppedAfterNormalize, " +
+                        "coverageTruncated=false, selected=${routePlan.selectedRouteCount}, mode=" +
+                        if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
+                            "android-excludeRoute/${ipListSettings.coverageMode}"
+                        } else {
+                            "ovpn-route-emulation(limit=${ipListSettings.android12OvpnRouteLimit}, " +
+                                "profileLimit=${routePlan.reachedProfileSizeLimit})"
+                        }
+                )
+            }
             if (bypassRoutes.isNotEmpty()) {
                 vpnController.showStatus(
                     "IP_LIST_READY",

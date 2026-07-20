@@ -27,10 +27,11 @@ data class IpListSettings(
     val priorityUrls: List<String> = emptyList(),
     /**
      * When true (default), the Android 13+ excludeRoute() count is capped at
-     * [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] (or the FAST-mode equivalent) so the
-     * system VPN status bar icon appears promptly. Turning this off removes the cap — up to
-     * [IpListRouteConfig.MAX_ROUTES] routes get pushed to excludeRoute() uncapped, trading full
-     * coverage for a system VPN icon that may take much longer to appear (or not appear at all).
+     * [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL] (or FAST
+     * [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST]) — a conservative production limit
+     * measured on SM-S928B, not a universal Binder ceiling. Turning this off removes the cap —
+     * up to [IpListRouteConfig.MAX_ROUTES] routes get pushed uncapped, trading coverage for
+     * TransactionTooLarge / unvalidated-VPN risk.
      */
     val safeRouteLimitEnabled: Boolean = true
 )

@@ -1634,11 +1634,11 @@ private fun IpListCoverageModeSelector(
             when (current) {
                 IpListCoverageMode.FAST -> stringResource(
                     R.string.settings_ip_lists_coverage_fast_description,
-                    IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES
+                    IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST
                 )
                 IpListCoverageMode.FULL -> stringResource(
                     R.string.settings_ip_lists_coverage_full_description,
-                    IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+                    IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL
                 )
             },
             style = MaterialTheme.typography.bodySmall,

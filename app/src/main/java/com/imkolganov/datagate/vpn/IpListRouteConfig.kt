@@ -48,33 +48,41 @@ data class IpListConnectionRoutePlan(
     val selectedRouteCount: Int,
     val appliedRouteCount: Int,
     val reachedProfileSizeLimit: Boolean,
-    /** True when Android 13+ excludeRoute list was truncated to [MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT]. */
+    /**
+     * True when Android 13+ excludeRoute list was truncated to the mode cap — normalized
+     * candidates exceeded the budget, so bypass coverage is incomplete (`coverageTruncated`).
+     */
     val reachedEstablishRouteLimit: Boolean = false,
-    val delivery: IpListRouteDelivery
+    val delivery: IpListRouteDelivery,
+    /** Candidate count before prefix-trie normalization (general + priority, as passed in). */
+    val rawCandidateCount: Int = 0,
+    /** Candidate count after dedupe / nested-prefix removal / sibling merge. */
+    val normalizedCandidateCount: Int = 0,
 )
 
 object IpListRouteConfig {
     const val MAX_ROUTES = 12_000
     /**
-     * Cap for [IpListCoverageMode.FAST]. Kept at the 1.0.13 budget (~2s icon) after raising to
-     * 2200 without fresh hang measurements proved risky.
-     */
-    const val MAX_ANDROID_EXCLUDED_ROUTES = 1_500
-    /**
-     * Cap for Android 13+ [android.net.VpnService.Builder.excludeRoute] at establish, used when
-     * [IpListSettings.safeRouteLimitEnabled] is true (the default).
+     * Cap for [IpListCoverageMode.FAST] — below FULL so establish stays quicker.
      *
-     * The framework's route processing scales worse than linearly with the excludeRoute() count
-     * (consistent with AOSP's [VpnTest.testDoesNotLockUpWithTooManyRoutes] O(n²) safeguard at 4000
-     * routes): on-device measurements showed the system VPN status bar icon taking ~0.4s to appear
-     * at 500 routes, ~3.7s at 2000, ~5.6s at 3000, ~8.5s at 3500, and still not appearing after 36s+
-     * at ~10800 (uncapped). Release 1.0.13 standardized on 2000 as the safe FULL budget; do not
-     * raise without new establish timings. [selectRoutesWithPriority] keeps a small curated
-     * priority list (e.g. sites that break under VPN) inside that budget. Turning off the safe
-     * limit (see [IpListSettings.safeRouteLimitEnabled]) removes this cap entirely — user-accepted
-     * hang risk, not the default.
+     * Device-specific margin under [MAX_ANDROID_EXCLUDED_ROUTES_FULL]; not a universal Binder limit.
      */
-    const val MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT = 2_000
+    const val MAX_ANDROID_EXCLUDED_ROUTES_FAST = 800
+    /**
+     * Cap for [IpListCoverageMode.FULL] when [IpListSettings.safeRouteLimitEnabled] is true.
+     *
+     * Conservative production cap for Android 13+ [android.net.VpnService.Builder.excludeRoute].
+     * 1750 routes were validated successfully on SM-S928B (Android 16), while 2000 routes caused
+     * TransactionTooLargeException in NetworkMonitorManager.notifyNetworkConnected (~281 KB
+     * LinkProperties parcel). This is not a universal Binder-safe ceiling — another OEM, Android
+     * version, or extra DNS/IPv6/address metadata in LinkProperties can move the boundary.
+     *
+     * Upstream ipverse "aggregated" RU lists are already fully collapsed (~8.6k IPv4 + ~2.2k IPv6);
+     * [IpCidrNormalizer] cannot shrink them under this budget. Complete coverage needs a future
+     * userspace TUN bypass. Turning off the safe limit removes the cap — user-accepted
+     * TransactionTooLarge / unvalidated-VPN risk, not the default.
+     */
+    const val MAX_ANDROID_EXCLUDED_ROUTES_FULL = 1_000
     const val DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT = 800
     const val MIN_ANDROID12_OVPN_ROUTE_LIMIT = 50
     const val MAX_ANDROID12_OVPN_ROUTE_LIMIT = 3_000
@@ -82,14 +90,14 @@ object IpListRouteConfig {
 
     /** The `excludeRoute()` cap that applies for a given [coverageMode] — see [prepareConnectionRoutes]. */
     fun androidExcludeRouteLimitFor(coverageMode: IpListCoverageMode): Int = when (coverageMode) {
-        IpListCoverageMode.FAST -> MAX_ANDROID_EXCLUDED_ROUTES
-        IpListCoverageMode.FULL -> MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+        IpListCoverageMode.FAST -> MAX_ANDROID_EXCLUDED_ROUTES_FAST
+        IpListCoverageMode.FULL -> MAX_ANDROID_EXCLUDED_ROUTES_FULL
     }
 
     fun selectAndroidExcludedRoutes(
         routes: List<IpCidrRoute>,
         priorityRoutes: List<IpCidrRoute> = emptyList(),
-        maxRoutes: Int = MAX_ANDROID_EXCLUDED_ROUTES
+        maxRoutes: Int = MAX_ANDROID_EXCLUDED_ROUTES_FAST
     ): List<IpCidrRoute> {
         return selectRoutesWithPriority(routes, priorityRoutes, maxRoutes)
     }
@@ -97,7 +105,7 @@ object IpListRouteConfig {
     fun selectAndroid13FullExcludedRoutes(
         routes: List<IpCidrRoute>,
         priorityRoutes: List<IpCidrRoute> = emptyList(),
-        maxRoutes: Int = MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+        maxRoutes: Int = MAX_ANDROID_EXCLUDED_ROUTES_FULL
     ): List<IpCidrRoute> {
         return selectRoutesWithPriority(routes, priorityRoutes, maxRoutes)
     }
@@ -159,24 +167,36 @@ object IpListRouteConfig {
         priorityRoutes: List<IpCidrRoute> = emptyList(),
         safeRouteLimitEnabled: Boolean = true,
     ): IpListConnectionRoutePlan {
+        val rawCandidateCount = routes.size + priorityRoutes.size
+        // Normalize families separately so priority CIDRs keep their identity for selection,
+        // while nested/sibling compression still runs within each list.
+        val normalizedGeneral = IpCidrNormalizer.normalize(routes)
+        val normalizedPriority = IpCidrNormalizer.normalize(priorityRoutes)
+        val normalizedCandidateCount =
+            normalizedGeneral.afterSiblingMergeCount + normalizedPriority.afterSiblingMergeCount
+
         val selectedRoutes = if (supportsAndroidRouteExclusion) {
             val cap = when (coverageMode) {
-                IpListCoverageMode.FAST -> MAX_ANDROID_EXCLUDED_ROUTES
-                IpListCoverageMode.FULL -> MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+                IpListCoverageMode.FAST -> MAX_ANDROID_EXCLUDED_ROUTES_FAST
+                IpListCoverageMode.FULL -> MAX_ANDROID_EXCLUDED_ROUTES_FULL
             }
             selectRoutesWithPriority(
-                routes = routes,
-                priorityRoutes = priorityRoutes,
+                routes = normalizedGeneral.routes,
+                priorityRoutes = normalizedPriority.routes,
                 maxRoutes = if (safeRouteLimitEnabled) cap else Int.MAX_VALUE,
             )
         } else {
-            selectAndroid12OvpnRoutes(routes, android12OvpnRouteLimit, priorityRoutes)
+            selectAndroid12OvpnRoutes(
+                routes = normalizedGeneral.routes,
+                limit = android12OvpnRouteLimit,
+                priorityRoutes = normalizedPriority.routes,
+            )
         }
 
         if (supportsAndroidRouteExclusion) {
             val totalUniqueCandidates = (
-                priorityRoutes.asSequence().map { it.toCidrString() } +
-                    routes.asSequence().map { it.toCidrString() }
+                normalizedPriority.routes.asSequence().map { it.toCidrString() } +
+                    normalizedGeneral.routes.asSequence().map { it.toCidrString() }
                 ).toHashSet().size
             val truncated = selectedRoutes.size < totalUniqueCandidates
             return IpListConnectionRoutePlan(
@@ -186,7 +206,9 @@ object IpListRouteConfig {
                 appliedRouteCount = selectedRoutes.size,
                 reachedProfileSizeLimit = false,
                 reachedEstablishRouteLimit = truncated,
-                delivery = IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
+                delivery = IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE,
+                rawCandidateCount = rawCandidateCount,
+                normalizedCandidateCount = normalizedCandidateCount,
             )
         }
 
@@ -198,7 +220,9 @@ object IpListRouteConfig {
             appliedRouteCount = appendResult.appliedRouteCount,
             reachedProfileSizeLimit = appendResult.reachedProfileSizeLimit,
             reachedEstablishRouteLimit = false,
-            delivery = IpListRouteDelivery.OVPN_PROFILE
+            delivery = IpListRouteDelivery.OVPN_PROFILE,
+            rawCandidateCount = rawCandidateCount,
+            normalizedCandidateCount = normalizedCandidateCount,
         )
     }
 

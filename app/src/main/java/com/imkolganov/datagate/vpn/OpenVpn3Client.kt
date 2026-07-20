@@ -282,8 +282,15 @@ class OpenVpn3Client(
         }
 
         return try {
-            applyExcludedRoutes(b)
+            val appliedExcludes = applyExcludedRoutes(b)
+            val dropped = (excludedRoutes.size - appliedExcludes).coerceAtLeast(0)
+            VpnDebugLogger.i(
+                TAG,
+                "excludeRoute establish: requested=${excludedRoutes.size} applied=$appliedExcludes dropped=$dropped"
+            )
+
             val pfd = b.establish()
+
             if (pfd == null) {
                 VpnDebugLogger.e(TAG, "tun_builder_establish: establish() returned null")
                 -1
@@ -305,12 +312,13 @@ class OpenVpn3Client(
         }
     }
 
-    private fun applyExcludedRoutes(b: VpnService.Builder) {
-        if (excludedRoutes.isEmpty()) return
+    /** @return number of routes actually passed to [VpnService.Builder.excludeRoute]. */
+    private fun applyExcludedRoutes(b: VpnService.Builder): Int {
+        if (excludedRoutes.isEmpty()) return 0
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             VpnDebugLogger.w(TAG, "Skipping ${excludedRoutes.size} excluded routes: excludeRoute requires Android 13+")
-            return
+            return 0
         }
 
         var applied = 0
@@ -328,6 +336,7 @@ class OpenVpn3Client(
             }
         }
         VpnDebugLogger.d(TAG, "Applied excluded routes: $applied/${excludedRoutes.size}")
+        return applied
     }
 
     override fun tun_builder_persist(): Boolean {

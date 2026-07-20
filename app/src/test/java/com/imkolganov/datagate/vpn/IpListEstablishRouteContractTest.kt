@@ -8,17 +8,18 @@ import org.junit.Test
 import java.io.File
 
 /**
- * CIDR establish budget — FULL capped at [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT].
+ * CIDR establish budget — FULL capped at [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL].
  */
 class IpListEstablishRouteContractTest {
 
     @Test
-    fun release_1_0_13_safeCaps_arePinned() {
-        // Do not raise without fresh on-device establish timings — O(n²) excludeRoute hang.
-        assertEquals(2_000, IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT)
-        assertEquals(1_500, IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES)
+    fun binderSafeCaps_arePinned() {
+        // Conservative production caps after TTLE at ~2000 excludes on SM-S928B; not a universal
+        // Binder ceiling. Do not raise without fresh LinkProperties parcel / VALIDATED measurements.
+        assertEquals(1_000, IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL)
+        assertEquals(800, IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST)
         assertEquals(
-            IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT,
+            IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL,
             IpListEstablishRoutePolicy.SAFE_ESTABLISH_EXCLUDE_ROUTE_BUDGET,
         )
     }
@@ -38,7 +39,7 @@ class IpListEstablishRouteContractTest {
         val plan = planForAndroid13(IpListCoverageMode.FULL, routes)
 
         assertEquals(IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE, plan.delivery)
-        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, plan.androidExcludedRoutes.size)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, plan.androidExcludedRoutes.size)
         assertTrue(plan.reachedEstablishRouteLimit)
         assertNull(IpListEstablishRoutePolicy.establishBudgetViolation(plan, IpListCoverageMode.FULL))
         assertTrue(
@@ -65,8 +66,8 @@ class IpListEstablishRouteContractTest {
         val fast = planForAndroid13(IpListCoverageMode.FAST, routes)
         val full = planForAndroid13(IpListCoverageMode.FULL, routes)
 
-        assertTrue(fast.androidExcludedRoutes.size <= IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES)
-        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, full.androidExcludedRoutes.size)
+        assertTrue(fast.androidExcludedRoutes.size <= IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, full.androidExcludedRoutes.size)
         assertTrue(full.androidExcludedRoutes.size > fast.androidExcludedRoutes.size)
     }
 
@@ -84,7 +85,7 @@ class IpListEstablishRouteContractTest {
 
         assertEquals(IpListRouteDelivery.OVPN_PROFILE, android12.delivery)
         assertTrue(android12.appliedRouteCount <= IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT)
-        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, android13Full.androidExcludedRoutes.size)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, android13Full.androidExcludedRoutes.size)
     }
 
     @Test
@@ -93,9 +94,9 @@ class IpListEstablishRouteContractTest {
         val app106Excluded = routes
         val current = planForAndroid13(IpListCoverageMode.FULL, routes)
 
-        assertTrue(app106Excluded.size > IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT)
+        assertTrue(app106Excluded.size > IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL)
         assertFalse(app106Excluded.size == current.androidExcludedRoutes.size)
-        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, current.androidExcludedRoutes.size)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, current.androidExcludedRoutes.size)
     }
 
     @Test
@@ -116,10 +117,11 @@ class IpListEstablishRouteContractTest {
             supportsAndroidRouteExclusion = true,
         )
 
+        val selectedCidrs = plan.androidExcludedRoutes.map { it.toCidrString() }.toHashSet()
         for (priorityRoute in priorityRoutes) {
             assertTrue(
                 "Priority route ${priorityRoute.toCidrString()} was dropped",
-                plan.androidExcludedRoutes.contains(priorityRoute),
+                priorityRoute.toCidrString() in selectedCidrs,
             )
         }
     }
