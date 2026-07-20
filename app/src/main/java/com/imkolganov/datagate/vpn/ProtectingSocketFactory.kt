@@ -1,22 +1,91 @@
 package com.imkolganov.datagate.vpn
 
+import java.io.IOException
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
+import javax.net.SocketFactory
+
+/**
+ * OkHttp plain [SocketFactory]: [android.net.VpnService.protect] runs in [createSocket]
+ * **before** OkHttp calls [Socket.connect].
+ *
+ * Only the no-argument [createSocket] overload is supported. OkHttp 5.x
+ * [okhttp3.internal.connection.ConnectPlan] uses that path, then connects itself.
+ * Connected overloads are disabled so a socket cannot be protected after connect.
+ *
+ * Local [Socket.bind] to an ephemeral port is a **compatibility workaround** so
+ * [android.net.VpnService.protect] has a valid FD (historical Android/OkHttp reports).
+ * It is not claimed to be required on every device/API; it does not select a physical
+ * network interface (wildcard local address is expected).
+ */
 class ProtectingSocketFactory(
-    private val base: javax.net.SocketFactory,
-    private val protectSocket: (java.net.Socket) -> Unit
-) : javax.net.SocketFactory() {
+    private val delegate: SocketFactory,
+    private val protect: (Socket) -> Boolean,
+    private val log: (String) -> Unit = {},
+) : SocketFactory() {
 
-    override fun createSocket(): java.net.Socket =
-        base.createSocket().also { protectSocket(it) }
+    override fun createSocket(): Socket {
+        val socket = delegate.createSocket()
+        try {
+            if (socket.isConnected) {
+                throw IOException("SocketFactory returned an already connected socket")
+            }
 
-    override fun createSocket(host: String, port: Int): java.net.Socket =
-        base.createSocket(host, port).also { protectSocket(it) }
+            // Compatibility workaround for protect() needing a bound FD; not a proven
+            // universal requirement. Does not bind to a specific underlying Network.
+            if (!socket.isBound) {
+                socket.bind(InetSocketAddress(0))
+            }
 
-    override fun createSocket(host: String, port: Int, localHost: java.net.InetAddress, localPort: Int): java.net.Socket =
-        base.createSocket(host, port, localHost, localPort).also { protectSocket(it) }
+            val protectedOk = protect(socket)
 
-    override fun createSocket(host: java.net.InetAddress, port: Int): java.net.Socket =
-        base.createSocket(host, port).also { protectSocket(it) }
+            runCatching {
+                log(
+                    "protect(plain)=$protectedOk " +
+                        "bound=${socket.isBound} " +
+                        "connected=${socket.isConnected} " +
+                        "closed=${socket.isClosed}"
+                )
+            }
 
-    override fun createSocket(address: java.net.InetAddress, port: Int, localAddress: java.net.InetAddress, localPort: Int): java.net.Socket =
-        base.createSocket(address, port, localAddress, localPort).also { protectSocket(it) }
+            if (!protectedOk) {
+                throw IOException("VpnService.protect failed for OkHttp plain socket")
+            }
+
+            return socket
+        } catch (e: Exception) {
+            try {
+                socket.close()
+            } catch (_: IOException) {
+                // Preserve the original exception.
+            }
+            throw e
+        }
+    }
+
+    override fun createSocket(host: String, port: Int): Socket = unsupportedConnectedOverload()
+
+    override fun createSocket(
+        host: String,
+        port: Int,
+        localHost: InetAddress,
+        localPort: Int,
+    ): Socket = unsupportedConnectedOverload()
+
+    override fun createSocket(host: InetAddress, port: Int): Socket = unsupportedConnectedOverload()
+
+    override fun createSocket(
+        address: InetAddress,
+        port: Int,
+        localAddress: InetAddress,
+        localPort: Int,
+    ): Socket = unsupportedConnectedOverload()
+
+    private fun unsupportedConnectedOverload(): Nothing {
+        throw UnsupportedOperationException(
+            "Connected createSocket overloads are disabled because " +
+                "the socket must be protected before connect()"
+        )
+    }
 }

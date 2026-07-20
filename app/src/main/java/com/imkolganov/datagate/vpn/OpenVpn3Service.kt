@@ -1417,6 +1417,18 @@ class OpenVpn3Service : VpnService() {
         }
 
         return okhttp3.OkHttpClient.Builder()
+            .socketFactory(
+                ProtectingSocketFactory(
+                    delegate = javax.net.SocketFactory.getDefault(),
+                    protect = { socket -> service.protect(socket) },
+                    log = { msg ->
+                        com.imkolganov.datagate.logger.VpnDebugLogger.d(
+                            "ProtectingSocketFactory",
+                            "protect.layer=plain $msg",
+                        )
+                    },
+                )
+            )
             .sslSocketFactory(protectingSslFactory, trustManager)
             .pingInterval(15, java.util.concurrent.TimeUnit.SECONDS)
             .build()
