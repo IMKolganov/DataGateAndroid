@@ -4,6 +4,7 @@ import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.concurrent.atomic.AtomicLong
 import javax.net.SocketFactory
 
 /**
@@ -18,6 +19,9 @@ import javax.net.SocketFactory
  * [android.net.VpnService.protect] has a valid FD (historical Android/OkHttp reports).
  * It is not claimed to be required on every device/API; it does not select a physical
  * network interface (wildcard local address is expected).
+ *
+ * [socketId] is local to this factory's createSocket() only — not correlated with OkHttp
+ * EventListener call.id (OkHttp does not expose a reliable link).
  */
 class ProtectingSocketFactory(
     private val delegate: SocketFactory,
@@ -25,7 +29,10 @@ class ProtectingSocketFactory(
     private val log: (String) -> Unit = {},
 ) : SocketFactory() {
 
+    private val nextSocketId = AtomicLong(0)
+
     override fun createSocket(): Socket {
+        val socketId = nextSocketId.incrementAndGet()
         val socket = delegate.createSocket()
         try {
             if (socket.isConnected) {
@@ -42,10 +49,13 @@ class ProtectingSocketFactory(
 
             runCatching {
                 log(
-                    "protect(plain)=$protectedOk " +
+                    "socket.id=$socketId event=protect " +
+                        "socket.role=wss_egress protect.layer=plain phase=before_connect " +
+                        "result=$protectedOk " +
                         "bound=${socket.isBound} " +
                         "connected=${socket.isConnected} " +
-                        "closed=${socket.isClosed}"
+                        "closed=${socket.isClosed} " +
+                        "thread=${Thread.currentThread().name}"
                 )
             }
 

@@ -1422,14 +1422,12 @@ class OpenVpn3Service : VpnService() {
                     delegate = javax.net.SocketFactory.getDefault(),
                     protect = { socket -> service.protect(socket) },
                     log = { msg ->
-                        com.imkolganov.datagate.logger.VpnDebugLogger.d(
-                            "ProtectingSocketFactory",
-                            "protect.layer=plain $msg",
-                        )
+                        com.imkolganov.datagate.logger.VpnDebugLogger.d("WssEgressSocket", msg)
                     },
                 )
             )
             .sslSocketFactory(protectingSslFactory, trustManager)
+            .eventListenerFactory(WssEgressOkHttpEventListener.FACTORY)
             .pingInterval(15, java.util.concurrent.TimeUnit.SECONDS)
             .build()
     }

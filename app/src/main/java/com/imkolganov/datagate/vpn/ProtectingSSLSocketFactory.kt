@@ -1,6 +1,5 @@
 package com.imkolganov.datagate.vpn
 
-import android.net.VpnService
 import java.net.InetAddress
 import java.net.Socket
 import javax.net.ssl.SSLSocketFactory

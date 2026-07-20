@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.vpn
 
 import android.net.VpnService
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import okio.ByteString.Companion.toByteString
 import java.util.concurrent.atomic.AtomicLong
 
@@ -56,8 +57,21 @@ class TcpToWssBridge(
         }
 
         try {
-            service.protect(tcp)
-        } catch (_: Throwable) {
+            val protectedOk = service.protect(tcp)
+            VpnDebugLogger.d(
+                TAG,
+                "bridge.proto=tcp socket.role=local_bridge event=protect " +
+                    "result=$protectedOk bound=${tcp.isBound} connected=${tcp.isConnected} " +
+                    "closed=${tcp.isClosed}",
+            )
+        } catch (e: Exception) {
+            VpnDebugLogger.w(
+                TAG,
+                "bridge.proto=tcp socket.role=local_bridge event=protect " +
+                    "result=false error.type=${e.javaClass.name} " +
+                    "error.message=${BridgeLogSanitizer.line(e.message)}",
+                e,
+            )
         }
 
         val queue = java.util.concurrent.LinkedBlockingQueue<okio.ByteString>()
@@ -66,13 +80,25 @@ class TcpToWssBridge(
         val lastInboundMs = AtomicLong(0L)
         fun notifyTransportLost(reason: String) {
             BridgeTransportLoss.notifyOnce(transportLostNotified, { lostReason ->
-                com.imkolganov.datagate.logger.VpnDebugLogger.w("TcpWssBridge", "transport_lost: $lostReason")
+                VpnDebugLogger.w(TAG, "bridge.proto=tcp transport_lost: $lostReason")
                 onTransportLost?.invoke(lostReason)
             }, reason)
         }
 
         val req = okhttp3.Request.Builder().url(wssUrl).build()
+        val bridgeSessionId = nextBridgeSessionId.incrementAndGet()
+        VpnDebugLogger.d(
+            TAG,
+            "bridge.proto=tcp bridge.session.id=$bridgeSessionId event=websocket_create",
+        )
         val ws = http.newWebSocket(req, object : okhttp3.WebSocketListener() {
+            override fun onOpen(webSocket: okhttp3.WebSocket, response: okhttp3.Response) {
+                VpnDebugLogger.d(
+                    TAG,
+                    "bridge.proto=tcp bridge.session.id=$bridgeSessionId " +
+                        "event=websocket_open code=${response.code}",
+                )
+            }
             override fun onMessage(webSocket: okhttp3.WebSocket, bytes: okio.ByteString) {
                 lastInboundMs.set(System.currentTimeMillis())
                 queue.offer(bytes)
@@ -82,11 +108,26 @@ class TcpToWssBridge(
                 t: Throwable,
                 response: okhttp3.Response?
             ) {
+                VpnDebugLogger.w(
+                    TAG,
+                    "bridge.proto=tcp bridge.session.id=$bridgeSessionId " +
+                        "event=websocket_failure " +
+                        "error.type=${t.javaClass.name} " +
+                        "error.message=${BridgeLogSanitizer.line(t.message)} " +
+                        "response.code=${response?.code}",
+                    t,
+                )
                 notifyTransportLost(BridgeTransportLoss.formatFailureReason(t))
                 queue.offer(okio.ByteString.EMPTY)
                 try { tcp.close() } catch (_: Throwable) {}
             }
             override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
+                VpnDebugLogger.d(
+                    TAG,
+                    "bridge.proto=tcp bridge.session.id=$bridgeSessionId " +
+                        "event=websocket_closed code=$code " +
+                        "reason=${BridgeLogSanitizer.line(reason)}",
+                )
                 notifyTransportLost(BridgeTransportLoss.formatClosedReason(code, reason))
                 queue.offer(okio.ByteString.EMPTY)
                 try { tcp.close() } catch (_: Throwable) {}
@@ -164,5 +205,10 @@ class TcpToWssBridge(
 
         t1.start()
         t2.start()
+    }
+
+    companion object {
+        private const val TAG = "TcpWssBridge"
+        private val nextBridgeSessionId = AtomicLong(0)
     }
 }
