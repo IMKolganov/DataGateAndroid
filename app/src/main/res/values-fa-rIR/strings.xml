@@ -251,6 +251,12 @@
     <string name="settings_link_telegram">کانال Telegram</string>
     <string name="settings_updates_github_title">بررسی به‌روزرسانی‌ها در GitHub</string>
     <string name="settings_updates_github_subtitle">آخرین انتشار عمومی را به‌صورت دوره‌ای بررسی و به شما اطلاع می‌دهد.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">هنگام یافتن نسخه جدید اطلاع بده</string>
     <string name="settings_push_updates_subtitle">اعلان محلی پس از بررسی GitHub. در Android 13+ به مجوز اعلان نیاز دارد.</string>
     <string name="settings_auto_download_title">پیشنهاد دانلود APK</string>

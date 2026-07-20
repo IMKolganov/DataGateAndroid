@@ -269,6 +269,12 @@
     <string name="settings_link_telegram">Telegram-kanal</string>
     <string name="settings_updates_github_title">Søg efter opdateringer på GitHub</string>
     <string name="settings_updates_github_subtitle">Kontrollér periodisk den seneste offentlige udgivelse og giv dig besked.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Giv besked når en ny version findes</string>
     <string name="settings_push_updates_subtitle">Lokal notifikation efter en GitHub-kontrol (ingen cloud push-server). Kræver notifikationstilladelse på Android 13+.</string>
     <string name="settings_auto_download_title">Foreslå APK-download</string>

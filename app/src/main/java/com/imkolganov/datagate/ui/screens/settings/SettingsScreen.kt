@@ -80,6 +80,8 @@ import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import java.util.Locale
 import com.imkolganov.datagate.update.ApkUpdateInstaller
+import com.imkolganov.datagate.update.ManualUpdateCheckResult
+import com.imkolganov.datagate.update.UpdateManualCheck
 import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.IpListCoverageMode
@@ -89,6 +91,7 @@ import com.imkolganov.datagate.vpn.IpListStatus
 import com.imkolganov.datagate.vpn.IpListUpdateFrequency
 import com.imkolganov.datagate.vpn.LocalBridgePortPool
 import com.imkolganov.datagate.vpn.LocalBridgePortPreferences
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -97,6 +100,7 @@ import java.security.MessageDigest
 import java.net.URL
 import java.text.DateFormat
 import java.util.Date
+import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,6 +132,10 @@ fun SettingsScreen(
     var githubUpdatesEnabled by remember { mutableStateOf(true) }
     var pushNotificationsForUpdates by remember { mutableStateOf(true) }
     var autoDownloadSuggest by remember { mutableStateOf(false) }
+    var checkingUpdates by remember { mutableStateOf(false) }
+    var updateCheckMessage by remember { mutableStateOf<String?>(null) }
+    var updateCheckIsError by remember { mutableStateOf(false) }
+    val updateCheckInFlight = remember { AtomicBoolean(false) }
     var showIpListSettings by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -513,6 +521,89 @@ fun SettingsScreen(
                             scope.launch {
                                 UpdatePreferences.setAutoDownloadEnabled(context.applicationContext, v)
                             }
+                        }
+                    )
+                }
+                Button(
+                    onClick = {
+                        if (!updateCheckInFlight.compareAndSet(false, true)) return@Button
+                        checkingUpdates = true
+                        updateCheckMessage = null
+                        updateCheckIsError = false
+                        scope.launch {
+                            try {
+                                val result = withContext(Dispatchers.IO) {
+                                    UpdateManualCheck.checkNow(
+                                        context = context.applicationContext,
+                                        http = HttpClients.createPlain(),
+                                    )
+                                }
+                                when (result) {
+                                    is ManualUpdateCheckResult.UpdateAvailable -> {
+                                        // Dialog already requested inside checkNow.
+                                        updateCheckMessage = null
+                                        updateCheckIsError = false
+                                    }
+                                    is ManualUpdateCheckResult.UpToDate -> {
+                                        updateCheckIsError = false
+                                        updateCheckMessage = context.getString(
+                                            R.string.settings_check_updates_up_to_date,
+                                            result.latestTag,
+                                        )
+                                    }
+                                    is ManualUpdateCheckResult.AheadOfLatest -> {
+                                        updateCheckIsError = false
+                                        updateCheckMessage = context.getString(
+                                            R.string.settings_check_updates_ahead,
+                                            result.latestTag,
+                                            result.installedVersion,
+                                        )
+                                    }
+                                    is ManualUpdateCheckResult.Failed -> {
+                                        updateCheckIsError = true
+                                        updateCheckMessage = context.getString(
+                                            R.string.settings_check_updates_failed,
+                                            result.message,
+                                        )
+                                    }
+                                    ManualUpdateCheckResult.RepoNotConfigured -> {
+                                        updateCheckIsError = true
+                                        updateCheckMessage =
+                                            context.getString(R.string.settings_check_updates_repo_missing)
+                                    }
+                                }
+                            } catch (t: Throwable) {
+                                if (t is CancellationException) throw t
+                                updateCheckIsError = true
+                                updateCheckMessage = context.getString(
+                                    R.string.settings_check_updates_failed,
+                                    t.message ?: t.javaClass.simpleName,
+                                )
+                            } finally {
+                                checkingUpdates = false
+                                updateCheckInFlight.set(false)
+                            }
+                        }
+                    },
+                    enabled = !checkingUpdates,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (checkingUpdates) {
+                            stringResource(R.string.settings_check_updates_now_loading)
+                        } else {
+                            stringResource(R.string.settings_check_updates_now)
+                        }
+                    )
+                }
+                updateCheckMessage?.let { msg ->
+                    Text(
+                        msg,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (updateCheckIsError) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
                         }
                     )
                 }

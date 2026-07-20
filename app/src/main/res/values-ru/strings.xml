@@ -214,6 +214,12 @@
     <string name="settings_link_telegram">Канал в Telegram</string>
     <string name="settings_updates_github_title">Проверять обновления на GitHub</string>
     <string name="settings_updates_github_subtitle">Периодически запрашивать последний релиз и уведомлять вас.</string>
+    <string name="settings_check_updates_now">Проверить сейчас</string>
+    <string name="settings_check_updates_now_loading">Проверка…</string>
+    <string name="settings_check_updates_up_to_date">У вас последняя версия (%1$s).</string>
+    <string name="settings_check_updates_ahead">На GitHub latest — %1$s; у этой установки новее (%2$s).</string>
+    <string name="settings_check_updates_failed">Не удалось проверить обновления: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Проверка обновлений не настроена в этой сборке.</string>
     <string name="settings_push_updates_title">Уведомлять о новой версии</string>
     <string name="settings_push_updates_subtitle">Локальное уведомление после проверки GitHub (без облачного push). На Android 13+ нужно разрешение на уведомления.</string>
     <string name="settings_auto_download_title">Предлагать загрузку APK</string>

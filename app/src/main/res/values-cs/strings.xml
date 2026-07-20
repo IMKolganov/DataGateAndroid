@@ -269,6 +269,12 @@
     <string name="settings_link_telegram">Kanál Telegram</string>
     <string name="settings_updates_github_title">Kontrolovat aktualizace na GitHubu</string>
     <string name="settings_updates_github_subtitle">Pravidelně kontrolovat nejnovější veřejné vydání a upozornit vás.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Upozornit při nalezení nové verze</string>
     <string name="settings_push_updates_subtitle">Místní oznámení po kontrole GitHubu (bez cloudového push serveru). Na Androidu 13+ vyžaduje oprávnění k oznámením.</string>
     <string name="settings_auto_download_title">Navrhovat stažení APK</string>

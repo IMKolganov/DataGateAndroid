@@ -251,6 +251,12 @@
     <string name="settings_link_telegram">Telegram 채널</string>
     <string name="settings_updates_github_title">GitHub에서 업데이트 확인</string>
     <string name="settings_updates_github_subtitle">최신 공개 릴리스를 주기적으로 확인하고 알려줍니다.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">새 버전 발견 시 알림</string>
     <string name="settings_push_updates_subtitle">GitHub 확인 후 로컬 알림입니다. Android 13+에서는 알림 권한이 필요합니다.</string>
     <string name="settings_auto_download_title">APK 다운로드 제안</string>

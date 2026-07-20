@@ -251,6 +251,12 @@
     <string name="settings_link_telegram">Telegram चैनल</string>
     <string name="settings_updates_github_title">GitHub पर अपडेट जांचें</string>
     <string name="settings_updates_github_subtitle">नवीनतम सार्वजनिक रिलीज़ को समय-समय पर जांचें और आपको सूचित करें।</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">नया संस्करण मिलने पर सूचित करें</string>
     <string name="settings_push_updates_subtitle">GitHub जांच के बाद स्थानीय सूचना। Android 13+ पर सूचना अनुमति चाहिए।</string>
     <string name="settings_auto_download_title">APK डाउनलोड सुझाएं</string>

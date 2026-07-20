@@ -251,6 +251,12 @@
     <string name="settings_link_telegram">Telegram kanalı</string>
     <string name="settings_updates_github_title">GitHub’da güncellemeleri kontrol et</string>
     <string name="settings_updates_github_subtitle">En son herkese açık sürümü düzenli olarak kontrol eder ve size bildirir.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Yeni sürüm bulunduğunda bildir</string>
     <string name="settings_push_updates_subtitle">GitHub kontrolünden sonra yerel bildirim. Android 13+ üzerinde bildirim izni gerekir.</string>
     <string name="settings_auto_download_title">APK indirmeyi öner</string>

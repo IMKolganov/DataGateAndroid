@@ -269,6 +269,12 @@
     <string name="settings_link_telegram">Κανάλι Telegram</string>
     <string name="settings_updates_github_title">Έλεγχος ενημερώσεων στο GitHub</string>
     <string name="settings_updates_github_subtitle">Περιοδικός έλεγχος της τελευταίας δημόσιας έκδοσης και ειδοποίηση.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Ειδοποίηση όταν βρεθεί νέα έκδοση</string>
     <string name="settings_push_updates_subtitle">Τοπική ειδοποίηση μετά από έλεγχο GitHub (χωρίς cloud push server). Απαιτεί άδεια ειδοποιήσεων σε Android 13+.</string>
     <string name="settings_auto_download_title">Πρόταση λήψης APK</string>

@@ -269,6 +269,12 @@
     <string name="settings_link_telegram">Telegram-csatorna</string>
     <string name="settings_updates_github_title">Frissítések keresése a GitHubon</string>
     <string name="settings_updates_github_subtitle">Rendszeresen ellenőrzi a legújabb nyilvános kiadást és értesít.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Értesítés új verzió találatakor</string>
     <string name="settings_push_updates_subtitle">Helyi értesítés GitHub-ellenőrzés után. Android 13+ rendszeren értesítési engedély szükséges.</string>
     <string name="settings_auto_download_title">APK-letöltés javaslata</string>

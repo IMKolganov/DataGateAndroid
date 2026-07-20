@@ -269,6 +269,12 @@
     <string name="settings_link_telegram">Telegram kanal</string>
     <string name="settings_updates_github_title">Provjeri ažuriranja na GitHubu</string>
     <string name="settings_updates_github_subtitle">Povremeno provjeri najnovije javno izdanje i obavijesti vas.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Obavijesti kada se pronađe nova verzija</string>
     <string name="settings_push_updates_subtitle">Lokalna obavijest nakon GitHub provjere. Za Android 13+ potrebna je dozvola za obavijesti.</string>
     <string name="settings_auto_download_title">Predloži preuzimanje APK-a</string>

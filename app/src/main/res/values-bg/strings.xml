@@ -269,6 +269,12 @@
     <string name="settings_link_telegram">Telegram канал</string>
     <string name="settings_updates_github_title">Проверка за обновления в GitHub</string>
     <string name="settings_updates_github_subtitle">Периодично проверяване за последния публичен релийз и известяване.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Известие при нова версия</string>
     <string name="settings_push_updates_subtitle">Локално известие след проверка в GitHub (без облачен push сървър). Изисква разрешение за известия на Android 13+.</string>
     <string name="settings_auto_download_title">Предлагане на APK изтегляне</string>

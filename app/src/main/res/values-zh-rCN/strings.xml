@@ -251,6 +251,12 @@
     <string name="settings_link_telegram">Telegram 频道</string>
     <string name="settings_updates_github_title">在 GitHub 上检查更新</string>
     <string name="settings_updates_github_subtitle">定期检查最新公开版本并通知你。</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">发现新版本时通知</string>
     <string name="settings_push_updates_subtitle">GitHub 检查后的本地通知。Android 13+ 需要通知权限。</string>
     <string name="settings_auto_download_title">建议下载 APK</string>

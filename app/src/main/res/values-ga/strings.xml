@@ -269,6 +269,12 @@
     <string name="settings_link_telegram">Cainéal Telegram</string>
     <string name="settings_updates_github_title">Seiceáil nuashonruithe ar GitHub</string>
     <string name="settings_updates_github_subtitle">Seiceáil an eisiúint phoiblí is déanaí go tréimhsiúil agus cuir in iúl duit.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Cuir in iúl nuair a aimsítear leagan nua</string>
     <string name="settings_push_updates_subtitle">Fógra áitiúil tar éis seiceáil GitHub. Teastaíonn cead fógraí ar Android 13+.</string>
     <string name="settings_auto_download_title">Mol íoslódáil APK</string>

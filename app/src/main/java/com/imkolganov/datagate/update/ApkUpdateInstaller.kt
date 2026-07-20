@@ -48,9 +48,9 @@ object ApkUpdateInstaller {
                 .build()
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) error("Download failed: HTTP ${response.code}")
-                response.body!!.byteStream().use { input ->
+                response.body.byteStream().use { input ->
                     outFile.outputStream().use { output -> input.copyTo(output) }
-                } ?: error("Empty body")
+                }
             }
             if (!outFile.exists() || outFile.length() == 0L) error("Empty file")
             outFile
