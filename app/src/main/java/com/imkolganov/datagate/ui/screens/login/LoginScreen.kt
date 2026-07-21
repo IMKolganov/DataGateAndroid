@@ -79,6 +79,8 @@ import com.imkolganov.datagate.ui.screens.auth.TotpChallengeScreen
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.support.ReportIssueDialog
 import com.imkolganov.datagate.ui.theme.AppLocale
+import com.imkolganov.datagate.ui.tv.LocalIsTelevision
+import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import java.util.Locale
 
 @Composable
@@ -121,7 +123,7 @@ internal fun AuthPasswordField(
                 )
             }
         },
-        modifier = modifier,
+        modifier = modifier.tvFocusBorder(shape = RoundedCornerShape(14.dp)),
         shape = RoundedCornerShape(14.dp)
     )
 }
@@ -151,7 +153,7 @@ internal fun AuthTextField(
                 )
             }
         },
-        modifier = modifier,
+        modifier = modifier.tvFocusBorder(shape = RoundedCornerShape(14.dp)),
         shape = RoundedCornerShape(14.dp)
     )
 }
@@ -167,7 +169,9 @@ internal fun AuthActionButton(
     Button(
         onClick = onClick,
         enabled = enabled && !isLoading,
-        modifier = modifier.height(52.dp),
+        modifier = modifier
+            .height(52.dp)
+            .tvFocusBorder(shape = AppCards.shape),
         shape = AppCards.shape
     ) {
         if (isLoading) {
@@ -228,7 +232,8 @@ private fun RowScope.LoginModeButton(
             enabled = enabled,
             modifier = Modifier
                 .weight(1f)
-                .height(44.dp),
+                .height(44.dp)
+                .tvFocusBorder(shape = shape),
             shape = shape,
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
         ) {
@@ -243,7 +248,8 @@ private fun RowScope.LoginModeButton(
             enabled = enabled,
             modifier = Modifier
                 .weight(1f)
-                .height(44.dp),
+                .height(44.dp)
+                .tvFocusBorder(shape = shape),
             shape = shape
         ) {
             Text(
@@ -444,6 +450,7 @@ fun LoginScreenContent(
     val configuration = LocalConfiguration.current
     val uiLocale = configuration.locales[0] ?: Locale.getDefault()
     val isWide = configuration.screenWidthDp >= 760
+    val isTelevision = LocalIsTelevision.current
     var showReportDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(pendingVerificationEmail, emailPane) {
@@ -464,10 +471,23 @@ fun LoginScreenContent(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = if (isWide) 32.dp else 20.dp, vertical = 16.dp)
+                        .padding(
+                            horizontal = when {
+                                isTelevision -> 48.dp
+                                isWide -> 32.dp
+                                else -> 20.dp
+                            },
+                            vertical = if (isTelevision) 28.dp else 16.dp,
+                        )
                         .imePadding()
                         .verticalScroll(scroll),
-                    verticalArrangement = Arrangement.spacedBy(if (isWide) 24.dp else 18.dp),
+                    verticalArrangement = Arrangement.spacedBy(
+                        when {
+                            isTelevision -> 28.dp
+                            isWide -> 24.dp
+                            else -> 18.dp
+                        }
+                    ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     LoginTopActions(
@@ -477,7 +497,13 @@ fun LoginScreenContent(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .widthIn(max = if (isWide) 480.dp else 440.dp),
+                            .widthIn(
+                                max = when {
+                                    isTelevision -> 560.dp
+                                    isWide -> 480.dp
+                                    else -> 440.dp
+                                }
+                            ),
                         shape = RoundedCornerShape(24.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         colors = CardDefaults.cardColors(

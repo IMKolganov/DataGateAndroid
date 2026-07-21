@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -111,7 +113,8 @@ fun SettingsScreen(
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     appLocale: AppLocale,
-    onAppLocaleChange: (AppLocale) -> Unit
+    onAppLocaleChange: (AppLocale) -> Unit,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
 ) {
     val context = LocalContext.current
     val uiLocale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
@@ -208,8 +211,10 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(if (com.imkolganov.datagate.ui.tv.LocalIsTelevision.current) 24.dp else 16.dp),
+        verticalArrangement = Arrangement.spacedBy(
+            if (com.imkolganov.datagate.ui.tv.LocalIsTelevision.current) 16.dp else 12.dp
+        )
     ) {
         Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
 
@@ -218,7 +223,8 @@ fun SettingsScreen(
             role = authInfo.role,
             email = authInfo.email,
             avatarUrl = authInfo.avatarUrl,
-            onLogout = onLogout
+            onLogout = onLogout,
+            primaryFocusRequester = primaryFocusRequester,
         )
 
         val isAdmin = remember(authInfo.role, tokenStore) {
@@ -1663,7 +1669,8 @@ private fun SessionLogoutCard(
     role: String?,
     email: String?,
     avatarUrl: String?,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
 ) {
     var showLogoutConfirm by remember { mutableStateOf(false) }
 
@@ -1677,13 +1684,17 @@ private fun SessionLogoutCard(
                     onClick = {
                         showLogoutConfirm = false
                         onLogout()
-                    }
+                    },
+                    modifier = Modifier.tvFocusBorder(shape = AppCards.shape),
                 ) {
                     Text(stringResource(R.string.sign_out))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLogoutConfirm = false }) {
+                TextButton(
+                    onClick = { showLogoutConfirm = false },
+                    modifier = Modifier.tvFocusBorder(shape = AppCards.shape),
+                ) {
                     Text(stringResource(R.string.action_cancel))
                 }
             }
@@ -1758,7 +1769,16 @@ private fun SessionLogoutCard(
 
             Button(
                 onClick = { showLogoutConfirm = true },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        if (primaryFocusRequester != null) {
+                            Modifier.focusRequester(primaryFocusRequester)
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .tvFocusBorder(shape = AppCards.shape),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer
