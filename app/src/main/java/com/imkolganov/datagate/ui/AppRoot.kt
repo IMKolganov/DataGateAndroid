@@ -26,6 +26,7 @@ import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.update.UpdatePromptController
 import com.imkolganov.datagate.freetier.FreeTierApi
 import com.imkolganov.datagate.ui.freetier.FreeTierOnboardingHost
+import com.imkolganov.datagate.vpn.VpnServerSelectionStore
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -110,7 +111,13 @@ fun AppRoot(
                     onCancelSetup = { authViewModel.cancelAdminTotpSetup() },
                     onConfirm = { authViewModel.confirmAdminTotpSetup(appContext.resources, it) },
                     onLogout = {
-                        performLogout(vpnState, onRequestDisconnect, authViewModel::logout, onAuthChanged)
+                        performLogout(
+                            vpnState = vpnState,
+                            onRequestDisconnect = onRequestDisconnect,
+                            logout = authViewModel::logout,
+                            onAuthChanged = onAuthChanged,
+                            clearServerSelection = { VpnServerSelectionStore.clear(appContext) },
+                        )
                     },
                 )
                 return
@@ -128,7 +135,13 @@ fun AppRoot(
                 onRequestResume = onRequestResume,
                 onReconnectVpn = onReconnectVpn,
                 onLogout = {
-                    performLogout(vpnState, onRequestDisconnect, authViewModel::logout, onAuthChanged)
+                    performLogout(
+                        vpnState = vpnState,
+                        onRequestDisconnect = onRequestDisconnect,
+                        logout = authViewModel::logout,
+                        onAuthChanged = onAuthChanged,
+                        clearServerSelection = { VpnServerSelectionStore.clear(appContext) },
+                    )
                 },
                 authViewModel = authViewModel,
                 tokenStore = tokenStore,

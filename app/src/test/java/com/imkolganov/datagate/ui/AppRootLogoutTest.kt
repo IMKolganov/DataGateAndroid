@@ -20,8 +20,9 @@ class AppRootLogoutTest {
             onRequestDisconnect = { calls += "disconnect" },
             logout = { calls += "logout" },
             onAuthChanged = { calls += "authChanged" },
+            clearServerSelection = { calls += "clearSelection" },
         )
-        assertEquals(listOf("disconnect", "logout", "authChanged"), calls)
+        assertEquals(listOf("disconnect", "clearSelection", "logout", "authChanged"), calls)
     }
 
     @Test
@@ -32,8 +33,9 @@ class AppRootLogoutTest {
             onRequestDisconnect = { calls += "disconnect" },
             logout = { calls += "logout" },
             onAuthChanged = { calls += "authChanged" },
+            clearServerSelection = { calls += "clearSelection" },
         )
-        assertEquals(listOf("disconnect", "logout", "authChanged"), calls)
+        assertEquals(listOf("disconnect", "clearSelection", "logout", "authChanged"), calls)
     }
 
     @Test
@@ -47,8 +49,9 @@ class AppRootLogoutTest {
             onRequestDisconnect = { calls += "disconnect" },
             logout = { calls += "logout" },
             onAuthChanged = { calls += "authChanged" },
+            clearServerSelection = { calls += "clearSelection" },
         )
-        assertEquals(listOf("disconnect", "logout", "authChanged"), calls)
+        assertEquals(listOf("disconnect", "clearSelection", "logout", "authChanged"), calls)
     }
 
     @Test
@@ -59,8 +62,9 @@ class AppRootLogoutTest {
             onRequestDisconnect = { calls += "disconnect" },
             logout = { calls += "logout" },
             onAuthChanged = { calls += "authChanged" },
+            clearServerSelection = { calls += "clearSelection" },
         )
-        assertEquals(listOf("disconnect", "logout", "authChanged"), calls)
+        assertEquals(listOf("disconnect", "clearSelection", "logout", "authChanged"), calls)
     }
 
     @Test
@@ -71,8 +75,9 @@ class AppRootLogoutTest {
             onRequestDisconnect = { calls += "disconnect" },
             logout = { calls += "logout" },
             onAuthChanged = { calls += "authChanged" },
+            clearServerSelection = { calls += "clearSelection" },
         )
-        assertEquals(listOf("logout", "authChanged"), calls)
+        assertEquals(listOf("clearSelection", "logout", "authChanged"), calls)
     }
 
     @Test
@@ -83,7 +88,21 @@ class AppRootLogoutTest {
             onRequestDisconnect = { calls += "disconnect" },
             logout = { calls += "logout" },
             onAuthChanged = { calls += "authChanged" },
+            clearServerSelection = { calls += "clearSelection" },
         )
-        assertEquals(listOf("logout", "authChanged"), calls)
+        assertEquals(listOf("clearSelection", "logout", "authChanged"), calls)
+    }
+
+    @Test
+    fun clearsServerSelectionBeforeLogout_evenWhenVpnAlreadyDisconnected() {
+        val calls = mutableListOf<String>()
+        performLogout(
+            vpnState = VpnStatusUiState(),
+            onRequestDisconnect = { calls += "disconnect" },
+            logout = { calls += "logout" },
+            onAuthChanged = { calls += "authChanged" },
+            clearServerSelection = { calls += "clearSelection" },
+        )
+        assertEquals("clearSelection", calls.first())
     }
 }

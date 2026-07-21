@@ -196,9 +196,10 @@ class OpenVpnServersApi(
             dcoIsEnabled = o.optBooleanOrNull("dcoIsEnabled") ?: o.optBooleanOrNull("DcoIsEnabled"),
             tags = tags,
             quotaPlanGroups = quotaGroups,
+            // Fail closed: missing flag must not make a Pro/Unlimited-only server look free.
             isAccessibleForUserQuotaPlan = o.optBoolean(
                 "isAccessibleForUserQuotaPlan",
-                o.optBoolean("IsAccessibleForUserQuotaPlan", true)
+                o.optBoolean("IsAccessibleForUserQuotaPlan", false)
             )
         )
     }

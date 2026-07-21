@@ -145,6 +145,9 @@ fun AccessScreen(
             onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
         }
         onEvent(AccessContract.UiEvent.SelectServer(server.id))
+        if (!server.isAccessibleForQuotaPlan) {
+            return
+        }
         if (vpnConnected || connectBusy) {
             switchTargetServer = server
         } else {
@@ -158,6 +161,9 @@ fun AccessScreen(
                     return
                 }
                 VpnServerType.OpenVpn -> Unit
+            }
+            if (!server.isAccessibleForQuotaPlan) {
+                return
             }
             if (!server.isEnableWss) {
                 noWssDialogName = server.name

@@ -38,12 +38,17 @@ open class AccessViewModel(
                 _state.update { prev ->
                     var next = prev.copy(serverSelectionMode = event.mode)
                     if (event.mode == ServerSelectionMode.MANUAL) {
-                        val id = next.selectedServerId
-                            ?: next.servers.firstOrNull { it.isOnline }?.id
-                            ?: next.servers.firstOrNull()?.id
+                        val id = AccessServerSelectionPolicy.resolveSelectedServerId(
+                            mode = ServerSelectionMode.MANUAL,
+                            previousSelectedId = next.selectedServerId,
+                            servers = next.servers,
+                        )
                         if (id != null) {
                             VpnServerSelectionStore.setSelectedServerId(appContext, id)
                             next = next.copy(selectedServerId = id)
+                        } else {
+                            VpnServerSelectionStore.setSelectedServerId(appContext, null)
+                            next = next.copy(selectedServerId = null)
                         }
                     }
                     next
@@ -74,17 +79,12 @@ open class AccessViewModel(
                 )
 
                 _state.update { prev ->
-                    var selectedId = prev.selectedServerId
-                    if (selectedId != null && servers.none { it.id == selectedId }) {
-                        selectedId = null
-                    }
-                    if (prev.serverSelectionMode == ServerSelectionMode.MANUAL && selectedId == null) {
-                        selectedId = servers.firstOrNull { it.isOnline }?.id
-                            ?: servers.firstOrNull()?.id
-                    }
-                    if (selectedId != null) {
-                        VpnServerSelectionStore.setSelectedServerId(appContext, selectedId)
-                    }
+                    val selectedId = AccessServerSelectionPolicy.resolveSelectedServerId(
+                        mode = prev.serverSelectionMode,
+                        previousSelectedId = prev.selectedServerId,
+                        servers = servers,
+                    )
+                    VpnServerSelectionStore.setSelectedServerId(appContext, selectedId)
 
                     prev.copy(
                         isLoading = false,

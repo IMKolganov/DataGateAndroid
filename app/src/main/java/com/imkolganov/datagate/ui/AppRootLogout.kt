@@ -14,6 +14,7 @@ internal fun performLogout(
     onRequestDisconnect: () -> Unit,
     logout: () -> Unit,
     onAuthChanged: () -> Unit,
+    clearServerSelection: () -> Unit = {},
 ) {
     if (VpnLifecyclePolicy.shouldDisconnectVpnOnLogout(
             isVpnConnected = vpnState.isVpnConnected,
@@ -24,6 +25,7 @@ internal fun performLogout(
     ) {
         onRequestDisconnect()
     }
+    clearServerSelection()
     logout()
     onAuthChanged()
 }

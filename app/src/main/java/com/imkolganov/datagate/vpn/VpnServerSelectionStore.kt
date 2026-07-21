@@ -42,4 +42,13 @@ object VpnServerSelectionStore {
             }
             .apply()
     }
+
+    /** Clears mode + selected id so a later login cannot reuse another account's Pro server. */
+    fun clear(context: Context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .remove(KEY_MODE)
+            .remove(KEY_SELECTED_SERVER_ID)
+            .apply()
+    }
 }
