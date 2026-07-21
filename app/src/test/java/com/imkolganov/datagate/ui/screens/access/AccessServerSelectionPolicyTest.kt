@@ -69,6 +69,15 @@ class AccessServerSelectionPolicyTest {
         assertNull(AccessServerSelectionPolicy.preferredManualServerId(servers))
     }
 
+    @Test
+    fun selectableServerId_rejectsQuotaBlockedAndUnknown() {
+        val servers = listOf(server(69, accessible = true), server(75, accessible = false))
+
+        assertEquals(69, AccessServerSelectionPolicy.selectableServerId(69, servers))
+        assertNull(AccessServerSelectionPolicy.selectableServerId(75, servers))
+        assertNull(AccessServerSelectionPolicy.selectableServerId(999, servers))
+    }
+
     private fun server(
         id: Int,
         accessible: Boolean,

@@ -196,7 +196,7 @@ fun MainScreenPreview() {
     val context = LocalContext.current
     val app = context.applicationContext as android.app.Application
     val previewVm = remember(context) {
-        PreviewAccessViewModel(context.applicationContext)
+        PreviewAccessViewModel(context.applicationContext).also { it.onUserSessionReady() }
     }
     val previewStats = remember(app) { PreviewStatsViewModel(app) }
     DataGateAndroidTheme {

@@ -130,6 +130,9 @@ fun AccessScreen(
     }
 
     fun runConnectToServer(server: AccessContract.ServerItem) {
+        if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
+            return
+        }
         val sessionServerId = vpnState.selectedServerId
             ?: VpnServerSelectionStore.getSelectedServerId(appContext)
         if (vpnConnected || connectBusy) {
@@ -145,9 +148,6 @@ fun AccessScreen(
             onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
         }
         onEvent(AccessContract.UiEvent.SelectServer(server.id))
-        if (!server.isAccessibleForQuotaPlan) {
-            return
-        }
         if (vpnConnected || connectBusy) {
             switchTargetServer = server
         } else {
@@ -161,9 +161,6 @@ fun AccessScreen(
                     return
                 }
                 VpnServerType.OpenVpn -> Unit
-            }
-            if (!server.isAccessibleForQuotaPlan) {
-                return
             }
             if (!server.isEnableWss) {
                 noWssDialogName = server.name
@@ -334,6 +331,9 @@ fun AccessScreen(
                     isVpnConnectingToThisServer = connectingHere,
                     connectBusy = connectBusy,
                     onSelect = {
+                        if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
+                            return@ServerCard
+                        }
                         onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
                         onEvent(AccessContract.UiEvent.SelectServer(server.id))
                     },

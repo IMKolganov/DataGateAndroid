@@ -14,7 +14,7 @@ object AccessServerSelectionPolicy {
         servers: List<AccessContract.ServerItem>,
     ): Int? {
         val previousStillAllowed = previousSelectedId?.let { id ->
-            servers.firstOrNull { it.id == id && it.isAccessibleForQuotaPlan }?.id
+            selectableServerId(id, servers)
         }
         if (previousStillAllowed != null) return previousStillAllowed
 
@@ -26,4 +26,11 @@ object AccessServerSelectionPolicy {
     fun preferredManualServerId(servers: List<AccessContract.ServerItem>): Int? =
         servers.firstOrNull { it.isOnline && it.isAccessibleForQuotaPlan }?.id
             ?: servers.firstOrNull { it.isAccessibleForQuotaPlan }?.id
+
+    /** Null when the id is unknown or outside the user's quota plan. */
+    fun selectableServerId(
+        serverId: Int,
+        servers: List<AccessContract.ServerItem>,
+    ): Int? =
+        servers.firstOrNull { it.id == serverId && it.isAccessibleForQuotaPlan }?.id
 }

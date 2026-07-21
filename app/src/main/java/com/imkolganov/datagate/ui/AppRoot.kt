@@ -62,6 +62,7 @@ fun AppRoot(
 
     LaunchedEffect(authState.isLoggedIn) {
         if (authState.isLoggedIn) {
+            accessViewModel.onUserSessionReady()
             onAuthChanged()
         }
     }
@@ -116,7 +117,10 @@ fun AppRoot(
                             onRequestDisconnect = onRequestDisconnect,
                             logout = authViewModel::logout,
                             onAuthChanged = onAuthChanged,
-                            clearServerSelection = { VpnServerSelectionStore.clear(appContext) },
+                            clearServerSelection = {
+                                VpnServerSelectionStore.clear(appContext)
+                                accessViewModel.resetSessionLocalState()
+                            },
                         )
                     },
                 )
@@ -140,7 +144,10 @@ fun AppRoot(
                         onRequestDisconnect = onRequestDisconnect,
                         logout = authViewModel::logout,
                         onAuthChanged = onAuthChanged,
-                        clearServerSelection = { VpnServerSelectionStore.clear(appContext) },
+                        clearServerSelection = {
+                            VpnServerSelectionStore.clear(appContext)
+                            accessViewModel.resetSessionLocalState()
+                        },
                     )
                 },
                 authViewModel = authViewModel,

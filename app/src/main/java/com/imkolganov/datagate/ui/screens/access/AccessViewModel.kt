@@ -2,14 +2,18 @@ package com.imkolganov.datagate.ui.screens.access
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import com.imkolganov.datagate.vpn.ServerSelectionMode
-import com.imkolganov.datagate.util.userFriendlyApiError
-import com.imkolganov.datagate.vpn.VpnServerSelectionStore
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
+import com.imkolganov.datagate.util.userFriendlyApiError
+import com.imkolganov.datagate.vpn.ServerSelectionMode
+import com.imkolganov.datagate.vpn.VpnServerSelectionStore
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.cancellation.CancellationException
 
 open class AccessViewModel(
     private val repo: AccessRepository,
@@ -18,6 +22,7 @@ open class AccessViewModel(
 
     private val _state = MutableStateFlow(
         AccessContract.UiState(
+            // No init-refresh: AppRoot.onUserSessionReady() is the single cold-start load.
             isLoading = true,
             serverSelectionMode = VpnServerSelectionStore.getMode(appContext),
             selectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext)
@@ -25,9 +30,8 @@ open class AccessViewModel(
     )
     val state: StateFlow<AccessContract.UiState> = _state
 
-    init {
-        refresh()
-    }
+    private val refreshGeneration = AtomicInteger(0)
+    private var refreshJob: Job? = null
 
     fun onEvent(event: AccessContract.UiEvent) {
         when (event) {
@@ -43,21 +47,20 @@ open class AccessViewModel(
                             previousSelectedId = next.selectedServerId,
                             servers = next.servers,
                         )
-                        if (id != null) {
-                            VpnServerSelectionStore.setSelectedServerId(appContext, id)
-                            next = next.copy(selectedServerId = id)
-                        } else {
-                            VpnServerSelectionStore.setSelectedServerId(appContext, null)
-                            next = next.copy(selectedServerId = null)
-                        }
+                        VpnServerSelectionStore.setSelectedServerId(appContext, id)
+                        next = next.copy(selectedServerId = id)
                     }
                     next
                 }
             }
 
             is AccessContract.UiEvent.SelectServer -> {
-                VpnServerSelectionStore.setSelectedServerId(appContext, event.serverId)
-                _state.update { it.copy(selectedServerId = event.serverId) }
+                val allowedId = AccessServerSelectionPolicy.selectableServerId(
+                    serverId = event.serverId,
+                    servers = _state.value.servers,
+                ) ?: return
+                VpnServerSelectionStore.setSelectedServerId(appContext, allowedId)
+                _state.update { it.copy(selectedServerId = allowedId) }
             }
 
             AccessContract.UiEvent.ClearError ->
@@ -65,18 +68,57 @@ open class AccessViewModel(
         }
     }
 
+    /**
+     * After [VpnServerSelectionStore.clear] on logout: drop in-memory mode/selection/servers and
+     * invalidate any in-flight refresh so a later login cannot apply the previous account's data.
+     */
+    fun resetSessionLocalState() {
+        refreshJob?.cancel()
+        refreshJob = null
+        refreshGeneration.incrementAndGet()
+        _state.value = AccessContract.UiState(
+            isLoading = false,
+            serverSelectionMode = VpnServerSelectionStore.getMode(appContext),
+            selectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext),
+        )
+    }
+
+    /** Fresh login (or re-entry): reload servers for the current token/quota plan. */
+    fun onUserSessionReady() {
+        _state.update { prev ->
+            prev.copy(
+                serverSelectionMode = VpnServerSelectionStore.getMode(appContext),
+                selectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext),
+            )
+        }
+        refresh()
+    }
+
     private fun refresh() {
-        viewModelScope.launch {
+        val generation = refreshGeneration.incrementAndGet()
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorText = null) }
 
             try {
                 val servers = repo.getServers()
+                ensureActive()
+                if (generation != refreshGeneration.get()) return@launch
+
                 val connections = repo.getMyActiveConnections()
+                ensureActive()
+                if (generation != refreshGeneration.get()) return@launch
+
                 val quotaRaw = repo.loadQuotaUi()
+                ensureActive()
+                if (generation != refreshGeneration.get()) return@launch
+
                 val res = appContext.resources
                 val quota = quotaRaw.copy(
                     errorText = quotaRaw.errorText?.let { res.userFriendlyApiError(it) }
                 )
+
+                if (generation != refreshGeneration.get()) return@launch
 
                 _state.update { prev ->
                     val selectedId = AccessServerSelectionPolicy.resolveSelectedServerId(
@@ -94,7 +136,10 @@ open class AccessViewModel(
                         selectedServerId = selectedId
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
+                if (generation != refreshGeneration.get()) return@launch
                 _state.update {
                     it.copy(
                         isLoading = false,
