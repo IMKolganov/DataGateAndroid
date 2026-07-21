@@ -846,6 +846,12 @@ fun LoginScreen(
     val context = LocalContext.current
     val activity = context as? Activity
     val resources = LocalResources.current
+    val isTelevision = LocalIsTelevision.current
+
+    if (isTelevision) {
+        TvLinkLoginScreen(viewModel = viewModel)
+        return
+    }
 
     val challenge = state.totpChallenge
     if (state.loginScreen == AuthLoginScreen.TotpChallenge && challenge != null) {

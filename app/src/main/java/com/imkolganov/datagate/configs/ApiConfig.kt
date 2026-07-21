@@ -20,6 +20,12 @@ object ApiConfig {
     const val FREE_TIER_ACCESS_CONNECT_PATH = "/api/auth/free-tier-access/connect"
     const val TELEGRAM_REQUEST_ACCOUNT_LINK_CODE_PATH = "/api/auth/telegram/request-account-link-code"
 
+    /** Anonymous TV device-linking: create session (QR + 6-digit code). */
+    const val TV_LOGIN_SESSION_PATH = "/api/auth/tv/session"
+
+    /** Anonymous TV device-linking: poll / fetch one-time tokens after approval. */
+    const val TV_LOGIN_SESSION_BY_ID_PREFIX = "/api/auth/tv/session/"
+
     /** GET …/get-all — V2 list without live metrics (optional). */
     const val API_OPEN_VPN_SERVERS_V2_GET_ALL_PATH = "api/v2/open-vpn-servers/get-all"
 

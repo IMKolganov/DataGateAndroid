@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.1"
+agp = "9.3.0"
 credentialManager = "1.6.0-rc01"
 datastorePreferences = "1.2.0"
 googleid = "1.1.1"
@@ -22,6 +22,8 @@ desugarJdkLibs = "2.1.5"
 zxing = "3.5.3"
 robolectric = "4.14.1"
 coroutines = "1.9.0"
+signalr = "8.0.17"
+gson = "2.11.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -56,6 +58,8 @@ desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref 
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+microsoft-signalr = { module = "com.microsoft.signalr:signalr", version.ref = "signalr" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

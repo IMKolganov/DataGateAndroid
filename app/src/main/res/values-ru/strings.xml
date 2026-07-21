@@ -468,4 +468,22 @@
     <string name="vpn_status_pausing">Пауза…</string>
     <string name="vpn_status_resuming">Возобновление…</string>
     <string name="vpn_msg_command_rejected">Команда VPN не выполнена (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Войти с телефона</string>
+    <string name="tv_link_subtitle">Отсканируйте QR-код телефоном или откройте ссылку из QR и введите код ниже.</string>
+    <string name="tv_link_code_label">Код для ТВ</string>
+    <string name="tv_link_qr_cd">QR-код для входа с телефона</string>
+    <string name="tv_link_creating">Подготовка входа…</string>
+    <string name="tv_link_expires_in">Код действует ещё %1$s</string>
+    <string name="tv_link_status_pending">Ожидание телефона…</string>
+    <string name="tv_link_status_viewed">Код открыт на телефоне — подтвердите вход</string>
+    <string name="tv_link_status_approved">Вход…</string>
+    <string name="tv_link_status_denied">Вход отклонён на телефоне</string>
+    <string name="tv_link_status_expired">Срок действия кода истёк</string>
+    <string name="tv_link_retry">Повторить</string>
+    <string name="tv_link_error_create">Не удалось начать вход с ТВ. Попробуйте снова.</string>
+    <string name="tv_link_error_unavailable">Вход с ТВ недоступен в этой сборке.</string>
+    <string name="tv_link_error_tokens_missing">Вход подтверждён, но токены не получены. Попробуйте снова.</string>
+
 </resources>

@@ -8,6 +8,7 @@ import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.servers.ManualServerResolve
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
+import com.imkolganov.datagate.ui.tv.isTelevision
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
 import java.util.concurrent.atomic.AtomicBoolean
@@ -142,7 +143,12 @@ class VpnConnectInteractor(
                 "BUILDING_COMMON_NAME",
                 res.getString(R.string.vpn_preparing_cert_identity, serverName ?: "")
             )
-            val commonName = "adg-${best.serverId}-$externalId-$shortInstallationId"
+            val commonName = VpnClientCommonName.build(
+                isTelevision = isTelevision(appContext),
+                serverId = best.serverId,
+                externalId = externalId,
+                shortInstallationId = shortInstallationId,
+            )
 
             vpnController.showStatus(
                 "DOWNLOADING_CONFIG",

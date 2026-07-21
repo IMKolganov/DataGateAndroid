@@ -161,6 +161,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.okhttp)
     implementation(libs.zxing.core)
+    implementation(libs.microsoft.signalr)
+    implementation(libs.gson)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.vico.compose.m3)

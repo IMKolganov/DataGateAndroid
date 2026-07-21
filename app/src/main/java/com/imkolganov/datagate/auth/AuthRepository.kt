@@ -3,7 +3,10 @@ package com.imkolganov.datagate.auth
 import android.app.Activity
 import android.util.Log
 import com.imkolganov.datagate.auth.http.BackendAuthApi
+import com.imkolganov.datagate.auth.tv.TvDeviceInfo
+import com.imkolganov.datagate.auth.tv.TvLoginApi
 import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
+import com.imkolganov.datagate.model.auth.CreateTvLoginSessionResponse
 import com.imkolganov.datagate.model.auth.GoogleLoginRequestDto
 import com.imkolganov.datagate.model.auth.LoginPasswordRequestDto
 import com.imkolganov.datagate.model.auth.LoginResponseDto
@@ -16,8 +19,11 @@ import com.imkolganov.datagate.model.auth.TotpDisableRequestDto
 import com.imkolganov.datagate.model.auth.TotpSetupDto
 import com.imkolganov.datagate.model.auth.TotpStatusDto
 import com.imkolganov.datagate.model.auth.TotpVerifyLoginRequestDto
+import com.imkolganov.datagate.model.auth.TvLoginSessionPollResponse
+import com.imkolganov.datagate.model.auth.TvLoginSessionStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.IOException
 
 sealed class LoginOutcome {
     data class TotpChallenge(
@@ -31,7 +37,8 @@ sealed class LoginOutcome {
 class AuthRepository(
     private val api: BackendAuthApi,
     private val tokenStore: TokenStore,
-    private val autoLoginStore: AutoLoginStore
+    private val autoLoginStore: AutoLoginStore,
+    private val tvLoginApi: TvLoginApi? = null,
 ) {
     private companion object {
         const val TAG = "Auth"
@@ -105,6 +112,45 @@ class AuthRepository(
             )
             applyLoginResponse(result)
         }
+
+    suspend fun createTvLoginSession(deviceName: String?): CreateTvLoginSessionResponse =
+        withContext(Dispatchers.IO) {
+            requireTvLoginApi().createSession(
+                deviceName = deviceName,
+                client = TvDeviceInfo.CLIENT_ANDROID_TV,
+            )
+        }
+
+    suspend fun pollTvLoginSession(sessionId: String): TvLoginSessionPollResponse =
+        withContext(Dispatchers.IO) {
+            requireTvLoginApi().getSession(sessionId)
+        }
+
+    /**
+     * Persists tokens from an approved TV poll response (one-time delivery).
+     * Call only when [TvLoginSessionPollResponse.status] is approved and tokens are present.
+     */
+    fun completeTvLogin(poll: TvLoginSessionPollResponse): LoginOutcome {
+        val status = TvLoginSessionStatus.normalize(poll.status)
+        if (status != TvLoginSessionStatus.APPROVED) {
+            throw IOException("TV login session is not approved (status=$status).")
+        }
+        return applyLoginResponse(
+            LoginResponseDto(
+                token = poll.token,
+                expiration = poll.expiration,
+                refreshToken = poll.refreshToken,
+                refreshExpiration = poll.refreshExpiration,
+                requiresTotp = poll.requiresTotp,
+                loginChallengeId = poll.loginChallengeId,
+                displayName = poll.displayName,
+                requiresTotpSetup = poll.requiresTotpSetup,
+            )
+        )
+    }
+
+    private fun requireTvLoginApi(): TvLoginApi =
+        tvLoginApi ?: throw IllegalStateException("TV login API is not configured.")
 
     /**
      * Returns true when admin must complete TOTP enrollment before using the app.
