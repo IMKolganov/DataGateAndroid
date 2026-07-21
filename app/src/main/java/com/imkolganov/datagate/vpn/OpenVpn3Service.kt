@@ -1046,6 +1046,11 @@ class OpenVpn3Service : VpnService() {
                 val cfg = ClientAPI_Config().apply {
                     content = patchedConfig
                     enableRouteEmulation = true
+                    // Exclude emulator/LAN prefixes (e.g. 10.0.2.0/24) from the full tunnel.
+                    allowLocalLanAccess = true
+                    // IPv4-only tunnel: keep native IPv6 on the underlying network instead of
+                    // installing broken IPv6 default routes (common "no internet" on TV emulator).
+                    allowUnusedAddrFamilies = "yes"
                 }
 
                 val client = OpenVpn3Client(

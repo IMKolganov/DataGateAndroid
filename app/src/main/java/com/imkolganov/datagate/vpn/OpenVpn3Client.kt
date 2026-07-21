@@ -1,9 +1,11 @@
 package com.imkolganov.datagate.vpn
 
+import android.net.ConnectivityManager
 import android.net.IpPrefix
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.system.OsConstants
 import com.imkolganov.datagate.logger.VpnDebugLogger
 import net.openvpn.ovpn3.ClientAPI_Event
 import net.openvpn.ovpn3.ClientAPI_LogInfo
@@ -25,6 +27,8 @@ class OpenVpn3Client(
     }
 
     private var builder: VpnService.Builder? = null
+    /** True once the profile assigned an IPv6 address to the TUN. */
+    private var hasIpv6TunAddress: Boolean = false
 
     // -------- Logging / events ----------
 
@@ -58,6 +62,7 @@ class OpenVpn3Client(
 
     override fun tun_builder_new(): Boolean {
         VpnDebugLogger.d(TAG, "tun_builder_new()")
+        hasIpv6TunAddress = false
 
         builder = service.Builder().apply {
             setSession("DataGate VPN")
@@ -89,7 +94,9 @@ class OpenVpn3Client(
             "tun_builder_add_address($address/$prefix_length, gw=$gateway, ipv6=$ipv6, net30=$net30)"
         )
         return try {
-            if (!ipv6) {
+            if (ipv6) {
+                hasIpv6TunAddress = true
+            } else {
                 VpnTunnelSessionStore.recordVpnIp(service.applicationContext, address)
             }
             builder?.addAddress(address, prefix_length)
@@ -113,8 +120,18 @@ class OpenVpn3Client(
                 builder?.addRoute("128.0.0.0", 1)
             }
             if (ipv6) {
-                builder?.addRoute("::", 1)
-                builder?.addRoute("8000::", 1)
+                if (hasIpv6TunAddress) {
+                    builder?.addRoute("::", 1)
+                    builder?.addRoute("8000::", 1)
+                } else {
+                    // IPv4-only tunnel + IPv6 default routes blackholes dual-stack apps
+                    // (common on Android / TV emulators). Let IPv6 use the underlying network.
+                    builder?.allowFamily(OsConstants.AF_INET6)
+                    VpnDebugLogger.w(
+                        TAG,
+                        "Skipping IPv6 default routes (no IPv6 TUN address); allowFamily(AF_INET6)"
+                    )
+                }
             }
             true
         } catch (t: Throwable) {
@@ -131,6 +148,13 @@ class OpenVpn3Client(
     ): Boolean {
         VpnDebugLogger.d(TAG, "tun_builder_add_route($address/$prefix_length, metric=$metric, ipv6=$ipv6)")
         return try {
+            if (ipv6 && !hasIpv6TunAddress) {
+                VpnDebugLogger.w(
+                    TAG,
+                    "Skipping IPv6 route $address/$prefix_length (no IPv6 TUN address)"
+                )
+                return true
+            }
             builder?.addRoute(address, prefix_length)
             true
         } catch (t: Throwable) {
@@ -265,7 +289,17 @@ class OpenVpn3Client(
 
     override fun tun_builder_set_allow_family(af: Int, allow: Boolean): Boolean {
         VpnDebugLogger.d(TAG, "tun_builder_set_allow_family(af=$af, allow=$allow)")
-        return true
+        return try {
+            if (allow) {
+                // Fall through to underlying network for this family when VPN has no
+                // addresses/routes for it (see VpnService.Builder.allowFamily).
+                builder?.allowFamily(af)
+            }
+            true
+        } catch (t: Throwable) {
+            VpnDebugLogger.e(TAG, "allowFamily failed af=$af allow=$allow", t)
+            false
+        }
     }
 
     override fun tun_builder_set_allow_local_dns(allow: Boolean): Boolean {
@@ -346,7 +380,10 @@ class OpenVpn3Client(
 
     override fun tun_builder_get_local_networks(ipv6: Boolean): ClientAPI_StringVec {
         VpnDebugLogger.d(TAG, "tun_builder_get_local_networks(ipv6=$ipv6)")
-        return ClientAPI_StringVec()
+        val cm = service.getSystemService(ConnectivityManager::class.java)
+        val cidrs = VpnLocalNetworks.collectCidrs(cm, ipv6 = ipv6)
+        VpnDebugLogger.d(TAG, "local networks ipv6=$ipv6: ${cidrs.joinToString()}")
+        return ClientAPI_StringVec(cidrs)
     }
 
     override fun tun_builder_establish_lite() {
