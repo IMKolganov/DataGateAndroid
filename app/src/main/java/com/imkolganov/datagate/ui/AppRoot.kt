@@ -16,7 +16,10 @@ import com.imkolganov.datagate.BuildConfig
 import com.imkolganov.datagate.auth.AdminTotpGate
 import com.imkolganov.datagate.auth.AuthUiState
 import com.imkolganov.datagate.auth.AuthViewModel
+import com.imkolganov.datagate.auth.JwtClaimsReader
 import com.imkolganov.datagate.auth.TokenStore
+import com.imkolganov.datagate.freetier.FreeTierApi
+import com.imkolganov.datagate.ui.freetier.FreeTierOnboardingHost
 import com.imkolganov.datagate.ui.screens.auth.AdminTotpSetupScreen
 import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.login.LoginScreen
@@ -24,13 +27,11 @@ import com.imkolganov.datagate.ui.screens.main.MainScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
+import com.imkolganov.datagate.ui.tv.LocalIsTelevision
+import com.imkolganov.datagate.ui.tv.isTelevision
 import com.imkolganov.datagate.update.UpdateCheckHost
 import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.update.UpdatePromptController
-import com.imkolganov.datagate.freetier.FreeTierApi
-import com.imkolganov.datagate.ui.freetier.FreeTierOnboardingHost
-import com.imkolganov.datagate.ui.tv.LocalIsTelevision
-import com.imkolganov.datagate.ui.tv.isTelevision
 import com.imkolganov.datagate.vpn.VpnServerSelectionStore
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 import kotlinx.coroutines.Dispatchers
@@ -129,6 +130,10 @@ private fun AppRootContent(
     }
 
     val isLoggedIn = authState.isLoggedIn
+    val accessState by accessViewModel.state.collectAsState()
+    val isAdmin = remember(authState.isLoggedIn, authVersion) {
+        JwtClaimsReader.isAdmin(tokenStore.getAccessToken())
+    }
 
     LaunchedEffect(openUpdateFromNotificationPending, isLoggedIn) {
         if (!openUpdateFromNotificationPending) return@LaunchedEffect
@@ -225,6 +230,8 @@ private fun AppRootContent(
                 adminTotpGate = authState.adminTotpGate,
                 freeTierApi = freeTierApi,
                 isVpnConnected = vpnState.isVpnConnected,
+                isAdmin = isAdmin,
+                knownPlanName = accessState.quota.currentPlanName,
             )
         }
     } else {
