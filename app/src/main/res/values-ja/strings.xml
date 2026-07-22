@@ -91,6 +91,22 @@
     <string name="settings_error_logs_count">%1$d 件</string>
     <string name="settings_share_logs">ログを共有</string>
     <string name="share_logs_chooser_title">エラーログを共有</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">コピーしました</string>
     <string name="no_error_logs">エラーログはありません</string>
     <string name="no_shareable_files">共有できるファイルがありません。</string>
@@ -201,18 +217,27 @@
     <string name="settings_ip_lists_frequency_weekly">毎週</string>
     <string name="settings_ip_lists_frequency_manual">手動のみ</string>
     <string name="settings_ip_lists_saved">IP リスト設定を保存しました。</string>
+    <string name="settings_ip_lists_priority_title">優先サイト</string>
+    <string name="settings_ip_lists_priority_subtitle">ここにあるCIDR範囲は、上の一般リストが切り詰められても常にVPNを迂回します。VPN経由で不具合が出る特定のサイトに使用してください。</string>
+    <string name="settings_ip_lists_priority_add_url_label">優先リストのURLを追加</string>
+    <string name="settings_ip_lists_priority_add_url">優先URLを追加</string>
+    <string name="settings_ip_lists_safe_limit_title">システムの安定性のためにルートを制限</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">バイパスルートの数を十分低く抑え、システムのVPNアイコンが素早く表示されるようにします。上の優先サイトは決して除外されません。</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP リストの状態</string>
     <string name="settings_ip_lists_last_updated">最終更新</string>
     <string name="settings_ip_lists_last_updated_never">なし</string>
     <string name="settings_ip_lists_loaded_routes">読み込まれたルート</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d ルート</string>
+    <string name="settings_ip_lists_loaded_priority_routes">優先ルート</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d ルート</string>
     <string name="settings_ip_lists_last_error">最後の読み込みエラー</string>
     <string name="settings_ip_lists_last_error_none">なし</string>
     <string name="settings_ip_lists_route_limit_notice">Se aplican hasta %1$d rutas IPv4 o IPv6.</string>
     <string name="settings_ip_lists_route_limit_warning">La lista alcanzó el límite de %1$d rutas. Las rutas adicionales se ignoraron.</string>
     <string name="settings_ip_lists_update_now">今すぐ更新</string>
     <string name="settings_ip_lists_update_now_loading">更新中…</string>
-    <string name="settings_ip_lists_update_ready">Lista IP actualizada: %1$d rutas cargadas.</string>
+    <string name="settings_ip_lists_update_ready">IPリストを更新しました: 一般 %1$d、優先 %2$d。</string>
     <string name="settings_ip_lists_update_failed_prefix">更新失敗</string>
     <string name="settings_ip_lists_update_failed">Error al actualizar: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Error al actualizar: %1$s. Se usa la lista en caché o integrada.</string>
@@ -226,6 +251,12 @@
     <string name="settings_link_telegram">Telegram チャンネル</string>
     <string name="settings_updates_github_title">GitHub で更新を確認</string>
     <string name="settings_updates_github_subtitle">最新の公開リリースを定期的に確認して通知します。</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">新しいバージョンが見つかったら通知</string>
     <string name="settings_push_updates_subtitle">GitHub 確認後のローカル通知です。Android 13+ では通知権限が必要です。</string>
     <string name="settings_auto_download_title">APK ダウンロードを提案</string>
@@ -327,7 +358,7 @@
     <string name="settings_ip_lists_coverage_fast">高速</string>
     <string name="settings_ip_lists_coverage_fast_description">広いルートを最大 %1$d 件まで適用します。トンネル確立は速いですが、小さな IP 範囲は VPN を使う場合があります。</string>
     <string name="settings_ip_lists_coverage_full">フルカバレッジ</string>
-    <string name="settings_ip_lists_coverage_full_description">読み込んだすべてのルートを適用して最大のカバレッジにします。大きなリストではトンネル確立に数秒かかることがあります。</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">カバレッジモード</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR リストはオフです。上のスイッチをオンにしてルーティング例外を再度適用してください。</string>
     <string name="settings_ip_lists_enable_subtitle">オフのときはリストベースのルーティング例外は適用されずリストもダウンロードされません。すべてのトラフィックが VPN トンネルを通ります。</string>
@@ -422,4 +453,22 @@
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>

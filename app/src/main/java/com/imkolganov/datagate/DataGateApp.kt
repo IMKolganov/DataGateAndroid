@@ -8,13 +8,25 @@ import androidx.core.content.edit
 import com.imkolganov.datagate.auth.LegacyAuthMigration
 import com.imkolganov.datagate.logger.CrashLogger
 import com.imkolganov.datagate.logger.CrashUploadWorkScheduler
+import com.imkolganov.datagate.logger.DebugPreferences
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.ui.theme.LanguagePreferenceStore
 import com.imkolganov.datagate.ui.theme.ThemePreferenceStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class DataGateApp : Application() {
 
     lateinit var crashLogger: CrashLogger
         private set
+
+    lateinit var vpnDebugLogger: VpnDebugLogger
+        private set
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         ThemePreferenceStore.apply(this)
@@ -24,6 +36,14 @@ class DataGateApp : Application() {
         crashLogger = CrashLogger(this)
         crashLogger.install()
         CrashUploadWorkScheduler.enqueue(this)
+
+        vpnDebugLogger = VpnDebugLogger(this)
+        VpnDebugLogger.install(vpnDebugLogger)
+        appScope.launch {
+            DebugPreferences.vpnDebugModeFlow(this@DataGateApp).collectLatest { enabled ->
+                vpnDebugLogger.setEnabled(enabled)
+            }
+        }
     }
 
     private fun migrateLegacyAuthSessionIfNeeded() {

@@ -102,6 +102,22 @@
     <string name="settings_error_logs_count">%1$d file(s)</string>
     <string name="settings_share_logs">Share Error Logs</string>
     <string name="share_logs_chooser_title">Share error logs</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
 
     <string name="copied">Copied</string>
     <string name="no_error_logs">No error logs found</string>
@@ -219,18 +235,27 @@
     <string name="settings_ip_lists_frequency_weekly">Kas savaitę</string>
     <string name="settings_ip_lists_frequency_manual">Tik rankiniu būdu</string>
     <string name="settings_ip_lists_saved">IP sąrašo nustatymai išsaugoti.</string>
+    <string name="settings_ip_lists_priority_title">Prioritetinės svetainės</string>
+    <string name="settings_ip_lists_priority_subtitle">Čia esantys CIDR intervalai visada apeina VPN, net jei bendras sąrašas aukščiau sutrumpinamas. Naudokite tai konkrečioms svetainėms, kurios sugenda nukreipiant per VPN.</string>
+    <string name="settings_ip_lists_priority_add_url_label">Pridėti prioritetinio sąrašo URL</string>
+    <string name="settings_ip_lists_priority_add_url">Pridėti prioritetinį URL</string>
+    <string name="settings_ip_lists_safe_limit_title">Riboti maršrutus dėl sistemos stabilumo</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">Palaiko apėjimo maršrutų skaičių pakankamai mažą, kad sistemos VPN piktograma greitai pasirodytų. Aukščiau esančios prioritetinės svetainės niekada nepašalinamos.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP sąrašo būsena</string>
     <string name="settings_ip_lists_last_updated">Paskutinį kartą atnaujinta</string>
     <string name="settings_ip_lists_last_updated_never">Niekada</string>
     <string name="settings_ip_lists_loaded_routes">Įkelti maršrutai</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d maršrutų</string>
+    <string name="settings_ip_lists_loaded_priority_routes">Prioritetiniai maršrutai</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d maršrutų</string>
     <string name="settings_ip_lists_last_error">Paskutinė įkėlimo klaida</string>
     <string name="settings_ip_lists_last_error_none">Nėra</string>
     <string name="settings_ip_lists_route_limit_notice">Taikoma iki %1$d IPv4 arba IPv6 maršrutų.</string>
     <string name="settings_ip_lists_route_limit_warning">Sąrašas pasiekė %1$d maršrutų limitą. Papildomi maršrutai ignoruoti.</string>
     <string name="settings_ip_lists_update_now">Atnaujinti dabar</string>
     <string name="settings_ip_lists_update_now_loading">Atnaujinama…</string>
-    <string name="settings_ip_lists_update_ready">IP sąrašas atnaujintas: įkelta %1$d maršrutų.</string>
+    <string name="settings_ip_lists_update_ready">IP sąrašas atnaujintas: %1$d bendrų, %2$d prioritetinių.</string>
     <string name="settings_ip_lists_update_failed_prefix">Atnaujinti nepavyko</string>
     <string name="settings_ip_lists_update_failed">Atnaujinti nepavyko: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Atnaujinti nepavyko: %1$s. Naudojamas talpykloje esantis arba įtaisytasis sąrašas.</string>
@@ -244,6 +269,12 @@
     <string name="settings_link_telegram">Telegram kanalas</string>
     <string name="settings_updates_github_title">Tikrinti atnaujinimus GitHub</string>
     <string name="settings_updates_github_subtitle">Periodiškai tikrina naujausią viešą leidimą ir praneša jums.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Pranešti radus naują versiją</string>
     <string name="settings_push_updates_subtitle">Vietinis pranešimas po GitHub patikros. Android 13+ reikia pranešimų leidimo.</string>
     <string name="settings_auto_download_title">Siūlyti APK atsisiuntimą</string>
@@ -345,7 +376,7 @@ Galite atidaryti leidimo puslapį arba atsisiųsti APK.</string>
     <string name="settings_ip_lists_coverage_fast">Greitas</string>
     <string name="settings_ip_lists_coverage_fast_description">Taiko iki %1$d plėtinių maršrutų. Tunelis susikuria greičiau, bet maži IP ruožai vis dar gali naudoti VPN.</string>
     <string name="settings_ip_lists_coverage_full">Pilnas padengimas</string>
-    <string name="settings_ip_lists_coverage_full_description">Taiko visus įkeltus maršrutus didžiausiam padengimui. Dideliuose sąrašuose tunelio kūrimas gali užtrukti kelias sekundes.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Padengimo režimas</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR sąrašai išjungti. Įjunkite jungiklį viršuje, kad vėl taikytumėte maršrutų išimtis.</string>
     <string name="settings_ip_lists_enable_subtitle">Išjungus, sąrašais pagrįstos maršrutų išimtys nepritaikomos ir sąrašai neatsisiunčiami— visas srautas eina per VPN tunelį.</string>
@@ -440,4 +471,22 @@ Galite atidaryti leidimo puslapį arba atsisiųsti APK.</string>
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>

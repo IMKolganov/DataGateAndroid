@@ -102,6 +102,22 @@
     <string name="settings_error_logs_count">%1$d file(s)</string>
     <string name="settings_share_logs">Share Error Logs</string>
     <string name="share_logs_chooser_title">Share error logs</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
 
     <string name="copied">Copied</string>
     <string name="no_error_logs">No error logs found</string>
@@ -219,18 +235,27 @@
     <string name="settings_ip_lists_frequency_weekly">Gach seachtain</string>
     <string name="settings_ip_lists_frequency_manual">De láimh amháin</string>
     <string name="settings_ip_lists_saved">Sábháladh socruithe an liosta IP.</string>
+    <string name="settings_ip_lists_priority_title">Suímh tosaíochta</string>
+    <string name="settings_ip_lists_priority_subtitle">Bíonn na raonta CIDR anseo i gcónaí ag seachbhóthar an VPN, fiú má ghearrtar an liosta ginearálta thuas. Úsáid é seo do shuímh shonracha a bhriseann nuair a dhírítear tríd an VPN iad.</string>
+    <string name="settings_ip_lists_priority_add_url_label">Cuir URL liosta tosaíochta leis</string>
+    <string name="settings_ip_lists_priority_add_url">Cuir URL tosaíochta leis</string>
+    <string name="settings_ip_lists_safe_limit_title">Teorannaigh bealaí ar mhaithe le cobhsaíocht an chórais</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">Coinníonn sé líon na mbealaí seachbhóthair íseal go leor go dtaispeánfaidh deilbhín VPN an chórais go tapa. Ní scriosfar riamh na suímh tosaíochta thuas.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Stádas an liosta IP</string>
     <string name="settings_ip_lists_last_updated">Nuashonraithe go deireanach</string>
     <string name="settings_ip_lists_last_updated_never">Riamh</string>
     <string name="settings_ip_lists_loaded_routes">Bealaí luchtaithe</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d bealach</string>
+    <string name="settings_ip_lists_loaded_priority_routes">Bealaí tosaíochta</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d bealach</string>
     <string name="settings_ip_lists_last_error">Earráid luchtaithe dheireanach</string>
     <string name="settings_ip_lists_last_error_none">Níl aon cheann</string>
     <string name="settings_ip_lists_route_limit_notice">Cuirtear suas le %1$d bealach IPv4 nó IPv6 i bhfeidhm.</string>
     <string name="settings_ip_lists_route_limit_warning">Shroich an liosta teorainn %1$d bealach. Rinneadh neamhaird de bhealaí breise.</string>
     <string name="settings_ip_lists_update_now">Nuashonraigh anois</string>
     <string name="settings_ip_lists_update_now_loading">Á nuashonrú…</string>
-    <string name="settings_ip_lists_update_ready">Nuashonraíodh an liosta IP: luchtaíodh %1$d bealach.</string>
+    <string name="settings_ip_lists_update_ready">Nuashonraíodh an liosta IP: %1$d ginearálta, %2$d tosaíochta.</string>
     <string name="settings_ip_lists_update_failed_prefix">Theip ar nuashonrú</string>
     <string name="settings_ip_lists_update_failed">Theip ar nuashonrú: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Theip ar nuashonrú: %1$s. Tá liosta taisce nó ionsuite á úsáid.</string>
@@ -244,6 +269,12 @@
     <string name="settings_link_telegram">Cainéal Telegram</string>
     <string name="settings_updates_github_title">Seiceáil nuashonruithe ar GitHub</string>
     <string name="settings_updates_github_subtitle">Seiceáil an eisiúint phoiblí is déanaí go tréimhsiúil agus cuir in iúl duit.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Cuir in iúl nuair a aimsítear leagan nua</string>
     <string name="settings_push_updates_subtitle">Fógra áitiúil tar éis seiceáil GitHub. Teastaíonn cead fógraí ar Android 13+.</string>
     <string name="settings_auto_download_title">Mol íoslódáil APK</string>
@@ -345,7 +376,7 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="settings_ip_lists_coverage_fast">Tapa</string>
     <string name="settings_ip_lists_coverage_fast_description">Cuirtear suas le %1$d slí leathan i bhfeidhm. Tá socrú tolláin níos tapúla, ach féidir le raonta IP beaga VPN a úsáid fós.</string>
     <string name="settings_ip_lists_coverage_full">Clúdach iomlán</string>
-    <string name="settings_ip_lists_coverage_full_description">Cuirtear gach lódáilte slí i bhfeidhm le clúdach is fearr. Féadfaidh socrú tollán cúpla soicind a ghlacadh ar liostaí móra.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Mód clúdach</string>
     <string name="settings_ip_lists_detail_disabled_notice">Tá liostaí CIDR as. Cumasaigh an mléid thuas chun eisceachtaí róstaireachta a chur i bhfeidhm arís.</string>
     <string name="settings_ip_lists_enable_subtitle">Nuair atá as, ní chuirtear eisceachtaí róstaireachta bunaithe ar liosta i bhfeidhm agus níl liostaí á n-íoslódáil; téann gach trácht tríd an tollán VPN.</string>
@@ -440,4 +471,22 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>

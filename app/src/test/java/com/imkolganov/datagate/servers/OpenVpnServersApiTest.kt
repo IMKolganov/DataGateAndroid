@@ -283,4 +283,37 @@ class OpenVpnServersApiTest {
         assertEquals(false, data.openVpnServerWithStatuses[0].server.isAccessibleForUserQuotaPlan)
         assertEquals(true, data.openVpnServerWithStatuses[1].server.isAccessibleForUserQuotaPlan)
     }
+
+    @Test
+    fun parseWithStatusResponse_missingAccessibilityFlag_defaultsToFalse() {
+        val response = api.parseWithStatusResponse(
+            """
+            {
+              "success": true,
+              "data": {
+                "vpnServerWithStatuses": [{
+                  "vpnServerResponses": {
+                    "vpnServer": {
+                      "id": 75,
+                      "serverName": "ambiguous",
+                      "isOnline": true,
+                      "isDefault": false,
+                      "apiUrl": "https://api.example",
+                      "isEnableWss": true,
+                      "isDeleted": false,
+                      "tags": [],
+                      "quotaPlanGroups": []
+                    }
+                  }
+                }]
+              }
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(
+            false,
+            response.data!!.openVpnServerWithStatuses.single().server.isAccessibleForUserQuotaPlan,
+        )
+    }
 }

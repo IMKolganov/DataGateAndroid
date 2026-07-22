@@ -59,6 +59,7 @@ import com.imkolganov.datagate.freetier.isFreeTierLinkCodeExpired
 import com.imkolganov.datagate.freetier.parseGraceExpiresAtMs
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnPoll
 import com.imkolganov.datagate.freetier.shouldRefreshFreeTierStatusOnResume
+import com.imkolganov.datagate.freetier.shouldSkipFreeTierClientChecks
 import com.imkolganov.datagate.freetier.shouldWarnLinkCodeExpiringSoon
 import com.imkolganov.datagate.freetier.telegramChannelUrl
 import com.imkolganov.datagate.model.base.ApiResponse
@@ -78,6 +79,9 @@ fun FreeTierOnboardingHost(
     adminTotpGate: AdminTotpGate,
     freeTierApi: FreeTierApi,
     isVpnConnected: Boolean = false,
+    isAdmin: Boolean = false,
+    /** Active quota plan from Access (servers load); used to skip Pro/Unlimited without polling. */
+    knownPlanName: String? = null,
 ) {
     if (adminTotpGate != AdminTotpGate.Allowed) {
         FreeTierComplianceController.setOnboardingVisible(false)
@@ -98,10 +102,14 @@ fun FreeTierOnboardingHost(
     var linkCodeLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var linkCodeExpiredNotice by remember { mutableStateOf(false) }
+    /** Set after backend says free-tier rules do not apply (Pro/Unlimited/etc.). */
+    var exemptFromChecks by remember { mutableStateOf(false) }
 
     var lastStatusFetchMs by remember { mutableLongStateOf(0L) }
     var refreshOnNextResume by remember { mutableStateOf(false) }
     val fetchMutex = remember { Mutex() }
+
+    val skipClientChecks = shouldSkipFreeTierClientChecks(isAdmin, knownPlanName) || exemptFromChecks
 
     val defaultChannelLabel = stringResource(R.string.free_tier_default_channel)
     val defaultChannelHandle = stringResource(R.string.free_tier_default_channel_handle)
@@ -112,17 +120,24 @@ fun FreeTierOnboardingHost(
         ApkUpdateInstaller.openUrl(activity, url)
     }
 
+    fun clearOverlayState() {
+        onboardingVisible = false
+        statusErrorVisible = false
+        linkCode = null
+        codeExpiresAtMs = 0L
+        codeSecondsLeft = 0
+        errorMessage = null
+        linkCodeExpiredNotice = false
+    }
+
     fun applyFetchResult(result: FreeTierStatusFetchResult) {
         when (result.outcome) {
             FreeTierStatusFetchOutcome.HideOnboarding -> {
-                onboardingVisible = false
-                statusErrorVisible = false
+                clearOverlayState()
                 status = result.status
-                linkCode = null
-                codeExpiresAtMs = 0L
-                codeSecondsLeft = 0
-                errorMessage = null
-                linkCodeExpiredNotice = false
+                if (result.status?.isApplicable == false) {
+                    exemptFromChecks = true
+                }
             }
             FreeTierStatusFetchOutcome.ShowOnboarding -> {
                 statusErrorVisible = false
@@ -136,6 +151,15 @@ fun FreeTierOnboardingHost(
                 errorMessage = result.errorMessage
                     ?: appContext.getString(R.string.free_tier_status_check_failed)
             }
+            FreeTierStatusFetchOutcome.NoChange -> Unit
+        }
+    }
+
+    LaunchedEffect(skipClientChecks) {
+        if (skipClientChecks) {
+            clearOverlayState()
+            FreeTierComplianceController.setOnboardingVisible(false)
+            FreeTierComplianceController.setGraceExpiresAtUtcMs(null)
         }
     }
 
@@ -162,12 +186,14 @@ fun FreeTierOnboardingHost(
         throw lastError ?: IllegalStateException("Free tier status fetch failed with no exception recorded")
     }
 
-    suspend fun fetchStatus(force: Boolean = false) {
+    suspend fun fetchStatus(force: Boolean = false, surfaceErrors: Boolean = false) {
+        if (skipClientChecks) return
         if (!force) {
             val now = System.currentTimeMillis()
             if (!shouldRefreshFreeTierStatusOnPoll(lastStatusFetchMs, now)) return
         }
         fetchMutex.withLock {
+            if (skipClientChecks) return@withLock
             if (!force) {
                 val now = System.currentTimeMillis()
                 if (!shouldRefreshFreeTierStatusOnPoll(lastStatusFetchMs, now)) return@withLock
@@ -176,13 +202,16 @@ fun FreeTierOnboardingHost(
             try {
                 val response = withStatusFetchRetry { freeTierApi.getAccessStatus() }
                 lastStatusFetchMs = System.currentTimeMillis()
-                applyFetchResult(evaluateFreeTierStatusFetch(response))
+                applyFetchResult(
+                    evaluateFreeTierStatusFetch(response, surfaceErrors = surfaceErrors)
+                )
             } catch (e: Exception) {
                 lastStatusFetchMs = System.currentTimeMillis()
                 applyFetchResult(
                     evaluateFreeTierStatusFetch(
                         response = ApiResponse(success = false, message = null, data = null),
                         apiFailureMessage = appContext.resources.userFriendlyApiError(e),
+                        surfaceErrors = surfaceErrors,
                     )
                 )
             } finally {
@@ -195,21 +224,25 @@ fun FreeTierOnboardingHost(
      * Starts/refreshes the grace window for a direct OpenVPN connection. Called once right after
      * the tunnel comes up (see the `isVpnConnected` [LaunchedEffect] below) — never on a timer or
      * poll, since repeated calls re-audit compliance server-side. Retries transient network
-     * failures (see [withStatusFetchRetry]) rather than immediately popping the error dialog.
+     * failures (see [withStatusFetchRetry]); background failures stay silent so paid/admin users
+     * are not shown an error dialog.
      */
     suspend fun notifyVpnConnected() {
+        if (skipClientChecks) return
         fetchMutex.withLock {
+            if (skipClientChecks) return@withLock
             statusLoading = true
             try {
                 val response = withStatusFetchRetry { freeTierApi.notifyVpnConnected() }
                 lastStatusFetchMs = System.currentTimeMillis()
-                applyFetchResult(evaluateFreeTierStatusFetch(response))
+                applyFetchResult(evaluateFreeTierStatusFetch(response, surfaceErrors = false))
             } catch (e: Exception) {
                 lastStatusFetchMs = System.currentTimeMillis()
                 applyFetchResult(
                     evaluateFreeTierStatusFetch(
                         response = ApiResponse(success = false, message = null, data = null),
                         apiFailureMessage = appContext.resources.userFriendlyApiError(e),
+                        surfaceErrors = false,
                     )
                 )
             } finally {
@@ -249,25 +282,28 @@ fun FreeTierOnboardingHost(
         onDispose { FreeTierComplianceController.setOnboardingVisible(false) }
     }
 
-    LaunchedEffect(adminTotpGate) {
-        if (adminTotpGate != AdminTotpGate.Allowed) {
+    LaunchedEffect(adminTotpGate, skipClientChecks) {
+        if (adminTotpGate != AdminTotpGate.Allowed || skipClientChecks) {
             status = null
             linkCode = null
-            onboardingVisible = false
-            statusErrorVisible = false
+            clearOverlayState()
             return@LaunchedEffect
         }
-        fetchStatus(force = true)
+        fetchStatus(force = true, surfaceErrors = false)
     }
 
     val statusRefreshNonce by FreeTierComplianceController.statusRefreshNonce.collectAsState()
-    LaunchedEffect(statusRefreshNonce) {
-        if (adminTotpGate != AdminTotpGate.Allowed || statusRefreshNonce == 0) return@LaunchedEffect
-        fetchStatus(force = false)
+    LaunchedEffect(statusRefreshNonce, skipClientChecks) {
+        if (adminTotpGate != AdminTotpGate.Allowed || skipClientChecks || statusRefreshNonce == 0) {
+            return@LaunchedEffect
+        }
+        fetchStatus(force = false, surfaceErrors = false)
     }
 
-    LaunchedEffect(isVpnConnected) {
-        if (adminTotpGate != AdminTotpGate.Allowed || !isVpnConnected) return@LaunchedEffect
+    LaunchedEffect(isVpnConnected, skipClientChecks) {
+        if (adminTotpGate != AdminTotpGate.Allowed || skipClientChecks || !isVpnConnected) {
+            return@LaunchedEffect
+        }
         notifyVpnConnected()
     }
 
@@ -279,9 +315,12 @@ fun FreeTierOnboardingHost(
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner, adminTotpGate) {
+    DisposableEffect(lifecycleOwner, adminTotpGate, skipClientChecks) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && adminTotpGate == AdminTotpGate.Allowed) {
+            if (event == Lifecycle.Event.ON_RESUME &&
+                adminTotpGate == AdminTotpGate.Allowed &&
+                !skipClientChecks
+            ) {
                 val now = System.currentTimeMillis()
                 if (shouldRefreshFreeTierStatusOnResume(
                         lastStatusFetchMs = lastStatusFetchMs,
@@ -291,7 +330,7 @@ fun FreeTierOnboardingHost(
                     )
                 ) {
                     refreshOnNextResume = false
-                    scope.launch { fetchStatus(force = true) }
+                    scope.launch { fetchStatus(force = true, surfaceErrors = false) }
                 }
             }
         }
@@ -331,7 +370,7 @@ fun FreeTierOnboardingHost(
             confirmButton = {
                 TextButton(
                     enabled = !statusLoading,
-                    onClick = { scope.launch { fetchStatus(force = true) } }
+                    onClick = { scope.launch { fetchStatus(force = true, surfaceErrors = true) } }
                 ) {
                     Text(
                         if (statusLoading) {
@@ -489,7 +528,7 @@ fun FreeTierOnboardingHost(
                 Spacer(modifier = Modifier.height(12.dp))
                 TextButton(
                     enabled = !statusLoading,
-                    onClick = { scope.launch { fetchStatus(force = true) } },
+                    onClick = { scope.launch { fetchStatus(force = true, surfaceErrors = false) } },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(

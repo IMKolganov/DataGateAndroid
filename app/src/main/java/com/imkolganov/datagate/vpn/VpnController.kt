@@ -7,7 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Build
-import android.util.Log
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
 import com.imkolganov.datagate.R
@@ -40,7 +40,12 @@ class VpnController(
             pendingCommandRollback = null
             val next = VpnCommandContract.applyCommandRejected(rollback, rejected, eventInfo)
             onStateChange(next)
-            Log.w(TAG, "VPN command rejected: $eventName ($eventInfo), rolled back UI")
+            VpnDebugLogger.event(
+                category = "ui.command",
+                action = "rejected",
+                details = mapOf("event" to eventName, "info" to eventInfo),
+            )
+            VpnDebugLogger.w(TAG, "VPN command rejected: $eventName ($eventInfo), rolled back UI")
             return@VpnStatusBroadcastReceiver
         }
         val broadcast = VpnLifecyclePolicy.StatusBroadcast(
@@ -56,7 +61,7 @@ class VpnController(
             },
         )
         if (mapped == null) {
-            Log.d(TAG, "Ignoring idle query DISCONNECTED over in-flight connect UI")
+            VpnDebugLogger.d(TAG, "Ignoring idle query DISCONNECTED over in-flight connect UI")
             return@VpnStatusBroadcastReceiver
         }
         if (VpnCommandContract.isAuthoritativeTunnelEvent(eventName)) {
@@ -66,7 +71,18 @@ class VpnController(
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
         onStateChange(mapped)
-        Log.d(TAG, "VPN status updated: $eventName - $eventInfo (fromQuery=$fromQuery)")
+        VpnDebugLogger.event(
+            category = "ui.status",
+            action = eventName,
+            details = mapOf(
+                "info" to eventInfo,
+                "fromQuery" to fromQuery,
+                "connected" to mapped.isVpnConnected,
+                "paused" to mapped.isVpnPaused,
+                "connectRequested" to mapped.isConnectRequested,
+            ),
+        )
+        VpnDebugLogger.d(TAG, "VPN status updated: $eventName - $eventInfo (fromQuery=$fromQuery)")
     }
 
     fun onStart() {
@@ -98,7 +114,7 @@ class VpnController(
             action = OpenVpn3Service.ACTION_QUERY_STATUS
         }
         runCatching { startServiceCompat(intent) }
-            .onFailure { Log.w(TAG, "Failed to query VPN service status", it) }
+            .onFailure { VpnDebugLogger.w(TAG, "Failed to query VPN service status", it) }
     }
 
     fun onStop() {
@@ -176,12 +192,23 @@ class VpnController(
         pendingLinkProtocol = linkProtocol
         pendingBypassRoutes = bypassRoutes
 
-        Log.d(TAG, "Calling VpnService.prepare()")
+        VpnDebugLogger.event(
+            category = "ui.user",
+            action = "start_with_config",
+            details = mapOf(
+                "proto" to linkProtocol.name,
+                "wssHost" to runCatching { java.net.URI(wssLink).host }.getOrNull(),
+                "configBytes" to configText.length,
+                "excludeRoutes" to bypassRoutes.size,
+            ),
+        )
+        VpnDebugLogger.d(TAG, "Calling VpnService.prepare()")
         val prepareIntent = VpnService.prepare(activity)
-        Log.d(TAG, "Prepare intent is null: ${prepareIntent == null}")
+        VpnDebugLogger.d(TAG, "Prepare intent is null: ${prepareIntent == null}")
 
         if (prepareIntent != null) {
-            Log.d(TAG, "VPN permission is not granted yet, requesting...")
+            VpnDebugLogger.event("ui.user", "request_vpn_permission")
+            VpnDebugLogger.d(TAG, "VPN permission is not granted yet, requesting...")
             permissionLauncher.launch(prepareIntent)
             onStateChange(
                 getState().copy(
@@ -192,12 +219,12 @@ class VpnController(
             return
         }
 
-        Log.d(TAG, "VPN permission already granted, starting service...")
+        VpnDebugLogger.d(TAG, "VPN permission already granted, starting service...")
         startServiceWithConfig(configText, wssLink, linkProtocol, bypassRoutes)
     }
 
     fun onPermissionGranted() {
-        Log.d(TAG, "VPN permission granted from launcher")
+        VpnDebugLogger.d(TAG, "VPN permission granted from launcher")
         updatePermissionState()
 
         val cfg = pendingConfigText
@@ -218,7 +245,7 @@ class VpnController(
     }
 
     fun onPermissionDenied() {
-        Log.w(TAG, "VPN permission denied from launcher")
+        VpnDebugLogger.w(TAG, "VPN permission denied from launcher")
         updatePermissionState()
         pendingConfigText = null
         pendingWssLink = null
@@ -228,6 +255,7 @@ class VpnController(
     }
 
     fun requestDisconnect() {
+        VpnDebugLogger.event("ui.user", "disconnect")
         pendingCommandRollback = null
         prefs.edit {
             remove("selected_server_name")
@@ -255,9 +283,19 @@ class VpnController(
     fun requestPause() {
         val current = getState()
         if (!VpnCommandContract.canRequestPauseFromUi(current)) {
-            Log.w(TAG, "Ignoring pause request in state connected=${current.isVpnConnected} paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
+            VpnDebugLogger.event(
+                category = "ui.user",
+                action = "pause_ignored",
+                details = mapOf(
+                    "connected" to current.isVpnConnected,
+                    "paused" to current.isVpnPaused,
+                    "pending" to current.pendingUserCommand?.name,
+                ),
+            )
+            VpnDebugLogger.w(TAG, "Ignoring pause request in state connected=${current.isVpnConnected} paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
             return
         }
+        VpnDebugLogger.event("ui.user", "pause")
         pendingCommandRollback = current
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_PAUSE
@@ -269,9 +307,18 @@ class VpnController(
     fun requestResume() {
         val current = getState()
         if (!VpnCommandContract.canRequestResumeFromUi(current)) {
-            Log.w(TAG, "Ignoring resume request in state paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
+            VpnDebugLogger.event(
+                category = "ui.user",
+                action = "resume_ignored",
+                details = mapOf(
+                    "paused" to current.isVpnPaused,
+                    "pending" to current.pendingUserCommand?.name,
+                ),
+            )
+            VpnDebugLogger.w(TAG, "Ignoring resume request in state paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
             return
         }
+        VpnDebugLogger.event("ui.user", "resume")
         pendingCommandRollback = current
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
             action = OpenVpn3Service.ACTION_RESUME
@@ -316,7 +363,7 @@ class VpnController(
         try {
             startServiceCompat(intent)
         } catch (t: Throwable) {
-            Log.e(TAG, "Failed to start OpenVPN service", t)
+            VpnDebugLogger.e(TAG, "Failed to start OpenVPN service", t)
             runCatching { configFile.delete() }
             routesFile?.let { runCatching { it.delete() } }
             showError(
@@ -381,15 +428,6 @@ class VpnController(
         val hasPermission = VpnService.prepare(activity) == null
         if (getState().hasVpnPermission != hasPermission) {
             onStateChange(getState().copy(hasVpnPermission = hasPermission))
-        }
-    }
-
-    fun requestVpnPermission() {
-        val prepareIntent = VpnService.prepare(activity)
-        if (prepareIntent != null) {
-            permissionLauncher.launch(prepareIntent)
-        } else {
-            updatePermissionState()
         }
     }
 

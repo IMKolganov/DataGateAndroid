@@ -5,7 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Opens the same update dialog as [UpdateCheckHost] when the user taps the Home banner.
+ * Opens the same update dialog as [UpdateCheckHost] (Home banner, notification tap,
+ * or Settings → Check now).
  */
 object UpdatePromptController {
 

@@ -91,6 +91,22 @@
     <string name="settings_error_logs_count">%1$d tiedosto(a)</string>
     <string name="settings_share_logs">Jaa virhelokit</string>
     <string name="share_logs_chooser_title">Jaa virhelokit</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">Kopioitu</string>
     <string name="no_error_logs">Ei virhelokitiedostoja</string>
     <string name="no_shareable_files">Ei jaettavia tiedostoja.</string>
@@ -201,18 +217,27 @@
     <string name="settings_ip_lists_frequency_weekly">Viikoittain</string>
     <string name="settings_ip_lists_frequency_manual">Vain manuaalisesti</string>
     <string name="settings_ip_lists_saved">IP-listan asetukset tallennettu.</string>
+    <string name="settings_ip_lists_priority_title">Ensisijaiset sivustot</string>
+    <string name="settings_ip_lists_priority_subtitle">Tässä olevat CIDR-alueet ohittavat aina VPN:n, vaikka yllä oleva yleinen lista katkaistaisiin. Käytä tätä tietyille sivustoille, jotka hajoavat VPN:n kautta reititettäessä.</string>
+    <string name="settings_ip_lists_priority_add_url_label">Lisää ensisijaisen listan URL</string>
+    <string name="settings_ip_lists_priority_add_url">Lisää ensisijainen URL</string>
+    <string name="settings_ip_lists_safe_limit_title">Rajoita reittejä järjestelmän vakauden vuoksi</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">Pitää ohitusreittien määrän riittävän alhaisena, jotta järjestelmän VPN-kuvake ilmestyy nopeasti. Yllä olevia ensisijaisia sivustoja ei koskaan pudoteta.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP-listan tila</string>
     <string name="settings_ip_lists_last_updated">Viimeksi päivitetty</string>
     <string name="settings_ip_lists_last_updated_never">Ei koskaan</string>
     <string name="settings_ip_lists_loaded_routes">Ladatut reitit</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d reittiä</string>
+    <string name="settings_ip_lists_loaded_priority_routes">Prioriteettireitit</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d reittiä</string>
     <string name="settings_ip_lists_last_error">Viimeisin latausvirhe</string>
     <string name="settings_ip_lists_last_error_none">Ei mitään</string>
     <string name="settings_ip_lists_route_limit_notice">Enintään %1$d IPv4- tai IPv6-reittiä otetaan käyttöön.</string>
     <string name="settings_ip_lists_route_limit_warning">Lista saavutti %1$d reitin rajan. Ylimääräiset reitit ohitettiin.</string>
     <string name="settings_ip_lists_update_now">Päivitä nyt</string>
     <string name="settings_ip_lists_update_now_loading">Päivitetään…</string>
-    <string name="settings_ip_lists_update_ready">IP-lista päivitetty: %1$d reittiä ladattu.</string>
+    <string name="settings_ip_lists_update_ready">IP-lista päivitetty: %1$d yleistä, %2$d prioriteettia.</string>
     <string name="settings_ip_lists_update_failed_prefix">Päivitys epäonnistui</string>
     <string name="settings_ip_lists_update_failed">Päivitys epäonnistui: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Päivitys epäonnistui: %1$s. Käytetään välimuistissa olevaa tai sisäänrakennettua listaa.</string>
@@ -226,6 +251,12 @@
     <string name="settings_link_telegram">Telegram-kanava</string>
     <string name="settings_updates_github_title">Tarkista päivitykset GitHubista</string>
     <string name="settings_updates_github_subtitle">Tarkistaa säännöllisesti uusimman julkisen julkaisun ja ilmoittaa sinulle.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Ilmoita, kun uusi versio löytyy</string>
     <string name="settings_push_updates_subtitle">Paikallinen ilmoitus GitHub-tarkistuksen jälkeen. Vaatii ilmoitusluvan Android 13+:ssa.</string>
     <string name="settings_auto_download_title">Ehdota APK-latausta</string>
@@ -327,7 +358,7 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="settings_ip_lists_coverage_fast">Nopea</string>
     <string name="settings_ip_lists_coverage_fast_description">Soveltaa enintään %1$d laajaa reittiä. Tunnelin määritys on nopeampi, mutta pienet IP-alueet voivat silti käyttää VPN:ää.</string>
     <string name="settings_ip_lists_coverage_full">Täysi peitto</string>
-    <string name="settings_ip_lists_coverage_full_description">Soveltaa jokaisen ladatun reitin maksimaalisen peiton saamiseksi. Tunnelin määritys voi kestää useita sekunteja isoilla luetteloilla.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Peittotila</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR-luettelot ovat pois päältä. Ota yläpuolen kytkin käyttöön, jotta reitityspoikkeukset otetaan taas käyttöön.</string>
     <string name="settings_ip_lists_enable_subtitle">Kun pois päältä, luettelopohjaisia reitityspoikkeuksia ei sovelleta eikä luetteloita ladata; kaikki liikenne kulkee VPN-tunnelin kautta.</string>
@@ -422,4 +453,22 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>

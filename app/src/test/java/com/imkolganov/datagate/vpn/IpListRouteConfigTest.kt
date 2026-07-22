@@ -1,21 +1,46 @@
 package com.imkolganov.datagate.vpn
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IpListRouteConfigTest {
 
     /**
+     * Builds [count] valid, non-adjacent /16s so [IpCidrNormalizer] cannot sibling-merge them
+     * (odd second-octet partners are absent).
+     */
+    private fun disjointBroadRoutes(count: Int): List<Ipv4CidrRoute> =
+        (0 until count).map { i ->
+            val flat = i * 2
+            val a = 1 + flat / 256
+            val b = flat % 256
+            Ipv4CidrRoute("$a.$b.0.0", "255.255.0.0", 16)
+        }
+
+    /**
+     * Non-adjacent /32s that survive normalization without collapsing into fewer prefixes.
+     */
+    private fun disjointHostRoutes(count: Int): List<Ipv4CidrRoute> =
+        (0 until count).map { i ->
+            val flat = i * 2
+            val a = 10 + flat / 65_536
+            val b = (flat / 256) % 256
+            val c = flat % 256
+            Ipv4CidrRoute("$a.$b.$c.1", "255.255.255.255", 32)
+        }
+
+    /**
      * Regression: the "IP list routes prepared" debug log always reported
-     * [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] as the applied cap even when
-     * [IpListCoverageMode.FAST] (capped at [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES]) truncated
+     * [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL] as the applied cap even when
+     * [IpListCoverageMode.FAST] (capped at [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST]) truncated
      * the list — misleading anyone debugging route counts in FAST mode.
      */
     @Test
     fun androidExcludeRouteLimitFor_fastMode_returnsFastCap() {
         assertEquals(
-            IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES,
+            IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST,
             IpListRouteConfig.androidExcludeRouteLimitFor(IpListCoverageMode.FAST)
         )
     }
@@ -23,7 +48,7 @@ class IpListRouteConfigTest {
     @Test
     fun androidExcludeRouteLimitFor_fullMode_returnsFullCap() {
         assertEquals(
-            IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT,
+            IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL,
             IpListRouteConfig.androidExcludeRouteLimitFor(IpListCoverageMode.FULL)
         )
     }
@@ -220,7 +245,7 @@ class IpListRouteConfigTest {
     }
 
     @Test
-    fun selectAndroid13FullExcludedRoutes_capsAt2000AndPrefersBroadPrefixes() {
+    fun selectAndroid13FullExcludedRoutes_capsAtLimitAndPrefersBroadPrefixes() {
         val narrowRoutes = (0 until 5_000).map {
             Ipv4CidrRoute("10.2.$it.0", "255.255.255.0", 24)
         }
@@ -231,16 +256,41 @@ class IpListRouteConfigTest {
 
         val selected = IpListRouteConfig.selectAndroid13FullExcludedRoutes(routes)
 
-        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, selected.size)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, selected.size)
         assertEquals(Ipv4CidrRoute("10.0.0.0", "255.0.0.0", 8), selected.first())
         assertEquals(Ipv4CidrRoute("10.1.0.0", "255.255.0.0", 16), selected[1])
     }
 
     @Test
+    fun selectAndroid13FullExcludedRoutes_priorityRoutesSurviveTruncation() {
+        // A narrow priority block that would rank far outside the broadest-first cutoff on its own.
+        val priorityRoute = Ipv4CidrRoute("203.0.112.0", "255.255.252.0", 22)
+        val broadNoise = disjointBroadRoutes(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL)
+
+        val selected = IpListRouteConfig.selectAndroid13FullExcludedRoutes(
+            routes = broadNoise,
+            priorityRoutes = listOf(priorityRoute),
+        )
+
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, selected.size)
+        assertTrue(selected.contains(priorityRoute))
+    }
+
+    @Test
+    fun selectAndroid13FullExcludedRoutes_dedupesPriorityAgainstGeneralList() {
+        val shared = Ipv4CidrRoute("203.0.113.0", "255.255.255.252", 22)
+
+        val selected = IpListRouteConfig.selectAndroid13FullExcludedRoutes(
+            routes = listOf(shared),
+            priorityRoutes = listOf(shared),
+        )
+
+        assertEquals(listOf(shared), selected)
+    }
+
+    @Test
     fun prepareConnectionRoutes_onAndroid13Full_setsEstablishRouteLimitFlag() {
-        val routes = (0 until 5_000).map {
-            Ipv4CidrRoute("10.3.$it.0", "255.255.255.0", 24)
-        }
+        val routes = disjointBroadRoutes(5_000)
 
         val plan = IpListRouteConfig.prepareConnectionRoutes(
             config = "client\n",
@@ -250,7 +300,43 @@ class IpListRouteConfigTest {
             supportsAndroidRouteExclusion = true,
         )
 
-        assertEquals(IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT, plan.androidExcludedRoutes.size)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, plan.androidExcludedRoutes.size)
+        assertTrue(plan.reachedEstablishRouteLimit)
+    }
+
+    @Test
+    fun prepareConnectionRoutes_safeLimitDisabled_skipsTruncation() {
+        val routeCount = IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL + 500
+        val routes = disjointHostRoutes(routeCount)
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = routes,
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+            safeRouteLimitEnabled = false,
+        )
+
+        assertEquals(routeCount, plan.androidExcludedRoutes.size)
+        assertFalse(plan.reachedEstablishRouteLimit)
+    }
+
+    @Test
+    fun prepareConnectionRoutes_priorityRouteSurvivesEvenWhenGeneralListIsTruncated() {
+        val priorityRoute = Ipv4CidrRoute("203.0.112.0", "255.255.252.0", 22)
+        val broadNoise = disjointBroadRoutes(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL)
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = broadNoise,
+            priorityRoutes = listOf(priorityRoute),
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+
+        assertTrue(plan.androidExcludedRoutes.contains(priorityRoute))
         assertTrue(plan.reachedEstablishRouteLimit)
     }
 
@@ -315,4 +401,111 @@ class IpListRouteConfigTest {
         assertEquals(false, plan.reachedProfileSizeLimit)
         assertEquals(IpListRouteDelivery.OVPN_PROFILE, plan.delivery)
     }
+
+    @Test
+    fun prepareConnectionRoutes_onAndroid12_priorityIpv4SurvivesOvpnCap() {
+        val priorityRoute = Ipv4CidrRoute("203.0.113.0", "255.255.255.252", 30)
+        val broadNoise = disjointBroadRoutes(IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT)
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = broadNoise,
+            priorityRoutes = listOf(priorityRoute),
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = false,
+        )
+
+        assertEquals(IpListRouteDelivery.OVPN_PROFILE, plan.delivery)
+        assertTrue(plan.config.contains("route 203.0.113.0 255.255.255.252 net_gateway"))
+        assertEquals(IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT, plan.selectedRouteCount)
+    }
+
+    @Test
+    fun prepareConnectionRoutes_fastMode_prioritySurvivesFastCap() {
+        val priorityRoute = Ipv4CidrRoute("203.0.113.0", "255.255.255.252", 30)
+        val broadNoise = disjointBroadRoutes(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST)
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = broadNoise,
+            priorityRoutes = listOf(priorityRoute),
+            coverageMode = IpListCoverageMode.FAST,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST, plan.androidExcludedRoutes.size)
+        assertTrue(plan.androidExcludedRoutes.contains(priorityRoute))
+        assertTrue(plan.reachedEstablishRouteLimit)
+    }
+
+    @Test
+    fun selectAndroid13FullExcludedRoutes_priorityLargerThanCap_keepsPriorityPrefixOnly() {
+        val priority = (0 until IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL + 10).map {
+            Ipv4CidrRoute("203.0.${it / 256}.${it % 256}", "255.255.255.255", 32)
+        }
+        val general = listOf(Ipv4CidrRoute("10.0.0.0", "255.0.0.0", 8))
+
+        val selected = IpListRouteConfig.selectAndroid13FullExcludedRoutes(
+            routes = general,
+            priorityRoutes = priority,
+        )
+
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, selected.size)
+        assertFalse(selected.contains(general.first()))
+        assertEquals(priority.take(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL), selected)
+    }
+
+    @Test
+    fun prepareConnectionRoutes_ipv6PrioritySurvivesTruncationOnAndroid13() {
+        val priorityRoute = Ipv6CidrRoute("2001:db8:abcd:0:0:0:0:0", 48)
+        val broadNoise = disjointBroadRoutes(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL)
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = broadNoise,
+            priorityRoutes = listOf(priorityRoute),
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+
+        assertTrue(
+            plan.androidExcludedRoutes.any {
+                it is Ipv6CidrRoute && it.prefixLength == 48 &&
+                    it.networkAddress.startsWith("2001:db8:abcd")
+            },
+        )
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, plan.androidExcludedRoutes.size)
+    }
+
+    @Test
+    fun prepareConnectionRoutes_normalizesNestedAndSiblingPrefixesBeforeCap() {
+        val nested = listOf(
+            Ipv4CidrRoute("10.0.0.0", "255.0.0.0", 8),
+            Ipv4CidrRoute("10.1.0.0", "255.255.0.0", 16),
+            Ipv4CidrRoute("10.1.2.0", "255.255.255.0", 24),
+        )
+        val siblings = listOf(
+            Ipv4CidrRoute("192.168.0.0", "255.255.255.0", 24),
+            Ipv4CidrRoute("192.168.1.0", "255.255.255.0", 24),
+        )
+
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "client\n",
+            routes = nested + siblings,
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+
+        assertEquals(2, plan.normalizedCandidateCount)
+        assertEquals(
+            setOf("10.0.0.0/8", "192.168.0.0/23"),
+            plan.androidExcludedRoutes.map { it.toCidrString() }.toSet(),
+        )
+        assertFalse(plan.reachedEstablishRouteLimit)
+    }
 }
+

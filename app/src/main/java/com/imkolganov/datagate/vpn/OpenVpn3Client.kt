@@ -1,10 +1,12 @@
 package com.imkolganov.datagate.vpn
 
+import android.net.ConnectivityManager
 import android.net.IpPrefix
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import android.util.Log
+import android.system.OsConstants
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import net.openvpn.ovpn3.ClientAPI_Event
 import net.openvpn.ovpn3.ClientAPI_LogInfo
 import net.openvpn.ovpn3.ClientAPI_OpenVPNClient
@@ -25,15 +27,26 @@ class OpenVpn3Client(
     }
 
     private var builder: VpnService.Builder? = null
+    /** True once the profile assigned an IPv6 address to the TUN. */
+    private var hasIpv6TunAddress: Boolean = false
 
     // -------- Logging / events ----------
 
     override fun log(info: ClientAPI_LogInfo) {
-        Log.d(TAG, "core log ]: ${info.text}")
+        val text = info.text ?: ""
+        // Always logcat; file only W/E-ish lines (core.log storms fill the 8MB debug file).
+        android.util.Log.d(TAG, "core log: $text")
+        if (OpenVpnCoreLogFilter.shouldPersistToDebugFile(text)) {
+            VpnDebugLogger.w(TAG, "core: $text")
+        }
     }
 
     override fun event(ev: ClientAPI_Event) {
-        Log.d(TAG, "core event: name=${ev.name} info=${ev.info}")
+        VpnDebugLogger.event(
+            category = "core.event",
+            action = ev.name ?: "unknown",
+            details = mapOf("info" to (ev.info ?: "")),
+        )
         onCoreEvent(ev.name, ev.info ?: "")
     }
 
@@ -41,14 +54,15 @@ class OpenVpn3Client(
 
     override fun socket_protect(socket: Int, remote: String, ipv6: Boolean): Boolean {
         val protected = service.protect(socket)
-        Log.d(TAG, "socket_protect(socket=$socket, remote=$remote, ipv6=$ipv6) -> $protected")
+        VpnDebugLogger.d(TAG, "socket_protect(socket=$socket, remote=$remote, ipv6=$ipv6) -> $protected")
         return protected
     }
 
     // -------- TUN builder API ----------
 
     override fun tun_builder_new(): Boolean {
-        Log.d(TAG, "tun_builder_new()")
+        VpnDebugLogger.d(TAG, "tun_builder_new()")
+        hasIpv6TunAddress = false
 
         builder = service.Builder().apply {
             setSession("DataGate VPN")
@@ -59,12 +73,12 @@ class OpenVpn3Client(
     }
 
     override fun tun_builder_set_layer(layer: Int): Boolean {
-        Log.d(TAG, "tun_builder_set_layer($layer)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_layer($layer)")
         return true
     }
 
     override fun tun_builder_set_remote_address(address: String, ipv6: Boolean): Boolean {
-        Log.d(TAG, "tun_builder_set_remote_address($address, ipv6=$ipv6)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_remote_address($address, ipv6=$ipv6)")
         return true
     }
 
@@ -75,41 +89,53 @@ class OpenVpn3Client(
         ipv6: Boolean,
         net30: Boolean
     ): Boolean {
-        Log.d(
+        VpnDebugLogger.d(
             TAG,
             "tun_builder_add_address($address/$prefix_length, gw=$gateway, ipv6=$ipv6, net30=$net30)"
         )
         return try {
-            if (!ipv6) {
+            if (ipv6) {
+                hasIpv6TunAddress = true
+            } else {
                 VpnTunnelSessionStore.recordVpnIp(service.applicationContext, address)
             }
             builder?.addAddress(address, prefix_length)
             true
         } catch (t: Throwable) {
-            Log.e(TAG, "addAddress failed", t)
+            VpnDebugLogger.e(TAG, "addAddress failed", t)
             false
         }
     }
 
     override fun tun_builder_set_route_metric_default(metric: Int): Boolean {
-        Log.d(TAG, "tun_builder_set_route_metric_default($metric)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_route_metric_default($metric)")
         return true
     }
 
     override fun tun_builder_reroute_gw(ipv4: Boolean, ipv6: Boolean, flags: Long): Boolean {
-        Log.d(TAG, "tun_builder_reroute_gw(ipv4=$ipv4, ipv6=$ipv6, flags=$flags)")
+        VpnDebugLogger.d(TAG, "tun_builder_reroute_gw(ipv4=$ipv4, ipv6=$ipv6, flags=$flags)")
         return try {
             if (ipv4) {
                 builder?.addRoute("0.0.0.0", 1)
                 builder?.addRoute("128.0.0.0", 1)
             }
             if (ipv6) {
-                builder?.addRoute("::", 1)
-                builder?.addRoute("8000::", 1)
+                if (hasIpv6TunAddress) {
+                    builder?.addRoute("::", 1)
+                    builder?.addRoute("8000::", 1)
+                } else {
+                    // IPv4-only tunnel + IPv6 default routes blackholes dual-stack apps
+                    // (common on Android / TV emulators). Let IPv6 use the underlying network.
+                    builder?.allowFamily(OsConstants.AF_INET6)
+                    VpnDebugLogger.w(
+                        TAG,
+                        "Skipping IPv6 default routes (no IPv6 TUN address); allowFamily(AF_INET6)"
+                    )
+                }
             }
             true
         } catch (t: Throwable) {
-            Log.e(TAG, "reroute gateway failed", t)
+            VpnDebugLogger.e(TAG, "reroute gateway failed", t)
             false
         }
     }
@@ -120,12 +146,19 @@ class OpenVpn3Client(
         metric: Int,
         ipv6: Boolean
     ): Boolean {
-        Log.d(TAG, "tun_builder_add_route($address/$prefix_length, metric=$metric, ipv6=$ipv6)")
+        VpnDebugLogger.d(TAG, "tun_builder_add_route($address/$prefix_length, metric=$metric, ipv6=$ipv6)")
         return try {
+            if (ipv6 && !hasIpv6TunAddress) {
+                VpnDebugLogger.w(
+                    TAG,
+                    "Skipping IPv6 route $address/$prefix_length (no IPv6 TUN address)"
+                )
+                return true
+            }
             builder?.addRoute(address, prefix_length)
             true
         } catch (t: Throwable) {
-            Log.e(TAG, "addRoute failed", t)
+            VpnDebugLogger.e(TAG, "addRoute failed", t)
             false
         }
     }
@@ -136,7 +169,7 @@ class OpenVpn3Client(
         metric: Int,
         ipv6: Boolean
     ): Boolean {
-        Log.d(
+        VpnDebugLogger.d(
             TAG,
             "tun_builder_exclude_route($address/$prefix_length, metric=$metric, ipv6=$ipv6)"
         )
@@ -144,26 +177,26 @@ class OpenVpn3Client(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 builder?.excludeRoute(IpPrefix(InetAddress.getByName(address), prefix_length))
             } else {
-                Log.d(TAG, "excludeRoute ignored below Android 13; OpenVPN route emulation should handle it")
+                VpnDebugLogger.d(TAG, "excludeRoute ignored below Android 13; OpenVPN route emulation should handle it")
             }
             true
         } catch (t: Throwable) {
-            Log.e(TAG, "excludeRoute failed", t)
+            VpnDebugLogger.e(TAG, "excludeRoute failed", t)
             false
         }
     }
 
     override fun tun_builder_set_dns_options(dns: DnsOptions): Boolean {
-        Log.d(TAG, "tun_builder_set_dns_options()")
+        VpnDebugLogger.d(TAG, "tun_builder_set_dns_options()")
         val b = builder ?: run {
-            Log.e(TAG, "tun_builder_set_dns_options: builder is null")
+            VpnDebugLogger.e(TAG, "tun_builder_set_dns_options: builder is null")
             return false
         }
         return try {
             applyDnsOptions(b, dns)
             true
         } catch (t: Throwable) {
-            Log.e(TAG, "tun_builder_set_dns_options failed", t)
+            VpnDebugLogger.e(TAG, "tun_builder_set_dns_options failed", t)
             false
         }
     }
@@ -176,7 +209,7 @@ class OpenVpn3Client(
             for ((_, server) in servers) {
                 val transport = server.transport
                 if (transport == DnsServer.Transport.HTTPS || transport == DnsServer.Transport.TLS) {
-                    Log.w(TAG, "Skipping DoH/DoT DNS server (transport=$transport): ${server.to_string()}")
+                    VpnDebugLogger.w(TAG, "Skipping DoH/DoT DNS server (transport=$transport): ${server.to_string()}")
                     continue
                 }
                 val addresses = server.addresses ?: continue
@@ -197,89 +230,106 @@ class OpenVpn3Client(
                     val domain = searchDomains[i].domain?.trim()
                     if (!domain.isNullOrEmpty()) {
                         b.addSearchDomain(domain)
-                        Log.d(TAG, "DNS search domain: $domain")
+                        VpnDebugLogger.d(TAG, "DNS search domain: $domain")
                     }
                 }
             } else {
-                Log.d(TAG, "Search domains ignored below Android 10")
+                VpnDebugLogger.d(TAG, "Search domains ignored below Android 10")
             }
         }
 
         if (appliedServers.isEmpty()) {
-            Log.w(TAG, "No DNS servers from push; falling back to 8.8.8.8 and 1.1.1.1")
+            VpnDebugLogger.w(TAG, "No DNS servers from push; falling back to 8.8.8.8 and 1.1.1.1")
             b.addDnsServer("8.8.8.8")
             b.addDnsServer("1.1.1.1")
             appliedServers.addAll(listOf("8.8.8.8", "1.1.1.1"))
         }
 
-        Log.d(TAG, "Applied DNS servers: ${appliedServers.joinToString(", ")}")
+        VpnDebugLogger.d(TAG, "Applied DNS servers: ${appliedServers.joinToString(", ")}")
         VpnTunnelSessionStore.recordDnsServers(service.applicationContext, appliedServers)
     }
 
     override fun tun_builder_set_mtu(mtu: Int): Boolean {
         val safeMtu = mtu.coerceIn(1200, 1500)
-        Log.d(TAG, "tun_builder_set_mtu($mtu) -> $safeMtu")
+        VpnDebugLogger.d(TAG, "tun_builder_set_mtu($mtu) -> $safeMtu")
         builder?.setMtu(safeMtu)
         return true
     }
 
     override fun tun_builder_set_session_name(name: String): Boolean {
-        Log.d(TAG, "tun_builder_set_session_name($name)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_session_name($name)")
         builder?.setSession(name)
         return true
     }
 
     override fun tun_builder_add_proxy_bypass(bypass_host: String): Boolean {
-        Log.d(TAG, "tun_builder_add_proxy_bypass($bypass_host)")
+        VpnDebugLogger.d(TAG, "tun_builder_add_proxy_bypass($bypass_host)")
         return true
     }
 
     override fun tun_builder_set_proxy_auto_config_url(url: String): Boolean {
-        Log.d(TAG, "tun_builder_set_proxy_auto_config_url($url)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_proxy_auto_config_url($url)")
         return true
     }
 
     override fun tun_builder_set_proxy_http(host: String, port: Int): Boolean {
-        Log.d(TAG, "tun_builder_set_proxy_http($host, $port)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_proxy_http($host, $port)")
         return true
     }
 
     override fun tun_builder_set_proxy_https(host: String, port: Int): Boolean {
-        Log.d(TAG, "tun_builder_set_proxy_https($host, $port)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_proxy_https($host, $port)")
         return true
     }
 
     override fun tun_builder_add_wins_server(address: String): Boolean {
-        Log.d(TAG, "tun_builder_add_wins_server($address)")
+        VpnDebugLogger.d(TAG, "tun_builder_add_wins_server($address)")
         return true
     }
 
     override fun tun_builder_set_allow_family(af: Int, allow: Boolean): Boolean {
-        Log.d(TAG, "tun_builder_set_allow_family(af=$af, allow=$allow)")
-        return true
+        VpnDebugLogger.d(TAG, "tun_builder_set_allow_family(af=$af, allow=$allow)")
+        return try {
+            if (allow) {
+                // Fall through to underlying network for this family when VPN has no
+                // addresses/routes for it (see VpnService.Builder.allowFamily).
+                builder?.allowFamily(af)
+            }
+            true
+        } catch (t: Throwable) {
+            VpnDebugLogger.e(TAG, "allowFamily failed af=$af allow=$allow", t)
+            false
+        }
     }
 
     override fun tun_builder_set_allow_local_dns(allow: Boolean): Boolean {
-        Log.d(TAG, "tun_builder_set_allow_local_dns($allow)")
+        VpnDebugLogger.d(TAG, "tun_builder_set_allow_local_dns($allow)")
         return true
     }
 
     override fun tun_builder_establish(): Int {
-        Log.d(TAG, "tun_builder_establish()")
+        VpnDebugLogger.d(TAG, "tun_builder_establish()")
 
         val b = builder ?: run {
-            Log.e(TAG, "tun_builder_establish: builder is null")
+            VpnDebugLogger.e(TAG, "tun_builder_establish: builder is null")
             return -1
         }
 
         return try {
-            applyExcludedRoutes(b)
+            val appliedExcludes = applyExcludedRoutes(b)
+            val dropped = (excludedRoutes.size - appliedExcludes).coerceAtLeast(0)
+            VpnDebugLogger.i(
+                TAG,
+                "excludeRoute establish: requested=${excludedRoutes.size} applied=$appliedExcludes dropped=$dropped"
+            )
+
             val pfd = b.establish()
+
             if (pfd == null) {
-                Log.e(TAG, "tun_builder_establish: establish() returned null")
+                VpnDebugLogger.e(TAG, "tun_builder_establish: establish() returned null")
                 -1
             } else {
-                Log.d(TAG, "tun_builder_establish: TUN established, pfd.fd=${pfd.fd}")
+                VpnDebugLogger.d(TAG, "tun_builder_establish: TUN established, pfd.fd=${pfd.fd}")
 
                 // For UI/debugging only (do NOT close pfd here)
                 onTunChanged(pfd)
@@ -287,21 +337,22 @@ class OpenVpn3Client(
                 val fd = pfd.detachFd()
                 pfd.close()
 
-                Log.d(TAG, "tun_builder_establish: detached fd=$fd")
+                VpnDebugLogger.d(TAG, "tun_builder_establish: detached fd=$fd")
                 fd
             }
         } catch (t: Throwable) {
-            Log.e(TAG, "builder.establish() failed", t)
+            VpnDebugLogger.e(TAG, "builder.establish() failed", t)
             -1
         }
     }
 
-    private fun applyExcludedRoutes(b: VpnService.Builder) {
-        if (excludedRoutes.isEmpty()) return
+    /** @return number of routes actually passed to [VpnService.Builder.excludeRoute]. */
+    private fun applyExcludedRoutes(b: VpnService.Builder): Int {
+        if (excludedRoutes.isEmpty()) return 0
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            Log.w(TAG, "Skipping ${excludedRoutes.size} excluded routes: excludeRoute requires Android 13+")
-            return
+            VpnDebugLogger.w(TAG, "Skipping ${excludedRoutes.size} excluded routes: excludeRoute requires Android 13+")
+            return 0
         }
 
         var applied = 0
@@ -315,28 +366,32 @@ class OpenVpn3Client(
                 )
                 applied++
             } catch (t: Throwable) {
-                Log.w(TAG, "excludeRoute failed for ${route.toCidrString()}", t)
+                VpnDebugLogger.w(TAG, "excludeRoute failed for ${route.toCidrString()}", t)
             }
         }
-        Log.d(TAG, "Applied excluded routes: $applied/${excludedRoutes.size}")
+        VpnDebugLogger.d(TAG, "Applied excluded routes: $applied/${excludedRoutes.size}")
+        return applied
     }
 
     override fun tun_builder_persist(): Boolean {
-        Log.d(TAG, "tun_builder_persist() -> false")
+        VpnDebugLogger.d(TAG, "tun_builder_persist() -> false")
         return false
     }
 
     override fun tun_builder_get_local_networks(ipv6: Boolean): ClientAPI_StringVec {
-        Log.d(TAG, "tun_builder_get_local_networks(ipv6=$ipv6)")
-        return ClientAPI_StringVec()
+        VpnDebugLogger.d(TAG, "tun_builder_get_local_networks(ipv6=$ipv6)")
+        val cm = service.getSystemService(ConnectivityManager::class.java)
+        val cidrs = VpnLocalNetworks.collectCidrs(cm, ipv6 = ipv6)
+        VpnDebugLogger.d(TAG, "local networks ipv6=$ipv6: ${cidrs.joinToString()}")
+        return ClientAPI_StringVec(cidrs)
     }
 
     override fun tun_builder_establish_lite() {
-        Log.d(TAG, "tun_builder_establish_lite()")
+        VpnDebugLogger.d(TAG, "tun_builder_establish_lite()")
     }
 
     override fun tun_builder_teardown(disconnect: Boolean) {
-        Log.d(TAG, "tun_builder_teardown(disconnect=$disconnect)")
+        VpnDebugLogger.d(TAG, "tun_builder_teardown(disconnect=$disconnect)")
         if (disconnect) {
             VpnTunnelSessionStore.clear(service.applicationContext)
         }

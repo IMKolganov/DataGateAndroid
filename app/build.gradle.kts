@@ -40,9 +40,9 @@ android {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 13
+        versionCode = 14
         // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
-        versionName = "1.0.13"
+        versionName = "1.0.14"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
             ?: "IMKolganov/DataGateAndroid"
@@ -146,6 +146,7 @@ dependencies {
     testImplementation(libs.json)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -160,6 +161,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.okhttp)
     implementation(libs.zxing.core)
+    implementation(libs.microsoft.signalr)
+    implementation(libs.gson)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.vico.compose.m3)

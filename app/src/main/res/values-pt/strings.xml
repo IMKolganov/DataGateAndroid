@@ -91,6 +91,22 @@
     <string name="settings_error_logs_count">%1$d ficheiro(s)</string>
     <string name="settings_share_logs">Partilhar registos</string>
     <string name="share_logs_chooser_title">Partilhar registos de erro</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">Copiado</string>
     <string name="no_error_logs">Sem registos de erro</string>
     <string name="no_shareable_files">Sem ficheiros para partilhar.</string>
@@ -201,18 +217,27 @@
     <string name="settings_ip_lists_frequency_weekly">Semanalmente</string>
     <string name="settings_ip_lists_frequency_manual">Apenas manual</string>
     <string name="settings_ip_lists_saved">Definições da lista IP guardadas.</string>
+    <string name="settings_ip_lists_priority_title">Sites prioritários</string>
+    <string name="settings_ip_lists_priority_subtitle">Os intervalos CIDR aqui contornam sempre a VPN, mesmo que a lista geral acima seja truncada. Use isto para sites específicos que falham quando encaminhados pela VPN.</string>
+    <string name="settings_ip_lists_priority_add_url_label">Adicionar URL da lista prioritária</string>
+    <string name="settings_ip_lists_priority_add_url">Adicionar URL prioritário</string>
+    <string name="settings_ip_lists_safe_limit_title">Limitar rotas para estabilidade do sistema</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">Mantém o número de rotas de desvio baixo o suficiente para que o ícone de VPN do sistema apareça rapidamente. Os sites prioritários acima nunca são descartados.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Estado da lista IP</string>
     <string name="settings_ip_lists_last_updated">Última atualização</string>
     <string name="settings_ip_lists_last_updated_never">Nunca</string>
     <string name="settings_ip_lists_loaded_routes">Rotas carregadas</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d rotas</string>
+    <string name="settings_ip_lists_loaded_priority_routes">Rotas prioritárias</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d rotas</string>
     <string name="settings_ip_lists_last_error">Último erro de carregamento</string>
     <string name="settings_ip_lists_last_error_none">Nenhum</string>
     <string name="settings_ip_lists_route_limit_notice">São aplicadas até %1$d rotas IPv4 ou IPv6.</string>
     <string name="settings_ip_lists_route_limit_warning">A lista atingiu o limite de %1$d rotas. As rotas extra foram ignoradas.</string>
     <string name="settings_ip_lists_update_now">Atualizar agora</string>
     <string name="settings_ip_lists_update_now_loading">A atualizar…</string>
-    <string name="settings_ip_lists_update_ready">Lista IP atualizada: %1$d rotas carregadas.</string>
+    <string name="settings_ip_lists_update_ready">Lista IP atualizada: %1$d gerais, %2$d prioritárias.</string>
     <string name="settings_ip_lists_update_failed_prefix">Falha na atualização</string>
     <string name="settings_ip_lists_update_failed">Falha na atualização: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Falha na atualização: %1$s. A usar a lista em cache ou incorporada.</string>
@@ -226,6 +251,12 @@
     <string name="settings_link_telegram">Canal Telegram</string>
     <string name="settings_updates_github_title">Verificar atualizações no GitHub</string>
     <string name="settings_updates_github_subtitle">Verificar periodicamente a versão pública mais recente e avisar você.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Avisar quando uma nova versão for encontrada</string>
     <string name="settings_push_updates_subtitle">Notificação local após uma verificação do GitHub. Requer permissão de notificações no Android 13+.</string>
     <string name="settings_auto_download_title">Sugerir download do APK</string>
@@ -327,7 +358,7 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="settings_ip_lists_coverage_fast">Rápido</string>
     <string name="settings_ip_lists_coverage_fast_description">Aplica até %1$d rotas amplas. A configuração do túnel é mais rápida, mas pequenos intervalos de IP podem ainda usar a VPN.</string>
     <string name="settings_ip_lists_coverage_full">Cobertura total</string>
-    <string name="settings_ip_lists_coverage_full_description">Aplica todas as rotas carregadas para máxima cobertura. A configuração do túnel pode demorar vários segundos em listas grandes.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Modo de cobertura</string>
     <string name="settings_ip_lists_detail_disabled_notice">As listas CIDR estão desativadas. Ative o interruptor acima para voltar a aplicar exceções de encaminhamento.</string>
     <string name="settings_ip_lists_enable_subtitle">Desligado: exceções baseadas em listas não são aplicadas e as listas não são descarregadas; todo o tráfego passa pelo túnel VPN.</string>
@@ -422,4 +453,22 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>
