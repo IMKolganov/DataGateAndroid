@@ -2,8 +2,9 @@ package com.imkolganov.datagate.ui.screens.access
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import com.imkolganov.datagate.ui.tv.tvClickable
+import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -240,7 +241,7 @@ fun ServerCard(
                 Modifier
             }
         )
-        .clickable(onClick = onSelect)
+        .tvClickable(shape = cardShape, onClick = onSelect)
 
     val inner: @Composable () -> Unit = {
         ServerCardInner(
@@ -395,7 +396,10 @@ private fun ServerCardInner(
             ) {
                 when {
                     isVpnSessionOnThisServer -> {
-                        Button(onClick = onDisconnect) {
+                        Button(
+                            onClick = onDisconnect,
+                            modifier = Modifier.tvFocusBorder(shape = AppCards.shape),
+                        ) {
                             Text(text = stringResource(R.string.action_disconnect))
                         }
                     }
@@ -424,7 +428,8 @@ private fun ServerCardInner(
                             else -> {
                                 Button(
                                     onClick = onConnect,
-                                    enabled = server.isOnline
+                                    enabled = server.isOnline,
+                                    modifier = Modifier.tvFocusBorder(shape = AppCards.shape),
                                 ) {
                                     Text(text = stringResource(R.string.action_connect))
                                     Spacer(modifier = Modifier.width(6.dp))

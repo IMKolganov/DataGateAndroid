@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
@@ -71,6 +73,8 @@ import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.JwtClaimsReader
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.auth.getAuthInfo
+import com.imkolganov.datagate.logger.DebugPreferences
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.theme.AppLanguageDropdown
@@ -78,6 +82,8 @@ import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
 import java.util.Locale
 import com.imkolganov.datagate.update.ApkUpdateInstaller
+import com.imkolganov.datagate.update.ManualUpdateCheckResult
+import com.imkolganov.datagate.update.UpdateManualCheck
 import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.IpListCoverageMode
@@ -87,6 +93,7 @@ import com.imkolganov.datagate.vpn.IpListStatus
 import com.imkolganov.datagate.vpn.IpListUpdateFrequency
 import com.imkolganov.datagate.vpn.LocalBridgePortPool
 import com.imkolganov.datagate.vpn.LocalBridgePortPreferences
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -95,6 +102,7 @@ import java.security.MessageDigest
 import java.net.URL
 import java.text.DateFormat
 import java.util.Date
+import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,18 +113,32 @@ fun SettingsScreen(
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     appLocale: AppLocale,
-    onAppLocaleChange: (AppLocale) -> Unit
+    onAppLocaleChange: (AppLocale) -> Unit,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
 ) {
     val context = LocalContext.current
     val uiLocale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
     val noErrorLogsLabel = stringResource(R.string.no_error_logs)
+    val noDebugLogsLabel = stringResource(R.string.no_debug_logs)
+    val debugLogsClearedLabel = stringResource(R.string.debug_logs_cleared)
     val projectWebsiteUrl = stringResource(R.string.project_website_url)
     val projectTelegramUrl = stringResource(R.string.project_telegram_url)
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
+    var vpnDebugModeEnabled by remember { mutableStateOf(false) }
+    var debugLogStatus by remember { mutableStateOf("0 B") }
+    var hasDebugLogs by remember { mutableStateOf(false) }
+    var debugLogPath by remember { mutableStateOf("") }
+    var debugLogPreview by remember { mutableStateOf("") }
+    var showDebugPreview by remember { mutableStateOf(false) }
+    var debugShareMessage by remember { mutableStateOf<String?>(null) }
     var githubUpdatesEnabled by remember { mutableStateOf(true) }
     var pushNotificationsForUpdates by remember { mutableStateOf(true) }
     var autoDownloadSuggest by remember { mutableStateOf(false) }
+    var checkingUpdates by remember { mutableStateOf(false) }
+    var updateCheckMessage by remember { mutableStateOf<String?>(null) }
+    var updateCheckIsError by remember { mutableStateOf(false) }
+    val updateCheckInFlight = remember { AtomicBoolean(false) }
     var showIpListSettings by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -160,6 +182,16 @@ fun SettingsScreen(
         crashFilesCount = withContext(Dispatchers.IO) {
             getCrashFiles(context.applicationContext).size
         }
+        val appCtx = context.applicationContext
+        vpnDebugModeEnabled = withContext(Dispatchers.IO) {
+            DebugPreferences.isVpnDebugModeEnabled(appCtx)
+        }
+        refreshDebugLogUi(appCtx) { size, has, path, preview ->
+            debugLogStatus = size
+            hasDebugLogs = has
+            debugLogPath = path
+            debugLogPreview = preview
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -179,8 +211,10 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(if (com.imkolganov.datagate.ui.tv.LocalIsTelevision.current) 24.dp else 16.dp),
+        verticalArrangement = Arrangement.spacedBy(
+            if (com.imkolganov.datagate.ui.tv.LocalIsTelevision.current) 16.dp else 12.dp
+        )
     ) {
         Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
 
@@ -189,7 +223,8 @@ fun SettingsScreen(
             role = authInfo.role,
             email = authInfo.email,
             avatarUrl = authInfo.avatarUrl,
-            onLogout = onLogout
+            onLogout = onLogout,
+            primaryFocusRequester = primaryFocusRequester,
         )
 
         val isAdmin = remember(authInfo.role, tokenStore) {
@@ -495,7 +530,286 @@ fun SettingsScreen(
                         }
                     )
                 }
+                Button(
+                    onClick = {
+                        if (!updateCheckInFlight.compareAndSet(false, true)) return@Button
+                        checkingUpdates = true
+                        updateCheckMessage = null
+                        updateCheckIsError = false
+                        scope.launch {
+                            try {
+                                val result = withContext(Dispatchers.IO) {
+                                    UpdateManualCheck.checkNow(
+                                        context = context.applicationContext,
+                                        http = HttpClients.createPlain(),
+                                    )
+                                }
+                                when (result) {
+                                    is ManualUpdateCheckResult.UpdateAvailable -> {
+                                        // Dialog already requested inside checkNow.
+                                        updateCheckMessage = null
+                                        updateCheckIsError = false
+                                    }
+                                    is ManualUpdateCheckResult.UpToDate -> {
+                                        updateCheckIsError = false
+                                        updateCheckMessage = context.getString(
+                                            R.string.settings_check_updates_up_to_date,
+                                            result.latestTag,
+                                        )
+                                    }
+                                    is ManualUpdateCheckResult.AheadOfLatest -> {
+                                        updateCheckIsError = false
+                                        updateCheckMessage = context.getString(
+                                            R.string.settings_check_updates_ahead,
+                                            result.latestTag,
+                                            result.installedVersion,
+                                        )
+                                    }
+                                    is ManualUpdateCheckResult.Failed -> {
+                                        updateCheckIsError = true
+                                        updateCheckMessage = context.getString(
+                                            R.string.settings_check_updates_failed,
+                                            result.message,
+                                        )
+                                    }
+                                    ManualUpdateCheckResult.RepoNotConfigured -> {
+                                        updateCheckIsError = true
+                                        updateCheckMessage =
+                                            context.getString(R.string.settings_check_updates_repo_missing)
+                                    }
+                                }
+                            } catch (t: Throwable) {
+                                if (t is CancellationException) throw t
+                                updateCheckIsError = true
+                                updateCheckMessage = context.getString(
+                                    R.string.settings_check_updates_failed,
+                                    t.message ?: t.javaClass.simpleName,
+                                )
+                            } finally {
+                                checkingUpdates = false
+                                updateCheckInFlight.set(false)
+                            }
+                        }
+                    },
+                    enabled = !checkingUpdates,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (checkingUpdates) {
+                            stringResource(R.string.settings_check_updates_now_loading)
+                        } else {
+                            stringResource(R.string.settings_check_updates_now)
+                        }
+                    )
+                }
+                updateCheckMessage?.let { msg ->
+                    Text(
+                        msg,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (updateCheckIsError) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
             }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    stringResource(R.string.settings_vpn_debug_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_debug_mode_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.settings_debug_mode),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = vpnDebugModeEnabled,
+                        onCheckedChange = { enabled ->
+                            vpnDebugModeEnabled = enabled
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    DebugPreferences.setVpnDebugModeEnabled(
+                                        context.applicationContext,
+                                        enabled
+                                    )
+                                }
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                            }
+                        }
+                    )
+                }
+
+                KeyValueRow(
+                    stringResource(R.string.settings_debug_log_path),
+                    debugLogPath.ifBlank { "—" }
+                )
+                Text(
+                    stringResource(R.string.settings_debug_logs_status, debugLogStatus),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            showDebugPreview = true
+                            scope.launch {
+                                debugLogPreview = withContext(Dispatchers.IO) {
+                                    VpnDebugLogger.get()?.readTail()
+                                        ?: ""
+                                }.ifBlank {
+                                    context.getString(R.string.settings_debug_empty_preview)
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.settings_debug_log_preview))
+                    }
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.settings_debug_log_refresh))
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            val files = getDebugLogFiles(context.applicationContext)
+                            scope.launch {
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                            }
+                            if (files.isEmpty()) {
+                                debugShareMessage = noDebugLogsLabel
+                                return@Button
+                            }
+                            debugShareMessage = shareDebugLogFiles(context.applicationContext, files)
+                        },
+                        modifier = Modifier.weight(1f),
+                        enabled = hasDebugLogs
+                    ) {
+                        Text(stringResource(R.string.settings_share_debug_logs))
+                    }
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    VpnDebugLogger.get()?.clearLogs()
+                                }
+                                refreshDebugLogUi(context.applicationContext) { size, has, path, preview ->
+                                    debugLogStatus = size
+                                    hasDebugLogs = has
+                                    debugLogPath = path
+                                    debugLogPreview = preview
+                                }
+                                debugShareMessage = debugLogsClearedLabel
+                            }
+                        },
+                        enabled = hasDebugLogs || vpnDebugModeEnabled
+                    ) {
+                        Text(stringResource(R.string.settings_clear_debug_logs))
+                    }
+                }
+
+                Text(
+                    stringResource(R.string.settings_debug_share_disclaimer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                TextButton(
+                    onClick = {
+                        val path = debugLogPath
+                        if (path.isNotBlank()) {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                                as android.content.ClipboardManager
+                            clipboard.setPrimaryClip(
+                                android.content.ClipData.newPlainText("vpn_debug_path", path)
+                            )
+                            debugShareMessage = context.getString(R.string.copied)
+                        }
+                    },
+                    enabled = debugLogPath.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.settings_copy_debug_path))
+                }
+
+                debugShareMessage?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        if (showDebugPreview) {
+            AlertDialog(
+                onDismissRequest = { showDebugPreview = false },
+                title = { Text(stringResource(R.string.settings_debug_preview_title)) },
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(
+                            debugLogPreview.ifBlank {
+                                stringResource(R.string.settings_debug_empty_preview)
+                            },
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDebugPreview = false }) {
+                        Text(stringResource(android.R.string.ok))
+                    }
+                }
+            )
         }
 
         Card(
@@ -541,7 +855,7 @@ fun SettingsScreen(
 
 private sealed interface IpListUpdateMessage {
     data class Failed(val error: String, val usedFallback: Boolean) : IpListUpdateMessage
-    data class Ready(val routeCount: Int) : IpListUpdateMessage
+    data class Ready(val routeCount: Int, val priorityRouteCount: Int) : IpListUpdateMessage
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -554,6 +868,9 @@ private fun IpListSettingsScreen(
 
     var sourceUrls by remember { mutableStateOf(IpListPreferences.DEFAULT_SOURCE_URLS) }
     var newSourceUrl by remember { mutableStateOf("") }
+    var priorityUrls by remember { mutableStateOf(IpListPreferences.DEFAULT_PRIORITY_URLS) }
+    var newPriorityUrl by remember { mutableStateOf("") }
+    var safeRouteLimitEnabled by remember { mutableStateOf(true) }
     var updateFrequency by remember { mutableStateOf(IpListUpdateFrequency.DAILY) }
     var coverageMode by remember { mutableStateOf(IpListCoverageMode.FULL) }
     var android12OvpnRouteLimitText by remember {
@@ -565,6 +882,7 @@ private fun IpListSettingsScreen(
             IpListStatus(
                 lastUpdatedEpochMs = null,
                 loadedRouteCount = 0,
+                priorityRouteCount = 0,
                 lastError = null,
                 reachedRouteLimit = false
             )
@@ -587,6 +905,8 @@ private fun IpListSettingsScreen(
         }
         val settings = loaded.first
         sourceUrls = settings.sourceUrls
+        priorityUrls = settings.priorityUrls
+        safeRouteLimitEnabled = settings.safeRouteLimitEnabled
         updateFrequency = settings.updateFrequency
         coverageMode = settings.coverageMode
         android12OvpnRouteLimitText = settings.android12OvpnRouteLimit.toString()
@@ -598,11 +918,17 @@ private fun IpListSettingsScreen(
     val newUrlError = remember(trimmedNewSourceUrl) {
         trimmedNewSourceUrl.isNotEmpty() && !isHttpUrl(trimmedNewSourceUrl)
     }
+    val trimmedNewPriorityUrl = newPriorityUrl.trim()
+    val newPriorityUrlError = remember(trimmedNewPriorityUrl) {
+        trimmedNewPriorityUrl.isNotEmpty() && !isHttpUrl(trimmedNewPriorityUrl)
+    }
     val android12OvpnRouteLimit = android12OvpnRouteLimitText.toIntOrNull()
     val android12OvpnRouteLimitError = android12OvpnRouteLimit == null ||
         android12OvpnRouteLimit !in IpListRouteConfig.MIN_ANDROID12_OVPN_ROUTE_LIMIT..IpListRouteConfig.MAX_ANDROID12_OVPN_ROUTE_LIMIT
     val hasSourceUrlError = sourceUrls.any { !isHttpUrl(it) }
-    val canSaveSources = sourceUrls.isNotEmpty() && !hasSourceUrlError && !android12OvpnRouteLimitError
+    val hasPriorityUrlError = priorityUrls.any { !isHttpUrl(it) }
+    val canSaveSources = sourceUrls.isNotEmpty() && !hasSourceUrlError &&
+        !hasPriorityUrlError && !android12OvpnRouteLimitError
 
     Column(
         modifier = Modifier
@@ -796,6 +1122,123 @@ private fun IpListSettingsScreen(
                     )
                 }
 
+                HorizontalDivider()
+
+                Text(
+                    stringResource(R.string.settings_ip_lists_priority_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_ip_lists_priority_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    priorityUrls.forEachIndexed { index, url ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier.weight(1f),
+                                value = url,
+                                onValueChange = { value ->
+                                    priorityUrls = priorityUrls.toMutableList().also {
+                                        it[index] = value
+                                    }
+                                    savedMessageVisible = false
+                                },
+                                label = { Text(stringResource(R.string.settings_ip_lists_url_label)) },
+                                isError = url.isNotBlank() && !isHttpUrl(url),
+                                singleLine = true
+                            )
+                            TextButton(
+                                onClick = {
+                                    priorityUrls = priorityUrls.toMutableList().also {
+                                        it.removeAt(index)
+                                    }
+                                    savedMessageVisible = false
+                                }
+                            ) {
+                                Text(stringResource(R.string.action_delete))
+                            }
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = newPriorityUrl,
+                    onValueChange = {
+                        newPriorityUrl = it
+                        savedMessageVisible = false
+                    },
+                    label = { Text(stringResource(R.string.settings_ip_lists_priority_add_url_label)) },
+                    supportingText = {
+                        Text(
+                            if (newPriorityUrlError) {
+                                stringResource(R.string.settings_ip_lists_url_error)
+                            } else {
+                                stringResource(R.string.settings_ip_lists_url_hint)
+                            }
+                        )
+                    },
+                    isError = newPriorityUrlError,
+                    singleLine = true
+                )
+                Button(
+                    onClick = {
+                        priorityUrls = (priorityUrls + trimmedNewPriorityUrl).map { it.trim() }
+                            .filter { it.isNotEmpty() }
+                            .distinct()
+                        newPriorityUrl = ""
+                        savedMessageVisible = false
+                    },
+                    enabled = trimmedNewPriorityUrl.isNotEmpty() && !newPriorityUrlError,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = AppCards.shape
+                ) {
+                    Text(stringResource(R.string.settings_ip_lists_priority_add_url))
+                }
+
+                HorizontalDivider()
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_ip_lists_safe_limit_title),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            stringResource(R.string.settings_ip_lists_safe_limit_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = safeRouteLimitEnabled,
+                        onCheckedChange = { v ->
+                            safeRouteLimitEnabled = v
+                            savedMessageVisible = false
+                        }
+                    )
+                }
+                if (!safeRouteLimitEnabled) {
+                    Text(
+                        stringResource(R.string.settings_ip_lists_safe_limit_disabled_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
                 Button(
                     onClick = {
                         scope.launch {
@@ -806,7 +1249,9 @@ private fun IpListSettingsScreen(
                                 coverageMode,
                                 android12OvpnRouteLimit
                                     ?: IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
-                                cidrListsEnabled
+                                cidrListsEnabled,
+                                priorityUrls,
+                                safeRouteLimitEnabled
                             )
                             savedMessageVisible = true
                         }
@@ -859,6 +1304,13 @@ private fun IpListSettingsScreen(
                     stringResource(R.string.settings_ip_lists_loaded_routes_value, status.loadedRouteCount)
                 )
                 KeyValueRow(
+                    stringResource(R.string.settings_ip_lists_loaded_priority_routes),
+                    stringResource(
+                        R.string.settings_ip_lists_loaded_priority_routes_value,
+                        status.priorityRouteCount
+                    )
+                )
+                KeyValueRow(
                     stringResource(R.string.settings_ip_lists_last_error),
                     status.lastError ?: stringResource(R.string.settings_ip_lists_last_error_none)
                 )
@@ -896,7 +1348,10 @@ private fun IpListSettingsScreen(
                             }
                             updateMessage = result.error
                                 ?.let { IpListUpdateMessage.Failed(it, result.usedFallback) }
-                                ?: IpListUpdateMessage.Ready(result.routeCount)
+                                ?: IpListUpdateMessage.Ready(
+                                    result.routeCount,
+                                    result.priorityRouteCount
+                                )
                             updateInProgress = false
                         }
                     },
@@ -933,7 +1388,8 @@ private fun IpListSettingsScreen(
                             is IpListUpdateMessage.Ready -> {
                                 stringResource(
                                     R.string.settings_ip_lists_update_ready,
-                                    message.routeCount
+                                    message.routeCount,
+                                    message.priorityRouteCount
                                 )
                             }
                         },
@@ -1184,9 +1640,12 @@ private fun IpListCoverageModeSelector(
             when (current) {
                 IpListCoverageMode.FAST -> stringResource(
                     R.string.settings_ip_lists_coverage_fast_description,
-                    IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES
+                    IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FAST
                 )
-                IpListCoverageMode.FULL -> stringResource(R.string.settings_ip_lists_coverage_full_description)
+                IpListCoverageMode.FULL -> stringResource(
+                    R.string.settings_ip_lists_coverage_full_description,
+                    IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL
+                )
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1210,7 +1669,8 @@ private fun SessionLogoutCard(
     role: String?,
     email: String?,
     avatarUrl: String?,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
 ) {
     var showLogoutConfirm by remember { mutableStateOf(false) }
 
@@ -1224,13 +1684,17 @@ private fun SessionLogoutCard(
                     onClick = {
                         showLogoutConfirm = false
                         onLogout()
-                    }
+                    },
+                    modifier = Modifier.tvFocusBorder(shape = AppCards.shape),
                 ) {
                     Text(stringResource(R.string.sign_out))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLogoutConfirm = false }) {
+                TextButton(
+                    onClick = { showLogoutConfirm = false },
+                    modifier = Modifier.tvFocusBorder(shape = AppCards.shape),
+                ) {
                     Text(stringResource(R.string.action_cancel))
                 }
             }
@@ -1305,7 +1769,16 @@ private fun SessionLogoutCard(
 
             Button(
                 onClick = { showLogoutConfirm = true },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        if (primaryFocusRequester != null) {
+                            Modifier.focusRequester(primaryFocusRequester)
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .tvFocusBorder(shape = AppCards.shape),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -1534,6 +2007,99 @@ private fun shareCrashFiles(
         null
     } catch (e: Exception) {
         android.util.Log.e("CrashShare", "Failed to start chooser", e)
+        e.message ?: context.getString(R.string.share_failed)
+    }
+}
+
+private fun getDebugLogFiles(context: android.content.Context): List<File> {
+    VpnDebugLogger.get()?.logFiles()?.let { files ->
+        return files.filter { it.isFile && it.length() > 0L }
+    }
+    val dir = File(context.noBackupFilesDir, VpnDebugLogger.DIR_NAME)
+    if (!dir.exists() || !dir.isDirectory) return emptyList()
+    return dir.listFiles()
+        ?.filter { it.isFile && it.length() > 0L && it.name.endsWith(".txt") }
+        ?.sortedByDescending { it.lastModified() }
+        ?: emptyList()
+}
+
+private fun formatDebugLogStatus(context: android.content.Context): String {
+    val bytes = VpnDebugLogger.get()?.totalBytes()
+        ?: getDebugLogFiles(context).sumOf { it.length() }
+    return when {
+        bytes < 1024 -> "$bytes B"
+        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
+        else -> String.format(Locale.US, "%.1f MB", bytes / (1024.0 * 1024.0))
+    }
+}
+
+private suspend fun refreshDebugLogUi(
+    context: android.content.Context,
+    apply: (size: String, has: Boolean, path: String, preview: String) -> Unit,
+) {
+    val snapshot = withContext(Dispatchers.IO) {
+        val logger = VpnDebugLogger.get()
+        val files = getDebugLogFiles(context)
+        val path = logger?.currentFilePath()
+            ?: File(context.noBackupFilesDir, "${VpnDebugLogger.DIR_NAME}/${VpnDebugLogger.CURRENT_FILE}").absolutePath
+        val preview = logger?.readTail()?.ifBlank { "" } ?: ""
+        Quad(
+            size = formatDebugLogStatus(context),
+            has = files.isNotEmpty(),
+            path = path,
+            preview = preview,
+        )
+    }
+    apply(snapshot.size, snapshot.has, snapshot.path, snapshot.preview)
+}
+
+private data class Quad(
+    val size: String,
+    val has: Boolean,
+    val path: String,
+    val preview: String,
+)
+
+private fun shareDebugLogFiles(
+    context: android.content.Context,
+    files: List<File>
+): String? {
+    val appContext = context.applicationContext
+    val authority = "${BuildConfig.APPLICATION_ID}.fileprovider"
+
+    val shareDir = File(appContext.cacheDir, "share/debug").apply { mkdirs() }
+    val uris = ArrayList<Uri>(files.size)
+
+    for (src in files) {
+        try {
+            val dst = File(shareDir, src.name)
+            src.copyTo(dst, overwrite = true)
+            uris.add(FileProvider.getUriForFile(appContext, authority, dst))
+        } catch (e: Exception) {
+            android.util.Log.e("DebugShare", "Failed to prepare share file: ${src.absolutePath}", e)
+        }
+    }
+
+    if (uris.isEmpty()) return context.getString(R.string.no_shareable_files)
+
+    val sendIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        type = "text/plain"
+        putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    val chooserIntent = Intent.createChooser(
+        sendIntent,
+        context.getString(R.string.share_debug_logs_chooser_title)
+    ).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    return try {
+        appContext.startActivity(chooserIntent)
+        null
+    } catch (e: Exception) {
+        android.util.Log.e("DebugShare", "Failed to start chooser", e)
         e.message ?: context.getString(R.string.share_failed)
     }
 }

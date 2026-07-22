@@ -91,6 +91,22 @@
     <string name="settings_error_logs_count">파일 %1$d개</string>
     <string name="settings_share_logs">로그 공유</string>
     <string name="share_logs_chooser_title">오류 로그 공유</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">복사됨</string>
     <string name="no_error_logs">오류 로그 없음</string>
     <string name="no_shareable_files">공유할 파일이 없습니다.</string>
@@ -201,18 +217,27 @@
     <string name="settings_ip_lists_frequency_weekly">매주</string>
     <string name="settings_ip_lists_frequency_manual">수동만</string>
     <string name="settings_ip_lists_saved">IP 목록 설정이 저장되었습니다.</string>
+    <string name="settings_ip_lists_priority_title">우선순위 사이트</string>
+    <string name="settings_ip_lists_priority_subtitle">여기의 CIDR 범위는 위의 일반 목록이 잘리더라도 항상 VPN을 우회합니다. VPN을 통해 라우팅될 때 문제가 발생하는 특정 사이트에 사용하세요.</string>
+    <string name="settings_ip_lists_priority_add_url_label">우선순위 목록 URL 추가</string>
+    <string name="settings_ip_lists_priority_add_url">우선순위 URL 추가</string>
+    <string name="settings_ip_lists_safe_limit_title">시스템 안정성을 위해 경로 제한</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">시스템 VPN 아이콘이 빠르게 나타나도록 우회 경로 수를 충분히 낮게 유지합니다. 위의 우선순위 사이트는 절대 삭제되지 않습니다.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP 목록 상태</string>
     <string name="settings_ip_lists_last_updated">마지막 업데이트</string>
     <string name="settings_ip_lists_last_updated_never">없음</string>
     <string name="settings_ip_lists_loaded_routes">로드된 경로</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d개 경로</string>
+    <string name="settings_ip_lists_loaded_priority_routes">우선 경로</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d개 경로</string>
     <string name="settings_ip_lists_last_error">마지막 로드 오류</string>
     <string name="settings_ip_lists_last_error_none">없음</string>
     <string name="settings_ip_lists_route_limit_notice">Se aplican hasta %1$d rutas IPv4 o IPv6.</string>
     <string name="settings_ip_lists_route_limit_warning">La lista alcanzó el límite de %1$d rutas. Las rutas adicionales se ignoraron.</string>
     <string name="settings_ip_lists_update_now">지금 업데이트</string>
     <string name="settings_ip_lists_update_now_loading">업데이트 중…</string>
-    <string name="settings_ip_lists_update_ready">Lista IP actualizada: %1$d rutas cargadas.</string>
+    <string name="settings_ip_lists_update_ready">IP 목록 업데이트됨: 일반 %1$d, 우선 %2$d.</string>
     <string name="settings_ip_lists_update_failed_prefix">업데이트 실패</string>
     <string name="settings_ip_lists_update_failed">Error al actualizar: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Error al actualizar: %1$s. Se usa la lista en caché o integrada.</string>
@@ -226,6 +251,12 @@
     <string name="settings_link_telegram">Telegram 채널</string>
     <string name="settings_updates_github_title">GitHub에서 업데이트 확인</string>
     <string name="settings_updates_github_subtitle">최신 공개 릴리스를 주기적으로 확인하고 알려줍니다.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">새 버전 발견 시 알림</string>
     <string name="settings_push_updates_subtitle">GitHub 확인 후 로컬 알림입니다. Android 13+에서는 알림 권한이 필요합니다.</string>
     <string name="settings_auto_download_title">APK 다운로드 제안</string>
@@ -327,7 +358,7 @@
     <string name="settings_ip_lists_coverage_fast">빠름</string>
     <string name="settings_ip_lists_coverage_fast_description">최대 %1$d개의 넓은 경로를 적용합니다. 터널 설정은 더 빠르지만 작은 IP 대역은 여전히 VPN을 사용할 수 있습니다.</string>
     <string name="settings_ip_lists_coverage_full">전체 적용</string>
-    <string name="settings_ip_lists_coverage_full_description">로드된 모든 경로를 적용하여 최대 적용 범위를 제공합니다. 큰 목록에서는 터널 설정에 몇 초 걸릴 수 있습니다.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">적용 범위 모드</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR 목록이 꺼져 있습니다. 위 스위치를 켜서 라우팅 예외를 다시 적용하세요.</string>
     <string name="settings_ip_lists_enable_subtitle">꺼져 있으면 목록 기반 라우팅 예외가 적용되지 않고 목록도 다운로드되지 않으며 모든 트래픽이 VPN 터널을 통과합니다.</string>
@@ -422,4 +453,22 @@
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>

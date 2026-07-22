@@ -102,6 +102,22 @@
     <string name="settings_error_logs_count">%1$d file(s)</string>
     <string name="settings_share_logs">Share Error Logs</string>
     <string name="share_logs_chooser_title">Share error logs</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
 
     <string name="copied">Copied</string>
     <string name="no_error_logs">No error logs found</string>
@@ -219,18 +235,27 @@
     <string name="settings_ip_lists_frequency_weekly">Tjedno</string>
     <string name="settings_ip_lists_frequency_manual">Samo ručno</string>
     <string name="settings_ip_lists_saved">Postavke IP popisa su spremljene.</string>
+    <string name="settings_ip_lists_priority_title">Prioritetne stranice</string>
+    <string name="settings_ip_lists_priority_subtitle">CIDR rasponi ovdje uvijek zaobilaze VPN, čak i ako se opći popis iznad skrati. Koristite ovo za određene stranice koje se pokvare kad se usmjeravaju kroz VPN.</string>
+    <string name="settings_ip_lists_priority_add_url_label">Dodaj URL popisa prioriteta</string>
+    <string name="settings_ip_lists_priority_add_url">Dodaj prioritetni URL</string>
+    <string name="settings_ip_lists_safe_limit_title">Ograniči rute radi stabilnosti sustava</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">Održava broj zaobilaznih ruta dovoljno niskim da se ikona VPN-a sustava brzo pojavi. Prioritetne stranice iznad nikada se ne izostavljaju.</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">Stanje IP popisa</string>
     <string name="settings_ip_lists_last_updated">Zadnje ažurirano</string>
     <string name="settings_ip_lists_last_updated_never">Nikad</string>
     <string name="settings_ip_lists_loaded_routes">Učitane rute</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d ruta</string>
+    <string name="settings_ip_lists_loaded_priority_routes">Prioritetne rute</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d ruta</string>
     <string name="settings_ip_lists_last_error">Zadnja pogreška učitavanja</string>
     <string name="settings_ip_lists_last_error_none">Nema</string>
     <string name="settings_ip_lists_route_limit_notice">Primjenjuje se do %1$d IPv4 ili IPv6 ruta.</string>
     <string name="settings_ip_lists_route_limit_warning">Popis je dosegao ograničenje od %1$d ruta. Dodatne rute su zanemarene.</string>
     <string name="settings_ip_lists_update_now">Ažuriraj sada</string>
     <string name="settings_ip_lists_update_now_loading">Ažuriranje…</string>
-    <string name="settings_ip_lists_update_ready">IP popis ažuriran: učitano %1$d ruta.</string>
+    <string name="settings_ip_lists_update_ready">IP popis ažuriran: %1$d općih, %2$d prioritetnih.</string>
     <string name="settings_ip_lists_update_failed_prefix">Ažuriranje nije uspjelo</string>
     <string name="settings_ip_lists_update_failed">Ažuriranje nije uspjelo: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Ažuriranje nije uspjelo: %1$s. Koristi se predmemorirani ili ugrađeni popis.</string>
@@ -244,6 +269,12 @@
     <string name="settings_link_telegram">Telegram kanal</string>
     <string name="settings_updates_github_title">Provjeri ažuriranja na GitHubu</string>
     <string name="settings_updates_github_subtitle">Povremeno provjeri najnovije javno izdanje i obavijesti vas.</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">Obavijesti kada se pronađe nova verzija</string>
     <string name="settings_push_updates_subtitle">Lokalna obavijest nakon GitHub provjere. Za Android 13+ potrebna je dozvola za obavijesti.</string>
     <string name="settings_auto_download_title">Predloži preuzimanje APK-a</string>
@@ -345,7 +376,7 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="settings_ip_lists_coverage_fast">Brzo</string>
     <string name="settings_ip_lists_coverage_fast_description">Primjenjuje do %1$d širokih ruta. Postavljanje tunela je brže, ali mali rasponi IP‑ova još mogu koristiti VPN.</string>
     <string name="settings_ip_lists_coverage_full">Potpuno pokrivenost</string>
-    <string name="settings_ip_lists_coverage_full_description">Primjenjuje svaku učitanu rutu za maksimalnu pokrivenost. Postavljanje tunela na velikim listama može trajati nekoliko sekundi.</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">Način pokrivenosti</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR liste su isključene. Uključite prekidač iznad za ponovnu primjenu izuzetaka usmjeravanja.</string>
     <string name="settings_ip_lists_enable_subtitle">Kad je isključeno, iznimke usmjeravanja iz lista se ne primjenjuju ni se liste ne preuzimaju— sav promet prolazi VPN tunelom.</string>
@@ -440,4 +471,22 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>

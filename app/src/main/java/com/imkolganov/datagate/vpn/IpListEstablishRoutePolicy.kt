@@ -3,12 +3,12 @@ package com.imkolganov.datagate.vpn
 /**
  * Budget for [android.net.VpnService.Builder.excludeRoute] calls during [tun_builder_establish].
  *
- * See [IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT] for the on-device measurements behind
- * this budget (system VPN status bar icon appearance latency vs. excludeRoute() count).
+ * See [IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL] for the SM-S928B measurements behind
+ * this budget (1750 validated / 2000 TransactionTooLarge). Not a universal Binder ceiling.
  */
 internal object IpListEstablishRoutePolicy {
 
-    const val SAFE_ESTABLISH_EXCLUDE_ROUTE_BUDGET = IpListRouteConfig.MAX_ANDROID13_EXCLUDE_ROUTE_LIMIT
+    const val SAFE_ESTABLISH_EXCLUDE_ROUTE_BUDGET = IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL
 
     fun excludeRouteCallsForPlan(plan: IpListConnectionRoutePlan): Int =
         when (plan.delivery) {

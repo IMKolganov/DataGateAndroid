@@ -60,6 +60,14 @@ object UpdatePreferences {
         context.updateDataStore.edit { it[KEY_LAST_CHECK_MS] = System.currentTimeMillis() }
     }
 
+    /** Last check timestamp (0 if never marked). Used by tests and diagnostics. */
+    suspend fun lastCheckEpochMs(context: Context): Long =
+        context.updateDataStore.data.map { it[KEY_LAST_CHECK_MS] ?: 0L }.first()
+
+    suspend fun clearLastCheckTimestamp(context: Context) {
+        context.updateDataStore.edit { it.remove(KEY_LAST_CHECK_MS) }
+    }
+
     suspend fun getDismissedTag(context: Context): String? =
         context.updateDataStore.data.map { it[KEY_DISMISSED_TAG] }.first()
 

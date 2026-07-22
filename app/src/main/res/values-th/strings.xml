@@ -91,6 +91,22 @@
     <string name="settings_error_logs_count">%1$d ไฟล์</string>
     <string name="settings_share_logs">แชร์บันทึก</string>
     <string name="share_logs_chooser_title">แชร์บันทึกข้อผิดพลาด</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">คัดลอกแล้ว</string>
     <string name="no_error_logs">ไม่มีบันทึกข้อผิดพลาด</string>
     <string name="no_shareable_files">ไม่มีไฟล์ให้แชร์</string>
@@ -201,18 +217,27 @@
     <string name="settings_ip_lists_frequency_weekly">รายสัปดาห์</string>
     <string name="settings_ip_lists_frequency_manual">ด้วยตนเองเท่านั้น</string>
     <string name="settings_ip_lists_saved">บันทึกการตั้งค่ารายการ IP แล้ว</string>
+    <string name="settings_ip_lists_priority_title">เว็บไซต์ที่มีความสำคัญ</string>
+    <string name="settings_ip_lists_priority_subtitle">ช่วง CIDR ที่นี่จะข้าม VPN เสมอ แม้ว่ารายการทั่วไปด้านบนจะถูกตัดทอนก็ตาม ใช้สิ่งนี้สำหรับเว็บไซต์เฉพาะที่มีปัญหาเมื่อเชื่อมต่อผ่าน VPN</string>
+    <string name="settings_ip_lists_priority_add_url_label">เพิ่ม URL รายการที่มีความสำคัญ</string>
+    <string name="settings_ip_lists_priority_add_url">เพิ่ม URL ที่มีความสำคัญ</string>
+    <string name="settings_ip_lists_safe_limit_title">จำกัดเส้นทางเพื่อความเสถียรของระบบ</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">รักษาจำนวนเส้นทางบายพาสให้ต่ำพอที่ไอคอน VPN ของระบบจะปรากฏขึ้นอย่างรวดเร็ว เว็บไซต์ที่มีความสำคัญด้านบนจะไม่ถูกตัดออกเลย</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">สถานะรายการ IP</string>
     <string name="settings_ip_lists_last_updated">อัปเดตล่าสุด</string>
     <string name="settings_ip_lists_last_updated_never">ไม่เคย</string>
     <string name="settings_ip_lists_loaded_routes">เส้นทางที่โหลด</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d เส้นทาง</string>
+    <string name="settings_ip_lists_loaded_priority_routes">เส้นทางลำดับความสำคัญ</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d เส้นทาง</string>
     <string name="settings_ip_lists_last_error">ข้อผิดพลาดการโหลดล่าสุด</string>
     <string name="settings_ip_lists_last_error_none">ไม่มี</string>
     <string name="settings_ip_lists_route_limit_notice">Up to %1$d IPv4 or IPv6 routes are applied.</string>
     <string name="settings_ip_lists_route_limit_warning">The list reached the %1$d route limit. Extra routes were ignored.</string>
     <string name="settings_ip_lists_update_now">อัปเดตตอนนี้</string>
     <string name="settings_ip_lists_update_now_loading">กำลังอัปเดต…</string>
-    <string name="settings_ip_lists_update_ready">IP list updated: %1$d routes loaded.</string>
+    <string name="settings_ip_lists_update_ready">อัปเดตรายการ IP แล้ว: ทั่วไป %1$d, สำคัญ %2$d</string>
     <string name="settings_ip_lists_update_failed_prefix">อัปเดตล้มเหลว</string>
     <string name="settings_ip_lists_update_failed">Update failed: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Update failed: %1$s. Using cached or built-in list.</string>
@@ -226,6 +251,12 @@
     <string name="settings_link_telegram">ช่อง Telegram</string>
     <string name="settings_updates_github_title">ตรวจสอบอัปเดตบน GitHub</string>
     <string name="settings_updates_github_subtitle">ตรวจสอบรุ่นสาธารณะล่าสุดเป็นระยะและแจ้งเตือนคุณ</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">แจ้งเตือนเมื่อพบเวอร์ชันใหม่</string>
     <string name="settings_push_updates_subtitle">การแจ้งเตือนในเครื่องหลังตรวจสอบ GitHub ต้องใช้สิทธิ์แจ้งเตือนบน Android 13+</string>
     <string name="settings_auto_download_title">แนะนำการดาวน์โหลด APK</string>
@@ -327,7 +358,7 @@
     <string name="settings_ip_lists_coverage_fast">เร็ว</string>
     <string name="settings_ip_lists_coverage_fast_description">ใช้เส้นทางกว้างได้สูงสุด %1$d เส้นทาง การตั้งค่าอุโมงค์เร็วขึ้น แต่ช่วง IP เล็กน้อยอาจยังใช้ VPN</string>
     <string name="settings_ip_lists_coverage_full">ครอบคลุมเต็มที่</string>
-    <string name="settings_ip_lists_coverage_full_description">ใช้ทุกเส้นทางที่โหลดเพื่อความครอบคลุมสูงสุด การตั้งค่าอุโมงค์อาจใช้เวลาหลายวินาทีเมื่อรายการใหญ่</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">โหมดความครอบคลุม</string>
     <string name="settings_ip_lists_detail_disabled_notice">รายการ CIDR ปิดอยู่ เปิดสวิตช์ด้านบนเพื่อใช้ข้อยกเว้นการเรียกเส้นทางอีกครั้ง</string>
     <string name="settings_ip_lists_enable_subtitle">เมื่อปิด จะไม่ใช้ข้อยกเว้นการเรียกเส้นทางแบบรายการและไม่ดาวน์โหลดรายการ ทราฟฟิกทั้งหมดผ่านอุโมงค์ VPN</string>
@@ -422,4 +453,22 @@
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>

@@ -1,7 +1,5 @@
 package com.imkolganov.datagate.servers
 
-import com.imkolganov.datagate.TEMP_IGNORE_QUOTA_PLAN_CLIENT_CHECKS
-import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.model.servers.OpenVpnServerWithStatusV2Item
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,32 +20,7 @@ class OpenVpnServersRepository(
     }
 
     suspend fun pickBestServer(): BestServerResult {
-        val items = listServersWithStatus()
-
-        val candidates = items.mapNotNull { row ->
-            val s = row.server
-            if (s.isDeleted) return@mapNotNull null
-            if (!TEMP_IGNORE_QUOTA_PLAN_CLIENT_CHECKS && !s.isAccessibleForUserQuotaPlan) return@mapNotNull null
-            if (!s.isOnline) return@mapNotNull null
-            if (s.serverType != VpnServerType.OpenVpn) return@mapNotNull null
-            if (!s.isEnableWss) return@mapNotNull null
-
-            BestServerResult(
-                serverId = s.id,
-                name = s.serverName.trim().takeUnless { it.isBlank() } ?: "Server #${s.id}",
-                apiUrl = s.apiUrl.takeUnless { it.isBlank() },
-                countConnectedClients = (row.countConnectedClients ?: 0).coerceAtLeast(0),
-                isDefault = s.isDefault
-            )
-        }
-
-        if (candidates.isEmpty()) {
-            throw IllegalStateException("No online WSS servers available")
-        }
-        return candidates.minWith(
-            compareBy<BestServerResult> { it.countConnectedClients }
-                .thenBy { it.serverId }
-        )
+        return VpnServerConnectPolicy.pickBestServer(listServersWithStatus())
     }
 
     /**
@@ -73,37 +46,6 @@ class OpenVpnServersRepository(
      * Looks up a server for manual (Access tab) connect: distinguishes offline/missing vs online but non-WSS vs quota.
      */
     suspend fun resolveManualConnection(serverId: Int): ManualServerResolve {
-        val items = listServersWithStatus()
-
-        for (row in items) {
-            val s = row.server
-            if (s.id != serverId) continue
-            if (s.isDeleted) return ManualServerResolve.NotAvailable
-            if (!s.isOnline) return ManualServerResolve.NotAvailable
-            val name = s.serverName.trim().takeUnless { it.isBlank() } ?: "Server #${s.id}"
-            if (!TEMP_IGNORE_QUOTA_PLAN_CLIENT_CHECKS && !s.isAccessibleForUserQuotaPlan) {
-                return ManualServerResolve.QuotaPlanBlocked(name)
-            }
-            if (s.serverType != VpnServerType.OpenVpn) {
-                return when (s.serverType) {
-                    VpnServerType.Xray -> ManualServerResolve.RequiresXrayClient(name)
-                    VpnServerType.OpenVpn -> error("unreachable")
-                    VpnServerType.Unknown -> ManualServerResolve.RequiresUnsupportedServerType(name)
-                }
-            }
-            if (!s.isEnableWss) {
-                return ManualServerResolve.RequiresExternalOpenVpn(name)
-            }
-            return ManualServerResolve.Ok(
-                BestServerResult(
-                    serverId = s.id,
-                    name = name,
-                    apiUrl = s.apiUrl.takeUnless { it.isBlank() },
-                    countConnectedClients = (row.countConnectedClients ?: 0).coerceAtLeast(0),
-                    isDefault = s.isDefault
-                )
-            )
-        }
-        return ManualServerResolve.NotAvailable
+        return VpnServerConnectPolicy.resolveManualConnection(listServersWithStatus(), serverId)
     }
 }

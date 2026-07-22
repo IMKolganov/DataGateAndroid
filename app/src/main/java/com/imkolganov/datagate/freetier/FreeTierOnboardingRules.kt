@@ -30,7 +30,10 @@ enum class FreeTierOnboardingCopyMode {
 enum class FreeTierStatusFetchOutcome {
     HideOnboarding,
     ShowOnboarding,
+    /** Manual retry only — never for background polls. */
     ShowStatusError,
+    /** Network/API blip on an automatic check: leave existing UI untouched. */
+    NoChange,
 }
 
 data class FreeTierStatusFetchResult(
@@ -38,6 +41,28 @@ data class FreeTierStatusFetchResult(
     val status: FreeTierAccessStatusResponse? = null,
     val errorMessage: String? = null,
 )
+
+/**
+ * Mirrors backend [QuotaPlanNames.IsFreeOrDefault]: only Free/Default plans are subject to
+ * Telegram channel / link onboarding. Pro, Unlimited, and any other paid plan are exempt.
+ */
+fun isFreeOrDefaultPlan(planName: String?): Boolean {
+    if (planName.isNullOrBlank()) return false
+    return planName.equals("Free", ignoreCase = true) ||
+        planName.equals("Default", ignoreCase = true)
+}
+
+/**
+ * Client-side gate before calling free-tier APIs.
+ * - Admins never need the Telegram compliance UX.
+ * - When we already know the active plan and it is not Free/Default (Pro, Unlimited, …), skip.
+ * - Unknown plan (`null`/`blank`) still allows a status poll until the backend or Access quota says otherwise.
+ */
+fun shouldSkipFreeTierClientChecks(isAdmin: Boolean, knownPlanName: String?): Boolean {
+    if (isAdmin) return true
+    if (knownPlanName.isNullOrBlank()) return false
+    return !isFreeOrDefaultPlan(knownPlanName)
+}
 
 fun shouldShowFreeTierOnboarding(status: FreeTierAccessStatusResponse?): Boolean {
     val s = status ?: return false
@@ -65,21 +90,29 @@ fun freeTierOnboardingCopyMode(status: FreeTierAccessStatusResponse): FreeTierOn
         else -> FreeTierOnboardingCopyMode.Generic
 }
 
+/**
+ * @param surfaceErrors when false (default for background polls / VPN connect), failures stay
+ * silent ([FreeTierStatusFetchOutcome.NoChange]) so Pro/Unlimited/admin never see a spurious
+ * error dialog if a concurrent check fails after a successful hide.
+ */
 fun evaluateFreeTierStatusFetch(
     response: ApiResponse<FreeTierAccessStatusResponse>,
     apiFailureMessage: String? = null,
+    surfaceErrors: Boolean = false,
 ): FreeTierStatusFetchResult {
-    apiFailureMessage?.let { msg ->
-        return FreeTierStatusFetchResult(
-            outcome = FreeTierStatusFetchOutcome.ShowStatusError,
-            errorMessage = msg,
-        )
-    }
+    fun failureResult(message: String?): FreeTierStatusFetchResult =
+        if (surfaceErrors) {
+            FreeTierStatusFetchResult(
+                outcome = FreeTierStatusFetchOutcome.ShowStatusError,
+                errorMessage = message,
+            )
+        } else {
+            FreeTierStatusFetchResult(outcome = FreeTierStatusFetchOutcome.NoChange)
+        }
+
+    apiFailureMessage?.let { msg -> return failureResult(msg) }
     if (!response.success) {
-        return FreeTierStatusFetchResult(
-            outcome = FreeTierStatusFetchOutcome.ShowStatusError,
-            errorMessage = response.message?.ifBlank { null },
-        )
+        return failureResult(response.message?.ifBlank { null })
     }
     val status = response.data
     return if (shouldShowFreeTierOnboarding(status)) {
@@ -88,7 +121,10 @@ fun evaluateFreeTierStatusFetch(
             status = status,
         )
     } else {
-        FreeTierStatusFetchResult(outcome = FreeTierStatusFetchOutcome.HideOnboarding)
+        FreeTierStatusFetchResult(
+            outcome = FreeTierStatusFetchOutcome.HideOnboarding,
+            status = status,
+        )
     }
 }
 

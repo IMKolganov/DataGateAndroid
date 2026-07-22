@@ -139,30 +139,72 @@ class FreeTierOnboardingRulesTest {
     }
 
     @Test
-    fun evaluateFreeTierStatusFetch_errorOnApiFailureMessage() {
+    fun evaluateFreeTierStatusFetch_errorOnApiFailureMessage_whenSurfaceErrors() {
         val result = evaluateFreeTierStatusFetch(
             response = ApiResponse(success = true, message = null, data = status()),
-            apiFailureMessage = "Network error"
+            apiFailureMessage = "Network error",
+            surfaceErrors = true,
         )
         assertEquals(FreeTierStatusFetchOutcome.ShowStatusError, result.outcome)
         assertEquals("Network error", result.errorMessage)
     }
 
     @Test
-    fun evaluateFreeTierStatusFetch_errorWhenSuccessFalse() {
+    fun evaluateFreeTierStatusFetch_silentOnApiFailure_byDefault() {
         val result = evaluateFreeTierStatusFetch(
-            ApiResponse(success = false, message = "Unauthorized", data = null)
+            response = ApiResponse(success = true, message = null, data = status()),
+            apiFailureMessage = "Network error",
+        )
+        assertEquals(FreeTierStatusFetchOutcome.NoChange, result.outcome)
+    }
+
+    @Test
+    fun evaluateFreeTierStatusFetch_errorWhenSuccessFalse_whenSurfaceErrors() {
+        val result = evaluateFreeTierStatusFetch(
+            ApiResponse(success = false, message = "Unauthorized", data = null),
+            surfaceErrors = true,
         )
         assertEquals(FreeTierStatusFetchOutcome.ShowStatusError, result.outcome)
         assertEquals("Unauthorized", result.errorMessage)
     }
 
     @Test
-    fun evaluateFreeTierStatusFetch_hideWhenSuccessTrueButNotApplicable() {
+    fun evaluateFreeTierStatusFetch_silentWhenSuccessFalse_byDefault() {
         val result = evaluateFreeTierStatusFetch(
-            ApiResponse(success = true, message = null, data = status(isApplicable = false))
+            ApiResponse(success = false, message = "Unauthorized", data = null),
+        )
+        assertEquals(FreeTierStatusFetchOutcome.NoChange, result.outcome)
+    }
+
+    @Test
+    fun evaluateFreeTierStatusFetch_hideWhenSuccessTrueButNotApplicable() {
+        val s = status(isApplicable = false)
+        val result = evaluateFreeTierStatusFetch(
+            ApiResponse(success = true, message = null, data = s)
         )
         assertEquals(FreeTierStatusFetchOutcome.HideOnboarding, result.outcome)
+        assertEquals(s, result.status)
+    }
+
+    @Test
+    fun isFreeOrDefaultPlan_onlyFreeAndDefault() {
+        assertTrue(isFreeOrDefaultPlan("Free"))
+        assertTrue(isFreeOrDefaultPlan("default"))
+        assertFalse(isFreeOrDefaultPlan("Pro"))
+        assertFalse(isFreeOrDefaultPlan("Unlimited"))
+        assertFalse(isFreeOrDefaultPlan(null))
+        assertFalse(isFreeOrDefaultPlan(""))
+    }
+
+    @Test
+    fun shouldSkipFreeTierClientChecks_adminOrPaidPlan() {
+        assertTrue(shouldSkipFreeTierClientChecks(isAdmin = true, knownPlanName = null))
+        assertTrue(shouldSkipFreeTierClientChecks(isAdmin = true, knownPlanName = "Free"))
+        assertTrue(shouldSkipFreeTierClientChecks(isAdmin = false, knownPlanName = "Pro"))
+        assertTrue(shouldSkipFreeTierClientChecks(isAdmin = false, knownPlanName = "Unlimited"))
+        assertFalse(shouldSkipFreeTierClientChecks(isAdmin = false, knownPlanName = null))
+        assertFalse(shouldSkipFreeTierClientChecks(isAdmin = false, knownPlanName = "Free"))
+        assertFalse(shouldSkipFreeTierClientChecks(isAdmin = false, knownPlanName = "Default"))
     }
 
     @Test

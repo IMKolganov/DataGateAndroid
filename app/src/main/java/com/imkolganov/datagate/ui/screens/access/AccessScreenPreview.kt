@@ -99,7 +99,6 @@ fun AccessScreenPreview() {
             vpnState = VpnStatusUiState(isVpnConnected = false),
             onEvent = {},
             onConnectVpn = {},
-            onRequestPermissionClick = {},
             onDisconnectVpn = {},
             onReconnectVpn = {}
         )

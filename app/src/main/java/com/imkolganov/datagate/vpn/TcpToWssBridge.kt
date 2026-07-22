@@ -1,7 +1,9 @@
 package com.imkolganov.datagate.vpn
 
 import android.net.VpnService
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import okio.ByteString.Companion.toByteString
+import java.util.concurrent.atomic.AtomicLong
 
 class TcpToWssBridge(
     private val service: VpnService,
@@ -55,19 +57,50 @@ class TcpToWssBridge(
         }
 
         try {
-            service.protect(tcp)
-        } catch (_: Throwable) {
+            val protectedOk = service.protect(tcp)
+            VpnDebugLogger.d(
+                TAG,
+                "bridge.proto=tcp socket.role=local_bridge event=protect " +
+                    "result=$protectedOk bound=${tcp.isBound} connected=${tcp.isConnected} " +
+                    "closed=${tcp.isClosed}",
+            )
+        } catch (e: Exception) {
+            VpnDebugLogger.w(
+                TAG,
+                "bridge.proto=tcp socket.role=local_bridge event=protect " +
+                    "result=false error.type=${e.javaClass.name} " +
+                    "error.message=${BridgeLogSanitizer.line(e.message)}",
+                e,
+            )
         }
 
         val queue = java.util.concurrent.LinkedBlockingQueue<okio.ByteString>()
         val transportLostNotified = java.util.concurrent.atomic.AtomicBoolean(false)
+        val lastOutboundMs = AtomicLong(0L)
+        val lastInboundMs = AtomicLong(0L)
         fun notifyTransportLost(reason: String) {
-            BridgeTransportLoss.notifyOnce(transportLostNotified, onTransportLost, reason)
+            BridgeTransportLoss.notifyOnce(transportLostNotified, { lostReason ->
+                VpnDebugLogger.w(TAG, "bridge.proto=tcp transport_lost: $lostReason")
+                onTransportLost?.invoke(lostReason)
+            }, reason)
         }
 
         val req = okhttp3.Request.Builder().url(wssUrl).build()
+        val bridgeSessionId = nextBridgeSessionId.incrementAndGet()
+        VpnDebugLogger.d(
+            TAG,
+            "bridge.proto=tcp bridge.session.id=$bridgeSessionId event=websocket_create",
+        )
         val ws = http.newWebSocket(req, object : okhttp3.WebSocketListener() {
+            override fun onOpen(webSocket: okhttp3.WebSocket, response: okhttp3.Response) {
+                VpnDebugLogger.d(
+                    TAG,
+                    "bridge.proto=tcp bridge.session.id=$bridgeSessionId " +
+                        "event=websocket_open code=${response.code}",
+                )
+            }
             override fun onMessage(webSocket: okhttp3.WebSocket, bytes: okio.ByteString) {
+                lastInboundMs.set(System.currentTimeMillis())
                 queue.offer(bytes)
             }
             override fun onFailure(
@@ -75,11 +108,26 @@ class TcpToWssBridge(
                 t: Throwable,
                 response: okhttp3.Response?
             ) {
+                VpnDebugLogger.w(
+                    TAG,
+                    "bridge.proto=tcp bridge.session.id=$bridgeSessionId " +
+                        "event=websocket_failure " +
+                        "error.type=${t.javaClass.name} " +
+                        "error.message=${BridgeLogSanitizer.line(t.message)} " +
+                        "response.code=${response?.code}",
+                    t,
+                )
                 notifyTransportLost(BridgeTransportLoss.formatFailureReason(t))
                 queue.offer(okio.ByteString.EMPTY)
                 try { tcp.close() } catch (_: Throwable) {}
             }
             override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
+                VpnDebugLogger.d(
+                    TAG,
+                    "bridge.proto=tcp bridge.session.id=$bridgeSessionId " +
+                        "event=websocket_closed code=$code " +
+                        "reason=${BridgeLogSanitizer.line(reason)}",
+                )
                 notifyTransportLost(BridgeTransportLoss.formatClosedReason(code, reason))
                 queue.offer(okio.ByteString.EMPTY)
                 try { tcp.close() } catch (_: Throwable) {}
@@ -114,7 +162,12 @@ class TcpToWssBridge(
                 while (true) {
                     val n = tcpIn.read(buf)
                     if (n <= 0) break
-                    ws.send(buf.toByteString(0, n))
+                    val accepted = ws.send(buf.toByteString(0, n))
+                    if (BridgeTransportLoss.shouldTreatSendRejectedAsTransportLost(accepted)) {
+                        notifyTransportLost(BridgeTransportLoss.formatSendRejectedReason())
+                        break
+                    }
+                    lastOutboundMs.set(System.currentTimeMillis())
                 }
             } catch (_: Throwable) {
             } finally {
@@ -124,23 +177,38 @@ class TcpToWssBridge(
 
         val t2 = Thread {
             try {
+                val pollMs = 5_000L
                 while (!tcp.isClosed) {
-                    val bytes = queue.poll(5, java.util.concurrent.TimeUnit.SECONDS)
-                        ?: continue
+                    val bytes = queue.poll(pollMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+                    if (bytes != null) {
+                        // optional: poison-pill
+                        if (bytes.size == 0) break
+                        tcpOut.write(bytes.toByteArray())
+                        tcpOut.flush()
+                        continue
+                    }
 
-                    // optional: poison-pill
-                    if (bytes.size == 0) break
-
-                    tcpOut.write(bytes.toByteArray())
-                    tcpOut.flush()
+                    val now = System.currentTimeMillis()
+                    val outbound = lastOutboundMs.get()
+                    val inbound = lastInboundMs.get()
+                    if (BridgeIdleProbePolicy.shouldDeclareStall(outbound, inbound, now)) {
+                        notifyTransportLost(BridgeIdleProbePolicy.formatIdleReason(now - outbound))
+                        break
+                    }
                 }
             } catch (_: Throwable) {
             } finally {
                 try { tcp.close() } catch (_: Throwable) {}
+                try { ws.cancel() } catch (_: Throwable) {}
             }
         }
 
         t1.start()
         t2.start()
+    }
+
+    companion object {
+        private const val TAG = "TcpWssBridge"
+        private val nextBridgeSessionId = AtomicLong(0)
     }
 }

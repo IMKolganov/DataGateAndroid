@@ -4,10 +4,11 @@ import OvpnApiClient
 import android.content.Context
 import android.net.Uri
 import android.os.Build
-import android.util.Log
+import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.servers.ManualServerResolve
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
+import com.imkolganov.datagate.ui.tv.isTelevision
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
 import java.util.concurrent.atomic.AtomicBoolean
@@ -32,10 +33,12 @@ class VpnConnectInteractor(
      */
     suspend fun connect(source: VpnConnectSource = VpnConnectSource.Access) {
         if (!isConnecting.compareAndSet(false, true)) {
-            Log.w("OpenVPN3", "Connect ignored: already in progress")
+            VpnDebugLogger.event("ui.connect", "ignored_already_in_progress", mapOf("source" to source.name))
+            VpnDebugLogger.w("OpenVPN3", "Connect ignored: already in progress")
             return
         }
 
+        VpnDebugLogger.event("ui.connect", "started", mapOf("source" to source.name))
         try {
             val preferredServerId = when (source) {
                 VpnConnectSource.Home -> null
@@ -50,14 +53,14 @@ class VpnConnectInteractor(
                     "SELECTING_SERVER",
                     res.getString(R.string.vpn_selecting_best_server)
                 )
-                Log.d("OpenVPN3", "Selecting best server...")
+                VpnDebugLogger.d("OpenVPN3", "Selecting best server...")
                 serversRepository.pickBestServer()
             } else {
                 vpnController.showStatus(
                     "SELECTING_SERVER",
                     res.getString(R.string.vpn_resolving_server)
                 )
-                Log.d("OpenVPN3", "Using selected serverId=$preferredServerId")
+                VpnDebugLogger.d("OpenVPN3", "Using selected serverId=$preferredServerId")
                 when (val resolved = serversRepository.resolveManualConnection(preferredServerId)) {
                     is ManualServerResolve.Ok -> resolved.result
                     is ManualServerResolve.RequiresXrayClient -> {
@@ -109,7 +112,7 @@ class VpnConnectInteractor(
                 }
             }
             val serverName = best.name
-            Log.d("OpenVPN3", "Selected serverId=${best.serverId}")
+            VpnDebugLogger.d("OpenVPN3", "Selected serverId=${best.serverId}")
             vpnController.notifyServerSelectedForConnection(
                 best.serverId,
                 serverName ?: res.getString(R.string.vpn_fallback_server_name)
@@ -140,7 +143,12 @@ class VpnConnectInteractor(
                 "BUILDING_COMMON_NAME",
                 res.getString(R.string.vpn_preparing_cert_identity, serverName ?: "")
             )
-            val commonName = "adg-${best.serverId}-$externalId-$shortInstallationId"
+            val commonName = VpnClientCommonName.build(
+                isTelevision = isTelevision(appContext),
+                serverId = best.serverId,
+                externalId = externalId,
+                shortInstallationId = shortInstallationId,
+            )
 
             vpnController.showStatus(
                 "DOWNLOADING_CONFIG",
@@ -160,7 +168,7 @@ class VpnConnectInteractor(
 
             val configText = downloaded.content.toString(Charsets.UTF_8)
             val linkProtocol = VpnLinkProtocol.fromOvpnConfigContent(configText)
-            Log.d(
+            VpnDebugLogger.d(
                 "OpenVPN3",
                 "OVPN profile transport=$linkProtocol (from proto line in file), size=${downloaded.content.size}"
             )
@@ -171,34 +179,52 @@ class VpnConnectInteractor(
                     res.getString(R.string.vpn_updating_ip_list)
                 )
             }
-            val bypassRoutes = ipListRoutesRepository.getRoutesForConnection()
+            val connectionRoutes = ipListRoutesRepository.getRoutesForConnection()
+            val bypassRoutes = connectionRoutes.generalRoutes + connectionRoutes.priorityRoutes
             val supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
             val routePlan = IpListRouteConfig.prepareConnectionRoutes(
                 config = configText,
-                routes = bypassRoutes,
+                routes = connectionRoutes.generalRoutes,
+                priorityRoutes = connectionRoutes.priorityRoutes,
                 coverageMode = ipListSettings.coverageMode,
                 android12OvpnRouteLimit = ipListSettings.android12OvpnRouteLimit,
-                supportsAndroidRouteExclusion = supportsAndroidRouteExclusion
+                supportsAndroidRouteExclusion = supportsAndroidRouteExclusion,
+                safeRouteLimitEnabled = ipListSettings.safeRouteLimitEnabled
             )
             IpListEstablishRoutePolicy.establishBudgetViolation(routePlan, ipListSettings.coverageMode)?.let { violation ->
-                Log.w("OpenVPN3", "excludeRoute establish budget violation: $violation")
+                VpnDebugLogger.w("OpenVPN3", "excludeRoute establish budget violation: $violation")
             }
-            Log.d(
-                "OpenVPN3",
-                "IP list routes prepared: applied=${routePlan.appliedRouteCount}/${bypassRoutes.size}, " +
-                    "selected=${routePlan.selectedRouteCount}, mode=" +
-                    if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
-                        "android-excludeRoute/${ipListSettings.coverageMode}" +
-                            if (routePlan.reachedEstablishRouteLimit) {
-                                "(capped=${IpListRouteConfig.androidExcludeRouteLimitFor(ipListSettings.coverageMode)})"
-                            } else {
-                                ""
-                            }
-                    } else {
-                        "ovpn-route-emulation(limit=${ipListSettings.android12OvpnRouteLimit}, " +
-                            "profileLimit=${routePlan.reachedProfileSizeLimit})"
-                    }
-            )
+            val droppedAfterNormalize =
+                (routePlan.normalizedCandidateCount - routePlan.appliedRouteCount).coerceAtLeast(0)
+            if (
+                routePlan.delivery == ANDROID_EXCLUDE_ROUTE &&
+                routePlan.reachedEstablishRouteLimit
+            ) {
+                VpnDebugLogger.w(
+                    "OpenVPN3",
+                    "Android excluded-route list truncated:\n" +
+                        "mode=${ipListSettings.coverageMode}\n" +
+                        "raw=${routePlan.rawCandidateCount}\n" +
+                        "normalized=${routePlan.normalizedCandidateCount}\n" +
+                        "applied=${routePlan.appliedRouteCount}\n" +
+                        "dropped=$droppedAfterNormalize\n" +
+                        "coverageTruncated=true"
+                )
+            } else {
+                VpnDebugLogger.d(
+                    "OpenVPN3",
+                    "IP list routes prepared: raw=${routePlan.rawCandidateCount}, " +
+                        "normalized=${routePlan.normalizedCandidateCount}, " +
+                        "applied=${routePlan.appliedRouteCount}, dropped=$droppedAfterNormalize, " +
+                        "coverageTruncated=false, selected=${routePlan.selectedRouteCount}, mode=" +
+                        if (routePlan.delivery == ANDROID_EXCLUDE_ROUTE) {
+                            "android-excludeRoute/${ipListSettings.coverageMode}"
+                        } else {
+                            "ovpn-route-emulation(limit=${ipListSettings.android12OvpnRouteLimit}, " +
+                                "profileLimit=${routePlan.reachedProfileSizeLimit})"
+                        }
+                )
+            }
             if (bypassRoutes.isNotEmpty()) {
                 vpnController.showStatus(
                     "IP_LIST_READY",
@@ -214,6 +240,18 @@ class VpnConnectInteractor(
                 ?: error("Best server apiUrl is null")
 
             val wssUrl = httpsToWssProxy(apiUrl, linkProtocol)
+            VpnDebugLogger.event(
+                category = "ui.connect",
+                action = "hand_off_to_controller",
+                details = mapOf(
+                    "serverId" to best.serverId,
+                    "proto" to linkProtocol.name,
+                    "wssHost" to runCatching { Uri.parse(wssUrl).host }.getOrNull(),
+                    "excludeRoutes" to routePlan.androidExcludedRoutes.size,
+                    "appliedRoutes" to routePlan.appliedRouteCount,
+                    "delivery" to routePlan.delivery.name,
+                ),
+            )
             vpnController.startWithConfig(
                 routePlan.config,
                 wssUrl,
@@ -221,7 +259,14 @@ class VpnConnectInteractor(
                 routePlan.androidExcludedRoutes
             )
         } catch (t: Throwable) {
-            Log.e("OpenVPN3", "Connect flow failed", t)
+            VpnDebugLogger.event(
+                category = "ui.connect",
+                action = "failed",
+                details = mapOf(
+                    "error" to (t.message ?: t.javaClass.simpleName),
+                ),
+            )
+            VpnDebugLogger.e("OpenVPN3", "Connect flow failed", t)
             val detail = appContext.resources.userFriendlyApiError(t)
                 .ifBlank { t.javaClass.simpleName }
             vpnController.showError(

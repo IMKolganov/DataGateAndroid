@@ -6,15 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.auth.tv.TvLoginSessionWatcher
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
 import com.imkolganov.datagate.model.auth.TotpSetupDto
 import com.imkolganov.datagate.model.auth.TotpStatusDto
+import com.imkolganov.datagate.model.auth.TvLoginSessionPollResponse
+import com.imkolganov.datagate.model.auth.TvLoginSessionStatus
 import com.imkolganov.datagate.util.deepMessageForApiError
 import com.imkolganov.datagate.util.userFriendlyApiError
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 enum class AuthLoginTab {
     Google,
@@ -40,6 +45,26 @@ enum class AdminTotpGate {
     SetupRequired,
 }
 
+enum class TvLinkPhase {
+    Idle,
+    Creating,
+    Waiting,
+    Completing,
+    Denied,
+    Expired,
+    Failed,
+}
+
+data class TvLinkUiState(
+    val phase: TvLinkPhase = TvLinkPhase.Idle,
+    val sessionId: String? = null,
+    val userCode: String? = null,
+    val qrPayload: String? = null,
+    val expiresAt: String? = null,
+    val status: String? = null,
+    val errorMessage: String? = null,
+)
+
 data class TotpChallengeUi(
     val loginChallengeId: String,
     val displayName: String? = null,
@@ -61,16 +86,21 @@ data class AuthUiState(
     val totpSetup: TotpSetupDto? = null,
     val totpSetupConfirmLoading: Boolean = false,
     val totpStatus: TotpStatusDto? = null,
+    val tvLink: TvLinkUiState = TvLinkUiState(),
 )
 
 class AuthViewModel(
-    private val repo: AuthRepository
+    private val repo: AuthRepository,
+    private val tvLoginWatcher: TvLoginSessionWatcher? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         AuthUiState(isLoading = true, isLoggedIn = false)
     )
     val state: StateFlow<AuthUiState> = _state
+
+    private var tvLinkWatchJob: Job? = null
+    private val tvApprovedHandled = AtomicBoolean(false)
 
     init {
         viewModelScope.launch {
@@ -134,6 +164,7 @@ class AuthViewModel(
                         totpChallenge = null,
                         adminTotpGate = gate,
                         errorMessage = null,
+                        tvLink = TvLinkUiState(),
                     )
                 }
                 if (!outcome.requiresTotpSetup) {
@@ -141,6 +172,184 @@ class AuthViewModel(
                 }
             }
         }
+    }
+
+    fun startTvLinkLogin(resources: Resources, deviceName: String) {
+        val watcher = tvLoginWatcher
+        if (watcher == null) {
+            _state.update {
+                it.copy(
+                    tvLink = TvLinkUiState(
+                        phase = TvLinkPhase.Failed,
+                        errorMessage = resources.getString(R.string.tv_link_error_unavailable),
+                    )
+                )
+            }
+            return
+        }
+
+        stopTvLinkLogin()
+        tvApprovedHandled.set(false)
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = null,
+                    infoMessage = null,
+                    tvLink = TvLinkUiState(phase = TvLinkPhase.Creating),
+                )
+            }
+            try {
+                val created = repo.createTvLoginSession(deviceName)
+                _state.update {
+                    it.copy(
+                        tvLink = TvLinkUiState(
+                            phase = TvLinkPhase.Waiting,
+                            sessionId = created.sessionId,
+                            userCode = created.userCode,
+                            qrPayload = created.qrPayload,
+                            expiresAt = created.expiresAt,
+                            status = TvLoginSessionStatus.PENDING,
+                        )
+                    )
+                }
+
+                tvLinkWatchJob = watcher.start(
+                    scope = viewModelScope,
+                    session = created,
+                    onStatus = { status, expiresAt ->
+                        handleTvLinkStatus(resources, status, expiresAt)
+                    },
+                    onApproved = { poll ->
+                        handleTvLinkApproved(resources, poll)
+                    },
+                )
+            } catch (e: Exception) {
+                val msg = resources.userFriendlyApiError(e)
+                _state.update {
+                    it.copy(
+                        tvLink = TvLinkUiState(
+                            phase = TvLinkPhase.Failed,
+                            errorMessage = msg.ifBlank {
+                                resources.getString(R.string.tv_link_error_create)
+                            },
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun retryTvLinkLogin(resources: Resources, deviceName: String) {
+        startTvLinkLogin(resources, deviceName)
+    }
+
+    fun stopTvLinkLogin() {
+        tvLinkWatchJob?.cancel()
+        tvLinkWatchJob = null
+        tvApprovedHandled.set(false)
+    }
+
+    private suspend fun handleTvLinkStatus(
+        resources: Resources,
+        status: String,
+        expiresAt: String?,
+    ) {
+        when (status) {
+            TvLoginSessionStatus.PENDING, TvLoginSessionStatus.VIEWED -> {
+                _state.update { s ->
+                    s.copy(
+                        tvLink = s.tvLink.copy(
+                            phase = TvLinkPhase.Waiting,
+                            status = status,
+                            expiresAt = expiresAt ?: s.tvLink.expiresAt,
+                            errorMessage = null,
+                        )
+                    )
+                }
+            }
+            TvLoginSessionStatus.APPROVED -> {
+                _state.update { s ->
+                    s.copy(
+                        tvLink = s.tvLink.copy(
+                            phase = TvLinkPhase.Completing,
+                            status = status,
+                            expiresAt = expiresAt ?: s.tvLink.expiresAt,
+                        )
+                    )
+                }
+            }
+            TvLoginSessionStatus.DENIED -> {
+                _state.update { s ->
+                    s.copy(
+                        tvLink = s.tvLink.copy(
+                            phase = TvLinkPhase.Denied,
+                            status = status,
+                            expiresAt = expiresAt ?: s.tvLink.expiresAt,
+                            errorMessage = resources.getString(R.string.tv_link_status_denied),
+                        )
+                    )
+                }
+            }
+            TvLoginSessionStatus.EXPIRED, TvLoginSessionStatus.CONSUMED -> {
+                _state.update { s ->
+                    s.copy(
+                        tvLink = s.tvLink.copy(
+                            phase = TvLinkPhase.Expired,
+                            status = status,
+                            expiresAt = expiresAt ?: s.tvLink.expiresAt,
+                            errorMessage = resources.getString(R.string.tv_link_status_expired),
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun handleTvLinkApproved(
+        resources: Resources,
+        poll: TvLoginSessionPollResponse,
+    ) {
+        if (!tvApprovedHandled.compareAndSet(false, true)) return
+        _state.update { s ->
+            s.copy(
+                tvLink = s.tvLink.copy(
+                    phase = TvLinkPhase.Completing,
+                    status = TvLoginSessionStatus.APPROVED,
+                    expiresAt = poll.expiresAt ?: s.tvLink.expiresAt,
+                )
+            )
+        }
+        try {
+            val pollStatus = TvLoginSessionStatus.normalize(poll.status)
+            if (pollStatus != TvLoginSessionStatus.APPROVED) {
+                if (pollStatus == TvLoginSessionStatus.CONSUMED && repo.isLoggedIn()) {
+                    handleLoginOutcome(LoginOutcome.Authenticated(requiresTotpSetup = false))
+                    return
+                }
+                throw IllegalStateException(
+                    resources.getString(R.string.tv_link_error_tokens_missing)
+                )
+            }
+            handleLoginOutcome(repo.completeTvLogin(poll))
+        } catch (e: Exception) {
+            val msg = resources.userFriendlyApiError(e)
+            _state.update {
+                it.copy(
+                    tvLink = TvLinkUiState(
+                        phase = TvLinkPhase.Failed,
+                        errorMessage = msg.ifBlank {
+                            resources.getString(R.string.tv_link_error_tokens_missing)
+                        },
+                    )
+                )
+            }
+        }
+    }
+
+    override fun onCleared() {
+        stopTvLinkLogin()
+        super.onCleared()
     }
 
     fun selectLoginTab(tab: AuthLoginTab) {
@@ -549,12 +758,13 @@ class AuthViewModel(
 }
 
 class AuthViewModelFactory(
-    private val repo: AuthRepository
+    private val repo: AuthRepository,
+    private val tvLoginWatcher: TvLoginSessionWatcher? = null,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AuthViewModel(repo) as T
+            return AuthViewModel(repo, tvLoginWatcher) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

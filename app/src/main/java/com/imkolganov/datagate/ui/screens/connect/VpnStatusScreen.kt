@@ -14,7 +14,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +30,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.focus.focusRequester
+import com.imkolganov.datagate.ui.tv.tvClickable
+import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PowerSettingsNew
@@ -74,7 +76,6 @@ import kotlinx.coroutines.delay
 fun VpnStatusScreen(
     state: VpnStatusUiState,
     onConnectClick: () -> Unit,
-    onRequestPermissionClick: () -> Unit,
     onDisconnectClick: () -> Unit,
     onPauseClick: () -> Unit = {},
     onResumeClick: () -> Unit = {},
@@ -82,6 +83,7 @@ fun VpnStatusScreen(
     onHomeUpdateBannerAction: (GitHubLatestRelease) -> Unit = {},
     onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
     graceExpiresAtUtcMs: Long? = null,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
 ) {
     val context = LocalContext.current
     val supportEmail = stringResource(R.string.support_contact_email)
@@ -223,7 +225,10 @@ fun VpnStatusScreen(
 
             HomeBrandHeader()
 
-            TextButton(onClick = { showReportDialog = true }) {
+            TextButton(
+                onClick = { showReportDialog = true },
+                modifier = Modifier.tvFocusBorder(shape = RoundedCornerShape(8.dp)),
+            ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -296,6 +301,7 @@ fun VpnStatusScreen(
                         TextButton(
                             onClick = onPauseClick,
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                            modifier = Modifier.tvFocusBorder(shape = RoundedCornerShape(8.dp)),
                         ) {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -317,6 +323,13 @@ fun VpnStatusScreen(
                     modifier = Modifier
                         .size(180.dp)
                         .scale(animatedScale)
+                        .then(
+                            if (primaryFocusRequester != null) {
+                                Modifier.focusRequester(primaryFocusRequester)
+                            } else {
+                                Modifier
+                            }
+                        )
                         .clip(CircleShape)
                         .background(color = backgroundColor)
                         .border(
@@ -324,7 +337,7 @@ fun VpnStatusScreen(
                             color = mainColor.copy(alpha = 0.6f),
                             shape = CircleShape
                         )
-                        .clickable(onClick = onClick),
+                        .tvClickable(shape = CircleShape, onClick = onClick),
                     contentAlignment = Alignment.Center
                 ) {
                 Box(
@@ -438,7 +451,10 @@ fun VpnStatusScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showReportDialog = false }) {
+                TextButton(
+                    onClick = { showReportDialog = false },
+                    modifier = Modifier.tvFocusBorder(shape = RoundedCornerShape(8.dp)),
+                ) {
                     Text(stringResource(R.string.action_ok))
                 }
             }
@@ -452,8 +468,12 @@ fun VpnStatusScreen(
             text = { Text(stringResource(R.string.vpn_permission_dialog_body)) },
             confirmButton = {
                 TextButton(onClick = {
+                    // Route through the normal connect entry point (not a bare permission
+                    // request): startWithConfig() stores the pending config before launching the
+                    // system dialog, so granting permission here resumes straight into connecting
+                    // instead of leaving the user stuck on a "config is missing" error.
                     showPermissionDialog = false
-                    onRequestPermissionClick()
+                    onConnectClick()
                 }) {
                     Text(stringResource(R.string.vpn_permission_dialog_grant))
                 }
@@ -603,7 +623,6 @@ fun VpnStatusScreenPreview_Connected() {
                 lastMessage = "Connected to DataGate VPN (10.0.0.2)"
             ),
             onConnectClick = {},
-            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }
@@ -620,7 +639,6 @@ fun VpnStatusScreenPreview_Connecting() {
                 lastMessage = "Connecting to server..."
             ),
             onConnectClick = {},
-            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }
@@ -636,7 +654,6 @@ fun VpnStatusScreenPreview_Disconnected() {
                 lastMessage = ""
             ),
             onConnectClick = {},
-            onRequestPermissionClick = {},
             onDisconnectClick = {}
         )
     }

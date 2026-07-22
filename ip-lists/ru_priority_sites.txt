@@ -1,0 +1,24 @@
+# DataGate priority bypass list
+#
+# CIDR ranges here always survive the excludeRoute() truncation that happens when the general
+# country IP list (see IpListPreferences.DEFAULT_SOURCE_URL) is bigger than the mode cap
+# (IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL / MAX_ANDROID_EXCLUDED_ROUTES_FAST).
+# The general list is sorted broadest-block-first when truncated, which maximizes IP-space
+# coverage but not business value — so pin anything whose loss you'd notice:
+#   - banks / anti-fraud / 2FA
+#   - Google Pay–dependent merchants
+#   - Ozon / Wildberries (and similar retail anti-VPN checks)
+#   - local Cyprus services you care about
+#   - DataGate API / update endpoints that must bypass the tunnel
+#
+# Format: one IPv4 or IPv6 CIDR per line, "#" starts a comment. Resolve the site's current IP(s)
+# and use the hosting provider's allocated block if you can find it (whois/RDAP), not just a /32
+# of the single resolved address — CDNs and load balancers rotate IPs within their block.
+#
+# Fetched from: https://raw.githubusercontent.com/IMKolganov/DataGateAndroid/main/ip-lists/ru_priority_sites.txt
+
+# Ozon (ozon.ru)
+185.73.192.0/22
+
+# Wildberries (wildberries.ru)
+185.62.200.0/22

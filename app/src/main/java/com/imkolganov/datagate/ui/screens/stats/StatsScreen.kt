@@ -26,17 +26,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.focusable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.tv.tvFocusBorder
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun StatsScreen(viewModel: StatsViewModel) {
+fun StatsScreen(
+    viewModel: StatsViewModel,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
+) {
     val state by viewModel.state.collectAsState()
+    val isTelevision = com.imkolganov.datagate.ui.tv.LocalIsTelevision.current
 
     LaunchedEffect(Unit) {
         viewModel.load()
@@ -50,16 +57,30 @@ fun StatsScreen(viewModel: StatsViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pullRefresh(pullRefreshState)
+            .then(
+                if (isTelevision) Modifier
+                else Modifier.pullRefresh(pullRefreshState)
+            )
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(if (isTelevision) 24.dp else 16.dp),
+            verticalArrangement = Arrangement.spacedBy(if (isTelevision) 16.dp else 12.dp)
         ) {
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (primaryFocusRequester != null) {
+                                Modifier
+                                    .focusRequester(primaryFocusRequester)
+                                    .focusable()
+                            } else {
+                                Modifier
+                            }
+                        )
+                        .tvFocusBorder(shape = AppCards.shape),
                     shape = AppCards.shape,
                     colors = AppCards.defaultColors(),
                     elevation = AppCards.defaultElevation()
@@ -163,11 +184,13 @@ fun StatsScreen(viewModel: StatsViewModel) {
             }
         }
 
-        PullRefreshIndicator(
-            refreshing = state.isLoading,
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
+        if (!isTelevision) {
+            PullRefreshIndicator(
+                refreshing = state.isLoading,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        }
 
         if (state.isLoading) {
             Dialog(
@@ -199,7 +222,9 @@ fun StatsScreen(viewModel: StatsViewModel) {
                         )
                         TextButton(
                             onClick = { viewModel.cancelLoad() },
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .tvFocusBorder(shape = AppCards.shape),
                         ) {
                             Text(stringResource(R.string.action_cancel))
                         }

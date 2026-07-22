@@ -98,4 +98,11 @@ internal object OpenVpnRuntimePolicy {
      * ovpncli can [thread_safe_pause] into the running io_context.
      */
     fun shouldSchedulePauseResumeOnForeignThread(nativeVpnJobActive: Boolean): Boolean = true
+
+    /**
+     * Bridge-loss [stop] must not share [OvpnNativeThread] with blocking [connect].
+     * Queuing stop on the native dispatcher leaves TUN up while tunneled traffic blackholes
+     * (TCP↔WSS idle stall / WSS close) until the user manually reconnects.
+     */
+    fun shouldScheduleBridgeLossStopOnForeignThread(nativeVpnJobActive: Boolean): Boolean = true
 }

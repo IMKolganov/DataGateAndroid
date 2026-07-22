@@ -51,6 +51,11 @@ class CrashLogger(private val context: Context) {
             )
             CrashUploadWorkScheduler.enqueue(context)
         }
+        VpnDebugLogger.e(
+            tag,
+            "nonfatal extras=${extras.entries.joinToString(",") { "${it.key}=${it.value}" }}",
+            throwable,
+        )
     }
 
     private fun writeCrashReport(thread: Thread, throwable: Throwable) {

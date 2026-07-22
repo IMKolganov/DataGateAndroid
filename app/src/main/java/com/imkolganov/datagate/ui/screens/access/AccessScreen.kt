@@ -42,12 +42,14 @@ import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import com.imkolganov.datagate.util.formatBytes
 import com.imkolganov.datagate.util.formatQuotaEffectiveFromForDisplay
 import com.imkolganov.datagate.util.userFriendlyApiError
@@ -63,13 +65,14 @@ fun AccessScreen(
     vpnState: VpnStatusUiState,
     onEvent: (AccessContract.UiEvent) -> Unit,
     onConnectVpn: () -> Unit,
-    onRequestPermissionClick: () -> Unit,
     onDisconnectVpn: () -> Unit,
     onPauseVpn: () -> Unit = {},
     onResumeVpn: () -> Unit = {},
     onReconnectVpn: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
 ) {
+    val isTelevision = com.imkolganov.datagate.ui.tv.LocalIsTelevision.current
     val pullRefreshState = rememberPullRefreshState(
         refreshing = state.isLoading,
         onRefresh = { onEvent(AccessContract.UiEvent.Refresh) }
@@ -131,6 +134,9 @@ fun AccessScreen(
     }
 
     fun runConnectToServer(server: AccessContract.ServerItem) {
+        if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
+            return
+        }
         val sessionServerId = vpnState.selectedServerId
             ?: VpnServerSelectionStore.getSelectedServerId(appContext)
         if (vpnConnected || connectBusy) {
@@ -269,8 +275,13 @@ fun AccessScreen(
             text = { Text(stringResource(R.string.vpn_permission_dialog_body)) },
             confirmButton = {
                 TextButton(onClick = {
+                    // Route through the normal connect entry point (not a bare permission
+                    // request): the target server was already selected above, and
+                    // VpnController.startWithConfig() stores the pending config before launching
+                    // the system dialog, so granting permission here resumes straight into
+                    // connecting instead of leaving the user stuck on a "config is missing" error.
                     showPermissionDialog = false
-                    onRequestPermissionClick()
+                    onConnectVpn()
                 }) {
                     Text(stringResource(R.string.vpn_permission_dialog_grant))
                 }
@@ -286,16 +297,20 @@ fun AccessScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .pullRefresh(pullRefreshState)
+            .then(
+                if (isTelevision) Modifier
+                else Modifier.pullRefresh(pullRefreshState)
+            )
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(if (isTelevision) 24.dp else 16.dp),
+            verticalArrangement = Arrangement.spacedBy(if (isTelevision) 16.dp else 12.dp)
         ) {
             item {
                 HeaderRow(
-                    onRefresh = { onEvent(AccessContract.UiEvent.Refresh) }
+                    onRefresh = { onEvent(AccessContract.UiEvent.Refresh) },
+                    primaryFocusRequester = primaryFocusRequester,
                 )
             }
 
@@ -324,6 +339,9 @@ fun AccessScreen(
                     isVpnConnectingToThisServer = connectingHere,
                     connectBusy = connectBusy,
                     onSelect = {
+                        if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
+                            return@ServerCard
+                        }
                         onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
                         onEvent(AccessContract.UiEvent.SelectServer(server.id))
                     },
@@ -371,11 +389,13 @@ fun AccessScreen(
             }
         }
 
-        PullRefreshIndicator(
-            refreshing = state.isLoading,
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
+        if (!isTelevision) {
+            PullRefreshIndicator(
+                refreshing = state.isLoading,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        }
     }
 }
 
@@ -694,7 +714,8 @@ private fun AccessQuotaSection(quota: AccessContract.QuotaUiState) {
 
 @Composable
 private fun HeaderRow(
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
 ) {
     Row(
         modifier = Modifier.padding(bottom = 4.dp),
@@ -705,7 +726,18 @@ private fun HeaderRow(
             text = stringResource(R.string.access_choose_server),
             style = MaterialTheme.typography.titleMedium
         )
-        IconButton(onClick = onRefresh) {
+        IconButton(
+            onClick = onRefresh,
+            modifier = Modifier
+                .then(
+                    if (primaryFocusRequester != null) {
+                        Modifier.focusRequester(primaryFocusRequester)
+                    } else {
+                        Modifier
+                    }
+                )
+                .tvFocusBorder(shape = RoundedCornerShape(50)),
+        ) {
             Icon(
                 imageVector = Icons.Outlined.Refresh,
                 contentDescription = stringResource(R.string.access_refresh)

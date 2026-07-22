@@ -250,4 +250,10 @@ class OpenVpnRuntimePolicyTest {
         assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(true))
         assertTrue(OpenVpnRuntimePolicy.shouldSchedulePauseResumeOnForeignThread(false))
     }
+
+    @Test
+    fun shouldScheduleBridgeLossStopOnForeignThread_always() {
+        assertTrue(OpenVpnRuntimePolicy.shouldScheduleBridgeLossStopOnForeignThread(true))
+        assertTrue(OpenVpnRuntimePolicy.shouldScheduleBridgeLossStopOnForeignThread(false))
+    }
 }

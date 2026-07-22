@@ -91,6 +91,22 @@
     <string name="settings_error_logs_count">%1$d फ़ाइलें</string>
     <string name="settings_share_logs">लॉग साझा करें</string>
     <string name="share_logs_chooser_title">त्रुटि लॉग साझा करें</string>
+    <string name="settings_debug_empty_preview">Log is empty. Turn recording on, reproduce the issue, then refresh.</string>
+    <string name="settings_debug_preview_title">VPN debug log preview</string>
+    <string name="settings_copy_debug_path">Copy path</string>
+    <string name="settings_debug_log_refresh">Refresh</string>
+    <string name="settings_debug_log_preview">Preview</string>
+    <string name="settings_debug_log_path">File path</string>
+    <string name="settings_vpn_debug_title">VPN Debug Log</string>
+    <string name="settings_debug_mode">Record VPN session to file</string>
+    <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
+    <string name="settings_debug_logs_status">Size: %1$s</string>
+    <string name="settings_share_debug_logs">Share</string>
+    <string name="settings_clear_debug_logs">Clear</string>
+    <string name="share_debug_logs_chooser_title">Share VPN debug logs</string>
+    <string name="settings_debug_share_disclaimer">Shared logs may include VPN hostnames, server names, and device model. Do not post them publicly.</string>
+    <string name="no_debug_logs">No debug logs found</string>
+    <string name="debug_logs_cleared">Debug logs cleared</string>
     <string name="copied">कॉपी हो गया</string>
     <string name="no_error_logs">कोई त्रुटि लॉग नहीं</string>
     <string name="no_shareable_files">साझा करने के लिए कोई फ़ाइल नहीं।</string>
@@ -201,18 +217,27 @@
     <string name="settings_ip_lists_frequency_weekly">साप्ताहिक</string>
     <string name="settings_ip_lists_frequency_manual">केवल मैन्युअल</string>
     <string name="settings_ip_lists_saved">IP सूची सेटिंग सहेजी गई।</string>
+    <string name="settings_ip_lists_priority_title">प्राथमिकता वाली साइटें</string>
+    <string name="settings_ip_lists_priority_subtitle">यहाँ के CIDR रेंज हमेशा VPN को बायपास करते हैं, भले ही ऊपर की सामान्य सूची छोटी कर दी गई हो। VPN के माध्यम से रूट होने पर टूटने वाली विशिष्ट साइटों के लिए इसका उपयोग करें।</string>
+    <string name="settings_ip_lists_priority_add_url_label">प्राथमिकता सूची URL जोड़ें</string>
+    <string name="settings_ip_lists_priority_add_url">प्राथमिकता URL जोड़ें</string>
+    <string name="settings_ip_lists_safe_limit_title">सिस्टम स्थिरता के लिए रूट सीमित करें</string>
+    <string name="settings_ip_lists_safe_limit_subtitle">बायपास रूट्स की संख्या को इतना कम रखता है कि सिस्टम VPN आइकन जल्दी दिखाई दे। ऊपर की प्राथमिकता वाली साइटें कभी नहीं हटाई जातीं।</string>
+    <string name="settings_ip_lists_safe_limit_disabled_warning">Warning: turning this off can freeze VPN establish for a long time (or hang) with large IP lists (~10 000 routes). Only disable if you accept that risk.</string>
     <string name="settings_ip_lists_status_title">IP सूची स्थिति</string>
     <string name="settings_ip_lists_last_updated">अंतिम अपडेट</string>
     <string name="settings_ip_lists_last_updated_never">कभी नहीं</string>
     <string name="settings_ip_lists_loaded_routes">लोड किए गए रूट</string>
     <string name="settings_ip_lists_loaded_routes_value">%1$d रूट</string>
+    <string name="settings_ip_lists_loaded_priority_routes">प्राथमिकता रूट</string>
+    <string name="settings_ip_lists_loaded_priority_routes_value">%1$d रूट</string>
     <string name="settings_ip_lists_last_error">अंतिम लोड त्रुटि</string>
     <string name="settings_ip_lists_last_error_none">कोई नहीं</string>
     <string name="settings_ip_lists_route_limit_notice">Se aplican hasta %1$d rutas IPv4 o IPv6.</string>
     <string name="settings_ip_lists_route_limit_warning">La lista alcanzó el límite de %1$d rutas. Las rutas adicionales se ignoraron.</string>
     <string name="settings_ip_lists_update_now">अभी अपडेट करें</string>
     <string name="settings_ip_lists_update_now_loading">अपडेट हो रहा है…</string>
-    <string name="settings_ip_lists_update_ready">Lista IP actualizada: %1$d rutas cargadas.</string>
+    <string name="settings_ip_lists_update_ready">IP सूची अपडेट हुई: %1$d सामान्य, %2$d प्राथमिकता।</string>
     <string name="settings_ip_lists_update_failed_prefix">अपडेट विफल</string>
     <string name="settings_ip_lists_update_failed">Error al actualizar: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Error al actualizar: %1$s. Se usa la lista en caché o integrada.</string>
@@ -226,6 +251,12 @@
     <string name="settings_link_telegram">Telegram चैनल</string>
     <string name="settings_updates_github_title">GitHub पर अपडेट जांचें</string>
     <string name="settings_updates_github_subtitle">नवीनतम सार्वजनिक रिलीज़ को समय-समय पर जांचें और आपको सूचित करें।</string>
+    <string name="settings_check_updates_now">Check now</string>
+    <string name="settings_check_updates_now_loading">Checking…</string>
+    <string name="settings_check_updates_up_to_date">You are on the latest release (%1$s).</string>
+    <string name="settings_check_updates_ahead">GitHub latest is %1$s; this install is newer (%2$s).</string>
+    <string name="settings_check_updates_failed">Could not check for updates: %1$s</string>
+    <string name="settings_check_updates_repo_missing">Update checks are not configured for this build.</string>
     <string name="settings_push_updates_title">नया संस्करण मिलने पर सूचित करें</string>
     <string name="settings_push_updates_subtitle">GitHub जांच के बाद स्थानीय सूचना। Android 13+ पर सूचना अनुमति चाहिए।</string>
     <string name="settings_auto_download_title">APK डाउनलोड सुझाएं</string>
@@ -327,7 +358,7 @@
     <string name="settings_ip_lists_coverage_fast">तेज़</string>
     <string name="settings_ip_lists_coverage_fast_description">%1$d चौड़े रूट तक लागू करता है। टनल सेटअप तेज़ है, लेकिन छोटे IP रेंज अभी भी VPN उपयोग कर सकते हैं।</string>
     <string name="settings_ip_lists_coverage_full">पूर्ण कवरेज</string>
-    <string name="settings_ip_lists_coverage_full_description">अधिकतम कवरेज के लिए हर लोड किया गया रूट लागू करता है। बड़ी सूचियों पर टनल सेटअप में कुछ सेकंड लग सकते हैं।</string>
+    <string name="settings_ip_lists_coverage_full_description">Applies up to %1$d bypass routes when the safe limit is on (not every loaded route). Priority sites always survive truncation. Tunnel setup can take several seconds on large lists.</string>
     <string name="settings_ip_lists_coverage_label">कवरेज मोड</string>
     <string name="settings_ip_lists_detail_disabled_notice">CIDR सूचियाँ बंद हैं। रूटिंग अपवाद फिर लागू करने के लिए ऊपर का स्विच चालू करें।</string>
     <string name="settings_ip_lists_enable_subtitle">बंद होने पर, सूची-आधारित रूटिंग अपवाद लागू नहीं होते और सूचियाँ डाउनलोड नहीं होतीं; सारा ट्रैफ़िक VPN टनल से जाता है।</string>
@@ -422,4 +453,22 @@
     <string name="vpn_status_pausing">Pausing…</string>
     <string name="vpn_status_resuming">Resuming…</string>
     <string name="vpn_msg_command_rejected">VPN command failed (%1$s)</string>
+
+    <!-- TV device linking (Netflix-style QR + code) -->
+    <string name="tv_link_title">Sign in with your phone</string>
+    <string name="tv_link_subtitle">Scan the QR code with your phone, or open the link from the QR and enter the code below.</string>
+    <string name="tv_link_code_label">TV code</string>
+    <string name="tv_link_qr_cd">QR code to sign in on your phone</string>
+    <string name="tv_link_creating">Preparing sign-in…</string>
+    <string name="tv_link_expires_in">Code expires in %1$s</string>
+    <string name="tv_link_status_pending">Waiting for your phone…</string>
+    <string name="tv_link_status_viewed">Opened on phone — approve to continue</string>
+    <string name="tv_link_status_approved">Signing in…</string>
+    <string name="tv_link_status_denied">Sign-in was denied on the phone</string>
+    <string name="tv_link_status_expired">This code has expired</string>
+    <string name="tv_link_retry">Try again</string>
+    <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
+    <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
+    <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
 </resources>
