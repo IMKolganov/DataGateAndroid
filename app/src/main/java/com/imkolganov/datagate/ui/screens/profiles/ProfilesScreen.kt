@@ -48,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.focusable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -188,7 +190,17 @@ fun ProfilesScreen(
                     onClick = {
                         importOvpnLauncher.launch(arrayOf("*/*", "application/x-openvpn-profile", "text/plain"))
                     },
-                    modifier = if (primaryFocusRequester != null) Modifier.tvFocusBorder() else Modifier,
+                    modifier = Modifier
+                        .then(
+                            if (primaryFocusRequester != null) {
+                                Modifier
+                                    .focusRequester(primaryFocusRequester)
+                                    .focusable()
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .tvFocusBorder(),
                 ) {
                     Text(stringResource(R.string.profiles_import_ovpn))
                 }
@@ -208,7 +220,8 @@ fun ProfilesScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(ui.profiles, key = { it.id }) { profile ->
+                items(ui.profiles.size, key = { ui.profiles[it].id }) { index ->
+                    val profile = ui.profiles[index]
                     ProfileCard(
                         profile = profile,
                         vpnState = vpnState,
@@ -217,6 +230,14 @@ fun ProfilesScreen(
                         onRename = { renameTarget = profile },
                         onEditCreds = { credsTarget = profile },
                         onDelete = { deleteTarget = profile },
+                        cardModifier = if (index == 0 && primaryFocusRequester != null) {
+                            Modifier
+                                .focusRequester(primaryFocusRequester)
+                                .focusable()
+                                .tvFocusBorder(shape = AppCards.shape)
+                        } else {
+                            Modifier.tvFocusBorder(shape = AppCards.shape)
+                        },
                     )
                 }
             }
@@ -387,6 +408,7 @@ private fun ProfileCard(
     onRename: () -> Unit,
     onEditCreds: () -> Unit,
     onDelete: () -> Unit,
+    cardModifier: Modifier = Modifier,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val isThisSession =
@@ -396,7 +418,9 @@ private fun ProfileCard(
         profile.type == VpnServerType.OpenVpn || profile.type == VpnServerType.Xray
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(cardModifier),
         shape = AppCards.shape,
         colors = AppCards.defaultColors(),
         elevation = AppCards.defaultElevation(),

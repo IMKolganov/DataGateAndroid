@@ -147,30 +147,18 @@ object VpnEventMapper {
             }
 
             "DISCONNECTED" -> {
-                // Mid-connect (never reached CONNECTED): keep selection — OpenVPN↔Xray peer
-                // teardown broadcasts DISCONNECTED while the new engine is still connecting.
-                // If we were already connected/paused, treat as a real session end (UI disconnect
-                // or notification action) so connectBusy cannot stick forever.
-                val midConnect =
-                    previous.isConnectRequested && !previous.isVpnConnected && !previous.isVpnPaused
-                if (midConnect) {
-                    previous.copy(
-                        isVpnConnected = false,
-                        isVpnPaused = false,
-                        pendingUserCommand = null,
-                        lastMessage = res.getString(R.string.vpn_msg_disconnected),
-                    )
-                } else {
-                    previous.copy(
-                        isConnectRequested = false,
-                        isVpnConnected = false,
-                        isVpnPaused = false,
-                        pendingUserCommand = null,
-                        selectedServerId = null,
-                        selectedServerName = null,
-                        lastMessage = res.getString(R.string.vpn_msg_disconnected),
-                    )
-                }
+                // Always end the session in the mapper. Peer-engine teardown during OpenVPN↔Xray
+                // switch is restored by VpnController.expectPeerEngineDisconnect so notification
+                // Disconnect mid-connect cannot leave connectBusy stuck forever.
+                previous.copy(
+                    isConnectRequested = false,
+                    isVpnConnected = false,
+                    isVpnPaused = false,
+                    pendingUserCommand = null,
+                    selectedServerId = null,
+                    selectedServerName = null,
+                    lastMessage = res.getString(R.string.vpn_msg_disconnected),
+                )
             }
 
             "TUN_SETUP_FAILED" -> previous.copy(

@@ -277,7 +277,8 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun peerEngineTeardown_whileConnecting_keepsSelectionUntilConnected() {
-        // OpenVPN DISCONNECTED mid-Xray connect must not wipe Access highlight / status name.
+        // Mapper clears on DISCONNECTED; VpnController.expectPeerEngineDisconnect restores
+        // selection — simulate that restore between peer stop and Xray CONNECTED.
         var state = VpnStatusUiState(
             isConnectRequested = true,
             selectedServerId = 88,
@@ -287,6 +288,18 @@ class VpnLifecyclePolicyTest {
             state,
             listOf(
                 VpnLifecyclePolicy.StatusBroadcast("DISCONNECTED", "peer OpenVPN stop"),
+            ),
+            mapper,
+        )
+        assertFalse(state.isConnectRequested)
+        state = state.copy(
+            isConnectRequested = true,
+            selectedServerId = 88,
+            selectedServerName = "Norway Xray",
+        )
+        state = VpnLifecyclePolicy.foldStatusBroadcasts(
+            state,
+            listOf(
                 VpnLifecyclePolicy.StatusBroadcast("CONNECTING"),
                 VpnLifecyclePolicy.StatusBroadcast("CONNECTED"),
             ),

@@ -121,8 +121,9 @@ class VpnEventMapperTest {
     }
 
     @Test
-    fun map_disconnected_whileConnecting_keepsSelectedServerIdAndName() {
-        // OpenVPN↔Xray peer teardown broadcasts DISCONNECTED mid-connect.
+    fun map_disconnected_whileConnecting_clearsConnectBusyForNotificationCancel() {
+        // Notification Disconnect mid-connect must not leave connectBusy stuck.
+        // Peer OpenVPN↔Xray teardown is restored by VpnController.expectPeerEngineDisconnect.
         val previous = VpnStatusUiState(
             isConnectRequested = true,
             isVpnConnected = false,
@@ -131,11 +132,10 @@ class VpnEventMapperTest {
         )
         val next = VpnEventMapper.map(context.resources, previous, "DISCONNECTED", "")
 
-        assertEquals(42, next.selectedServerId)
-        assertEquals("Frankfurt", next.selectedServerName)
-        assertTrue(next.isConnectRequested)
+        assertFalse(next.isConnectRequested)
         assertFalse(next.isVpnConnected)
-        assertFalse(next.isVpnPaused)
+        assertNull(next.selectedServerId)
+        assertNull(next.selectedServerName)
     }
 
     @Test
@@ -157,6 +157,8 @@ class VpnEventMapperTest {
 
     @Test
     fun map_engineSwitch_peerDisconnectedThenConnected_keepsServerNameInStatus() {
+        // Mapper clears on peer DISCONNECTED; VpnController.expectPeerEngineDisconnect restores
+        // selection — simulate that restore before CONNECTED.
         var state = VpnStatusUiState(
             isConnectRequested = true,
             isVpnConnected = false,
@@ -164,9 +166,13 @@ class VpnEventMapperTest {
             selectedServerName = "DataGate+🇳🇴+Norway+xray",
         )
         state = VpnEventMapper.map(context.resources, state, "DISCONNECTED", "peer teardown")
-        assertEquals("DataGate+🇳🇴+Norway+xray", state.selectedServerName)
-        assertEquals(88, state.selectedServerId)
-        assertTrue(state.isConnectRequested)
+        assertNull(state.selectedServerName)
+        assertFalse(state.isConnectRequested)
+        state = state.copy(
+            isConnectRequested = true,
+            selectedServerId = 88,
+            selectedServerName = "DataGate+🇳🇴+Norway+xray",
+        )
 
         state = VpnEventMapper.map(context.resources, state, "CONNECTED", "")
         assertTrue(state.isVpnConnected)
