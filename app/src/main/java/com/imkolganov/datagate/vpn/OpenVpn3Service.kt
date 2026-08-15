@@ -93,8 +93,9 @@ class OpenVpn3Service : VpnService() {
         const val PREF_LAST_EVENT_NAME = "vpn_last_event_name"
         const val PREF_LAST_EVENT_INFO = "vpn_last_event_info"
         const val PREF_LAST_EVENT_AT_MS = "vpn_last_event_at_ms"
-        private var lastEventName: String = "UNKNOWN"
-        private var lastEventInfo: String = "No status yet"
+        /** Idle until the first real tunnel event; never show this pair in the UI. */
+        private var lastEventName: String = "DISCONNECTED"
+        private var lastEventInfo: String = ""
 
         const val ACTION_PAUSE = "com.imkolganov.datagate.vpn.PAUSE"
         const val ACTION_RESUME = "com.imkolganov.datagate.vpn.RESUME"
@@ -220,8 +221,10 @@ class OpenVpn3Service : VpnService() {
         super.onDestroy()
     }
 
-    private fun notificationBody(fallback: String): String =
-        sessionServerDisplayName?.takeIf { it.isNotBlank() } ?: fallback
+    private fun notificationBody(fallback: String): String {
+        val name = sessionServerDisplayName?.takeIf { it.isNotBlank() }
+        return if (name != null) "$name · $fallback" else fallback
+    }
 
     private fun buildNotification(fallbackText: String): Notification {
         val disconnectIntent = Intent(this, OpenVpn3Service::class.java).apply {
@@ -420,7 +423,10 @@ class OpenVpn3Service : VpnService() {
             VpnCommand.QueryStatus -> processQueryStatus()
             VpnCommand.Pause -> processPause()
             VpnCommand.Resume -> processResume()
-            VpnCommand.SyncStatus -> broadcastStatus(lastEventName, lastEventInfo)
+            VpnCommand.SyncStatus -> {
+                val (name, info) = resolvedCachedStatusForUi()
+                broadcastStatus(name, info)
+            }
         }
     }
 
@@ -574,7 +580,7 @@ class OpenVpn3Service : VpnService() {
             VpnRuntimeState.CONNECTING -> "Connecting..."
             VpnRuntimeState.DISCONNECTING -> "Disconnecting..."
             VpnRuntimeState.ERROR -> "Last operation failed"
-            VpnRuntimeState.IDLE -> "No active session"
+            VpnRuntimeState.IDLE -> getString(R.string.vpn_msg_disconnected)
         }
 
         runSystemVpnHealthCheck("query_status")
@@ -582,6 +588,30 @@ class OpenVpn3Service : VpnService() {
         if (runtimeState == VpnRuntimeState.IDLE && !connectInProgress && !hasActiveSession && !desiredConnection) {
             stopSelf()
         }
+    }
+
+    /** Avoid developer placeholders like UNKNOWN / "No status yet" on status sync. */
+    private fun resolvedCachedStatusForUi(): Pair<String, String> {
+        val name = lastEventName.trim()
+        val info = lastEventInfo.trim()
+        if (name.isEmpty() || name.equals("UNKNOWN", ignoreCase = true)) {
+            return "DISCONNECTED" to getString(R.string.vpn_msg_disconnected)
+        }
+        if (info.isEmpty() || info.equals("No status yet", ignoreCase = true)) {
+            val friendly = when {
+                name.equals("DISCONNECTED", ignoreCase = true) ->
+                    getString(R.string.vpn_msg_disconnected)
+                name.equals("CONNECTED", ignoreCase = true) ->
+                    getString(R.string.vpn_msg_connected)
+                name.equals("CONNECTING", ignoreCase = true) ->
+                    getString(R.string.vpn_msg_connecting)
+                name.equals("PAUSED", ignoreCase = true) ->
+                    getString(R.string.vpn_msg_paused)
+                else -> info
+            }
+            return name to friendly
+        }
+        return name to info
     }
 
     private fun processPause() {

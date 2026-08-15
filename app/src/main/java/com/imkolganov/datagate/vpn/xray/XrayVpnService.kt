@@ -12,11 +12,14 @@ import android.content.pm.ServiceInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.system.OsConstants
 import androidx.core.app.NotificationCompat
 import com.imkolganov.datagate.MainActivity
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.OpenVpn3Service
+import com.imkolganov.datagate.vpn.VpnExcludeRoutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,6 +29,8 @@ import java.io.File
 /**
  * Android [VpnService] that runs XTLS/libXray with a TUN fd injected into the client config.
  * Status broadcasts use the same action/extras as [OpenVpn3Service] so Home/Access UI stays shared.
+ *
+ * Notification mirrors OpenVPN (status text + Pause/Disconnect). Pause for Xray v1 disconnects.
  */
 @SuppressLint("VpnServicePolicy")
 class XrayVpnService : VpnService() {
@@ -34,19 +39,23 @@ class XrayVpnService : VpnService() {
         private const val TAG = "XrayVpn"
         const val ACTION_CONNECT = "com.imkolganov.datagate.vpn.xray.CONNECT"
         const val ACTION_DISCONNECT = "com.imkolganov.datagate.vpn.xray.DISCONNECT"
+        /** Same UX affordance as OpenVPN pause; tears down the Xray session. */
+        const val ACTION_PAUSE = "com.imkolganov.datagate.vpn.xray.PAUSE"
         const val ACTION_QUERY_STATUS = "com.imkolganov.datagate.vpn.xray.QUERY_STATUS"
         const val EXTRA_CONFIG_PATH = "com.imkolganov.datagate.vpn.xray.EXTRA_CONFIG_PATH"
         const val EXTRA_CONFIG_TEXT = "com.imkolganov.datagate.vpn.xray.EXTRA_CONFIG_TEXT"
         const val EXTRA_SERVER_DISPLAY_NAME = "com.imkolganov.datagate.vpn.xray.EXTRA_SERVER_DISPLAY_NAME"
+        /** Same CIDR list format as OpenVPN [OpenVpn3Service.EXTRA_EXCLUDED_ROUTES_PATH]. */
+        const val EXTRA_EXCLUDED_ROUTES_PATH = "com.imkolganov.datagate.vpn.xray.EXTRA_EXCLUDED_ROUTES_PATH"
 
         private const val NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "xray_vpn_channel"
 
         @Volatile
-        private var lastEventName: String = "UNKNOWN"
+        private var lastEventName: String = "DISCONNECTED"
 
         @Volatile
-        private var lastEventInfo: String = "No status yet"
+        private var lastEventInfo: String = ""
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
@@ -78,9 +87,11 @@ class XrayVpnService : VpnService() {
             ACTION_CONNECT -> {
                 sessionServerDisplayName = intent.getStringExtra(EXTRA_SERVER_DISPLAY_NAME)
                     ?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: statePrefs.getString("selected_server_name", null)
+                        ?.trim()?.takeIf { it.isNotEmpty() }
                 serviceScope.launch { connect(intent) }
             }
-            ACTION_DISCONNECT -> {
+            ACTION_DISCONNECT, ACTION_PAUSE -> {
                 serviceScope.launch {
                     stopXraySession(broadcast = true)
                     stopForegroundCompat()
@@ -88,7 +99,8 @@ class XrayVpnService : VpnService() {
                 }
             }
             ACTION_QUERY_STATUS -> {
-                broadcastStatus(lastEventName, lastEventInfo, fromQuery = true)
+                val (name, info) = resolvedCachedStatusForUi()
+                broadcastStatus(name, info, fromQuery = true)
             }
             else -> Unit
         }
@@ -121,10 +133,20 @@ class XrayVpnService : VpnService() {
             }
 
             broadcastStatus("CONNECTING", getString(R.string.vpn_connecting_generic))
-            startForegroundNow(notificationBody(getString(R.string.vpn_connecting_generic)))
+            startForegroundNow(getString(R.string.vpn_connecting_generic))
 
             // Tear down any previous session in this service.
             stopXraySession(broadcast = false)
+
+            val excludedRoutesPath = intent.getStringExtra(EXTRA_EXCLUDED_ROUTES_PATH)
+            val excludedRoutes = excludedRoutesPath
+                ?.takeIf { it.isNotBlank() }
+                ?.let { path ->
+                    runCatching {
+                        IpListRouteConfig.parseCidrRoutesResult(File(path).readText()).routes
+                    }.getOrElse { emptyList() }
+                }
+                ?: emptyList()
 
             val builder = Builder()
                 .setSession(sessionServerDisplayName ?: "DataGate Xray")
@@ -135,9 +157,38 @@ class XrayVpnService : VpnService() {
                 .addDnsServer("8.8.8.8")
                 .setBlocking(false)
 
+            // IPv4-only TUN: keep native IPv6 on the underlying network (same as OpenVPN on TV).
+            // Without this, some OEMs still try to send IPv6 into the VPN and blackhole dual-stack apps.
+            runCatching {
+                builder.allowFamily(OsConstants.AF_INET6)
+            }.onFailure { VpnDebugLogger.w(TAG, "allowFamily(AF_INET6) failed", it) }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 builder.setMetered(false)
             }
+
+            val appliedExcludes = VpnExcludeRoutes.applyToBuilder(builder, excludedRoutes)
+            // Android 12-: excludeRoute is a no-op; inject the same CIDRs into Xray routing → direct.
+            // Requires VpnService.protect on freedom sockets (registered below before runFromJson).
+            val routingBypassCidrs =
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    excludedRoutes.map { it.toCidrString() }
+                } else {
+                    emptyList()
+                }
+            VpnDebugLogger.event(
+                category = "xray.tun",
+                action = "establish",
+                details = mapOf(
+                    "excludeRoutes" to excludedRoutes.size,
+                    "excludeApplied" to appliedExcludes,
+                    "routingDirectBypass" to routingBypassCidrs.size,
+                    "sdk" to Build.VERSION.SDK_INT,
+                ),
+            )
+
+            // Register protect before establish/run so any early dials cannot loop into TUN.
+            XrayCoreFacade.registerProtect(this)
 
             val pfd = builder.establish()
             if (pfd == null) {
@@ -148,16 +199,17 @@ class XrayVpnService : VpnService() {
             }
             tunPfd = pfd
 
-            XrayCoreFacade.registerProtect(this)
             val fullConfig = XrayConfigBuilder.buildTunClientConfig(
                 outboundsJson = raw,
                 tunFd = pfd.fd,
+                directBypassCidrs = routingBypassCidrs,
             )
             XrayCoreFacade.runFromJson(fullConfig)
             running = true
             broadcastStatus("CONNECTED", getString(R.string.vpn_msg_connected))
-            startForegroundNow(notificationBody(getString(R.string.vpn_status_connected)))
+            startForegroundNow(getString(R.string.vpn_status_connected))
             runCatching { path?.let { File(it).delete() } }
+            excludedRoutesPath?.let { runCatching { File(it).delete() } }
         } catch (t: Throwable) {
             VpnDebugLogger.e(TAG, "Xray connect failed", t)
             stopXraySession(broadcast = false)
@@ -177,11 +229,14 @@ class XrayVpnService : VpnService() {
         }
     }
 
-    private fun notificationBody(fallback: String): String =
-        sessionServerDisplayName?.takeIf { it.isNotBlank() } ?: fallback
+    /** Prefer "Server · Connected" so status stays visible when a display name is set. */
+    private fun notificationBody(status: String): String {
+        val name = sessionServerDisplayName?.takeIf { it.isNotBlank() }
+        return if (name != null) "$name · $status" else status
+    }
 
-    private fun startForegroundNow(text: String) {
-        val notification = buildNotification(text)
+    private fun startForegroundNow(statusText: String) {
+        val notification = buildNotification(statusText)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 NOTIFICATION_ID,
@@ -193,9 +248,12 @@ class XrayVpnService : VpnService() {
         }
     }
 
-    private fun buildNotification(text: String): Notification {
+    private fun buildNotification(statusText: String): Notification {
         val disconnectIntent = Intent(this, XrayVpnService::class.java).apply {
             action = ACTION_DISCONNECT
+        }
+        val pauseIntent = Intent(this, XrayVpnService::class.java).apply {
+            action = ACTION_PAUSE
         }
         val disconnectPending = PendingIntent.getService(
             this,
@@ -203,21 +261,54 @@ class XrayVpnService : VpnService() {
             disconnectIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or pendingIntentImmutableFlag(),
         )
+        val pausePending = PendingIntent.getService(
+            this,
+            4,
+            pauseIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or pendingIntentImmutableFlag(),
+        )
+        val openAppIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
         val openApp = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, MainActivity::class.java),
+            openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or pendingIntentImmutableFlag(),
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_stat_vpn)
+            .setContentTitle(getString(R.string.login_title))
+            .setContentText(notificationBody(statusText))
             .setOngoing(true)
+            .setAutoCancel(false)
             .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentIntent(openApp)
-            .addAction(0, getString(R.string.action_disconnect), disconnectPending)
+            .apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    foregroundServiceBehavior = NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE
+                }
+            }
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    0,
+                    getString(R.string.action_pause),
+                    pausePending,
+                ).build()
+            )
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    0,
+                    getString(R.string.action_disconnect),
+                    disconnectPending,
+                ).build()
+            )
             .build()
+            .apply {
+                flags = flags or Notification.FLAG_ONGOING_EVENT or Notification.FLAG_NO_CLEAR
+            }
     }
 
     private fun stopForegroundCompat() {
@@ -244,6 +335,28 @@ class XrayVpnService : VpnService() {
 
     private fun pendingIntentImmutableFlag(): Int =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+
+    /** Avoid developer placeholders like UNKNOWN / "No status yet" on status query. */
+    private fun resolvedCachedStatusForUi(): Pair<String, String> {
+        val name = lastEventName.trim()
+        val info = lastEventInfo.trim()
+        if (name.isEmpty() || name.equals("UNKNOWN", ignoreCase = true)) {
+            return "DISCONNECTED" to getString(R.string.vpn_msg_disconnected)
+        }
+        if (info.isEmpty() || info.equals("No status yet", ignoreCase = true)) {
+            val friendly = when {
+                name.equals("DISCONNECTED", ignoreCase = true) ->
+                    getString(R.string.vpn_msg_disconnected)
+                name.equals("CONNECTED", ignoreCase = true) ->
+                    getString(R.string.vpn_msg_connected)
+                name.equals("CONNECTING", ignoreCase = true) ->
+                    getString(R.string.vpn_msg_connecting)
+                else -> info
+            }
+            return name to friendly
+        }
+        return name to info
+    }
 
     private fun broadcastStatus(name: String, info: String, fromQuery: Boolean = false) {
         if (!fromQuery) {

@@ -20,6 +20,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowVpnService
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], application = android.app.Application::class, shadows = [ShadowVpnService::class])
@@ -240,6 +241,36 @@ class VpnControllerPermissionTest {
         val startedIntent = findStartedService(activity, XrayVpnService.ACTION_CONNECT)
         assertNotNull(startedIntent)
         assertNotNull(startedIntent?.getStringExtra(XrayVpnService.EXTRA_CONFIG_PATH))
+        assertTrue(state.isConnectRequested)
+    }
+
+    @Test
+    fun startWithXrayConfig_withBypassRoutes_passesExcludedRoutesPathExtra() {
+        ShadowVpnService.setPrepareResult(null)
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        var state = VpnStatusUiState()
+        val controller = VpnController(
+            activity = activity,
+            permissionLauncher = noopLauncher,
+            onStateChange = { state = it },
+            getState = { state }
+        )
+
+        val cfg = """{"outbounds":[{"tag":"proxy","protocol":"freedom","settings":{}}]}"""
+        controller.startWithXrayConfig(
+            configText = cfg,
+            bypassRoutes = listOf(
+                Ipv4CidrRoute(networkAddress = "1.2.3.0", netmask = "255.255.255.0", prefixLength = 24),
+            ),
+        )
+
+        val startedIntent = findStartedService(activity, XrayVpnService.ACTION_CONNECT)
+        assertNotNull(startedIntent)
+        val routesPath = startedIntent?.getStringExtra(XrayVpnService.EXTRA_EXCLUDED_ROUTES_PATH)
+        assertNotNull(routesPath)
+        val routesFile = File(routesPath!!)
+        assertTrue(routesFile.isFile)
+        assertTrue(routesFile.readText().contains("1.2.3.0/24"))
         assertTrue(state.isConnectRequested)
     }
 }

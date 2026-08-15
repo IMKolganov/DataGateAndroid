@@ -82,23 +82,21 @@ fun AccessScreen(
 
     val vpnConnected = vpnState.isVpnConnected
     val vpnPaused = vpnState.isVpnPaused
-    val connectBusy = vpnState.isConnectRequested && !vpnConnected && !vpnPaused
-    val resolvedSessionId =
-        vpnState.selectedServerId
-            ?: if (vpnConnected) {
-                VpnServerSelectionStore.getSelectedServerId(appContext)
-            } else {
-                null
-            }
-    val connectingTargetId =
-        if (connectBusy) {
-            vpnState.selectedServerId ?: VpnServerSelectionStore.getSelectedServerId(appContext)
-        } else {
-            null
-        }
-
-    val sessionServerId =
-        resolvedSessionId ?: state.selectedServerId ?: connectingTargetId
+    val connectBusy = AccessVpnSessionPolicy.isConnectBusy(
+        isConnectRequested = vpnState.isConnectRequested,
+        isVpnConnected = vpnConnected,
+        isVpnPaused = vpnPaused,
+    )
+    // Active VPN session id only — never fall back to Access list selection (that made every
+    // tapped card look like "the" session / show the wrong actions).
+    val activeSessionServerId = AccessVpnSessionPolicy.activeSessionServerId(
+        isVpnConnected = vpnConnected,
+        isVpnPaused = vpnPaused,
+        isConnectRequested = vpnState.isConnectRequested,
+        vpnSelectedServerId = vpnState.selectedServerId,
+        storeSelectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext),
+    )
+    val sessionServerId = activeSessionServerId
     val externalIpAddress = AccessSessionNetworkInfo.resolveExternalIp(sessionServerId, state.servers)
     val externalIpLoading = state.isLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
 
@@ -133,6 +131,9 @@ fun AccessScreen(
 
     fun runConnectToServer(server: AccessContract.ServerItem) {
         if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
+            return
+        }
+        if (!server.isOnline) {
             return
         }
         val sessionServerId = vpnState.selectedServerId
@@ -278,14 +279,24 @@ fun AccessScreen(
             }
 
             items(state.servers, key = { it.id }) { server ->
-                val isSelected = state.selectedServerId == server.id
-                val onThisServer = resolvedSessionId == server.id
-                val connectingHere = connectingTargetId == server.id
+                val isSessionCard = AccessVpnSessionPolicy.isSessionCard(
+                    activeSessionServerId = activeSessionServerId,
+                    serverId = server.id,
+                    isVpnConnected = vpnConnected,
+                    isVpnPaused = vpnPaused,
+                )
+                val isConnectingHere = AccessVpnSessionPolicy.isConnectingToServer(
+                    activeSessionServerId = activeSessionServerId,
+                    serverId = server.id,
+                    connectBusy = connectBusy,
+                )
+                // Highlight the live session even if Access list selection drifted.
+                val isSelected = state.selectedServerId == server.id || isSessionCard
                 ServerCard(
                     server = server,
                     isSelected = isSelected,
-                    isVpnSessionOnThisServer = (vpnConnected || vpnPaused) && onThisServer,
-                    isVpnConnectingToThisServer = connectingHere,
+                    isVpnSessionOnThisServer = isSessionCard,
+                    isVpnConnectingToThisServer = isConnectingHere,
                     connectBusy = connectBusy,
                     onSelect = {
                         if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {

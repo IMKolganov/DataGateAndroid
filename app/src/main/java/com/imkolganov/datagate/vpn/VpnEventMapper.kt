@@ -146,14 +146,32 @@ object VpnEventMapper {
                 )
             }
 
-            "DISCONNECTED" -> previous.copy(
-                isConnectRequested = false,
-                isVpnConnected = false,
-                isVpnPaused = false,
-                selectedServerId = null,
-                selectedServerName = null,
-                lastMessage = res.getString(R.string.vpn_msg_disconnected)
-            )
+            "DISCONNECTED" -> {
+                // Mid-connect (never reached CONNECTED): keep selection — OpenVPN↔Xray peer
+                // teardown broadcasts DISCONNECTED while the new engine is still connecting.
+                // If we were already connected/paused, treat as a real session end (UI disconnect
+                // or notification action) so connectBusy cannot stick forever.
+                val midConnect =
+                    previous.isConnectRequested && !previous.isVpnConnected && !previous.isVpnPaused
+                if (midConnect) {
+                    previous.copy(
+                        isVpnConnected = false,
+                        isVpnPaused = false,
+                        pendingUserCommand = null,
+                        lastMessage = res.getString(R.string.vpn_msg_disconnected),
+                    )
+                } else {
+                    previous.copy(
+                        isConnectRequested = false,
+                        isVpnConnected = false,
+                        isVpnPaused = false,
+                        pendingUserCommand = null,
+                        selectedServerId = null,
+                        selectedServerName = null,
+                        lastMessage = res.getString(R.string.vpn_msg_disconnected),
+                    )
+                }
+            }
 
             "TUN_SETUP_FAILED" -> previous.copy(
                 isConnectRequested = false,
@@ -173,6 +191,15 @@ object VpnEventMapper {
                     eventInfo.trim().ifBlank { eventName }
                 )
             )
+
+            // Stale query before any real tunnel event — never show "UNKNOWN: No status yet".
+            "UNKNOWN" -> {
+                if (previous.isConnectRequested || previous.isVpnConnected || previous.isVpnPaused) {
+                    previous
+                } else {
+                    previous.copy(lastMessage = res.getString(R.string.vpn_msg_disconnected))
+                }
+            }
 
             else -> {
                 val msg = sanitizeFallback(eventName, eventInfo)
@@ -203,9 +230,13 @@ object VpnEventMapper {
 
     private fun sanitizeFallback(eventName: String, eventInfo: String): String {
         val name = eventName.trim().ifBlank { "STATUS" }
+        if (name.equals("UNKNOWN", ignoreCase = true)) {
+            return eventInfo.trim().takeIf { it.isNotEmpty() && !it.equals("No status yet", ignoreCase = true) }
+                ?: name
+        }
         val info = eventInfo.trim()
 
-        if (info.isBlank()) return name
+        if (info.isBlank() || info.equals("No status yet", ignoreCase = true)) return name
 
         val isLikelyNetworkJunk =
             info.length > 60 ||

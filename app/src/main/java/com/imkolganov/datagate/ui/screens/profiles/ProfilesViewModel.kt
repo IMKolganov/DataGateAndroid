@@ -112,8 +112,10 @@ class ProfilesViewModel(
             // JSON with outbounds can still be stored without native convert.
             val trimmed = raw.trim()
             if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+                val outbounds = com.imkolganov.datagate.vpn.xray.XrayConfigBuilder.extractOutbounds(trimmed)
+                com.imkolganov.datagate.vpn.xray.XrayConfigBuilder.sanitizeOutboundsForRuntime(outbounds)
                 return org.json.JSONObject()
-                    .put("outbounds", com.imkolganov.datagate.vpn.xray.XrayConfigBuilder.extractOutbounds(trimmed))
+                    .put("outbounds", outbounds)
                     .toString()
             }
             error(getApplication<Application>().getString(com.imkolganov.datagate.R.string.profiles_error_xray_unavailable))

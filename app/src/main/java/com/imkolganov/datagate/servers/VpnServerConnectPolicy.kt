@@ -16,7 +16,7 @@ object VpnServerConnectPolicy {
     ): BestServerResult {
         val candidates = items.mapNotNull { row -> candidateOrNull(row, ignoreQuotaPlanChecks) }
         if (candidates.isEmpty()) {
-            throw IllegalStateException("No online WSS servers available")
+            throw IllegalStateException("No online servers available")
         }
         return candidates.minWith(
             compareBy<BestServerResult> { it.countConnectedClients }
@@ -75,17 +75,32 @@ object VpnServerConnectPolicy {
         if (s.isDeleted) return null
         if (!ignoreQuotaPlanChecks && !s.isAccessibleForUserQuotaPlan) return null
         if (!s.isOnline) return null
-        if (s.serverType != VpnServerType.OpenVpn) return null
-        // Auto-pick / Home still prefer WSS-capable servers only.
-        if (!s.isEnableWss) return null
-        return BestServerResult(
-            serverId = s.id,
-            name = s.serverName.trim().takeUnless { it.isBlank() } ?: "Server #${s.id}",
-            apiUrl = s.apiUrl.takeUnless { it.isBlank() },
-            countConnectedClients = (row.countConnectedClients ?: 0).coerceAtLeast(0),
-            isDefault = s.isDefault,
-            useWss = true,
-            serverType = VpnServerType.OpenVpn,
-        )
+        val name = s.serverName.trim().takeUnless { it.isBlank() } ?: "Server #${s.id}"
+        val clients = (row.countConnectedClients ?: 0).coerceAtLeast(0)
+        return when (s.serverType) {
+            VpnServerType.OpenVpn -> {
+                // Auto-pick still prefers WSS-capable OpenVPN servers only.
+                if (!s.isEnableWss) return null
+                BestServerResult(
+                    serverId = s.id,
+                    name = name,
+                    apiUrl = s.apiUrl.takeUnless { it.isBlank() },
+                    countConnectedClients = clients,
+                    isDefault = s.isDefault,
+                    useWss = true,
+                    serverType = VpnServerType.OpenVpn,
+                )
+            }
+            VpnServerType.Xray -> BestServerResult(
+                serverId = s.id,
+                name = name,
+                apiUrl = s.apiUrl.takeUnless { it.isBlank() },
+                countConnectedClients = clients,
+                isDefault = s.isDefault,
+                useWss = false,
+                serverType = VpnServerType.Xray,
+            )
+            VpnServerType.Unknown -> null
+        }
     }
 }

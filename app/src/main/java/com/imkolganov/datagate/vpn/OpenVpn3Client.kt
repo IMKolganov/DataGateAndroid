@@ -347,31 +347,8 @@ class OpenVpn3Client(
     }
 
     /** @return number of routes actually passed to [VpnService.Builder.excludeRoute]. */
-    private fun applyExcludedRoutes(b: VpnService.Builder): Int {
-        if (excludedRoutes.isEmpty()) return 0
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            VpnDebugLogger.w(TAG, "Skipping ${excludedRoutes.size} excluded routes: excludeRoute requires Android 13+")
-            return 0
-        }
-
-        var applied = 0
-        for (route in excludedRoutes) {
-            try {
-                b.excludeRoute(
-                    IpPrefix(
-                        InetAddress.getByName(route.networkAddress),
-                        route.prefixLength
-                    )
-                )
-                applied++
-            } catch (t: Throwable) {
-                VpnDebugLogger.w(TAG, "excludeRoute failed for ${route.toCidrString()}", t)
-            }
-        }
-        VpnDebugLogger.d(TAG, "Applied excluded routes: $applied/${excludedRoutes.size}")
-        return applied
-    }
+    private fun applyExcludedRoutes(b: VpnService.Builder): Int =
+        VpnExcludeRoutes.applyToBuilder(b, excludedRoutes)
 
     override fun tun_builder_persist(): Boolean {
         VpnDebugLogger.d(TAG, "tun_builder_persist() -> false")

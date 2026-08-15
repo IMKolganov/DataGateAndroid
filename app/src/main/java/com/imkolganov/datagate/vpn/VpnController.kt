@@ -42,6 +42,13 @@ class VpnController(
 
     private var pendingCommandRollback: VpnStatusUiState? = null
 
+    /**
+     * Set when we intentionally stop the other engine during a connect (OpenVPN↔Xray).
+     * The peer's DISCONNECTED must not clear [VpnStatusUiState.isConnectRequested] / selection.
+     */
+    @Volatile
+    private var expectPeerEngineDisconnect: Boolean = false
+
     private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo, fromQuery ->
         val current = getState()
         VpnCommandContract.parseRejectedCommand(eventName)?.let { rejected ->
@@ -62,7 +69,7 @@ class VpnController(
             eventInfo = eventInfo,
             fromQuery = fromQuery,
         )
-        val mapped = VpnLifecyclePolicy.applyStatusBroadcast(
+        var mapped = VpnLifecyclePolicy.applyStatusBroadcast(
             current = current,
             broadcast = broadcast,
             mapEvent = { state, name, info ->
@@ -76,7 +83,24 @@ class VpnController(
         if (VpnCommandContract.isAuthoritativeTunnelEvent(eventName)) {
             pendingCommandRollback = null
         }
-        if (eventName == "DISCONNECTED" && !fromQuery) {
+        // Peer stop while switching engines: mapper clears a connected session; restore in-flight UI.
+        if (eventName == "DISCONNECTED" && !fromQuery && expectPeerEngineDisconnect) {
+            expectPeerEngineDisconnect = false
+            mapped = mapped.copy(
+                isConnectRequested = true,
+                selectedServerId = current.selectedServerId,
+                selectedServerName = current.selectedServerName,
+            )
+        } else if (
+            eventName.equals("CONNECTED", ignoreCase = true) ||
+            eventName.equals("ERROR", ignoreCase = true) ||
+            eventName.equals("TUN_SETUP_FAILED", ignoreCase = true)
+        ) {
+            expectPeerEngineDisconnect = false
+        }
+        // Only drop session id when the session is truly over. Peer-engine DISCONNECTED
+        // during an in-flight connect keeps isConnectRequested and must keep the id.
+        if (eventName == "DISCONNECTED" && !fromQuery && !mapped.isConnectRequested) {
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
         onStateChange(mapped)
@@ -187,6 +211,9 @@ class VpnController(
             putString("selected_server_name", serverName)
             putInt(KEY_SESSION_SERVER_ID, serverId)
         }
+        // Keep Access tab selection in sync (same prefs file, different key).
+        VpnServerSelectionStore.setSelectedServerId(activity, serverId)
+        VpnServerSelectionStore.setMode(activity, ServerSelectionMode.MANUAL)
         onStateChange(
             getState().copy(
                 selectedServerName = serverName,
@@ -267,24 +294,33 @@ class VpnController(
 
     /**
      * Starts VPN with a normalized Xray outbounds JSON (or full config with outbounds).
+     * [bypassRoutes] are applied via [VpnService.Builder.excludeRoute] on Android 13+
+     * (same IP list as OpenVPN). On Android 12 and below they are injected into Xray routing
+     * as `direct` rules (freedom + [VpnService.protect]).
      */
-    fun startWithXrayConfig(configText: String) {
+    fun startWithXrayConfig(
+        configText: String,
+        bypassRoutes: List<IpCidrRoute> = emptyList(),
+    ) {
         pendingEngine = VpnEngine.Xray
         pendingXrayConfigText = configText
         pendingConfigText = null
         pendingWssLink = null
         pendingLinkProtocol = null
-        pendingBypassRoutes = emptyList()
+        pendingBypassRoutes = bypassRoutes
         pendingUsername = ""
         pendingPassword = ""
 
         VpnDebugLogger.event(
             category = "ui.user",
             action = "start_with_xray_config",
-            details = mapOf("configBytes" to configText.length),
+            details = mapOf(
+                "configBytes" to configText.length,
+                "excludeRoutes" to bypassRoutes.size,
+            ),
         )
         requestVpnPermissionOrStart {
-            startXrayServiceWithConfig(configText)
+            startXrayServiceWithConfig(configText, bypassRoutes)
         }
     }
 
@@ -331,7 +367,7 @@ class VpnController(
                     showError(activity.getString(R.string.vpn_error_permission_missing_config))
                     return
                 }
-                startXrayServiceWithConfig(xrayCfg)
+                startXrayServiceWithConfig(xrayCfg, bypassRoutes)
             }
             VpnEngine.OpenVpn -> {
                 val missingWss = transport == VpnTransport.Wss && wss.isNullOrBlank()
@@ -362,6 +398,7 @@ class VpnController(
     fun requestDisconnect() {
         VpnDebugLogger.event("ui.user", "disconnect")
         pendingCommandRollback = null
+        expectPeerEngineDisconnect = false
         prefs.edit {
             remove("selected_server_name")
             remove(KEY_SESSION_SERVER_ID)
@@ -482,6 +519,7 @@ class VpnController(
 
     /** Always disconnect the other VPN engine before starting [keep]. */
     private fun stopPeerEngine(keep: VpnEngine) {
+        expectPeerEngineDisconnect = true
         when (keep) {
             VpnEngine.OpenVpn -> {
                 startServiceCompat(
@@ -560,17 +598,24 @@ class VpnController(
         )
     }
 
-    private fun startXrayServiceWithConfig(configText: String) {
+    private fun startXrayServiceWithConfig(
+        configText: String,
+        bypassRoutes: List<IpCidrRoute>,
+    ) {
         stopPeerEngine(VpnEngine.Xray)
         setActiveEngine(VpnEngine.Xray)
         val serverDisplayName =
             getState().selectedServerName?.takeIf { it.isNotBlank() }
                 ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
         val configFile = writeXrayConfigForService(configText)
+        val routesFile = writeRoutesForService(bypassRoutes)
 
         val intent = Intent(activity, XrayVpnService::class.java).apply {
             action = XrayVpnService.ACTION_CONNECT
             putExtra(XrayVpnService.EXTRA_CONFIG_PATH, configFile.absolutePath)
+            routesFile?.let {
+                putExtra(XrayVpnService.EXTRA_EXCLUDED_ROUTES_PATH, it.absolutePath)
+            }
             if (serverDisplayName != null) {
                 putExtra(XrayVpnService.EXTRA_SERVER_DISPLAY_NAME, serverDisplayName)
             }
@@ -581,6 +626,7 @@ class VpnController(
         } catch (t: Throwable) {
             VpnDebugLogger.e(TAG, "Failed to start Xray service", t)
             runCatching { configFile.delete() }
+            routesFile?.let { runCatching { it.delete() } }
             showError(
                 activity.getString(
                     R.string.vpn_connect_failed,

@@ -305,12 +305,21 @@ class VpnConnectInteractor(
                 vpnController.notifyProfileSelectedForConnection(profile.name)
                 val raw = repo.readConfigText(profile)
                 val normalized = XrayCoreFacade.normalizeToOutboundsConfig(raw)
+                val routePlan = prepareXrayExcludeRoutePlan()
                 VpnDebugLogger.event(
                     category = "ui.connect",
                     action = "hand_off_to_xray_controller",
-                    details = mapOf("profileId" to profile.id, "configBytes" to normalized.length),
+                    details = mapOf(
+                        "profileId" to profile.id,
+                        "configBytes" to normalized.length,
+                        "excludeRoutes" to routePlan.androidExcludedRoutes.size,
+                        "appliedRoutes" to routePlan.appliedRouteCount,
+                    ),
                 )
-                vpnController.startWithXrayConfig(normalized)
+                vpnController.startWithXrayConfig(
+                    configText = normalized,
+                    bypassRoutes = routePlan.androidExcludedRoutes,
+                )
                 return
             }
             if (profile.type != VpnServerType.OpenVpn) {
@@ -415,15 +424,72 @@ class VpnConnectInteractor(
             res.getString(R.string.vpn_config_received, downloaded.content.size)
         )
         val normalized = XrayCoreFacade.normalizeToOutboundsConfig(linkText)
+        val routePlan = prepareXrayExcludeRoutePlan()
         VpnDebugLogger.event(
             category = "ui.connect",
             action = "hand_off_to_xray_controller",
             details = mapOf(
                 "serverId" to best.serverId,
                 "configBytes" to normalized.length,
+                "excludeRoutes" to routePlan.androidExcludedRoutes.size,
+                "appliedRoutes" to routePlan.appliedRouteCount,
+                "delivery" to routePlan.delivery.name,
             ),
         )
-        vpnController.startWithXrayConfig(normalized)
+        vpnController.startWithXrayConfig(
+            configText = normalized,
+            bypassRoutes = routePlan.androidExcludedRoutes,
+        )
+    }
+
+    /**
+     * IP-list bypass for Xray:
+     * - Android 13+: [VpnService.Builder.excludeRoute] (FAST=800 / FULL=1000).
+     * - Android 12-: same selected CIDRs via Xray routing → `direct` + VpnService.protect
+     *   ([IpListRouteDelivery.XRAY_ROUTING_DIRECT]); no OVPN-profile path.
+     */
+    private suspend fun prepareXrayExcludeRoutePlan(): IpListConnectionRoutePlan {
+        val res = appContext.resources
+        val ipListSettings = IpListPreferences.getSettings(appContext)
+        if (ipListSettings.cidrListsEnabled) {
+            vpnController.showStatus(
+                "UPDATING_IP_LIST",
+                res.getString(R.string.vpn_updating_ip_list)
+            )
+        }
+        val connectionRoutes = ipListRoutesRepository.getRoutesForConnection()
+        val bypassRoutes = connectionRoutes.generalRoutes + connectionRoutes.priorityRoutes
+        val supportsExclude = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        val routePlan = IpListRouteConfig.prepareXrayBypassRoutes(
+            routes = connectionRoutes.generalRoutes,
+            priorityRoutes = connectionRoutes.priorityRoutes,
+            coverageMode = ipListSettings.coverageMode,
+            android12OvpnRouteLimit = ipListSettings.android12OvpnRouteLimit,
+            supportsAndroidRouteExclusion = supportsExclude,
+            safeRouteLimitEnabled = ipListSettings.safeRouteLimitEnabled,
+            constrainedDevice = isTelevision(appContext),
+        )
+        if (supportsExclude) {
+            IpListEstablishRoutePolicy.establishBudgetViolation(routePlan, ipListSettings.coverageMode)?.let { violation ->
+                VpnDebugLogger.w("XrayVpn", "excludeRoute establish budget violation: $violation")
+            }
+        } else if (routePlan.androidExcludedRoutes.isNotEmpty()) {
+            VpnDebugLogger.d(
+                "XrayVpn",
+                "Android <13: ${routePlan.androidExcludedRoutes.size} IP-list CIDRs via Xray routing→direct",
+            )
+        }
+        if (bypassRoutes.isNotEmpty()) {
+            vpnController.showStatus(
+                "IP_LIST_READY",
+                if (routePlan.reachedEstablishRouteLimit) {
+                    res.getString(R.string.vpn_ip_list_ready_limited, routePlan.appliedRouteCount)
+                } else {
+                    res.getString(R.string.vpn_ip_list_ready, routePlan.appliedRouteCount)
+                },
+            )
+        }
+        return routePlan
     }
 
     private suspend fun prepareRoutePlan(configText: String): IpListConnectionRoutePlan {

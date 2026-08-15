@@ -58,8 +58,14 @@ object XrayCoreFacade {
 
     fun registerProtect(service: VpnService) {
         ensureAvailable()
+        // Critical for Android TUN: freedom/direct (and proxy) sockets must bypass the VPN
+        // interface or they loop back into TUN (see v2rayNG Xray-TUN + Direct issues).
         val controller = DialerController { fd ->
-            runCatching { service.protect(fd.toInt()) }.getOrDefault(false)
+            val ok = runCatching { service.protect(fd.toInt()) }.getOrDefault(false)
+            if (!ok) {
+                VpnDebugLogger.w(TAG, "VpnService.protect failed for fd=$fd (risk of TUN loop on direct)")
+            }
+            ok
         }
         LibXray.registerDialerController(controller)
         LibXray.registerListenerController(controller)
@@ -105,12 +111,16 @@ object XrayCoreFacade {
         if (trimmed.startsWith("{")) {
             val obj = JSONObject(trimmed)
             if (obj.has("outbounds") || obj.has("OutboundConfigs")) {
-                return JSONObject().put("outbounds", XrayConfigBuilder.extractOutbounds(trimmed)).toString()
+                val outbounds = XrayConfigBuilder.extractOutbounds(trimmed)
+                XrayConfigBuilder.sanitizeOutboundsForRuntime(outbounds)
+                return JSONObject().put("outbounds", outbounds).toString()
             }
         }
         val share = XrayConfigBuilder.extractShareLink(trimmed) ?: trimmed
         val converted = convertShareLinksToXrayJson(share)
-        return JSONObject().put("outbounds", XrayConfigBuilder.extractOutbounds(converted)).toString()
+        val outbounds = XrayConfigBuilder.extractOutbounds(converted)
+        XrayConfigBuilder.sanitizeOutboundsForRuntime(outbounds)
+        return JSONObject().put("outbounds", outbounds).toString()
     }
 
     private fun ensureAvailable() {
