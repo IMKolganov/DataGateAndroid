@@ -25,6 +25,8 @@ import com.imkolganov.datagate.ui.AppRoot
 import com.imkolganov.datagate.ui.screens.access.AccessRepositoryImpl
 import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.access.AccessViewModelFactory
+import com.imkolganov.datagate.ui.screens.profiles.ProfilesViewModel
+import com.imkolganov.datagate.ui.screens.profiles.ProfilesViewModelFactory
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModelFactory
 import com.imkolganov.datagate.ui.theme.AppLocale
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     private var installationId: String? = null
 
     private lateinit var accessViewModel: AccessViewModel
+    private lateinit var profilesViewModel: ProfilesViewModel
     private lateinit var statsViewModel: StatsViewModel
 
     private var reconnectJob: kotlinx.coroutines.Job? = null
@@ -133,6 +136,13 @@ class MainActivity : AppCompatActivity() {
         accessViewModel = androidx.lifecycle.ViewModelProvider(this, accessFactory)
             .get(AccessViewModel::class.java)
 
+        val profilesFactory = ProfilesViewModelFactory(
+            application = application,
+            repository = graph.profilesRepository,
+        )
+        profilesViewModel = androidx.lifecycle.ViewModelProvider(this, profilesFactory)
+            .get(ProfilesViewModel::class.java)
+
         val statsFactory = StatsViewModelFactory(
             application = application,
             api = graph.statsApi,
@@ -169,6 +179,9 @@ class MainActivity : AppCompatActivity() {
                     onConnectFromAccess = {
                         lifecycleScope.launch { connectInteractor.connect(VpnConnectSource.Access) }
                     },
+                    onConnectFromProfile = { profileId ->
+                        lifecycleScope.launch { connectInteractor.connectFromLocalProfile(profileId) }
+                    },
                     onRequestDisconnect = { vpnController.requestDisconnect() },
                     onRequestPause = { vpnController.requestPause() },
                     onRequestResume = { vpnController.requestResume() },
@@ -183,6 +196,7 @@ class MainActivity : AppCompatActivity() {
                     onAuthChanged = { authVersion++ },
                     authVersion = authVersion,
                     accessViewModel = accessViewModel,
+                    profilesViewModel = profilesViewModel,
                     statsViewModel = statsViewModel,
                     themeMode = themeMode,
                     onThemeModeChange = { next ->

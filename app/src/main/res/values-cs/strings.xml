@@ -420,14 +420,9 @@ Můžete otevřít stránku vydání nebo stáhnout APK. Pomocí volby níže po
     <string name="settings_ip_lists_android_12_route_limit_label">Max OVPN trasy</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Doporučeno %1$d. Povoleno %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Zadejte hodnotu od %1$d do %2$d.</string>
-    <string name="vpn_ip_list_ready_limited">Seznam IP adres připraven (%1$d tras; dosažen limit profilu)</string>
-
-    <string name="access_xray_dialog_title">XRay není podporován</string>
-    <string name="access_unsupported_server_type_dialog_title">Typ serveru není podporován</string>
+    <string name="vpn_ip_list_ready_limited">Seznam IP adres připraven (%1$d tras; dosažen limit profilu)</string>    <string name="access_unsupported_server_type_dialog_title">Typ serveru není podporován</string>
     <string name="label_server_type_xray">Xray</string>
-    <string name="label_server_type_unknown">Jiný</string>
-    <string name="vpn_requires_xray_client">Tato aplikace se nemůže připojit k serverům XRay. Server: %1$s.\n\nPoužijte jiného klienta.</string>
-    <string name="vpn_requires_unsupported_server_type">Tato aplikace nepodporuje tento typ serveru. Server: %1$s.\n\nPoužijte jiného klienta.</string>
+    <string name="label_server_type_unknown">Jiný</string>    <string name="vpn_requires_unsupported_server_type">Tato aplikace nepodporuje tento typ serveru. Server: %1$s.\n\nPoužijte jiného klienta.</string>
     <string name="free_tier_title_link">Propojte Telegram pro přístup k VPN</string>
     <string name="free_tier_title_subscribe">Odebírejte Telegram kanál</string>
     <string name="free_tier_body_link">Pro VPN na tarifu Free nebo Default:\n• Odebírejte %1$s\n• Nebo propojte účet s Telegram botem DataGate</string>
@@ -488,4 +483,33 @@ Můžete otevřít stránku vydání nebo stáhnout APK. Pomocí volby níže po
     <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
     <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
 
+    <string name="nav_profiles">Profiles</string>
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_add">Add profile</string>
+    <string name="profiles_import_ovpn">Import OpenVPN (.ovpn)</string>
+    <string name="profiles_import_confirm">Import</string>
+    <string name="profiles_import_xray_file">Import Xray JSON / links file</string>
+    <string name="profiles_import_xray_link">Paste Xray / VLESS link</string>    <string name="profiles_empty_title">No local profiles yet</string>
+    <string name="profiles_empty_body">Import an .ovpn file or paste a VLESS/Xray share link to connect from this device.</string>
+    <string name="profiles_imported">Imported “%1$s”</string>
+    <string name="profiles_rename_title">Rename profile</string>
+    <string name="profiles_name_label">Name</string>
+    <string name="profiles_rename">Rename</string>
+    <string name="profiles_edit_creds">Username / password</string>
+    <string name="profiles_creds_title">Profile credentials</string>
+    <string name="profiles_creds_hint">Optional. Used when the .ovpn profile expects auth-user-pass.</string>
+    <string name="profiles_username_label">Username</string>
+    <string name="profiles_password_label">Password</string>
+    <string name="profiles_delete">Delete</string>
+    <string name="profiles_delete_title">Delete profile?</string>
+    <string name="profiles_delete_message">Remove “%1$s” from this device?</string>
+    <string name="profiles_delete_confirm">Delete</string>
+    <string name="profiles_transport_direct">Direct OpenVPN (no WSS)</string>
+    <string name="profiles_transport_xray">Xray (libXray)</string>
+        <string name="profiles_xray_paste_title">Import Xray link</string>
+    <string name="profiles_xray_paste_hint">Paste a vless://, vmess://, trojan://, or ss:// link, or a JSON config with outbounds.</string>
+    <string name="profiles_xray_paste_label">Share link or JSON</string>    <string name="profiles_error_unavailable">Local profiles are not available</string>
+    <string name="profiles_error_not_found">Profile not found</string>
+    <string name="profiles_error_xray_unavailable">libXray is not included in this build. Rebuild with app/libs/libxray.aar.</string>
+    <string name="profiles_error_xray_not_supported">Cannot connect to Xray profile “%1$s” in this app version.</string>
 </resources>

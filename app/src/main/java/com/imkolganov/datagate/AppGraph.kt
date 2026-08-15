@@ -1,6 +1,7 @@
 package com.imkolganov.datagate
 
 import OvpnApiClient
+import XrayClientLinksApiClient
 import android.app.Activity
 import android.content.Context
 import com.imkolganov.datagate.auth.SharedPrefsTokenStore
@@ -10,8 +11,9 @@ import com.imkolganov.datagate.auth.http.BackendAuthApi
 import com.imkolganov.datagate.auth.http.OkHttpBackendAuthApi
 import com.imkolganov.datagate.configs.AuthConfig
 import com.imkolganov.datagate.network.HttpClients
-import com.imkolganov.datagate.quota.QuotaPlanApi
 import com.imkolganov.datagate.freetier.FreeTierApi
+import com.imkolganov.datagate.profiles.LocalVpnProfilesRepository
+import com.imkolganov.datagate.quota.QuotaPlanApi
 import com.imkolganov.datagate.servers.OpenVpnServersApi
 import com.imkolganov.datagate.servers.OpenVpnServersRepository
 import com.imkolganov.datagate.stats.StatsApiClient
@@ -59,6 +61,13 @@ class AppGraph(
             tokenProvider = { tokenStore.getAccessToken() }
         )
 
+    val xrayApi: XrayClientLinksApiClient =
+        XrayClientLinksApiClient(
+            http = httpAuth,
+            baseUrl = AuthConfig.BACKEND_BASE_URL,
+            tokenProvider = { tokenStore.getAccessToken() }
+        )
+
     val ipListRoutesRepository: IpListRoutesRepository =
         IpListRoutesRepository(
             appContext = appContext,
@@ -76,8 +85,13 @@ class AppGraph(
             serversRepository = serversRepository,
             vpnController = vpnController,
             api = ovpnApi,
-            ipListRoutesRepository = ipListRoutesRepository
+            xrayApi = xrayApi,
+            ipListRoutesRepository = ipListRoutesRepository,
+            profilesRepository = profilesRepository,
         )
+
+    val profilesRepository: LocalVpnProfilesRepository =
+        LocalVpnProfilesRepository(appContext)
 
     val statsApi: StatsApiClient =
         StatsApiClient(

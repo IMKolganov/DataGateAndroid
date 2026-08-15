@@ -105,6 +105,20 @@ class VpnServerConnectPolicyTest {
     }
 
     @Test
+    fun resolveManual_accessibleOnlineWithoutWss_returnsOkDirect() {
+        val items = listOf(
+            row(id = 42, name = "direct-only", clients = 1, accessible = true, wss = false),
+        )
+
+        val resolved = VpnServerConnectPolicy.resolveManualConnection(items, 42)
+
+        assertTrue(resolved is ManualServerResolve.Ok)
+        val ok = resolved as ManualServerResolve.Ok
+        assertEquals(42, ok.result.serverId)
+        assertEquals(false, ok.result.useWss)
+    }
+
+    @Test
     fun resolveManual_accessibleOnlineWss_returnsOk() {
         val items = listOf(
             row(id = 69, name = "helsinki", clients = 2, accessible = true),
@@ -129,6 +143,21 @@ class VpnServerConnectPolicyTest {
 
         assertTrue(manual is ManualServerResolve.QuotaPlanBlocked)
         assertEquals(69, auto.serverId)
+    }
+
+    @Test
+    fun resolveManual_accessibleOnlineXray_returnsOk() {
+        val items = listOf(
+            row(id = 88, name = "xray-node", clients = 1, accessible = true, type = VpnServerType.Xray, wss = false),
+        )
+
+        val resolved = VpnServerConnectPolicy.resolveManualConnection(items, 88)
+
+        assertTrue(resolved is ManualServerResolve.Ok)
+        val ok = resolved as ManualServerResolve.Ok
+        assertEquals(88, ok.result.serverId)
+        assertEquals(VpnServerType.Xray, ok.result.serverType)
+        assertEquals(false, ok.result.useWss)
     }
 
     private fun row(

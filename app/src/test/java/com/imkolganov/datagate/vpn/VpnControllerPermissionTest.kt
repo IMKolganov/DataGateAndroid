@@ -2,12 +2,12 @@ package com.imkolganov.datagate.vpn
 
 import android.app.Activity
 import android.content.Intent
-import android.net.VpnService
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityOptionsCompat
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.vpn.xray.XrayVpnService
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -30,6 +30,14 @@ class VpnControllerPermissionTest {
         override fun unregister() = Unit
         override val contract: ActivityResultContract<Intent, *>
             get() = ActivityResultContracts.StartActivityForResult()
+    }
+
+    private fun findStartedService(activity: Activity, action: String): Intent? {
+        val shadow = shadowOf(activity)
+        while (true) {
+            val next = shadow.getNextStartedService() ?: return null
+            if (next.action == action) return next
+        }
     }
 
     @Test
@@ -152,13 +160,86 @@ class VpnControllerPermissionTest {
         ShadowVpnService.setPrepareResult(null)
         controller.onPermissionGranted()
 
-        val startedIntent = shadowOf(activity).peekNextStartedService()
+        val startedIntent = findStartedService(activity, OpenVpn3Service.ACTION_CONNECT)
         assertNotNull(
             "Granting permission after startWithConfig() must resume the pending connect, " +
                 "not just clear it and leave the user stuck",
             startedIntent
         )
-        assertEquals(OpenVpn3Service.ACTION_CONNECT, startedIntent?.action)
+        assertTrue(state.isConnectRequested)
+    }
+
+    @Test
+    fun startWithConfig_directTransport_whenPermissionGranted_startsWithoutWssUrl() {
+        ShadowVpnService.setPrepareResult(Intent())
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        var state = VpnStatusUiState()
+        val controller = VpnController(
+            activity = activity,
+            permissionLauncher = noopLauncher,
+            onStateChange = { state = it },
+            getState = { state }
+        )
+
+        controller.startWithConfig(
+            configText = "remote vpn.example.com 1194\nproto udp\n",
+            wssLink = null,
+            linkProtocol = VpnLinkProtocol.UDP,
+            transport = VpnTransport.Direct,
+        )
+
+        ShadowVpnService.setPrepareResult(null)
+        controller.onPermissionGranted()
+
+        val startedIntent = findStartedService(activity, OpenVpn3Service.ACTION_CONNECT)
+        assertNotNull(startedIntent)
+        assertEquals(
+            VpnTransport.Direct.intentValue(),
+            startedIntent?.getStringExtra(OpenVpn3Service.EXTRA_TRANSPORT)
+        )
+        assertNull(startedIntent?.getStringExtra(OpenVpn3Service.EXTRA_WSS_URL))
+        assertTrue(state.isConnectRequested)
+    }
+
+    @Test
+    fun startWithXrayConfig_whenPermissionMissing_doesNotStartServiceYet() {
+        ShadowVpnService.setPrepareResult(Intent())
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        var state = VpnStatusUiState()
+        val controller = VpnController(
+            activity = activity,
+            permissionLauncher = noopLauncher,
+            onStateChange = { state = it },
+            getState = { state }
+        )
+
+        controller.startWithXrayConfig("""{"outbounds":[{"tag":"proxy","protocol":"freedom"}]}""")
+
+        assertNull(shadowOf(activity).peekNextStartedService())
+        assertEquals(activity.getString(R.string.vpn_waiting_permission), state.lastMessage)
+    }
+
+    @Test
+    fun startWithXrayConfig_thenPermissionGranted_startsXrayServiceWithPendingConfig() {
+        ShadowVpnService.setPrepareResult(Intent())
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        var state = VpnStatusUiState()
+        val controller = VpnController(
+            activity = activity,
+            permissionLauncher = noopLauncher,
+            onStateChange = { state = it },
+            getState = { state }
+        )
+
+        val cfg = """{"outbounds":[{"tag":"proxy","protocol":"freedom","settings":{}}]}"""
+        controller.startWithXrayConfig(cfg)
+
+        ShadowVpnService.setPrepareResult(null)
+        controller.onPermissionGranted()
+
+        val startedIntent = findStartedService(activity, XrayVpnService.ACTION_CONNECT)
+        assertNotNull(startedIntent)
+        assertNotNull(startedIntent?.getStringExtra(XrayVpnService.EXTRA_CONFIG_PATH))
         assertTrue(state.isConnectRequested)
     }
 }

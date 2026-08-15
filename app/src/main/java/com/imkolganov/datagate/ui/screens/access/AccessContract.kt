@@ -48,9 +48,9 @@ interface AccessContract {
         val name: String,
         val protocol: String?,
         val isOnline: Boolean,
-        /** In-app VPN requires WSS; if false, show dialog and use OpenVPN Connect instead. */
+        /** When true, in-app connect uses WSS bridge; when false, direct OpenVPN. */
         val isEnableWss: Boolean,
-        /** Backend server stack; only [com.imkolganov.datagate.model.servers.VpnServerType.OpenVpn] connects in-app. */
+        /** Backend server stack; OpenVPN and Xray connect in-app. */
         val serverType: VpnServerType = VpnServerType.OpenVpn,
 
         val uptimeText: String?,

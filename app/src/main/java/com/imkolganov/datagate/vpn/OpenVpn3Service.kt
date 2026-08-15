@@ -51,8 +51,11 @@ class OpenVpn3Service : VpnService() {
         const val EXTRA_OVPN_CONFIG_PATH = "com.imkolganov.datagate.vpn.EXTRA_OVPN_CONFIG_PATH"
         const val EXTRA_EXCLUDED_ROUTES_PATH = "com.imkolganov.datagate.vpn.EXTRA_EXCLUDED_ROUTES_PATH"
         const val EXTRA_WSS_URL = "com.imkolganov.datagate.vpn.EXTRA_WSS_URL"
+        const val EXTRA_TRANSPORT = "com.imkolganov.datagate.vpn.EXTRA_TRANSPORT"
         const val EXTRA_LINK_PROTOCOL = "com.imkolganov.datagate.vpn.EXTRA_LINK_PROTOCOL"
         const val EXTRA_SERVER_DISPLAY_NAME = "com.imkolganov.datagate.vpn.EXTRA_SERVER_DISPLAY_NAME"
+        const val EXTRA_AUTH_USERNAME = "com.imkolganov.datagate.vpn.EXTRA_AUTH_USERNAME"
+        const val EXTRA_AUTH_PASSWORD = "com.imkolganov.datagate.vpn.EXTRA_AUTH_PASSWORD"
 
         /** False when this device's ABI has no bundled libovpncli.so (see jniLibs). */
         @Volatile
@@ -122,9 +125,12 @@ class OpenVpn3Service : VpnService() {
 
     private data class PendingConnectRequest(
         val configText: String,
-        val wssUrl: String,
+        val wssUrl: String?,
+        val transport: VpnTransport,
         val linkProtocol: VpnLinkProtocol,
-        val excludedRoutes: List<IpCidrRoute>
+        val excludedRoutes: List<IpCidrRoute>,
+        val username: String = "",
+        val password: String = "",
     )
     private data class SystemVpnSnapshot(
         val hasVpnTransport: Boolean,
@@ -455,12 +461,20 @@ class OpenVpn3Service : VpnService() {
             }
             .orEmpty()
         val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
+        val transport = VpnTransport.fromIntentExtra(intent.getStringExtra(EXTRA_TRANSPORT))
+        val username = intent.getStringExtra(EXTRA_AUTH_USERNAME).orEmpty()
+        val password = intent.getStringExtra(EXTRA_AUTH_PASSWORD).orEmpty()
 
-        if (configText.isNullOrBlank() || wssUrl.isNullOrBlank()) {
+        val missingWss = transport == VpnTransport.Wss && wssUrl.isNullOrBlank()
+        if (configText.isNullOrBlank() || missingWss) {
             desiredConnection = false
             pendingConnectRequest = null
             transitionState(VpnRuntimeState.ERROR, "missing_connect_args")
-            broadcastStatus("ERROR", "Missing config or WSS URL")
+            broadcastStatus(
+                "ERROR",
+                if (transport == VpnTransport.Direct) "Missing OpenVPN config"
+                else "Missing config or WSS URL"
+            )
             stopSelf()
             return
         }
@@ -469,20 +483,24 @@ class OpenVpn3Service : VpnService() {
         pendingConnectRequest = PendingConnectRequest(
             configText = configText,
             wssUrl = wssUrl,
+            transport = transport,
             linkProtocol = linkProtocol,
-            excludedRoutes = excludedRoutes
+            excludedRoutes = excludedRoutes,
+            username = username,
+            password = password,
         )
         VpnDebugLogger.event(
             category = "service.connect",
             action = "accepted",
             details = mapOf(
                 "proto" to linkProtocol.name,
-                "wssHost" to runCatching { java.net.URI(wssUrl).host }.getOrNull(),
+                "transport" to transport.name,
+                "wssHost" to wssUrl?.let { runCatching { java.net.URI(it).host }.getOrNull() },
                 "configBytes" to configText.length,
                 "excludeRoutes" to excludedRoutes.size,
                 "server" to sessionServerDisplayName,
                 "network" to networkAvailable,
-                "transport" to currentTransportLabel(),
+                "netTransport" to currentTransportLabel(),
             ),
         )
         if (!networkAvailable) {
@@ -886,8 +904,11 @@ class OpenVpn3Service : VpnService() {
         startVpn(
             configText = request.configText,
             wssUrl = request.wssUrl,
+            transport = request.transport,
             linkProtocol = request.linkProtocol,
-            excludedRoutes = request.excludedRoutes
+            excludedRoutes = request.excludedRoutes,
+            username = request.username,
+            password = request.password,
         )
     }
 
@@ -1024,9 +1045,12 @@ class OpenVpn3Service : VpnService() {
 
     private fun startVpn(
         configText: String,
-        wssUrl: String,
+        wssUrl: String?,
+        transport: VpnTransport,
         linkProtocol: VpnLinkProtocol,
-        excludedRoutes: List<IpCidrRoute>
+        excludedRoutes: List<IpCidrRoute>,
+        username: String = "",
+        password: String = "",
     ) {
         // Bump before tearing down the previous job so its finally cannot clear this session.
         val sessionGeneration = ++vpnSessionGeneration
@@ -1034,14 +1058,23 @@ class OpenVpn3Service : VpnService() {
 
         vpnJob = serviceScope.launch(ovpnNativeDispatcher) {
             try {
-                val http = buildProtectedOkHttp(this@OpenVpn3Service)
-                bridgeHttp = http
+                val patchedConfig = when (transport) {
+                    VpnTransport.Wss -> {
+                        val url = wssUrl?.takeIf { it.isNotBlank() }
+                            ?: error("WSS URL required for Wss transport")
+                        val http = buildProtectedOkHttp(this@OpenVpn3Service)
+                        bridgeHttp = http
+                        val bridgePort = startBridgeWithRetry(http, url, linkProtocol)
+                        VpnDebugLogger.d(TAG, "startVpn: WSS bridge on port=$bridgePort gen=$sessionGeneration")
+                        forceRemoteToLocalBridge(configText, bridgePort, linkProtocol)
+                    }
+                    VpnTransport.Direct -> {
+                        VpnDebugLogger.d(TAG, "startVpn: Direct transport (no WSS bridge) gen=$sessionGeneration")
+                        configText
+                    }
+                }
 
-                val bridgePort = startBridgeWithRetry(http, wssUrl, linkProtocol)
-
-                VpnDebugLogger.d(TAG, "startVpn: building config gen=$sessionGeneration")
-
-                val patchedConfig = forceRemoteToLocalBridge(configText, bridgePort, linkProtocol)
+                VpnDebugLogger.d(TAG, "startVpn: building config gen=$sessionGeneration transport=$transport")
 
                 val cfg = ClientAPI_Config().apply {
                     content = patchedConfig
@@ -1077,8 +1110,8 @@ class OpenVpn3Service : VpnService() {
 
                 VpnDebugLogger.d(TAG, "startVpn: provide_creds")
                 val creds = ClientAPI_ProvideCreds().apply {
-                    username = ""
-                    password = ""
+                    this.username = username
+                    this.password = password
                 }
                 val credStatus: ClientAPI_Status = client.provide_creds(creds)
                 if (credStatus.error) {

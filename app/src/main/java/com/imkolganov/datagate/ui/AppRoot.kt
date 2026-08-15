@@ -24,6 +24,7 @@ import com.imkolganov.datagate.ui.screens.auth.AdminTotpSetupScreen
 import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.login.LoginScreen
 import com.imkolganov.datagate.ui.screens.main.MainScreen
+import com.imkolganov.datagate.ui.screens.profiles.ProfilesViewModel
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
@@ -46,6 +47,7 @@ fun AppRoot(
     vpnState: VpnStatusUiState,
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
+    onConnectFromProfile: (String) -> Unit,
     onRequestDisconnect: () -> Unit,
     onRequestPause: () -> Unit = {},
     onRequestResume: () -> Unit = {},
@@ -53,6 +55,7 @@ fun AppRoot(
     authVersion: Int,
     onAuthChanged: () -> Unit,
     accessViewModel: AccessViewModel,
+    profilesViewModel: ProfilesViewModel,
     statsViewModel: StatsViewModel,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
@@ -74,6 +77,7 @@ fun AppRoot(
             vpnState = vpnState,
             onConnectFromHome = onConnectFromHome,
             onConnectFromAccess = onConnectFromAccess,
+            onConnectFromProfile = onConnectFromProfile,
             onRequestDisconnect = onRequestDisconnect,
             onRequestPause = onRequestPause,
             onRequestResume = onRequestResume,
@@ -81,6 +85,7 @@ fun AppRoot(
             authVersion = authVersion,
             onAuthChanged = onAuthChanged,
             accessViewModel = accessViewModel,
+            profilesViewModel = profilesViewModel,
             statsViewModel = statsViewModel,
             themeMode = themeMode,
             onThemeModeChange = onThemeModeChange,
@@ -103,6 +108,7 @@ private fun AppRootContent(
     vpnState: VpnStatusUiState,
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
+    onConnectFromProfile: (String) -> Unit,
     onRequestDisconnect: () -> Unit,
     onRequestPause: () -> Unit,
     onRequestResume: () -> Unit,
@@ -110,6 +116,7 @@ private fun AppRootContent(
     authVersion: Int,
     onAuthChanged: () -> Unit,
     accessViewModel: AccessViewModel,
+    profilesViewModel: ProfilesViewModel,
     statsViewModel: StatsViewModel,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
@@ -200,6 +207,7 @@ private fun AppRootContent(
                 vpnState = vpnState,
                 onConnectFromHome = onConnectFromHome,
                 onConnectFromAccess = onConnectFromAccess,
+                onConnectFromProfile = onConnectFromProfile,
                 onRequestDisconnect = onRequestDisconnect,
                 onRequestPause = onRequestPause,
                 onRequestResume = onRequestResume,
@@ -219,6 +227,7 @@ private fun AppRootContent(
                 authViewModel = authViewModel,
                 tokenStore = tokenStore,
                 accessViewModel = accessViewModel,
+                profilesViewModel = profilesViewModel,
                 statsViewModel = statsViewModel,
                 themeMode = themeMode,
                 onThemeModeChange = onThemeModeChange,

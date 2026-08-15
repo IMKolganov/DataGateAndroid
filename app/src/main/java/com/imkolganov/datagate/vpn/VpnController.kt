@@ -11,6 +11,7 @@ import com.imkolganov.datagate.logger.VpnDebugLogger
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.vpn.xray.XrayVpnService
 import java.io.File
 
 class VpnController(
@@ -22,14 +23,22 @@ class VpnController(
     private var isReceiverRegistered = false
     private var pendingConfigText: String? = null
     private var pendingWssLink: String? = null
+    private var pendingTransport: VpnTransport = VpnTransport.Wss
     private var pendingLinkProtocol: VpnLinkProtocol? = null
     private var pendingBypassRoutes: List<IpCidrRoute> = emptyList()
+    private var pendingUsername: String = ""
+    private var pendingPassword: String = ""
+    private var pendingXrayConfigText: String? = null
+    private var pendingEngine: VpnEngine = VpnEngine.OpenVpn
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
 
     companion object {
         private const val TAG = "OpenVPN3"
         private const val KEY_SESSION_SERVER_ID = "vpn_session_server_id"
+        private const val KEY_ACTIVE_ENGINE = "vpn_active_engine"
     }
+
+    private enum class VpnEngine { OpenVpn, Xray }
 
     private var pendingCommandRollback: VpnStatusUiState? = null
 
@@ -110,11 +119,22 @@ class VpnController(
 
     /** Ask the running VPN service for its authoritative runtime state. */
     fun queryServiceStatus() {
-        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
-            action = OpenVpn3Service.ACTION_QUERY_STATUS
+        when (activeEngine()) {
+            VpnEngine.Xray -> {
+                val intent = Intent(activity, XrayVpnService::class.java).apply {
+                    action = XrayVpnService.ACTION_QUERY_STATUS
+                }
+                runCatching { startServiceCompat(intent) }
+                    .onFailure { VpnDebugLogger.w(TAG, "Failed to query Xray service status", it) }
+            }
+            VpnEngine.OpenVpn -> {
+                val intent = Intent(activity, OpenVpn3Service::class.java).apply {
+                    action = OpenVpn3Service.ACTION_QUERY_STATUS
+                }
+                runCatching { startServiceCompat(intent) }
+                    .onFailure { VpnDebugLogger.w(TAG, "Failed to query VPN service status", it) }
+            }
         }
-        runCatching { startServiceCompat(intent) }
-            .onFailure { VpnDebugLogger.w(TAG, "Failed to query VPN service status", it) }
     }
 
     fun onStop() {
@@ -178,30 +198,97 @@ class VpnController(
         )
     }
 
+    /** Local profile / non-catalog session — display name only, no Access server id. */
+    fun notifyProfileSelectedForConnection(profileName: String) {
+        prefs.edit {
+            putString("selected_server_name", profileName)
+            remove(KEY_SESSION_SERVER_ID)
+        }
+        onStateChange(
+            getState().copy(
+                selectedServerName = profileName,
+                selectedServerId = null,
+                lastMessage = activity.getString(R.string.vpn_server_selected),
+                isConnectRequested = true,
+                isVpnConnected = false
+            )
+        )
+    }
+
+    /**
+     * Starts VPN with a prepared OVPN config.
+     * [wssLink] is required when [transport] is [VpnTransport.Wss]; ignored for Direct.
+     */
     fun startWithConfig(
         configText: String,
-        wssLink: String,
+        wssLink: String?,
         linkProtocol: VpnLinkProtocol,
-        bypassRoutes: List<IpCidrRoute> = emptyList()
+        bypassRoutes: List<IpCidrRoute> = emptyList(),
+        transport: VpnTransport = if (wssLink.isNullOrBlank()) VpnTransport.Direct else VpnTransport.Wss,
+        username: String = "",
+        password: String = "",
     ) {
         // Do not block on isConnectRequested here because it may already be set by pre-connect flow.
         // The real connection state will be driven by OpenVPN core events.
 
+        pendingEngine = VpnEngine.OpenVpn
         pendingConfigText = configText
+        pendingXrayConfigText = null
         pendingWssLink = wssLink
+        pendingTransport = transport
         pendingLinkProtocol = linkProtocol
         pendingBypassRoutes = bypassRoutes
+        pendingUsername = username
+        pendingPassword = password
 
         VpnDebugLogger.event(
             category = "ui.user",
             action = "start_with_config",
             details = mapOf(
                 "proto" to linkProtocol.name,
-                "wssHost" to runCatching { java.net.URI(wssLink).host }.getOrNull(),
+                "transport" to transport.name,
+                "wssHost" to wssLink?.let { runCatching { java.net.URI(it).host }.getOrNull() },
                 "configBytes" to configText.length,
                 "excludeRoutes" to bypassRoutes.size,
             ),
         )
+        requestVpnPermissionOrStart {
+            startServiceWithConfig(
+                configText = configText,
+                wssLink = wssLink,
+                transport = transport,
+                linkProtocol = linkProtocol,
+                bypassRoutes = bypassRoutes,
+                username = username,
+                password = password,
+            )
+        }
+    }
+
+    /**
+     * Starts VPN with a normalized Xray outbounds JSON (or full config with outbounds).
+     */
+    fun startWithXrayConfig(configText: String) {
+        pendingEngine = VpnEngine.Xray
+        pendingXrayConfigText = configText
+        pendingConfigText = null
+        pendingWssLink = null
+        pendingLinkProtocol = null
+        pendingBypassRoutes = emptyList()
+        pendingUsername = ""
+        pendingPassword = ""
+
+        VpnDebugLogger.event(
+            category = "ui.user",
+            action = "start_with_xray_config",
+            details = mapOf("configBytes" to configText.length),
+        )
+        requestVpnPermissionOrStart {
+            startXrayServiceWithConfig(configText)
+        }
+    }
+
+    private fun requestVpnPermissionOrStart(onReady: () -> Unit) {
         VpnDebugLogger.d(TAG, "Calling VpnService.prepare()")
         val prepareIntent = VpnService.prepare(activity)
         VpnDebugLogger.d(TAG, "Prepare intent is null: ${prepareIntent == null}")
@@ -220,37 +307,55 @@ class VpnController(
         }
 
         VpnDebugLogger.d(TAG, "VPN permission already granted, starting service...")
-        startServiceWithConfig(configText, wssLink, linkProtocol, bypassRoutes)
+        onReady()
     }
 
     fun onPermissionGranted() {
         VpnDebugLogger.d(TAG, "VPN permission granted from launcher")
         updatePermissionState()
 
+        val engine = pendingEngine
+        val xrayCfg = pendingXrayConfigText
         val cfg = pendingConfigText
         val wss = pendingWssLink
+        val transport = pendingTransport
         val linkProtocol = pendingLinkProtocol
         val bypassRoutes = pendingBypassRoutes
-        pendingConfigText = null
-        pendingWssLink = null
-        pendingLinkProtocol = null
-        pendingBypassRoutes = emptyList()
+        val username = pendingUsername
+        val password = pendingPassword
+        clearPendingConnect()
 
-        if (cfg.isNullOrBlank() || wss.isNullOrBlank()) {
-            showError(activity.getString(R.string.vpn_error_permission_missing_config))
-            return
+        when (engine) {
+            VpnEngine.Xray -> {
+                if (xrayCfg.isNullOrBlank()) {
+                    showError(activity.getString(R.string.vpn_error_permission_missing_config))
+                    return
+                }
+                startXrayServiceWithConfig(xrayCfg)
+            }
+            VpnEngine.OpenVpn -> {
+                val missingWss = transport == VpnTransport.Wss && wss.isNullOrBlank()
+                if (cfg.isNullOrBlank() || missingWss) {
+                    showError(activity.getString(R.string.vpn_error_permission_missing_config))
+                    return
+                }
+                startServiceWithConfig(
+                    configText = cfg,
+                    wssLink = wss,
+                    transport = transport,
+                    linkProtocol = linkProtocol ?: VpnLinkProtocol.TCP,
+                    bypassRoutes = bypassRoutes,
+                    username = username,
+                    password = password,
+                )
+            }
         }
-
-        startServiceWithConfig(cfg, wss, linkProtocol ?: VpnLinkProtocol.TCP, bypassRoutes)
     }
 
     fun onPermissionDenied() {
         VpnDebugLogger.w(TAG, "VPN permission denied from launcher")
         updatePermissionState()
-        pendingConfigText = null
-        pendingWssLink = null
-        pendingLinkProtocol = null
-        pendingBypassRoutes = emptyList()
+        clearPendingConnect()
         showError(activity.getString(R.string.vpn_error_permission_denied))
     }
 
@@ -260,13 +365,19 @@ class VpnController(
         prefs.edit {
             remove("selected_server_name")
             remove(KEY_SESSION_SERVER_ID)
+            remove(KEY_ACTIVE_ENGINE)
         }
 
-        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
-            action = OpenVpn3Service.ACTION_DISCONNECT
-        }
-
-        startServiceCompat(intent)
+        startServiceCompat(
+            Intent(activity, OpenVpn3Service::class.java).apply {
+                action = OpenVpn3Service.ACTION_DISCONNECT
+            }
+        )
+        startServiceCompat(
+            Intent(activity, XrayVpnService::class.java).apply {
+                action = XrayVpnService.ACTION_DISCONNECT
+            }
+        )
 
         onStateChange(
             getState().copy(
@@ -295,6 +406,12 @@ class VpnController(
             VpnDebugLogger.w(TAG, "Ignoring pause request in state connected=${current.isVpnConnected} paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
             return
         }
+        // Xray v1 has no pause — treat as disconnect.
+        if (activeEngine() == VpnEngine.Xray) {
+            VpnDebugLogger.event("ui.user", "pause_as_disconnect_xray")
+            requestDisconnect()
+            return
+        }
         VpnDebugLogger.event("ui.user", "pause")
         pendingCommandRollback = current
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
@@ -318,6 +435,10 @@ class VpnController(
             VpnDebugLogger.w(TAG, "Ignoring resume request in state paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
             return
         }
+        if (activeEngine() == VpnEngine.Xray) {
+            VpnDebugLogger.w(TAG, "Ignoring resume: Xray has no pause/resume")
+            return
+        }
         VpnDebugLogger.event("ui.user", "resume")
         pendingCommandRollback = current
         val intent = Intent(activity, OpenVpn3Service::class.java).apply {
@@ -337,12 +458,59 @@ class VpnController(
         activity.sendBroadcast(testIntent)
     }
 
+    private fun clearPendingConnect() {
+        pendingConfigText = null
+        pendingXrayConfigText = null
+        pendingWssLink = null
+        pendingTransport = VpnTransport.Wss
+        pendingLinkProtocol = null
+        pendingBypassRoutes = emptyList()
+        pendingUsername = ""
+        pendingPassword = ""
+        pendingEngine = VpnEngine.OpenVpn
+    }
+
+    private fun activeEngine(): VpnEngine =
+        when (prefs.getString(KEY_ACTIVE_ENGINE, null)) {
+            VpnEngine.Xray.name -> VpnEngine.Xray
+            else -> VpnEngine.OpenVpn
+        }
+
+    private fun setActiveEngine(engine: VpnEngine) {
+        prefs.edit { putString(KEY_ACTIVE_ENGINE, engine.name) }
+    }
+
+    /** Always disconnect the other VPN engine before starting [keep]. */
+    private fun stopPeerEngine(keep: VpnEngine) {
+        when (keep) {
+            VpnEngine.OpenVpn -> {
+                startServiceCompat(
+                    Intent(activity, XrayVpnService::class.java).apply {
+                        action = XrayVpnService.ACTION_DISCONNECT
+                    }
+                )
+            }
+            VpnEngine.Xray -> {
+                startServiceCompat(
+                    Intent(activity, OpenVpn3Service::class.java).apply {
+                        action = OpenVpn3Service.ACTION_DISCONNECT
+                    }
+                )
+            }
+        }
+    }
+
     private fun startServiceWithConfig(
         configText: String,
-        wssLink: String,
+        wssLink: String?,
+        transport: VpnTransport,
         linkProtocol: VpnLinkProtocol,
-        bypassRoutes: List<IpCidrRoute>
+        bypassRoutes: List<IpCidrRoute>,
+        username: String,
+        password: String,
     ) {
+        stopPeerEngine(VpnEngine.OpenVpn)
+        setActiveEngine(VpnEngine.OpenVpn)
         val serverDisplayName =
             getState().selectedServerName?.takeIf { it.isNotBlank() }
                 ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
@@ -353,8 +521,17 @@ class VpnController(
             action = OpenVpn3Service.ACTION_CONNECT
             putExtra(OpenVpn3Service.EXTRA_OVPN_CONFIG_PATH, configFile.absolutePath)
             routesFile?.let { putExtra(OpenVpn3Service.EXTRA_EXCLUDED_ROUTES_PATH, it.absolutePath) }
-            putExtra(OpenVpn3Service.EXTRA_WSS_URL, wssLink)
+            putExtra(OpenVpn3Service.EXTRA_TRANSPORT, transport.intentValue())
             putExtra(OpenVpn3Service.EXTRA_LINK_PROTOCOL, linkProtocol.intentValue())
+            if (transport == VpnTransport.Wss && !wssLink.isNullOrBlank()) {
+                putExtra(OpenVpn3Service.EXTRA_WSS_URL, wssLink)
+            }
+            if (username.isNotEmpty()) {
+                putExtra(OpenVpn3Service.EXTRA_AUTH_USERNAME, username)
+            }
+            if (password.isNotEmpty()) {
+                putExtra(OpenVpn3Service.EXTRA_AUTH_PASSWORD, password)
+            }
             if (serverDisplayName != null) {
                 putExtra(OpenVpn3Service.EXTRA_SERVER_DISPLAY_NAME, serverDisplayName)
             }
@@ -383,6 +560,51 @@ class VpnController(
         )
     }
 
+    private fun startXrayServiceWithConfig(configText: String) {
+        stopPeerEngine(VpnEngine.Xray)
+        setActiveEngine(VpnEngine.Xray)
+        val serverDisplayName =
+            getState().selectedServerName?.takeIf { it.isNotBlank() }
+                ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
+        val configFile = writeXrayConfigForService(configText)
+
+        val intent = Intent(activity, XrayVpnService::class.java).apply {
+            action = XrayVpnService.ACTION_CONNECT
+            putExtra(XrayVpnService.EXTRA_CONFIG_PATH, configFile.absolutePath)
+            if (serverDisplayName != null) {
+                putExtra(XrayVpnService.EXTRA_SERVER_DISPLAY_NAME, serverDisplayName)
+            }
+        }
+
+        try {
+            startServiceCompat(intent)
+        } catch (t: Throwable) {
+            VpnDebugLogger.e(TAG, "Failed to start Xray service", t)
+            runCatching { configFile.delete() }
+            showError(
+                activity.getString(
+                    R.string.vpn_connect_failed,
+                    t.message ?: t.javaClass.simpleName
+                )
+            )
+            return
+        }
+
+        onStateChange(
+            getState().copy(
+                isConnectRequested = true,
+                lastMessage = activity.getString(R.string.vpn_connecting_generic)
+            )
+        )
+    }
+
+    private fun writeXrayConfigForService(configText: String): File {
+        val dir = File(activity.cacheDir, "vpn").apply { mkdirs() }
+        return File(dir, "pending-xray-${System.currentTimeMillis()}.json").apply {
+            writeText(configText)
+        }
+    }
+
     private fun writeConfigForService(configText: String): File {
         val dir = File(activity.cacheDir, "vpn").apply { mkdirs() }
         return File(dir, "pending-${System.currentTimeMillis()}.ovpn").apply {
@@ -399,7 +621,9 @@ class VpnController(
     }
 
     private fun startServiceCompat(intent: Intent) {
-        val isConnect = intent.action == OpenVpn3Service.ACTION_CONNECT
+        val isConnect =
+            intent.action == OpenVpn3Service.ACTION_CONNECT ||
+                intent.action == XrayVpnService.ACTION_CONNECT
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isConnect) {
             activity.startForegroundService(intent)
@@ -435,6 +659,7 @@ class VpnController(
         prefs.edit {
             remove("selected_server_name")
             remove(KEY_SESSION_SERVER_ID)
+            remove(KEY_ACTIVE_ENGINE)
         }
 
         onStateChange(

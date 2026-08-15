@@ -4,6 +4,7 @@
 
     <string name="nav_home">Home</string>
     <string name="nav_access">Access</string>
+    <string name="nav_profiles">Profiles</string>
     <string name="nav_statistics">Statistics</string>
     <string name="nav_settings">Settings</string>
 
@@ -362,9 +363,7 @@
     <string name="sign_out_confirm_title">Sign out?</string>
     <string name="sign_out_confirm_message">Are you sure you want to sign out?</string>
 
-    <string name="access_no_wss_dialog_title">Cannot connect in this app</string>
-    <string name="access_xray_dialog_title">XRay not supported</string>
-    <string name="access_unsupported_server_type_dialog_title">Server type not supported</string>
+    <string name="access_no_wss_dialog_title">Cannot connect in this app</string>    <string name="access_unsupported_server_type_dialog_title">Server type not supported</string>
     <string name="access_switch_title">Switch server?</string>
     <string name="access_switch_message">Disconnect from the current VPN and connect to \"%1$s\"?</string>
     <string name="access_switch">Switch</string>
@@ -430,16 +429,14 @@
     <string name="vpn_connect_failed">Connect failed: %1$s</string>
     <string name="vpn_server_selected">Server selected</string>
     <string name="vpn_waiting_permission">Waiting for VPN permission…</string>
-    <string name="vpn_error_permission_missing_config">VPN permission granted, but config or WSS link is missing</string>
+    <string name="vpn_error_permission_missing_config">VPN permission granted, but config (or WSS link for proxy mode) is missing</string>
     <string name="vpn_error_permission_denied">VPN permission denied</string>
     <string name="vpn_disconnecting">Disconnecting…</string>
     <string name="vpn_connecting_generic">Connecting…</string>
     <string name="vpn_permission_dialog_title" translatable="false">VPN Permission Required</string>
     <string name="vpn_permission_dialog_body" translatable="false">To secure your connection, DataGate needs permission to set up a VPN tunnel. This is a standard Android request for all VPN apps.</string>
     <string name="vpn_permission_dialog_grant" translatable="false">Grant permission</string>
-    <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>
-    <string name="vpn_requires_xray_client">This app cannot connect to XRay servers. Server: %1$s.\n\nPlease use a different client.</string>
-    <string name="vpn_requires_unsupported_server_type">This app does not support this server type. Server: %1$s.\n\nPlease use a different client.</string>
+    <string name="vpn_requires_openvpn_connect">This server (%1$s) does not support in-app connection over WSS. To connect, use the official OpenVPN Connect app with a profile from this server.\n\nIn countries with heavy state network control (e.g. Russia, Iran), it may still not work reliably.</string>    <string name="vpn_requires_unsupported_server_type">This app does not support this server type. Server: %1$s.\n\nPlease use a different client.</string>
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
     <string name="vpn_server_quota_blocked">Server \"%1$s\" is not included in your quota plan.</string>
     <string name="access_server_quota_blocked">Not in your plan</string>
@@ -495,4 +492,33 @@
     <string name="tv_link_error_create">Could not start TV sign-in. Try again.</string>
     <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
     <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
+
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_add">Add profile</string>
+    <string name="profiles_import_ovpn">Import OpenVPN (.ovpn)</string>
+    <string name="profiles_import_xray_link">Paste Xray / VLESS link</string>
+    <string name="profiles_import_xray_file">Import Xray JSON / links file</string>
+    <string name="profiles_import_confirm">Import</string>    <string name="profiles_empty_title">No local profiles yet</string>
+    <string name="profiles_empty_body">Import an .ovpn file or paste a VLESS/Xray share link to connect from this device.</string>
+    <string name="profiles_imported">Imported “%1$s”</string>
+    <string name="profiles_rename_title">Rename profile</string>
+    <string name="profiles_name_label">Name</string>
+    <string name="profiles_rename">Rename</string>
+    <string name="profiles_edit_creds">Username / password</string>
+    <string name="profiles_creds_title">Profile credentials</string>
+    <string name="profiles_creds_hint">Optional. Used when the .ovpn profile expects auth-user-pass.</string>
+    <string name="profiles_username_label">Username</string>
+    <string name="profiles_password_label">Password</string>
+    <string name="profiles_delete">Delete</string>
+    <string name="profiles_delete_title">Delete profile?</string>
+    <string name="profiles_delete_message">Remove “%1$s” from this device?</string>
+    <string name="profiles_delete_confirm">Delete</string>
+    <string name="profiles_transport_direct">Direct OpenVPN (no WSS)</string>
+    <string name="profiles_transport_xray">Xray (libXray)</string>
+    <string name="profiles_xray_paste_title">Import Xray link</string>
+    <string name="profiles_xray_paste_hint">Paste a vless://, vmess://, trojan://, or ss:// link, or a JSON config with outbounds.</string>
+    <string name="profiles_xray_paste_label">Share link or JSON</string>    <string name="profiles_error_unavailable">Local profiles are not available</string>
+    <string name="profiles_error_not_found">Profile not found</string>
+    <string name="profiles_error_xray_not_supported">Cannot connect to Xray profile “%1$s” in this app version.</string>
+    <string name="profiles_error_xray_unavailable">libXray is not included in this build. Rebuild with app/libs/libxray.aar.</string>
 </resources>

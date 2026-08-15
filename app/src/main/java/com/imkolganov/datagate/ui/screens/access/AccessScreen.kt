@@ -104,8 +104,6 @@ fun AccessScreen(
 
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
     var showPermissionDialog by remember { mutableStateOf(false) }
-    var noWssDialogName by remember { mutableStateOf<String?>(null) }
-    var xrayDialogName by remember { mutableStateOf<String?>(null) }
     var unsupportedTypeDialogName by remember { mutableStateOf<String?>(null) }
     var networkIdentity by remember { mutableStateOf(NetworkIdentitySnapshot()) }
     var networkIdentityLoading by remember { mutableStateOf(true) }
@@ -156,19 +154,11 @@ fun AccessScreen(
             switchTargetServer = server
         } else {
             when (server.serverType) {
-                VpnServerType.Xray -> {
-                    xrayDialogName = server.name
-                    return
-                }
                 VpnServerType.Unknown -> {
                     unsupportedTypeDialogName = server.name
                     return
                 }
-                VpnServerType.OpenVpn -> Unit
-            }
-            if (!server.isEnableWss) {
-                noWssDialogName = server.name
-                return
+                VpnServerType.OpenVpn, VpnServerType.Xray -> Unit
             }
             if (vpnState.hasVpnPermission) {
                 onConnectVpn()
@@ -193,13 +183,8 @@ fun AccessScreen(
                     onClick = {
                         switchTargetServer = null
                         when (target.serverType) {
-                            VpnServerType.Xray -> xrayDialogName = target.name
                             VpnServerType.Unknown -> unsupportedTypeDialogName = target.name
-                            VpnServerType.OpenVpn -> if (!target.isEnableWss) {
-                                noWssDialogName = target.name
-                            } else {
-                                onReconnectVpn()
-                            }
+                            VpnServerType.OpenVpn, VpnServerType.Xray -> onReconnectVpn()
                         }
                     }
                 ) {
@@ -209,42 +194,6 @@ fun AccessScreen(
             dismissButton = {
                 TextButton(onClick = { switchTargetServer = null }) {
                     Text(stringResource(R.string.action_cancel))
-                }
-            }
-        )
-    }
-
-    noWssDialogName?.let { serverName ->
-        AlertDialog(
-            onDismissRequest = { noWssDialogName = null },
-            title = { Text(stringResource(R.string.access_no_wss_dialog_title)) },
-            text = {
-                Text(
-                    stringResource(R.string.vpn_requires_openvpn_connect, serverName),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { noWssDialogName = null }) {
-                    Text(stringResource(R.string.action_ok))
-                }
-            }
-        )
-    }
-
-    xrayDialogName?.let { serverName ->
-        AlertDialog(
-            onDismissRequest = { xrayDialogName = null },
-            title = { Text(stringResource(R.string.access_xray_dialog_title)) },
-            text = {
-                Text(
-                    stringResource(R.string.vpn_requires_xray_client, serverName),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { xrayDialogName = null }) {
-                    Text(stringResource(R.string.action_ok))
                 }
             }
         )

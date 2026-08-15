@@ -38,25 +38,31 @@ object VpnServerConnectPolicy {
             if (!ignoreQuotaPlanChecks && !s.isAccessibleForUserQuotaPlan) {
                 return ManualServerResolve.QuotaPlanBlocked(name)
             }
-            if (s.serverType != VpnServerType.OpenVpn) {
-                return when (s.serverType) {
-                    VpnServerType.Xray -> ManualServerResolve.RequiresXrayClient(name)
-                    VpnServerType.OpenVpn -> error("unreachable")
-                    VpnServerType.Unknown -> ManualServerResolve.RequiresUnsupportedServerType(name)
-                }
-            }
-            if (!s.isEnableWss) {
-                return ManualServerResolve.RequiresExternalOpenVpn(name)
-            }
-            return ManualServerResolve.Ok(
-                BestServerResult(
-                    serverId = s.id,
-                    name = name,
-                    apiUrl = s.apiUrl.takeUnless { it.isBlank() },
-                    countConnectedClients = (row.countConnectedClients ?: 0).coerceAtLeast(0),
-                    isDefault = s.isDefault
+            return when (s.serverType) {
+                VpnServerType.OpenVpn -> ManualServerResolve.Ok(
+                    BestServerResult(
+                        serverId = s.id,
+                        name = name,
+                        apiUrl = s.apiUrl.takeUnless { it.isBlank() },
+                        countConnectedClients = (row.countConnectedClients ?: 0).coerceAtLeast(0),
+                        isDefault = s.isDefault,
+                        useWss = s.isEnableWss,
+                        serverType = VpnServerType.OpenVpn,
+                    )
                 )
-            )
+                VpnServerType.Xray -> ManualServerResolve.Ok(
+                    BestServerResult(
+                        serverId = s.id,
+                        name = name,
+                        apiUrl = s.apiUrl.takeUnless { it.isBlank() },
+                        countConnectedClients = (row.countConnectedClients ?: 0).coerceAtLeast(0),
+                        isDefault = s.isDefault,
+                        useWss = false,
+                        serverType = VpnServerType.Xray,
+                    )
+                )
+                VpnServerType.Unknown -> ManualServerResolve.RequiresUnsupportedServerType(name)
+            }
         }
         return ManualServerResolve.NotAvailable
     }
@@ -70,13 +76,16 @@ object VpnServerConnectPolicy {
         if (!ignoreQuotaPlanChecks && !s.isAccessibleForUserQuotaPlan) return null
         if (!s.isOnline) return null
         if (s.serverType != VpnServerType.OpenVpn) return null
+        // Auto-pick / Home still prefer WSS-capable servers only.
         if (!s.isEnableWss) return null
         return BestServerResult(
             serverId = s.id,
             name = s.serverName.trim().takeUnless { it.isBlank() } ?: "Server #${s.id}",
             apiUrl = s.apiUrl.takeUnless { it.isBlank() },
             countConnectedClients = (row.countConnectedClients ?: 0).coerceAtLeast(0),
-            isDefault = s.isDefault
+            isDefault = s.isDefault,
+            useWss = true,
+            serverType = VpnServerType.OpenVpn,
         )
     }
 }

@@ -296,9 +296,7 @@
     <string name="sign_out_confirm_title">Выйти?</string>
     <string name="sign_out_confirm_message">Вы уверены, что хотите выйти?</string>
 
-    <string name="access_no_wss_dialog_title">Подключение в приложении недоступно</string>
-    <string name="access_xray_dialog_title">XRay не поддерживается</string>
-    <string name="access_unsupported_server_type_dialog_title">Тип сервера не поддерживается</string>
+    <string name="access_no_wss_dialog_title">Подключение в приложении недоступно</string>    <string name="access_unsupported_server_type_dialog_title">Тип сервера не поддерживается</string>
     <string name="access_switch_title">Сменить сервер?</string>
     <string name="access_switch_message">Отключить текущий VPN и подключиться к «%1$s»?</string>
     <string name="access_switch">Сменить</string>
@@ -370,9 +368,7 @@
     <string name="vpn_permission_dialog_title">Требуется разрешение на VPN</string>
     <string name="vpn_permission_dialog_body">Для защиты вашего соединения DataGate необходимо разрешение на создание VPN-туннеля. Это стандартный запрос Android для всех VPN-приложений.</string>
     <string name="vpn_permission_dialog_grant">Предоставить доступ</string>
-    <string name="vpn_requires_openvpn_connect">Сервер «%1$s» не поддерживает подключение в этом приложении (нужен WSS). Подключайтесь через официальное приложение OpenVPN Connect с профилем этого сервера.\n\nВ странах с жёстким государственным контролем сети (например Россия, Иран) соединение всё равно может не работать.</string>
-    <string name="vpn_requires_xray_client">Это приложение не позволяет подключаться к серверам типа XRay. Сервер: %1$s.\n\nПожалуйста, используйте другой клиент.</string>
-    <string name="vpn_requires_unsupported_server_type">Это приложение не поддерживает данный тип сервера. Сервер: %1$s.\n\nПожалуйста, используйте другой клиент.</string>
+    <string name="vpn_requires_openvpn_connect">Сервер «%1$s» не поддерживает подключение в этом приложении (нужен WSS). Подключайтесь через официальное приложение OpenVPN Connect с профилем этого сервера.\n\nВ странах с жёстким государственным контролем сети (например Россия, Иран) соединение всё равно может не работать.</string>    <string name="vpn_requires_unsupported_server_type">Это приложение не поддерживает данный тип сервера. Сервер: %1$s.\n\nПожалуйста, используйте другой клиент.</string>
     <string name="vpn_server_manual_unavailable">Сервер №%1$d недоступен или не подходит для подключения в приложении.</string>
     <string name="vpn_server_quota_blocked">Сервер «%1$s» не входит в ваш тарифный план.</string>
     <string name="access_server_quota_blocked">Нет в вашем плане</string>
@@ -486,4 +482,33 @@
     <string name="tv_link_error_unavailable">Вход с ТВ недоступен в этой сборке.</string>
     <string name="tv_link_error_tokens_missing">Вход подтверждён, но токены не получены. Попробуйте снова.</string>
 
+    <string name="nav_profiles">Профили</string>
+    <string name="profiles_title">Профили</string>
+    <string name="profiles_add">Добавить профиль</string>
+    <string name="profiles_import_ovpn">Импорт OpenVPN (.ovpn)</string>
+    <string name="profiles_import_confirm">Import</string>
+    <string name="profiles_import_xray_file">Import Xray JSON / links file</string>
+    <string name="profiles_import_xray_link">Paste Xray / VLESS link</string>    <string name="profiles_empty_title">Пока нет локальных профилей</string>
+    <string name="profiles_empty_body">Import an .ovpn file or paste a VLESS/Xray share link to connect from this device.</string>
+    <string name="profiles_imported">Импортирован «%1$s»</string>
+    <string name="profiles_rename_title">Переименовать профиль</string>
+    <string name="profiles_name_label">Имя</string>
+    <string name="profiles_rename">Переименовать</string>
+    <string name="profiles_edit_creds">Логин / пароль</string>
+    <string name="profiles_creds_title">Учётные данные профиля</string>
+    <string name="profiles_creds_hint">Необязательно. Нужны, если в .ovpn указан auth-user-pass.</string>
+    <string name="profiles_username_label">Логин</string>
+    <string name="profiles_password_label">Пароль</string>
+    <string name="profiles_delete">Удалить</string>
+    <string name="profiles_delete_title">Удалить профиль?</string>
+    <string name="profiles_delete_message">Удалить «%1$s» с этого устройства?</string>
+    <string name="profiles_delete_confirm">Удалить</string>
+    <string name="profiles_transport_direct">Прямой OpenVPN (без WSS)</string>
+    <string name="profiles_transport_xray">Xray (libXray)</string>
+        <string name="profiles_xray_paste_title">Import Xray link</string>
+    <string name="profiles_xray_paste_hint">Paste a vless://, vmess://, trojan://, or ss:// link, or a JSON config with outbounds.</string>
+    <string name="profiles_xray_paste_label">Share link or JSON</string>    <string name="profiles_error_unavailable">Локальные профили недоступны</string>
+    <string name="profiles_error_not_found">Профиль не найден</string>
+    <string name="profiles_error_xray_unavailable">libXray is not included in this build. Rebuild with app/libs/libxray.aar.</string>
+    <string name="profiles_error_xray_not_supported">Нельзя подключиться к профилю Xray «%1$s» в этой версии приложения.</string>
 </resources>
