@@ -277,8 +277,7 @@ class VpnLifecyclePolicyTest {
 
     @Test
     fun peerEngineTeardown_whileConnecting_keepsSelectionUntilConnected() {
-        // Mapper clears on DISCONNECTED; VpnController.expectPeerEngineDisconnect restores
-        // selection — simulate that restore between peer stop and Xray CONNECTED.
+        // Mapper clears on DISCONNECTED; VpnController ignores inactive-engine peer teardown.
         var state = VpnStatusUiState(
             isConnectRequested = true,
             selectedServerId = 88,

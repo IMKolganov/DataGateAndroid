@@ -9,20 +9,19 @@ import org.junit.Test
 class AccessVpnSessionPolicyTest {
 
     @Test
-    fun activeSessionServerId_idle_isNullEvenIfStoreHasSelection() {
+    fun activeSessionServerId_idle_isNullEvenIfVpnHadSelection() {
         assertNull(
             AccessVpnSessionPolicy.activeSessionServerId(
                 isVpnConnected = false,
                 isVpnPaused = false,
                 isConnectRequested = false,
-                vpnSelectedServerId = null,
-                storeSelectedServerId = 99,
+                vpnSelectedServerId = 99,
             ),
         )
     }
 
     @Test
-    fun activeSessionServerId_connected_prefersVpnStateOverStore() {
+    fun activeSessionServerId_connected_usesVpnState() {
         assertEquals(
             42,
             AccessVpnSessionPolicy.activeSessionServerId(
@@ -30,27 +29,25 @@ class AccessVpnSessionPolicyTest {
                 isVpnPaused = false,
                 isConnectRequested = true,
                 vpnSelectedServerId = 42,
-                storeSelectedServerId = 99,
             ),
         )
     }
 
     @Test
-    fun activeSessionServerId_connected_fallsBackToStoreWhenVpnIdMissing() {
-        assertEquals(
-            99,
+    fun activeSessionServerId_profileSession_nullVpnId_doesNotInventCatalogSession() {
+        // Local profile clears selectedServerId; Access list selection must not become the session.
+        assertNull(
             AccessVpnSessionPolicy.activeSessionServerId(
                 isVpnConnected = true,
                 isVpnPaused = false,
                 isConnectRequested = true,
                 vpnSelectedServerId = null,
-                storeSelectedServerId = 99,
             ),
         )
     }
 
     @Test
-    fun activeSessionServerId_connectBusy_usesVpnOrStore() {
+    fun activeSessionServerId_connectBusy_usesVpnId() {
         assertEquals(
             7,
             AccessVpnSessionPolicy.activeSessionServerId(
@@ -58,7 +55,6 @@ class AccessVpnSessionPolicyTest {
                 isVpnPaused = false,
                 isConnectRequested = true,
                 vpnSelectedServerId = 7,
-                storeSelectedServerId = null,
             ),
         )
     }

@@ -54,7 +54,6 @@ import com.imkolganov.datagate.util.formatBytes
 import com.imkolganov.datagate.util.formatQuotaEffectiveFromForDisplay
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.ServerSelectionMode
-import com.imkolganov.datagate.vpn.VpnServerSelectionStore
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 import java.util.Locale
 
@@ -94,7 +93,6 @@ fun AccessScreen(
         isVpnPaused = vpnPaused,
         isConnectRequested = vpnState.isConnectRequested,
         vpnSelectedServerId = vpnState.selectedServerId,
-        storeSelectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext),
     )
     val sessionServerId = activeSessionServerId
     val externalIpAddress = AccessSessionNetworkInfo.resolveExternalIp(sessionServerId, state.servers)
@@ -137,9 +135,8 @@ fun AccessScreen(
             return
         }
         val sessionServerId = vpnState.selectedServerId
-            ?: VpnServerSelectionStore.getSelectedServerId(appContext)
         if (vpnConnected || connectBusy) {
-            if (sessionServerId == server.id) {
+            if (sessionServerId != null && sessionServerId == server.id) {
                 if (state.serverSelectionMode == ServerSelectionMode.AUTO) {
                     onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
                 }

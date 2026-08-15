@@ -148,8 +148,8 @@ object VpnEventMapper {
 
             "DISCONNECTED" -> {
                 // Always end the session in the mapper. Peer-engine teardown during OpenVPN↔Xray
-                // switch is restored by VpnController.expectPeerEngineDisconnect so notification
-                // Disconnect mid-connect cannot leave connectBusy stuck forever.
+                // switch is ignored by VpnController via VpnEngineStatusPolicy (inactive engine),
+                // so notification Disconnect mid-connect cannot leave connectBusy stuck forever.
                 previous.copy(
                     isConnectRequested = false,
                     isVpnConnected = false,

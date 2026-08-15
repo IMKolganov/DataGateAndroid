@@ -42,14 +42,15 @@ class VpnController(
 
     private var pendingCommandRollback: VpnStatusUiState? = null
 
-    /**
-     * Set when we intentionally stop the other engine during a connect (OpenVPN↔Xray).
-     * The peer's DISCONNECTED must not clear [VpnStatusUiState.isConnectRequested] / selection.
-     */
-    @Volatile
-    private var expectPeerEngineDisconnect: Boolean = false
-
-    private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo, fromQuery ->
+    private val receiver = VpnStatusBroadcastReceiver { eventName, eventInfo, fromQuery, statusEngine ->
+        val activeEngineName = prefs.getString(KEY_ACTIVE_ENGINE, null)
+        if (!VpnEngineStatusPolicy.shouldApplyStatusBroadcast(activeEngineName, statusEngine)) {
+            VpnDebugLogger.d(
+                TAG,
+                "Ignoring status from inactive engine: event=$eventName engine=$statusEngine active=$activeEngineName",
+            )
+            return@VpnStatusBroadcastReceiver
+        }
         val current = getState()
         VpnCommandContract.parseRejectedCommand(eventName)?.let { rejected ->
             val rollback = pendingCommandRollback ?: current
@@ -69,7 +70,7 @@ class VpnController(
             eventInfo = eventInfo,
             fromQuery = fromQuery,
         )
-        var mapped = VpnLifecyclePolicy.applyStatusBroadcast(
+        val mapped = VpnLifecyclePolicy.applyStatusBroadcast(
             current = current,
             broadcast = broadcast,
             mapEvent = { state, name, info ->
@@ -83,24 +84,7 @@ class VpnController(
         if (VpnCommandContract.isAuthoritativeTunnelEvent(eventName)) {
             pendingCommandRollback = null
         }
-        // Peer stop while switching engines: mapper clears a connected session; restore in-flight UI.
-        if (eventName == "DISCONNECTED" && !fromQuery && expectPeerEngineDisconnect) {
-            expectPeerEngineDisconnect = false
-            mapped = mapped.copy(
-                isConnectRequested = true,
-                selectedServerId = current.selectedServerId,
-                selectedServerName = current.selectedServerName,
-            )
-        } else if (
-            eventName.equals("CONNECTED", ignoreCase = true) ||
-            eventName.equals("ERROR", ignoreCase = true) ||
-            eventName.equals("TUN_SETUP_FAILED", ignoreCase = true)
-        ) {
-            expectPeerEngineDisconnect = false
-        }
-        // Only drop session id when the session is truly over. Peer-engine DISCONNECTED
-        // during an in-flight connect keeps isConnectRequested and must keep the id.
-        if (eventName == "DISCONNECTED" && !fromQuery && !mapped.isConnectRequested) {
+        if (eventName == "DISCONNECTED" && !fromQuery) {
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
         onStateChange(mapped)
@@ -110,12 +94,13 @@ class VpnController(
             details = mapOf(
                 "info" to eventInfo,
                 "fromQuery" to fromQuery,
+                "engine" to (statusEngine ?: ""),
                 "connected" to mapped.isVpnConnected,
                 "paused" to mapped.isVpnPaused,
                 "connectRequested" to mapped.isConnectRequested,
             ),
         )
-        VpnDebugLogger.d(TAG, "VPN status updated: $eventName - $eventInfo (fromQuery=$fromQuery)")
+        VpnDebugLogger.d(TAG, "VPN status updated: $eventName - $eventInfo (fromQuery=$fromQuery engine=$statusEngine)")
     }
 
     fun onStart() {
@@ -398,7 +383,6 @@ class VpnController(
     fun requestDisconnect() {
         VpnDebugLogger.event("ui.user", "disconnect")
         pendingCommandRollback = null
-        expectPeerEngineDisconnect = false
         prefs.edit {
             remove("selected_server_name")
             remove(KEY_SESSION_SERVER_ID)
@@ -519,7 +503,6 @@ class VpnController(
 
     /** Always disconnect the other VPN engine before starting [keep]. */
     private fun stopPeerEngine(keep: VpnEngine) {
-        expectPeerEngineDisconnect = true
         when (keep) {
             VpnEngine.OpenVpn -> {
                 startServiceCompat(
@@ -547,8 +530,9 @@ class VpnController(
         username: String,
         password: String,
     ) {
-        stopPeerEngine(VpnEngine.OpenVpn)
+        // Mark active engine before peer teardown so peer DISCONNECTED cannot wipe UI.
         setActiveEngine(VpnEngine.OpenVpn)
+        stopPeerEngine(VpnEngine.OpenVpn)
         val serverDisplayName =
             getState().selectedServerName?.takeIf { it.isNotBlank() }
                 ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
@@ -602,8 +586,9 @@ class VpnController(
         configText: String,
         bypassRoutes: List<IpCidrRoute>,
     ) {
-        stopPeerEngine(VpnEngine.Xray)
+        // Mark active engine before peer teardown so peer DISCONNECTED cannot wipe UI.
         setActiveEngine(VpnEngine.Xray)
+        stopPeerEngine(VpnEngine.Xray)
         val serverDisplayName =
             getState().selectedServerName?.takeIf { it.isNotBlank() }
                 ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }

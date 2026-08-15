@@ -84,6 +84,10 @@ class OpenVpn3Service : VpnService() {
         const val EXTRA_EVENT_NAME = "event_name"
         const val EXTRA_EVENT_INFO = "event_info"
         const val EXTRA_STATUS_FROM_QUERY = "status_from_query"
+        /** Which VPN engine emitted this status ([ENGINE_OPENVPN] / [ENGINE_XRAY]). */
+        const val EXTRA_STATUS_ENGINE = "status_engine"
+        const val ENGINE_OPENVPN = "OpenVpn"
+        const val ENGINE_XRAY = "Xray"
 
         const val ACTION_QUERY_STATUS = "com.imkolganov.datagate.vpn.QUERY_STATUS"
 
@@ -434,12 +438,6 @@ class OpenVpn3Service : VpnService() {
         isStopping = false
         desiredConnection = true
 
-        if (runtimeState == VpnRuntimeState.CONNECTING || runtimeState == VpnRuntimeState.CONNECTED) {
-            logCommandDropped("CONNECT", "already_$runtimeState")
-            broadcastStatus(lastEventName, lastEventInfo)
-            return
-        }
-
         if (!isNativeLibraryLoaded) {
             desiredConnection = false
             pendingConnectRequest = null
@@ -509,9 +507,14 @@ class OpenVpn3Service : VpnService() {
                 "netTransport" to currentTransportLabel(),
             ),
         )
+        // Replace any in-flight/active OpenVPN session (profile switch, same-engine reconnect).
+        // [startVpn] tears down the previous generation; clear gates so startPending is not blocked.
+        reconnectPendingAfterJob = false
+        isPaused = false
+        connectInProgress = false
+        hasActiveSession = false
+
         if (!networkAvailable) {
-            connectInProgress = false
-            hasActiveSession = false
             transitionState(VpnRuntimeState.WAITING_NETWORK, "connect_wait_network")
             broadcastStatus("WAITING_NETWORK", "Waiting for network...")
         } else {
@@ -1361,6 +1364,7 @@ class OpenVpn3Service : VpnService() {
                 putExtra(EXTRA_EVENT_NAME, name)
                 putExtra(EXTRA_EVENT_INFO, info)
                 putExtra(EXTRA_STATUS_FROM_QUERY, fromQuery)
+                putExtra(EXTRA_STATUS_ENGINE, ENGINE_OPENVPN)
             }
 
         sendBroadcast(intent)

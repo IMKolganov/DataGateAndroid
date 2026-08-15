@@ -375,6 +375,7 @@ class XrayVpnService : VpnService() {
                 putExtra(OpenVpn3Service.EXTRA_EVENT_NAME, name)
                 putExtra(OpenVpn3Service.EXTRA_EVENT_INFO, info)
                 putExtra(OpenVpn3Service.EXTRA_STATUS_FROM_QUERY, fromQuery)
+                putExtra(OpenVpn3Service.EXTRA_STATUS_ENGINE, OpenVpn3Service.ENGINE_XRAY)
             }
         sendBroadcast(intent)
     }

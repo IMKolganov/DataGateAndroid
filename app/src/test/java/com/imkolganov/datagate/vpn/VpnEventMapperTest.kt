@@ -123,7 +123,7 @@ class VpnEventMapperTest {
     @Test
     fun map_disconnected_whileConnecting_clearsConnectBusyForNotificationCancel() {
         // Notification Disconnect mid-connect must not leave connectBusy stuck.
-        // Peer OpenVPN↔Xray teardown is restored by VpnController.expectPeerEngineDisconnect.
+        // Peer OpenVPN↔Xray teardown is ignored by VpnController via VpnEngineStatusPolicy.
         val previous = VpnStatusUiState(
             isConnectRequested = true,
             isVpnConnected = false,
@@ -157,8 +157,8 @@ class VpnEventMapperTest {
 
     @Test
     fun map_engineSwitch_peerDisconnectedThenConnected_keepsServerNameInStatus() {
-        // Mapper clears on peer DISCONNECTED; VpnController.expectPeerEngineDisconnect restores
-        // selection — simulate that restore before CONNECTED.
+        // Mapper clears on peer DISCONNECTED; VpnController ignores inactive-engine events so
+        // a live Xray session is not wiped — simulate ignore by keeping selection.
         var state = VpnStatusUiState(
             isConnectRequested = true,
             isVpnConnected = false,
