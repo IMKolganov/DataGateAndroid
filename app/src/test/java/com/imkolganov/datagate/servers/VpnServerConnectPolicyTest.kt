@@ -227,6 +227,57 @@ class VpnServerConnectPolicyTest {
         assertEquals(false, ok.result.useWss)
     }
 
+    @Test
+    fun pickBestServer_forwardsDnsServersAndTags_forXray() {
+        val items = listOf(
+            row(
+                id = 21,
+                name = "xray-dns",
+                clients = 0,
+                accessible = true,
+                type = VpnServerType.Xray,
+                wss = false,
+                dnsServers = listOf("172.20.0.1"),
+                tags = listOf("identity", "eu"),
+            ),
+        )
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(21, best.serverId)
+        assertEquals(listOf("172.20.0.1"), best.dnsServers)
+        assertEquals(listOf("identity", "eu"), best.tags)
+        assertEquals(VpnServerType.Xray, best.serverType)
+    }
+
+    @Test
+    fun resolveManual_forwardsDnsServersAndTags_forOpenVpn() {
+        val items = listOf(
+            row(
+                id = 69,
+                name = "helsinki",
+                clients = 1,
+                accessible = true,
+                dnsServers = listOf("8.8.8.8", "1.1.1.1"),
+                tags = listOf("free"),
+            ),
+        )
+        val resolved = VpnServerConnectPolicy.resolveManualConnection(items, 69)
+        assertTrue(resolved is ManualServerResolve.Ok)
+        val best = (resolved as ManualServerResolve.Ok).result
+        assertEquals(listOf("8.8.8.8", "1.1.1.1"), best.dnsServers)
+        assertEquals(listOf("free"), best.tags)
+        assertEquals(VpnServerType.OpenVpn, best.serverType)
+    }
+
+    @Test
+    fun pickBestServer_defaultDnsAndTagsEmpty() {
+        val items = listOf(
+            row(id = 1, name = "plain", clients = 0, accessible = true),
+        )
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(emptyList<String>(), best.dnsServers)
+        assertEquals(emptyList<String>(), best.tags)
+    }
+
     private fun row(
         id: Int,
         name: String,
@@ -236,6 +287,8 @@ class VpnServerConnectPolicyTest {
         wss: Boolean = true,
         type: VpnServerType = VpnServerType.OpenVpn,
         deleted: Boolean = false,
+        dnsServers: List<String> = emptyList(),
+        tags: List<String> = emptyList(),
     ): OpenVpnServerWithStatusV2Item {
         val server = OpenVpnServerV2Dto(
             id = id,
@@ -251,9 +304,10 @@ class VpnServerConnectPolicyTest {
             lastUpdate = null,
             isDeleted = deleted,
             dcoIsEnabled = null,
-            tags = emptyList(),
+            tags = tags,
             quotaPlanGroups = emptyList(),
             isAccessibleForUserQuotaPlan = accessible,
+            dnsServers = dnsServers,
         )
         return OpenVpnServerWithStatusV2Item(
             server = server,

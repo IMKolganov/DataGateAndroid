@@ -337,7 +337,10 @@ fun AccessScreen(
                     isLoading = networkIdentityLoading,
                     externalIpLoading = externalIpLoading,
                     showVpnIp = vpnConnected,
-                    showPrivateDnsHint = vpnConnected && networkIdentity.dnsIdentityEnabled,
+                    showPrivateDnsHint = AccessSessionNetworkInfo.shouldShowPrivateDnsHint(
+                        vpnConnected = vpnConnected,
+                        dnsIdentityEnabled = networkIdentity.dnsIdentityEnabled,
+                    ),
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }

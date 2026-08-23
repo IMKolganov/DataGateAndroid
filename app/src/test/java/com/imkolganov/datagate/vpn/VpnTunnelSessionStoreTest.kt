@@ -83,4 +83,68 @@ class VpnTunnelSessionStoreTest {
         assertFalse(VpnTunnelSessionStore.read(context).dnsIdentityEnabled)
         assertEquals(listOf("8.8.8.8"), VpnTunnelSessionStore.read(context).dnsServers)
     }
+
+    @Test
+    fun clear_withExpectedOwnerOpenVpn_skipsWhenXrayOwnsSession() {
+        VpnTunnelSessionStore.clear(context)
+        VpnTunnelSessionStore.recordDnsServers(
+            context,
+            listOf("172.20.0.1"),
+            owner = VpnTunnelSessionStore.OWNER_XRAY,
+        )
+        VpnTunnelSessionStore.recordDnsIdentityEnabled(
+            context,
+            true,
+            owner = VpnTunnelSessionStore.OWNER_XRAY,
+        )
+
+        // Late OpenVPN teardown must not wipe active Xray session DNS.
+        VpnTunnelSessionStore.clear(context, expectedOwner = VpnTunnelSessionStore.OWNER_OPENVPN)
+
+        val snapshot = VpnTunnelSessionStore.read(context)
+        assertEquals(listOf("172.20.0.1"), snapshot.dnsServers)
+        assertTrue(snapshot.dnsIdentityEnabled)
+    }
+
+    @Test
+    fun clear_withExpectedOwnerOpenVpn_clearsWhenOwnerMatches() {
+        VpnTunnelSessionStore.recordDnsServers(
+            context,
+            listOf("8.8.8.8"),
+            owner = VpnTunnelSessionStore.OWNER_OPENVPN,
+        )
+        VpnTunnelSessionStore.clear(context, expectedOwner = VpnTunnelSessionStore.OWNER_OPENVPN)
+        assertEquals(emptyList<String>(), VpnTunnelSessionStore.read(context).dnsServers)
+    }
+
+    @Test
+    fun recordXraySession_persistsIpDnsAndIdentityWithOwner() {
+        VpnTunnelSessionStore.clear(context)
+        VpnTunnelSessionStore.recordVpnIp(
+            context,
+            "10.10.10.2",
+            owner = VpnTunnelSessionStore.OWNER_XRAY,
+        )
+        VpnTunnelSessionStore.recordDnsServers(
+            context,
+            listOf("172.20.0.1"),
+            owner = VpnTunnelSessionStore.OWNER_XRAY,
+        )
+        VpnTunnelSessionStore.recordDnsIdentityEnabled(
+            context,
+            true,
+            owner = VpnTunnelSessionStore.OWNER_XRAY,
+        )
+
+        val snapshot = VpnTunnelSessionStore.read(context)
+        assertEquals("10.10.10.2", snapshot.vpnIpAddress)
+        assertEquals(listOf("172.20.0.1"), snapshot.dnsServers)
+        assertTrue(snapshot.dnsIdentityEnabled)
+
+        VpnTunnelSessionStore.clear(context, expectedOwner = VpnTunnelSessionStore.OWNER_XRAY)
+        val cleared = VpnTunnelSessionStore.read(context)
+        assertNull(cleared.vpnIpAddress)
+        assertEquals(emptyList<String>(), cleared.dnsServers)
+        assertFalse(cleared.dnsIdentityEnabled)
+    }
 }

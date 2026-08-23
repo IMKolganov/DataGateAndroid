@@ -307,13 +307,11 @@ class VpnConnectInteractor(
                 val raw = repo.readConfigText(profile)
                 val normalized = XrayCoreFacade.normalizeToOutboundsConfig(raw)
                 val routePlan = prepareXrayExcludeRoutePlan()
-                val dnsServers = XrayVpnDns.resolve(
-                    explicitDnsServers = profile.dnsServers.ifEmpty {
-                        XrayVpnDns.extractExplicitDnsServers(raw)
-                    },
+                val dnsPlan = XrayVpnDns.planFromLocalProfile(
+                    profileDnsServers = profile.dnsServers,
+                    profileDnsIdentityEnabled = profile.dnsIdentityEnabled,
+                    rawConfig = raw,
                 )
-                val dnsIdentityEnabled = profile.dnsIdentityEnabled ||
-                    (XrayVpnDns.extractDnsIdentityEnabled(raw) == true)
                 VpnDebugLogger.event(
                     category = "ui.connect",
                     action = "hand_off_to_xray_controller",
@@ -322,15 +320,15 @@ class VpnConnectInteractor(
                         "configBytes" to normalized.length,
                         "excludeRoutes" to routePlan.androidExcludedRoutes.size,
                         "appliedRoutes" to routePlan.appliedRouteCount,
-                        "dnsServers" to dnsServers.joinToString(","),
-                        "dnsIdentityEnabled" to dnsIdentityEnabled,
+                        "dnsServers" to dnsPlan.dnsServers.joinToString(","),
+                        "dnsIdentityEnabled" to dnsPlan.dnsIdentityEnabled,
                     ),
                 )
                 vpnController.startWithXrayConfig(
                     configText = normalized,
                     bypassRoutes = routePlan.androidExcludedRoutes,
-                    dnsServers = dnsServers,
-                    dnsIdentityEnabled = dnsIdentityEnabled,
+                    dnsServers = dnsPlan.dnsServers,
+                    dnsIdentityEnabled = dnsPlan.dnsIdentityEnabled,
                 )
                 return
             }
@@ -437,10 +435,7 @@ class VpnConnectInteractor(
         )
         val normalized = XrayCoreFacade.normalizeToOutboundsConfig(linkText)
         val routePlan = prepareXrayExcludeRoutePlan()
-        val dnsServers = XrayVpnDns.resolve(
-            explicitDnsServers = XrayVpnDns.extractExplicitDnsServers(linkText),
-        )
-        val dnsIdentityEnabled = XrayVpnDns.extractDnsIdentityEnabled(linkText) == true
+        val dnsPlan = XrayVpnDns.planFromIssuedLink(linkText)
         VpnDebugLogger.event(
             category = "ui.connect",
             action = "hand_off_to_xray_controller",
@@ -450,15 +445,15 @@ class VpnConnectInteractor(
                 "excludeRoutes" to routePlan.androidExcludedRoutes.size,
                 "appliedRoutes" to routePlan.appliedRouteCount,
                 "delivery" to routePlan.delivery.name,
-                "dnsServers" to dnsServers.joinToString(","),
-                "dnsIdentityEnabled" to dnsIdentityEnabled,
+                "dnsServers" to dnsPlan.dnsServers.joinToString(","),
+                "dnsIdentityEnabled" to dnsPlan.dnsIdentityEnabled,
             ),
         )
         vpnController.startWithXrayConfig(
             configText = normalized,
             bypassRoutes = routePlan.androidExcludedRoutes,
-            dnsServers = dnsServers,
-            dnsIdentityEnabled = dnsIdentityEnabled,
+            dnsServers = dnsPlan.dnsServers,
+            dnsIdentityEnabled = dnsPlan.dnsIdentityEnabled,
         )
     }
 

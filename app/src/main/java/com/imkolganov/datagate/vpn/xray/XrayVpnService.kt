@@ -253,13 +253,8 @@ class XrayVpnService : VpnService() {
         }
     }
 
-    private fun resolveDnsServers(intent: Intent): List<String> {
-        val fromExtra = intent.getStringArrayListExtra(EXTRA_DNS_SERVERS)
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-            .orEmpty()
-        return XrayVpnDns.resolve(explicitDnsServers = fromExtra)
-    }
+    private fun resolveDnsServers(intent: Intent): List<String> =
+        XrayVpnDns.resolveFromIntentExtras(intent.getStringArrayListExtra(EXTRA_DNS_SERVERS))
 
     /** Prefer "Server · Connected" so status stays visible when a display name is set. */
     private fun notificationBody(status: String): String {

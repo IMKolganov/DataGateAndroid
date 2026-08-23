@@ -1,7 +1,9 @@
 package com.imkolganov.datagate.ui.screens.access
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AccessSessionNetworkInfoTest {
@@ -43,5 +45,33 @@ class AccessSessionNetworkInfoTest {
         assertNull(AccessSessionNetworkInfo.resolveExternalIp(null, servers))
         assertNull(AccessSessionNetworkInfo.resolveExternalIp(2, servers))
         assertNull(AccessSessionNetworkInfo.resolveExternalIp(99, servers))
+    }
+
+    @Test
+    fun shouldShowPrivateDnsHint_onlyWhenConnectedAndIdentityEnabled() {
+        assertTrue(
+            AccessSessionNetworkInfo.shouldShowPrivateDnsHint(
+                vpnConnected = true,
+                dnsIdentityEnabled = true,
+            ),
+        )
+        assertFalse(
+            AccessSessionNetworkInfo.shouldShowPrivateDnsHint(
+                vpnConnected = true,
+                dnsIdentityEnabled = false,
+            ),
+        )
+        assertFalse(
+            AccessSessionNetworkInfo.shouldShowPrivateDnsHint(
+                vpnConnected = false,
+                dnsIdentityEnabled = true,
+            ),
+        )
+        assertFalse(
+            AccessSessionNetworkInfo.shouldShowPrivateDnsHint(
+                vpnConnected = false,
+                dnsIdentityEnabled = false,
+            ),
+        )
     }
 }

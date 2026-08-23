@@ -12,10 +12,51 @@ object XrayVpnDns {
 
     private val PUBLIC_FALLBACK = listOf("1.1.1.1", "8.8.8.8")
 
+    /** DNS servers + Private DNS Off hint for an Xray connect handoff. */
+    data class ConnectDnsPlan(
+        val dnsServers: List<String>,
+        val dnsIdentityEnabled: Boolean,
+    )
+
     /** Prefer explicit IPv4 servers from issued profile; otherwise public classic resolvers. */
     fun resolve(explicitDnsServers: List<String>? = null): List<String> {
         val explicit = cleanList(explicitDnsServers)
         return explicit.ifEmpty { PUBLIC_FALLBACK }
+    }
+
+    /**
+     * Same as [resolve] for [android.content.Intent] `EXTRA_DNS_SERVERS` (may be null/empty).
+     * Non-IPv4 entries are dropped; empty → public fallback.
+     */
+    fun resolveFromIntentExtras(servers: List<String>?): List<String> =
+        resolve(explicitDnsServers = servers)
+
+    /**
+     * Local Profiles connect: prefer index `dnsServers` / `dnsIdentityEnabled`, else parse [rawConfig].
+     */
+    fun planFromLocalProfile(
+        profileDnsServers: List<String>,
+        profileDnsIdentityEnabled: Boolean,
+        rawConfig: String,
+    ): ConnectDnsPlan {
+        val servers = resolve(
+            explicitDnsServers = profileDnsServers.ifEmpty {
+                extractExplicitDnsServers(rawConfig)
+            },
+        )
+        val identity = profileDnsIdentityEnabled ||
+            (extractDnsIdentityEnabled(rawConfig) == true)
+        return ConnectDnsPlan(dnsServers = servers, dnsIdentityEnabled = identity)
+    }
+
+    /**
+     * Catalog Xray connect: DNS only from issued client-link / profile JSON body.
+     * Catalog list fields (`BestServerResult.dnsServers`) must not be passed here.
+     */
+    fun planFromIssuedLink(linkText: String): ConnectDnsPlan {
+        val servers = resolve(explicitDnsServers = extractExplicitDnsServers(linkText))
+        val identity = extractDnsIdentityEnabled(linkText) == true
+        return ConnectDnsPlan(dnsServers = servers, dnsIdentityEnabled = identity)
     }
 
     /**
