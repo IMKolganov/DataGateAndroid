@@ -274,4 +274,40 @@ class VpnLifecyclePolicyTest {
         assertEquals("Tokyo", afterReopen.selectedServerName)
         assertEquals(9, afterReopen.selectedServerId)
     }
+
+    @Test
+    fun peerEngineTeardown_whileConnecting_keepsSelectionUntilConnected() {
+        // Mapper clears on DISCONNECTED; VpnController ignores inactive-engine peer teardown.
+        var state = VpnStatusUiState(
+            isConnectRequested = true,
+            selectedServerId = 88,
+            selectedServerName = "Norway Xray",
+        )
+        state = VpnLifecyclePolicy.foldStatusBroadcasts(
+            state,
+            listOf(
+                VpnLifecyclePolicy.StatusBroadcast("DISCONNECTED", "peer OpenVPN stop"),
+            ),
+            mapper,
+        )
+        assertFalse(state.isConnectRequested)
+        state = state.copy(
+            isConnectRequested = true,
+            selectedServerId = 88,
+            selectedServerName = "Norway Xray",
+        )
+        state = VpnLifecyclePolicy.foldStatusBroadcasts(
+            state,
+            listOf(
+                VpnLifecyclePolicy.StatusBroadcast("CONNECTING"),
+                VpnLifecyclePolicy.StatusBroadcast("CONNECTED"),
+            ),
+            mapper,
+        )
+
+        assertTrue(state.isVpnConnected)
+        assertEquals(88, state.selectedServerId)
+        assertEquals("Norway Xray", state.selectedServerName)
+        assertTrue(state.lastMessage.contains("Norway"))
+    }
 }

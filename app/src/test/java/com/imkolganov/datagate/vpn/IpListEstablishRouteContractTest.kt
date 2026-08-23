@@ -118,7 +118,10 @@ class IpListEstablishRouteContractTest {
         )
 
         val selectedCidrs = plan.androidExcludedRoutes.map { it.toCidrString() }.toHashSet()
-        for (priorityRoute in priorityRoutes) {
+        // Compare post-normalization: sibling/nested merges rewrite CIDR strings (e.g. two /22 → /21).
+        val normalizedPriority = IpCidrNormalizer.normalize(priorityRoutes).routes
+        assertTrue(normalizedPriority.isNotEmpty())
+        for (priorityRoute in normalizedPriority) {
             assertTrue(
                 "Priority route ${priorityRoute.toCidrString()} was dropped",
                 priorityRoute.toCidrString() in selectedCidrs,
@@ -164,6 +167,34 @@ class IpListEstablishRouteContractTest {
         assertEquals(0, IpListEstablishRoutePolicy.excludeRouteCallsForPlan(plan))
         assertTrue(plan.appliedRouteCount > 0)
         assertTrue(plan.config.contains("net_gateway"))
+    }
+
+    @Test
+    fun productionPriorityFallback_fitsWithinXrayTvRoutingDirectBudget() {
+        // TV Android 12- uses MAX_XRAY_ROUTING_DIRECT_CIDRS_TV; priority must still fit entirely.
+        val priorityRoutes = parseProductionPriorityFallbackList()
+        assertTrue(priorityRoutes.isNotEmpty())
+        val normalized = IpCidrNormalizer.normalize(priorityRoutes).routes
+        assertTrue(
+            "Priority list grew past TV Xray routing budget (${normalized.size} > " +
+                "${IpListRouteConfig.MAX_XRAY_ROUTING_DIRECT_CIDRS_TV})",
+            normalized.size <= IpListRouteConfig.MAX_XRAY_ROUTING_DIRECT_CIDRS_TV,
+        )
+        val plan = IpListRouteConfig.prepareXrayBypassRoutes(
+            routes = emptyList(),
+            priorityRoutes = priorityRoutes,
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = false,
+            constrainedDevice = true,
+        )
+        val selected = plan.androidExcludedRoutes.map { it.toCidrString() }.toHashSet()
+        for (route in normalized) {
+            assertTrue(
+                "Priority ${route.toCidrString()} dropped under TV Xray routing cap",
+                route.toCidrString() in selected,
+            )
+        }
     }
 
     private fun planForAndroid13(

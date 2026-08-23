@@ -9,6 +9,9 @@ import com.imkolganov.datagate.json.optStringOrNull
 import com.imkolganov.datagate.model.base.ApiResponse
 import com.imkolganov.datagate.model.quota.QuotaPlanDto
 import com.imkolganov.datagate.model.quota.UserQuotaPlanDto
+import executeSuspending
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -24,7 +27,7 @@ class QuotaPlanApi(
     private val baseUrl: String = AuthConfig.BACKEND_BASE_URL
 ) {
 
-    fun getAllQuotaPlans(includeInactive: Boolean): ApiResponse<QuotaPlansPayload> {
+    suspend fun getAllQuotaPlans(includeInactive: Boolean): ApiResponse<QuotaPlansPayload> {
         val url = baseUrl.trimEnd('/') + "/" + ApiConfig.API_QUOTA_PLANS_GET_ALL.trimStart('/')
         val bodyJson = JSONObject().apply { put("includeInactive", includeInactive) }.toString()
         val req = Request.Builder()
@@ -33,17 +36,19 @@ class QuotaPlanApi(
             .header("Accept", "application/json")
             .build()
 
-        http.newCall(req).execute().use { resp ->
-            val code = resp.code
-            val body = resp.body.string().orEmpty()
-            if (code !in 200..299) {
-                throw IOException(formatHttpErrorDetail("Quota plans failed", code, body))
+        return withContext(Dispatchers.IO) {
+            http.executeSuspending(req).use { resp ->
+                val code = resp.code
+                val body = resp.body.string().orEmpty()
+                if (code !in 200..299) {
+                    throw IOException(formatHttpErrorDetail("Quota plans failed", code, body))
+                }
+                parseQuotaPlansResponse(body)
             }
-            return parseQuotaPlansResponse(body)
         }
     }
 
-    fun getUserQuotaPlansByUserId(userId: Int): ApiResponse<UserQuotaPlansByUserPayload> {
+    suspend fun getUserQuotaPlansByUserId(userId: Int): ApiResponse<UserQuotaPlansByUserPayload> {
         val url = baseUrl.trimEnd('/') + "/" +
             ApiConfig.API_USER_QUOTA_PLANS_GET_BY_USER_ID_PREFIX.trimStart('/') + userId
 
@@ -53,13 +58,15 @@ class QuotaPlanApi(
             .header("Accept", "application/json")
             .build()
 
-        http.newCall(req).execute().use { resp ->
-            val code = resp.code
-            val body = resp.body.string().orEmpty()
-            if (code !in 200..299) {
-                throw IOException(formatHttpErrorDetail("User quota plans failed", code, body))
+        return withContext(Dispatchers.IO) {
+            http.executeSuspending(req).use { resp ->
+                val code = resp.code
+                val body = resp.body.string().orEmpty()
+                if (code !in 200..299) {
+                    throw IOException(formatHttpErrorDetail("User quota plans failed", code, body))
+                }
+                parseUserQuotaPlansResponse(body)
             }
-            return parseUserQuotaPlansResponse(body)
         }
     }
 

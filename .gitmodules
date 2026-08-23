@@ -6,3 +6,6 @@
 [submodule "native-openvpn3/third_party/asio"]
     path = native-openvpn3/third_party/asio
     url = https://github.com/chriskohlhoff/asio.git
+[submodule "native-libxray"]
+	path = native-libxray
+	url = https://github.com/XTLS/libXray.git

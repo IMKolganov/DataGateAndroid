@@ -40,6 +40,11 @@ data class IpListAppendResult(
 enum class IpListRouteDelivery {
     ANDROID_EXCLUDE_ROUTE,
     OVPN_PROFILE,
+    /**
+     * Android 12 and below for Xray: CIDRs are matched inside Xray routing → `direct`
+     * (freedom + [android.net.VpnService.protect]), not via [android.net.VpnService.Builder.excludeRoute].
+     */
+    XRAY_ROUTING_DIRECT,
 }
 
 data class IpListConnectionRoutePlan(
@@ -71,7 +76,9 @@ object IpListRouteConfig {
     /**
      * Cap for [IpListCoverageMode.FULL] when [IpListSettings.safeRouteLimitEnabled] is true.
      *
-     * Conservative production cap for Android 13+ [android.net.VpnService.Builder.excludeRoute].
+     * Conservative production cap for Android 13+ [android.net.VpnService.Builder.excludeRoute]
+     * (OpenVPN and Xray TUN share this budget). On Android 12- Xray instead uses
+     * [IpListRouteDelivery.XRAY_ROUTING_DIRECT] with [DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT].
      * 1750 routes were validated successfully on SM-S928B (Android 16), while 2000 routes caused
      * TransactionTooLargeException in NetworkMonitorManager.notifyNetworkConnected (~281 KB
      * LinkProperties parcel). This is not a universal Binder-safe ceiling — another OEM, Android
@@ -155,8 +162,95 @@ object IpListRouteConfig {
         return cappedPriority + selectBroadestRoutes(remainingGeneral, remainingBudget, sortAlways = true)
     }
 
+    /**
+     * Soft cap for [IpListRouteDelivery.XRAY_ROUTING_DIRECT] (Android 12-): matching hundreds of
+     * CIDRs inside Xray on every connection is heavier than OS [excludeRoute], and large JSON
+     * hurts weak TV SoCs. Priority routes still survive first within this budget.
+     */
+    const val MAX_XRAY_ROUTING_DIRECT_CIDRS = 400
+    /** Tighter budget on Android TV / leanback devices. */
+    const val MAX_XRAY_ROUTING_DIRECT_CIDRS_TV = 250
+
     fun sanitizeAndroid12OvpnRouteLimit(value: Int): Int =
         value.coerceIn(MIN_ANDROID12_OVPN_ROUTE_LIMIT, MAX_ANDROID12_OVPN_ROUTE_LIMIT)
+
+    /** Effective CIDR budget for Xray routing→direct bypass (Android 12-). */
+    fun xrayRoutingDirectCidrLimit(
+        android12OvpnRouteLimit: Int,
+        constrainedDevice: Boolean,
+    ): Int {
+        val userCap = sanitizeAndroid12OvpnRouteLimit(android12OvpnRouteLimit)
+        val softCap =
+            if (constrainedDevice) MAX_XRAY_ROUTING_DIRECT_CIDRS_TV
+            else MAX_XRAY_ROUTING_DIRECT_CIDRS
+        return minOf(userCap, softCap)
+    }
+
+    /**
+     * Bypass plan for Xray TUN sessions.
+     *
+     * - Android 13+: [IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE] (same caps as OpenVPN).
+     * - Android 12-: [IpListRouteDelivery.XRAY_ROUTING_DIRECT] — selected CIDRs stay in
+     *   [IpListConnectionRoutePlan.androidExcludedRoutes] for injection into Xray routing rules
+     *   (no OVPN profile, no [excludeRoute]). Requires [android.net.VpnService.protect] on
+     *   freedom/direct outbounds or traffic loops back into TUN.
+     *
+     * @param constrainedDevice TV / weak devices — uses [MAX_XRAY_ROUTING_DIRECT_CIDRS_TV].
+     */
+    fun prepareXrayBypassRoutes(
+        routes: List<IpCidrRoute>,
+        priorityRoutes: List<IpCidrRoute>,
+        coverageMode: IpListCoverageMode,
+        android12OvpnRouteLimit: Int,
+        supportsAndroidRouteExclusion: Boolean,
+        safeRouteLimitEnabled: Boolean = true,
+        constrainedDevice: Boolean = false,
+    ): IpListConnectionRoutePlan {
+        val rawCandidateCount = routes.size + priorityRoutes.size
+        val normalizedGeneral = IpCidrNormalizer.normalize(routes)
+        val normalizedPriority = IpCidrNormalizer.normalize(priorityRoutes)
+        val normalizedCandidateCount =
+            normalizedGeneral.afterSiblingMergeCount + normalizedPriority.afterSiblingMergeCount
+        val uniqueCandidates = (
+            normalizedPriority.routes.asSequence().map { it.toCidrString() } +
+                normalizedGeneral.routes.asSequence().map { it.toCidrString() }
+            ).toHashSet().size
+
+        val selectedRoutes: List<IpCidrRoute>
+        val delivery: IpListRouteDelivery
+        if (supportsAndroidRouteExclusion) {
+            val cap = when (coverageMode) {
+                IpListCoverageMode.FAST -> MAX_ANDROID_EXCLUDED_ROUTES_FAST
+                IpListCoverageMode.FULL -> MAX_ANDROID_EXCLUDED_ROUTES_FULL
+            }
+            selectedRoutes = selectRoutesWithPriority(
+                routes = normalizedGeneral.routes,
+                priorityRoutes = normalizedPriority.routes,
+                maxRoutes = if (safeRouteLimitEnabled) cap else Int.MAX_VALUE,
+            )
+            delivery = IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE
+        } else {
+            // Include IPv6 (unlike OVPN android12 path) — Xray routing accepts both families.
+            selectedRoutes = selectRoutesWithPriority(
+                routes = normalizedGeneral.routes,
+                priorityRoutes = normalizedPriority.routes,
+                maxRoutes = xrayRoutingDirectCidrLimit(android12OvpnRouteLimit, constrainedDevice),
+            )
+            delivery = IpListRouteDelivery.XRAY_ROUTING_DIRECT
+        }
+
+        return IpListConnectionRoutePlan(
+            config = "",
+            androidExcludedRoutes = selectedRoutes,
+            selectedRouteCount = selectedRoutes.size,
+            appliedRouteCount = selectedRoutes.size,
+            reachedProfileSizeLimit = false,
+            reachedEstablishRouteLimit = selectedRoutes.size < uniqueCandidates,
+            delivery = delivery,
+            rawCandidateCount = rawCandidateCount,
+            normalizedCandidateCount = normalizedCandidateCount,
+        )
+    }
 
     fun prepareConnectionRoutes(
         config: String,

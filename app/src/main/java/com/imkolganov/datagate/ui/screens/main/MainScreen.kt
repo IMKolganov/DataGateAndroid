@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -44,6 +46,9 @@ import com.imkolganov.datagate.ui.screens.access.AccessContract
 import com.imkolganov.datagate.ui.screens.access.AccessScreen
 import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.connect.VpnStatusScreen
+import com.imkolganov.datagate.ui.screens.profiles.ProfilesScreen
+import com.imkolganov.datagate.ui.screens.profiles.ProfilesViewModel
+import com.imkolganov.datagate.ui.screens.quota.QuotaScreen
 import com.imkolganov.datagate.ui.screens.settings.SettingsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
@@ -59,7 +64,7 @@ import kotlinx.coroutines.launch
 
 /** Main app tabs (bottom bar on phone, navigation rail on TV). */
 enum class MainTab {
-    Home, Access, Statistics, Settings
+    Home, Access, Quota, Profiles, Statistics, Settings
 }
 
 /** @deprecated Use [MainTab]; kept as typealias for any leftover call sites. */
@@ -76,6 +81,7 @@ fun MainScreen(
     vpnState: VpnStatusUiState,
     onConnectFromHome: () -> Unit,
     onConnectFromAccess: () -> Unit,
+    onConnectFromProfile: (String) -> Unit,
     onRequestDisconnect: () -> Unit,
     onRequestPause: () -> Unit = {},
     onRequestResume: () -> Unit = {},
@@ -84,6 +90,7 @@ fun MainScreen(
     authViewModel: AuthViewModel? = null,
     tokenStore: TokenStore,
     accessViewModel: AccessViewModel,
+    profilesViewModel: ProfilesViewModel,
     statsViewModel: StatsViewModel,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
@@ -118,6 +125,8 @@ fun MainScreen(
     val tabs = listOf(
         MainTabSpec(MainTab.Home, R.string.nav_home, Icons.Default.Home),
         MainTabSpec(MainTab.Access, R.string.nav_access, Icons.Default.Lock),
+        MainTabSpec(MainTab.Quota, R.string.nav_quota, Icons.Default.Star),
+        MainTabSpec(MainTab.Profiles, R.string.nav_profiles, Icons.Default.Folder),
         MainTabSpec(MainTab.Statistics, R.string.nav_statistics, Icons.Default.AccountBox),
         MainTabSpec(MainTab.Settings, R.string.nav_settings, Icons.Default.Settings),
     )
@@ -152,6 +161,18 @@ fun MainScreen(
                 onPauseVpn = onRequestPause,
                 onResumeVpn = onRequestResume,
                 onReconnectVpn = onReconnectVpn,
+                primaryFocusRequester = if (isTelevision) contentFocusRequester else null,
+            )
+            MainTab.Quota -> QuotaScreen(
+                state = accessState,
+                onEvent = accessViewModel::onEvent,
+                primaryFocusRequester = if (isTelevision) contentFocusRequester else null,
+            )
+            MainTab.Profiles -> ProfilesScreen(
+                viewModel = profilesViewModel,
+                vpnState = vpnState,
+                onConnectProfile = onConnectFromProfile,
+                onDisconnectVpn = onRequestDisconnect,
                 primaryFocusRequester = if (isTelevision) contentFocusRequester else null,
             )
             MainTab.Statistics -> StatsScreen(
@@ -234,7 +255,8 @@ private class PreviewAccessViewModel(
     repo = object : com.imkolganov.datagate.ui.screens.access.AccessRepository {
         override suspend fun getServers(): List<AccessContract.ServerItem> = emptyList()
         override suspend fun getMyActiveConnections(): List<AccessContract.ActiveConnectionItem> = emptyList()
-        override suspend fun loadQuotaUi(): AccessContract.QuotaUiState = AccessContract.QuotaUiState()
+        override suspend fun loadQuotaPlanUi(): AccessContract.QuotaUiState = AccessContract.QuotaUiState()
+        override suspend fun loadQuotaTrafficUsedBytes(periodIsMonthly: Boolean): Long = -1L
     },
     appContext = appContext
 )
@@ -256,17 +278,25 @@ fun MainScreenPreview() {
         PreviewAccessViewModel(context.applicationContext).also { it.onUserSessionReady() }
     }
     val previewStats = remember(app) { PreviewStatsViewModel(app) }
+    val previewProfiles = remember(app) {
+        ProfilesViewModel(
+            application = app,
+            repository = com.imkolganov.datagate.profiles.LocalVpnProfilesRepository(app),
+        )
+    }
     DataGateAndroidTheme {
         MainScreen(
             vpnState = VpnStatusUiState(),
             onConnectFromHome = {},
             onConnectFromAccess = {},
+            onConnectFromProfile = {},
             onRequestDisconnect = {},
             onReconnectVpn = {},
             onLogout = {},
             authViewModel = null,
             tokenStore = PreviewTokenStore(),
             accessViewModel = previewVm,
+            profilesViewModel = previewProfiles,
             statsViewModel = previewStats,
             themeMode = ThemeMode.SYSTEM,
             onThemeModeChange = {},

@@ -10,7 +10,9 @@ import java.net.Inet4Address
 data class NetworkIdentitySnapshot(
     /** Virtual IPv4 assigned inside the VPN tunnel (e.g. 10.51.15.x). */
     val vpnIpAddress: String? = null,
-    val dnsServers: List<String> = emptyList()
+    val dnsServers: List<String> = emptyList(),
+    /** Issued Xray profile flag — show Private DNS Off hint when true. */
+    val dnsIdentityEnabled: Boolean = false,
 )
 
 object NetworkIdentityReader {
@@ -30,7 +32,8 @@ object NetworkIdentityReader {
         fromSession: NetworkIdentitySnapshot
     ): NetworkIdentitySnapshot = NetworkIdentitySnapshot(
         vpnIpAddress = fromSystem.vpnIpAddress ?: fromSession.vpnIpAddress,
-        dnsServers = fromSystem.dnsServers.ifEmpty { fromSession.dnsServers }
+        dnsServers = fromSystem.dnsServers.ifEmpty { fromSession.dnsServers },
+        dnsIdentityEnabled = fromSession.dnsIdentityEnabled,
     )
 
     private fun readUnsafe(context: Context): NetworkIdentitySnapshot {

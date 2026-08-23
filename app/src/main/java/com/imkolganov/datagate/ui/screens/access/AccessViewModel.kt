@@ -23,19 +23,25 @@ open class AccessViewModel(
     private val _state = MutableStateFlow(
         AccessContract.UiState(
             // No init-refresh: AppRoot.onUserSessionReady() is the single cold-start load.
-            isLoading = true,
+            isServersLoading = true,
+            isQuotaLoading = true,
+            isTrafficLoading = true,
             serverSelectionMode = VpnServerSelectionStore.getMode(appContext),
             selectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext)
         )
     )
     val state: StateFlow<AccessContract.UiState> = _state
 
-    private val refreshGeneration = AtomicInteger(0)
-    private var refreshJob: Job? = null
+    private val serversGeneration = AtomicInteger(0)
+    private val quotaGeneration = AtomicInteger(0)
+    private var serversJob: Job? = null
+    private var quotaJob: Job? = null
 
     fun onEvent(event: AccessContract.UiEvent) {
         when (event) {
             AccessContract.UiEvent.Refresh -> refresh()
+            AccessContract.UiEvent.RefreshServers -> refreshServers(restartIfActive = false)
+            AccessContract.UiEvent.RefreshQuota -> refreshQuota(restartIfActive = false)
 
             is AccessContract.UiEvent.SetServerSelectionMode -> {
                 VpnServerSelectionStore.setMode(appContext, event.mode)
@@ -64,7 +70,12 @@ open class AccessViewModel(
             }
 
             AccessContract.UiEvent.ClearError ->
-                _state.update { it.copy(errorText = null) }
+                _state.update {
+                    it.copy(
+                        serversErrorText = null,
+                        quota = it.quota.copy(errorText = null)
+                    )
+                }
         }
     }
 
@@ -73,17 +84,22 @@ open class AccessViewModel(
      * invalidate any in-flight refresh so a later login cannot apply the previous account's data.
      */
     fun resetSessionLocalState() {
-        refreshJob?.cancel()
-        refreshJob = null
-        refreshGeneration.incrementAndGet()
+        serversJob?.cancel()
+        quotaJob?.cancel()
+        serversJob = null
+        quotaJob = null
+        serversGeneration.incrementAndGet()
+        quotaGeneration.incrementAndGet()
         _state.value = AccessContract.UiState(
-            isLoading = false,
+            isServersLoading = false,
+            isQuotaLoading = false,
+            isTrafficLoading = false,
             serverSelectionMode = VpnServerSelectionStore.getMode(appContext),
             selectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext),
         )
     }
 
-    /** Fresh login (or re-entry): reload servers for the current token/quota plan. */
+    /** Fresh login (or re-entry): reload servers and quota for the current token. */
     fun onUserSessionReady() {
         _state.update { prev ->
             prev.copy(
@@ -91,34 +107,34 @@ open class AccessViewModel(
                 selectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext),
             )
         }
-        refresh()
+        // Always restart: account/token may have changed; cancel orphans via executeSuspending.
+        refreshServers(restartIfActive = true)
+        refreshQuota(restartIfActive = true)
     }
 
     private fun refresh() {
-        val generation = refreshGeneration.incrementAndGet()
-        refreshJob?.cancel()
-        refreshJob = viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, errorText = null) }
+        // Pull-to-refresh while a request is in flight: keep the current job.
+        // Cancel+restart used to orphan blocking OkHttp execute() sockets (VPN hang → connect timeout).
+        refreshServers(restartIfActive = false)
+        refreshQuota(restartIfActive = false)
+    }
+
+    private fun refreshServers(restartIfActive: Boolean = true) {
+        if (!restartIfActive && serversJob?.isActive == true) return
+
+        val generation = serversGeneration.incrementAndGet()
+        serversJob?.cancel()
+        serversJob = viewModelScope.launch {
+            _state.update { it.copy(isServersLoading = true, serversErrorText = null) }
 
             try {
                 val servers = repo.getServers()
                 ensureActive()
-                if (generation != refreshGeneration.get()) return@launch
+                if (generation != serversGeneration.get()) return@launch
 
                 val connections = repo.getMyActiveConnections()
                 ensureActive()
-                if (generation != refreshGeneration.get()) return@launch
-
-                val quotaRaw = repo.loadQuotaUi()
-                ensureActive()
-                if (generation != refreshGeneration.get()) return@launch
-
-                val res = appContext.resources
-                val quota = quotaRaw.copy(
-                    errorText = quotaRaw.errorText?.let { res.userFriendlyApiError(it) }
-                )
-
-                if (generation != refreshGeneration.get()) return@launch
+                if (generation != serversGeneration.get()) return@launch
 
                 _state.update { prev ->
                     val selectedId = AccessServerSelectionPolicy.resolveSelectedServerId(
@@ -129,21 +145,89 @@ open class AccessViewModel(
                     VpnServerSelectionStore.setSelectedServerId(appContext, selectedId)
 
                     prev.copy(
-                        isLoading = false,
+                        isServersLoading = false,
                         servers = servers,
                         activeConnections = connections,
-                        quota = quota,
-                        selectedServerId = selectedId
+                        selectedServerId = selectedId,
+                        serversErrorText = null,
                     )
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (generation != refreshGeneration.get()) return@launch
+                if (generation != serversGeneration.get()) return@launch
                 _state.update {
                     it.copy(
-                        isLoading = false,
-                        errorText = appContext.resources.userFriendlyApiError(e)
+                        isServersLoading = false,
+                        serversErrorText = appContext.resources.userFriendlyApiError(e)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun refreshQuota(restartIfActive: Boolean = true) {
+        if (!restartIfActive && quotaJob?.isActive == true) return
+
+        val generation = quotaGeneration.incrementAndGet()
+        quotaJob?.cancel()
+        quotaJob = viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isQuotaLoading = true,
+                    isTrafficLoading = true,
+                    quota = it.quota.copy(errorText = null),
+                )
+            }
+
+            try {
+                val quotaRaw = repo.loadQuotaPlanUi()
+                ensureActive()
+                if (generation != quotaGeneration.get()) return@launch
+
+                val res = appContext.resources
+                val planQuota = quotaRaw.copy(
+                    errorText = quotaRaw.errorText?.let { res.userFriendlyApiError(it) }
+                )
+
+                _state.update {
+                    it.copy(
+                        isQuotaLoading = false,
+                        quota = planQuota,
+                    )
+                }
+
+                val needTraffic = planQuota.errorText == null &&
+                    planQuota.quotaLimitBytes > 0L &&
+                    !planQuota.trafficUsageNeedsExternalId
+
+                if (!needTraffic) {
+                    if (generation != quotaGeneration.get()) return@launch
+                    _state.update { it.copy(isTrafficLoading = false) }
+                    return@launch
+                }
+
+                val used = repo.loadQuotaTrafficUsedBytes(planQuota.quotaPeriodIsMonthly)
+                ensureActive()
+                if (generation != quotaGeneration.get()) return@launch
+
+                _state.update { prev ->
+                    prev.copy(
+                        isTrafficLoading = false,
+                        quota = prev.quota.copy(trafficUsedBytesForPeriod = used),
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (generation != quotaGeneration.get()) return@launch
+                _state.update {
+                    it.copy(
+                        isQuotaLoading = false,
+                        isTrafficLoading = false,
+                        quota = it.quota.copy(
+                            errorText = appContext.resources.userFriendlyApiError(e)
+                        ),
                     )
                 }
             }

@@ -146,14 +146,20 @@ object VpnEventMapper {
                 )
             }
 
-            "DISCONNECTED" -> previous.copy(
-                isConnectRequested = false,
-                isVpnConnected = false,
-                isVpnPaused = false,
-                selectedServerId = null,
-                selectedServerName = null,
-                lastMessage = res.getString(R.string.vpn_msg_disconnected)
-            )
+            "DISCONNECTED" -> {
+                // Always end the session in the mapper. Peer-engine teardown during OpenVPN↔Xray
+                // switch is ignored by VpnController via VpnEngineStatusPolicy (inactive engine),
+                // so notification Disconnect mid-connect cannot leave connectBusy stuck forever.
+                previous.copy(
+                    isConnectRequested = false,
+                    isVpnConnected = false,
+                    isVpnPaused = false,
+                    pendingUserCommand = null,
+                    selectedServerId = null,
+                    selectedServerName = null,
+                    lastMessage = res.getString(R.string.vpn_msg_disconnected),
+                )
+            }
 
             "TUN_SETUP_FAILED" -> previous.copy(
                 isConnectRequested = false,
@@ -173,6 +179,15 @@ object VpnEventMapper {
                     eventInfo.trim().ifBlank { eventName }
                 )
             )
+
+            // Stale query before any real tunnel event — never show "UNKNOWN: No status yet".
+            "UNKNOWN" -> {
+                if (previous.isConnectRequested || previous.isVpnConnected || previous.isVpnPaused) {
+                    previous
+                } else {
+                    previous.copy(lastMessage = res.getString(R.string.vpn_msg_disconnected))
+                }
+            }
 
             else -> {
                 val msg = sanitizeFallback(eventName, eventInfo)
@@ -203,9 +218,13 @@ object VpnEventMapper {
 
     private fun sanitizeFallback(eventName: String, eventInfo: String): String {
         val name = eventName.trim().ifBlank { "STATUS" }
+        if (name.equals("UNKNOWN", ignoreCase = true)) {
+            return eventInfo.trim().takeIf { it.isNotEmpty() && !it.equals("No status yet", ignoreCase = true) }
+                ?: name
+        }
         val info = eventInfo.trim()
 
-        if (info.isBlank()) return name
+        if (info.isBlank() || info.equals("No status yet", ignoreCase = true)) return name
 
         val isLikelyNetworkJunk =
             info.length > 60 ||

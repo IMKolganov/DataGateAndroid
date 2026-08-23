@@ -20,6 +20,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.IconButton
@@ -41,7 +42,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -50,13 +50,9 @@ import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.ui.components.AppCards
 import com.imkolganov.datagate.ui.tv.tvFocusBorder
-import com.imkolganov.datagate.util.formatBytes
-import com.imkolganov.datagate.util.formatQuotaEffectiveFromForDisplay
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.ServerSelectionMode
-import com.imkolganov.datagate.vpn.VpnServerSelectionStore
 import com.imkolganov.datagate.vpn.VpnStatusUiState
-import java.util.Locale
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -74,43 +70,45 @@ fun AccessScreen(
 ) {
     val isTelevision = com.imkolganov.datagate.ui.tv.LocalIsTelevision.current
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = state.isLoading,
-        onRefresh = { onEvent(AccessContract.UiEvent.Refresh) }
+        refreshing = state.isServersLoading,
+        onRefresh = { onEvent(AccessContract.UiEvent.RefreshServers) }
     )
 
     val appContext = LocalContext.current.applicationContext
 
     val vpnConnected = vpnState.isVpnConnected
     val vpnPaused = vpnState.isVpnPaused
-    val connectBusy = vpnState.isConnectRequested && !vpnConnected && !vpnPaused
-    val resolvedSessionId =
-        vpnState.selectedServerId
-            ?: if (vpnConnected) {
-                VpnServerSelectionStore.getSelectedServerId(appContext)
-            } else {
-                null
-            }
-    val connectingTargetId =
-        if (connectBusy) {
-            vpnState.selectedServerId ?: VpnServerSelectionStore.getSelectedServerId(appContext)
-        } else {
-            null
-        }
-
-    val sessionServerId =
-        resolvedSessionId ?: state.selectedServerId ?: connectingTargetId
+    val connectBusy = AccessVpnSessionPolicy.isConnectBusy(
+        isConnectRequested = vpnState.isConnectRequested,
+        isVpnConnected = vpnConnected,
+        isVpnPaused = vpnPaused,
+    )
+    // Active VPN session id only — never fall back to Access list selection (that made every
+    // tapped card look like "the" session / show the wrong actions).
+    val activeSessionServerId = AccessVpnSessionPolicy.activeSessionServerId(
+        isVpnConnected = vpnConnected,
+        isVpnPaused = vpnPaused,
+        isConnectRequested = vpnState.isConnectRequested,
+        vpnSelectedServerId = vpnState.selectedServerId,
+    )
+    val sessionServerId = activeSessionServerId
     val externalIpAddress = AccessSessionNetworkInfo.resolveExternalIp(sessionServerId, state.servers)
-    val externalIpLoading = state.isLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
+    val externalIpLoading = state.isServersLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
+
+    val accessibleServers = remember(state.servers) {
+        state.servers.filter { it.isAccessibleForQuotaPlan }
+    }
+    val blockedServers = remember(state.servers) {
+        state.servers.filter { !it.isAccessibleForQuotaPlan }
+    }
 
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
     var showPermissionDialog by remember { mutableStateOf(false) }
-    var noWssDialogName by remember { mutableStateOf<String?>(null) }
-    var xrayDialogName by remember { mutableStateOf<String?>(null) }
     var unsupportedTypeDialogName by remember { mutableStateOf<String?>(null) }
     var networkIdentity by remember { mutableStateOf(NetworkIdentitySnapshot()) }
     var networkIdentityLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(vpnConnected, connectBusy, state.isLoading) {
+    LaunchedEffect(vpnConnected, connectBusy, state.isServersLoading) {
         networkIdentityLoading = true
         if (connectBusy) {
             networkIdentity = NetworkIdentitySnapshot()
@@ -137,10 +135,12 @@ fun AccessScreen(
         if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
             return
         }
+        if (!server.isOnline) {
+            return
+        }
         val sessionServerId = vpnState.selectedServerId
-            ?: VpnServerSelectionStore.getSelectedServerId(appContext)
         if (vpnConnected || connectBusy) {
-            if (sessionServerId == server.id) {
+            if (sessionServerId != null && sessionServerId == server.id) {
                 if (state.serverSelectionMode == ServerSelectionMode.AUTO) {
                     onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
                 }
@@ -156,19 +156,11 @@ fun AccessScreen(
             switchTargetServer = server
         } else {
             when (server.serverType) {
-                VpnServerType.Xray -> {
-                    xrayDialogName = server.name
-                    return
-                }
                 VpnServerType.Unknown -> {
                     unsupportedTypeDialogName = server.name
                     return
                 }
-                VpnServerType.OpenVpn -> Unit
-            }
-            if (!server.isEnableWss) {
-                noWssDialogName = server.name
-                return
+                VpnServerType.OpenVpn, VpnServerType.Xray -> Unit
             }
             if (vpnState.hasVpnPermission) {
                 onConnectVpn()
@@ -193,13 +185,8 @@ fun AccessScreen(
                     onClick = {
                         switchTargetServer = null
                         when (target.serverType) {
-                            VpnServerType.Xray -> xrayDialogName = target.name
                             VpnServerType.Unknown -> unsupportedTypeDialogName = target.name
-                            VpnServerType.OpenVpn -> if (!target.isEnableWss) {
-                                noWssDialogName = target.name
-                            } else {
-                                onReconnectVpn()
-                            }
+                            VpnServerType.OpenVpn, VpnServerType.Xray -> onReconnectVpn()
                         }
                     }
                 ) {
@@ -209,42 +196,6 @@ fun AccessScreen(
             dismissButton = {
                 TextButton(onClick = { switchTargetServer = null }) {
                     Text(stringResource(R.string.action_cancel))
-                }
-            }
-        )
-    }
-
-    noWssDialogName?.let { serverName ->
-        AlertDialog(
-            onDismissRequest = { noWssDialogName = null },
-            title = { Text(stringResource(R.string.access_no_wss_dialog_title)) },
-            text = {
-                Text(
-                    stringResource(R.string.vpn_requires_openvpn_connect, serverName),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { noWssDialogName = null }) {
-                    Text(stringResource(R.string.action_ok))
-                }
-            }
-        )
-    }
-
-    xrayDialogName?.let { serverName ->
-        AlertDialog(
-            onDismissRequest = { xrayDialogName = null },
-            title = { Text(stringResource(R.string.access_xray_dialog_title)) },
-            text = {
-                Text(
-                    stringResource(R.string.vpn_requires_xray_client, serverName),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = { xrayDialogName = null }) {
-                    Text(stringResource(R.string.action_ok))
                 }
             }
         )
@@ -309,7 +260,7 @@ fun AccessScreen(
         ) {
             item {
                 HeaderRow(
-                    onRefresh = { onEvent(AccessContract.UiEvent.Refresh) },
+                    onRefresh = { onEvent(AccessContract.UiEvent.RefreshServers) },
                     primaryFocusRequester = primaryFocusRequester,
                 )
             }
@@ -318,7 +269,7 @@ fun AccessScreen(
                 VpnStatusCard(vpnState = vpnState)
             }
 
-            state.errorText?.let { err ->
+            state.serversErrorText?.let { err ->
                 item {
                     Text(
                         text = err,
@@ -328,30 +279,88 @@ fun AccessScreen(
                 }
             }
 
-            items(state.servers, key = { it.id }) { server ->
-                val isSelected = state.selectedServerId == server.id
-                val onThisServer = resolvedSessionId == server.id
-                val connectingHere = connectingTargetId == server.id
-                ServerCard(
+            if (state.isServersLoading && state.servers.isEmpty() && state.serversErrorText == null) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.padding(end = 12.dp))
+                        Text(
+                            text = stringResource(R.string.access_servers_loading),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (state.isServersLoading && state.servers.isNotEmpty()) {
+                item {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+            }
+
+            if (accessibleServers.isNotEmpty() && blockedServers.isNotEmpty()) {
+                item(key = "available_header", contentType = "header") {
+                    Text(
+                        text = stringResource(R.string.access_servers_available_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            items(
+                items = accessibleServers,
+                key = { it.id },
+                contentType = { "server" },
+            ) { server ->
+                AccessServerListCard(
                     server = server,
-                    isSelected = isSelected,
-                    isVpnSessionOnThisServer = (vpnConnected || vpnPaused) && onThisServer,
-                    isVpnConnectingToThisServer = connectingHere,
+                    state = state,
+                    vpnConnected = vpnConnected,
+                    vpnPaused = vpnPaused,
                     connectBusy = connectBusy,
-                    onSelect = {
-                        if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
-                            return@ServerCard
-                        }
-                        onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
-                        onEvent(AccessContract.UiEvent.SelectServer(server.id))
-                    },
+                    activeSessionServerId = activeSessionServerId,
+                    onEvent = onEvent,
                     onConnect = { runConnectToServer(server) },
-                    onDisconnect = onDisconnectVpn
+                    onDisconnect = onDisconnectVpn,
                 )
             }
 
-            item {
-                AccessQuotaSection(quota = state.quota)
+            if (blockedServers.isNotEmpty()) {
+                item(key = "upgrade_note", contentType = "note") {
+                    AccessUpgradeAccessNote()
+                }
+                item(key = "blocked_header", contentType = "header") {
+                    Text(
+                        text = stringResource(R.string.access_servers_unavailable_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+                items(
+                    items = blockedServers,
+                    key = { it.id },
+                    contentType = { "server_blocked" },
+                ) { server ->
+                    AccessServerListCard(
+                        server = server,
+                        state = state,
+                        vpnConnected = vpnConnected,
+                        vpnPaused = vpnPaused,
+                        connectBusy = connectBusy,
+                        activeSessionServerId = activeSessionServerId,
+                        onEvent = onEvent,
+                        onConnect = { runConnectToServer(server) },
+                        onDisconnect = onDisconnectVpn,
+                    )
+                }
             }
 
             if (state.activeConnections.isNotEmpty()) {
@@ -380,6 +389,10 @@ fun AccessScreen(
                     isLoading = networkIdentityLoading,
                     externalIpLoading = externalIpLoading,
                     showVpnIp = vpnConnected,
+                    showPrivateDnsHint = AccessSessionNetworkInfo.shouldShowPrivateDnsHint(
+                        vpnConnected = vpnConnected,
+                        dnsIdentityEnabled = networkIdentity.dnsIdentityEnabled,
+                    ),
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -391,7 +404,7 @@ fun AccessScreen(
 
         if (!isTelevision) {
             PullRefreshIndicator(
-                refreshing = state.isLoading,
+                refreshing = state.isServersLoading,
                 state = pullRefreshState,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
@@ -492,221 +505,99 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
 }
 
 @Composable
-private fun AccessQuotaSection(quota: AccessContract.QuotaUiState) {
-    Column(
+private fun AccessServerListCard(
+    server: AccessContract.ServerItem,
+    state: AccessContract.UiState,
+    vpnConnected: Boolean,
+    vpnPaused: Boolean,
+    connectBusy: Boolean,
+    activeSessionServerId: Int?,
+    onEvent: (AccessContract.UiEvent) -> Unit,
+    onConnect: () -> Unit,
+    onDisconnect: () -> Unit,
+) {
+    val isSessionCard = AccessVpnSessionPolicy.isSessionCard(
+        activeSessionServerId = activeSessionServerId,
+        serverId = server.id,
+        isVpnConnected = vpnConnected,
+        isVpnPaused = vpnPaused,
+    )
+    val isConnectingHere = AccessVpnSessionPolicy.isConnectingToServer(
+        activeSessionServerId = activeSessionServerId,
+        serverId = server.id,
+        connectBusy = connectBusy,
+    )
+    val isSelected = state.selectedServerId == server.id || isSessionCard
+    ServerCard(
+        server = server,
+        isSelected = isSelected,
+        isVpnSessionOnThisServer = isSessionCard,
+        isVpnConnectingToThisServer = isConnectingHere,
+        connectBusy = connectBusy,
+        onSelect = {
+            if (AccessServerSelectionPolicy.selectableServerId(server.id, state.servers) == null) {
+                return@ServerCard
+            }
+            onEvent(AccessContract.UiEvent.SetServerSelectionMode(ServerSelectionMode.MANUAL))
+            onEvent(AccessContract.UiEvent.SelectServer(server.id))
+        },
+        onConnect = onConnect,
+        onDisconnect = onDisconnect,
+    )
+}
+
+@Composable
+private fun AccessUpgradeAccessNote() {
+    val context = LocalContext.current
+    val telegramUrl = stringResource(R.string.support_telegram_bot_url)
+    val email = stringResource(R.string.support_contact_email)
+
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.access_quota_section_title),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        shape = AppCards.shape,
+        elevation = AppCards.defaultElevation(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
-
-        quota.errorText?.let { err ->
-            Text(
-                text = err,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = AppCards.shape,
-            elevation = AppCards.defaultElevation(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = stringResource(R.string.access_quota_current_plan),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                if (quota.currentPlanName != null) {
-                    Text(
-                        text = quota.currentPlanName,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    quota.currentEffectiveFrom?.takeIf { it.isNotBlank() }?.let { from ->
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(
-                                R.string.access_quota_effective_from,
-                                formatQuotaEffectiveFromForDisplay(from)
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+            Text(
+                text = stringResource(R.string.access_upgrade_note_title),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Text(
+                text = stringResource(R.string.access_upgrade_note_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            TextButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(
+                            android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(telegramUrl)
+                            )
                         )
                     }
-                    quota.currentNote?.takeIf { it.isNotBlank() }?.let { note ->
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = note,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            ) {
+                Text(stringResource(R.string.home_report_telegram))
+            }
+            TextButton(
+                onClick = {
+                    runCatching {
+                        val uri = android.net.Uri.parse("mailto:$email")
+                        context.startActivity(
+                            android.content.Intent(android.content.Intent.ACTION_SENDTO, uri)
                         )
                     }
-                } else {
-                    Text(
-                        text = stringResource(R.string.access_quota_no_active),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
-            }
-        }
-
-        if (quota.errorText == null) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.access_quota_traffic_title),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            when {
-                quota.trafficUsageNeedsExternalId -> {
-                    Text(
-                        text = stringResource(R.string.access_quota_needs_external_id),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                quota.quotaLimitBytes <= 0L -> {
-                    Text(
-                        text = stringResource(R.string.access_quota_no_traffic_cap),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                quota.trafficUsedBytesForPeriod < 0L -> {
-                    Text(
-                        text = stringResource(R.string.access_quota_usage_unavailable),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                else -> {
-                    val used = quota.trafficUsedBytesForPeriod
-                    val lim = quota.quotaLimitBytes
-                    val pct = if (lim > 0) 100.0 * used.toDouble() / lim.toDouble() else 0.0
-                    val over = used > lim && lim > 0
-                    val barFraction =
-                        if (lim > 0) (used.toDouble() / lim.toDouble()).coerceIn(0.0, 1.0).toFloat() else 0f
-                    val periodLabel = if (quota.quotaPeriodIsMonthly) {
-                        stringResource(R.string.access_quota_period_month)
-                    } else {
-                        stringResource(R.string.access_quota_period_today)
-                    }
-                    Text(
-                        text = periodLabel,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    LinearProgressIndicator(
-                        progress = { barFraction },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(10.dp)
-                            .clip(RoundedCornerShape(5.dp)),
-                        color = if (over) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        },
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(
-                            R.string.access_quota_used_line,
-                            formatBytes(used),
-                            formatBytes(lim),
-                            String.format(Locale.US, "%.1f", pct)
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = if (over) {
-                            stringResource(
-                                R.string.access_quota_over_by,
-                                formatBytes(used - lim)
-                            )
-                        } else {
-                            stringResource(
-                                R.string.access_quota_remaining,
-                                formatBytes(lim - used)
-                            )
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (over) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                }
-            }
-        }
-
-        if (quota.allPlans.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.access_quota_all_plans_title),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            quota.allPlans.forEach { plan ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = AppCards.shape,
-                    elevation = AppCards.defaultElevation()
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = plan.name,
-                                style = MaterialTheme.typography.titleSmall,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                if (plan.isDefault) {
-                                    Text(
-                                        text = stringResource(R.string.access_quota_plan_default),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                                if (!plan.isActive) {
-                                    Text(
-                                        text = stringResource(R.string.access_quota_plan_inactive),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                        plan.description?.takeIf { it.isNotBlank() }?.let { desc ->
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = desc,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
+            ) {
+                Text(stringResource(R.string.access_upgrade_contact_email, email))
             }
         }
     }

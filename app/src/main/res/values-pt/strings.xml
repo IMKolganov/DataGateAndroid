@@ -3,6 +3,7 @@
     <string name="language_system">Predefinição do sistema</string>
     <string name="nav_home">Início</string>
     <string name="nav_access">Acesso</string>
+    <string name="nav_quota">Quota</string>
     <string name="nav_statistics">Estatísticas</string>
     <string name="nav_settings">Definições</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Indisponível</string>
     <string name="access_users_footer">%1$d utilizadores no total · %2$d de %3$d servidores online</string>
     <string name="access_choose_server">Escolher servidor</string>
+    <string name="access_servers_loading">A carregar servidores…</string>
     <string name="access_refresh">Atualizar</string>
     <string name="access_use_home_hint">O Início liga automaticamente. Aqui escolha um servidor e toque em Ligar — ou Desligar no ativo.</string>
     <string name="access_vpn_active">VPN ativa</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">O servidor n.º %1$d está offline ou indisponível para ligação na app.</string>
     <string name="vpn_server_quota_blocked">O servidor «%1$s» não está incluído no seu plano.</string>
     <string name="access_server_quota_blocked">Não está no seu plano</string>
+    <string name="access_servers_available_title">Disponíveis para si</string>
+    <string name="access_servers_unavailable_title">Não incluídos no seu plano</string>
+    <string name="access_upgrade_note_title">Acesso total aos servidores</string>
+    <string name="access_upgrade_note_body">Para desbloquear todos os servidores, abra o bot Telegram @DataGateVPNBot para detalhes do plano — ou pergunte-me diretamente.</string>
+    <string name="access_upgrade_contact_email">Email %1$s</string>
     <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_loading">A carregar plano…</string>
+    <string name="access_quota_traffic_loading">A carregar utilização de tráfego…</string>
     <string name="access_quota_current_plan">O seu plano atual</string>
     <string name="access_quota_no_active">Sem atribuição de quota ativa</string>
     <string name="access_quota_effective_from">Válido desde: %1$s</string>
@@ -403,14 +412,9 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="settings_ip_lists_android_12_route_limit_label">Max. OVPN-Routen</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
-    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
-
-    <string name="access_xray_dialog_title">XRay não suportado</string>
-    <string name="access_unsupported_server_type_dialog_title">Tipo de servidor não suportado</string>
+    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>    <string name="access_unsupported_server_type_dialog_title">Tipo de servidor não suportado</string>
     <string name="label_server_type_xray">Xray</string>
-    <string name="label_server_type_unknown">Outro</string>
-    <string name="vpn_requires_xray_client">Esta app não pode ligar-se a servidores XRay. Servidor: %1$s.\n\nUse outro cliente.</string>
-    <string name="vpn_requires_unsupported_server_type">Esta app não suporta este tipo de servidor. Servidor: %1$s.\n\nUse outro cliente.</string>
+    <string name="label_server_type_unknown">Outro</string>    <string name="vpn_requires_unsupported_server_type">Esta app não suporta este tipo de servidor. Servidor: %1$s.\n\nUse outro cliente.</string>
     <string name="free_tier_title_link">Ligue o Telegram para aceder à VPN</string>
     <string name="free_tier_title_subscribe">Subscreva o canal do Telegram</string>
     <string name="free_tier_body_link">Para usar VPN no plano Free ou Default:\n• Subscreva %1$s\n• Ou associe a sua conta ao bot Telegram DataGate</string>
@@ -471,4 +475,33 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
     <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
 
+    <string name="nav_profiles">Profiles</string>
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_add">Add profile</string>
+    <string name="profiles_import_ovpn">Import OpenVPN (.ovpn)</string>
+    <string name="profiles_import_confirm">Import</string>
+    <string name="profiles_import_xray_file">Import Xray JSON / links file</string>
+    <string name="profiles_import_xray_link">Paste Xray / VLESS link</string>    <string name="profiles_empty_title">No local profiles yet</string>
+    <string name="profiles_empty_body">Import an .ovpn file or paste a VLESS/Xray share link to connect from this device.</string>
+    <string name="profiles_imported">Imported “%1$s”</string>
+    <string name="profiles_rename_title">Rename profile</string>
+    <string name="profiles_name_label">Name</string>
+    <string name="profiles_rename">Rename</string>
+    <string name="profiles_edit_creds">Username / password</string>
+    <string name="profiles_creds_title">Profile credentials</string>
+    <string name="profiles_creds_hint">Optional. Used when the .ovpn profile expects auth-user-pass.</string>
+    <string name="profiles_username_label">Username</string>
+    <string name="profiles_password_label">Password</string>
+    <string name="profiles_delete">Delete</string>
+    <string name="profiles_delete_title">Delete profile?</string>
+    <string name="profiles_delete_message">Remove “%1$s” from this device?</string>
+    <string name="profiles_delete_confirm">Delete</string>
+    <string name="profiles_transport_direct">Direct OpenVPN (no WSS)</string>
+    <string name="profiles_transport_xray">Xray (libXray)</string>
+        <string name="profiles_xray_paste_title">Import Xray link</string>
+    <string name="profiles_xray_paste_hint">Paste a vless://, vmess://, trojan://, or ss:// link, or a JSON config with outbounds.</string>
+    <string name="profiles_xray_paste_label">Share link or JSON</string>    <string name="profiles_error_unavailable">Local profiles are not available</string>
+    <string name="profiles_error_not_found">Profile not found</string>
+    <string name="profiles_error_xray_unavailable">libXray is not included in this build. Rebuild with app/libs/libxray.aar.</string>
+    <string name="profiles_error_xray_not_supported">Cannot connect to Xray profile “%1$s” in this app version.</string>
 </resources>

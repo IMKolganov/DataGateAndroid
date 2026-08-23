@@ -53,15 +53,30 @@ class VpnServerConnectPolicyTest {
     }
 
     @Test
-    fun pickBestServer_skipsOfflineXrayAndNonWss() {
+    fun pickBestServer_skipsOfflineAndNonWssOpenVpn_includesXray() {
         val items = listOf(
             row(id = 1, name = "offline", clients = 0, accessible = true, online = false),
-            row(id = 2, name = "xray", clients = 0, accessible = true, type = VpnServerType.Xray),
+            row(id = 2, name = "xray", clients = 0, accessible = true, type = VpnServerType.Xray, wss = false),
             row(id = 3, name = "no-wss", clients = 0, accessible = true, wss = false),
             row(id = 4, name = "ok", clients = 3, accessible = true),
         )
 
-        assertEquals(4, VpnServerConnectPolicy.pickBestServer(items).serverId)
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(2, best.serverId)
+        assertEquals(VpnServerType.Xray, best.serverType)
+    }
+
+    @Test
+    fun pickBestServer_prefersLeastLoadedAcrossOpenVpnAndXray() {
+        val items = listOf(
+            row(id = 10, name = "ovpn", clients = 5, accessible = true),
+            row(id = 20, name = "xray-busy", clients = 2, accessible = true, type = VpnServerType.Xray, wss = false),
+            row(id = 21, name = "xray-free", clients = 0, accessible = true, type = VpnServerType.Xray, wss = false),
+        )
+
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(21, best.serverId)
+        assertEquals(VpnServerType.Xray, best.serverType)
     }
 
     @Test
@@ -73,7 +88,7 @@ class VpnServerConnectPolicyTest {
             VpnServerConnectPolicy.pickBestServer(items, ignoreQuotaPlanChecks = false)
             fail("expected IllegalStateException")
         } catch (e: IllegalStateException) {
-            assertTrue(e.message!!.contains("No online WSS"))
+            assertTrue(e.message!!.contains("No online"))
         }
     }
 
@@ -105,6 +120,20 @@ class VpnServerConnectPolicyTest {
     }
 
     @Test
+    fun resolveManual_accessibleOnlineWithoutWss_returnsOkDirect() {
+        val items = listOf(
+            row(id = 42, name = "direct-only", clients = 1, accessible = true, wss = false),
+        )
+
+        val resolved = VpnServerConnectPolicy.resolveManualConnection(items, 42)
+
+        assertTrue(resolved is ManualServerResolve.Ok)
+        val ok = resolved as ManualServerResolve.Ok
+        assertEquals(42, ok.result.serverId)
+        assertEquals(false, ok.result.useWss)
+    }
+
+    @Test
     fun resolveManual_accessibleOnlineWss_returnsOk() {
         val items = listOf(
             row(id = 69, name = "helsinki", clients = 2, accessible = true),
@@ -131,6 +160,124 @@ class VpnServerConnectPolicyTest {
         assertEquals(69, auto.serverId)
     }
 
+    @Test
+    fun pickBestServer_onlyXrayOnline_picksXray() {
+        val items = listOf(
+            row(id = 1, name = "ovpn-offline", clients = 0, accessible = true, online = false),
+            row(id = 2, name = "xray-only", clients = 1, accessible = true, type = VpnServerType.Xray, wss = false),
+        )
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(2, best.serverId)
+        assertEquals(VpnServerType.Xray, best.serverType)
+        assertEquals(false, best.useWss)
+    }
+
+    @Test
+    fun pickBestServer_skipsOfflineAndQuotaBlockedXray() {
+        val items = listOf(
+            row(id = 1, name = "xray-off", clients = 0, accessible = true, online = false, type = VpnServerType.Xray, wss = false),
+            row(id = 2, name = "xray-quota", clients = 0, accessible = false, type = VpnServerType.Xray, wss = false),
+            row(id = 3, name = "ovpn", clients = 4, accessible = true),
+        )
+        assertEquals(3, VpnServerConnectPolicy.pickBestServer(items).serverId)
+    }
+
+    @Test
+    fun pickBestServer_skipsUnknownType() {
+        val items = listOf(
+            row(id = 1, name = "unknown", clients = 0, accessible = true, type = VpnServerType.Unknown),
+            row(id = 2, name = "ovpn", clients = 1, accessible = true),
+        )
+        assertEquals(2, VpnServerConnectPolicy.pickBestServer(items).serverId)
+    }
+
+    @Test
+    fun pickBestServer_prefersOpenVpnWhenLessLoadedThanXray() {
+        val items = listOf(
+            row(id = 10, name = "ovpn", clients = 1, accessible = true),
+            row(id = 20, name = "xray", clients = 5, accessible = true, type = VpnServerType.Xray, wss = false),
+        )
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(10, best.serverId)
+        assertEquals(VpnServerType.OpenVpn, best.serverType)
+    }
+
+    @Test
+    fun resolveManual_offlineXray_notAvailable() {
+        val items = listOf(
+            row(id = 88, name = "xray", clients = 0, accessible = true, online = false, type = VpnServerType.Xray, wss = false),
+        )
+        assertTrue(
+            VpnServerConnectPolicy.resolveManualConnection(items, 88) is ManualServerResolve.NotAvailable,
+        )
+    }
+
+    @Test
+    fun resolveManual_accessibleOnlineXray_returnsOk() {
+        val items = listOf(
+            row(id = 88, name = "xray-node", clients = 1, accessible = true, type = VpnServerType.Xray, wss = false),
+        )
+
+        val resolved = VpnServerConnectPolicy.resolveManualConnection(items, 88)
+
+        assertTrue(resolved is ManualServerResolve.Ok)
+        val ok = resolved as ManualServerResolve.Ok
+        assertEquals(88, ok.result.serverId)
+        assertEquals(VpnServerType.Xray, ok.result.serverType)
+        assertEquals(false, ok.result.useWss)
+    }
+
+    @Test
+    fun pickBestServer_forwardsDnsServersAndTags_forXray() {
+        val items = listOf(
+            row(
+                id = 21,
+                name = "xray-dns",
+                clients = 0,
+                accessible = true,
+                type = VpnServerType.Xray,
+                wss = false,
+                dnsServers = listOf("172.20.0.1"),
+                tags = listOf("identity", "eu"),
+            ),
+        )
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(21, best.serverId)
+        assertEquals(listOf("172.20.0.1"), best.dnsServers)
+        assertEquals(listOf("identity", "eu"), best.tags)
+        assertEquals(VpnServerType.Xray, best.serverType)
+    }
+
+    @Test
+    fun resolveManual_forwardsDnsServersAndTags_forOpenVpn() {
+        val items = listOf(
+            row(
+                id = 69,
+                name = "helsinki",
+                clients = 1,
+                accessible = true,
+                dnsServers = listOf("8.8.8.8", "1.1.1.1"),
+                tags = listOf("free"),
+            ),
+        )
+        val resolved = VpnServerConnectPolicy.resolveManualConnection(items, 69)
+        assertTrue(resolved is ManualServerResolve.Ok)
+        val best = (resolved as ManualServerResolve.Ok).result
+        assertEquals(listOf("8.8.8.8", "1.1.1.1"), best.dnsServers)
+        assertEquals(listOf("free"), best.tags)
+        assertEquals(VpnServerType.OpenVpn, best.serverType)
+    }
+
+    @Test
+    fun pickBestServer_defaultDnsAndTagsEmpty() {
+        val items = listOf(
+            row(id = 1, name = "plain", clients = 0, accessible = true),
+        )
+        val best = VpnServerConnectPolicy.pickBestServer(items)
+        assertEquals(emptyList<String>(), best.dnsServers)
+        assertEquals(emptyList<String>(), best.tags)
+    }
+
     private fun row(
         id: Int,
         name: String,
@@ -140,6 +287,8 @@ class VpnServerConnectPolicyTest {
         wss: Boolean = true,
         type: VpnServerType = VpnServerType.OpenVpn,
         deleted: Boolean = false,
+        dnsServers: List<String> = emptyList(),
+        tags: List<String> = emptyList(),
     ): OpenVpnServerWithStatusV2Item {
         val server = OpenVpnServerV2Dto(
             id = id,
@@ -155,9 +304,10 @@ class VpnServerConnectPolicyTest {
             lastUpdate = null,
             isDeleted = deleted,
             dcoIsEnabled = null,
-            tags = emptyList(),
+            tags = tags,
             quotaPlanGroups = emptyList(),
             isAccessibleForUserQuotaPlan = accessible,
+            dnsServers = dnsServers,
         )
         return OpenVpnServerWithStatusV2Item(
             server = server,

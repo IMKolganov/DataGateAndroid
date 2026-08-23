@@ -305,6 +305,88 @@ class IpListRouteConfigTest {
     }
 
     @Test
+    fun prepareConnectionRoutes_xrayPath_emptyConfig_usesSameExcludeCapsAsOpenVpn() {
+        // Android 13+ Xray uses excludeRoute with unused OVPN config string.
+        val routes = disjointBroadRoutes(2_500)
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = "",
+            routes = routes,
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+        assertEquals(IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE, plan.delivery)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, plan.androidExcludedRoutes.size)
+        assertEquals("", plan.config)
+        assertTrue(plan.reachedEstablishRouteLimit)
+    }
+
+    @Test
+    fun prepareXrayBypassRoutes_onAndroid12_deliversRoutingDirectWithPriority() {
+        val priorityRoute = Ipv4CidrRoute("203.0.112.0", "255.255.252.0", 22)
+        val broadNoise = disjointBroadRoutes(2_000)
+        val plan = IpListRouteConfig.prepareXrayBypassRoutes(
+            routes = broadNoise,
+            priorityRoutes = listOf(priorityRoute),
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = false,
+        )
+        assertEquals(IpListRouteDelivery.XRAY_ROUTING_DIRECT, plan.delivery)
+        assertEquals(0, IpListEstablishRoutePolicy.excludeRouteCallsForPlan(plan))
+        assertTrue(plan.androidExcludedRoutes.contains(priorityRoute))
+        assertEquals(IpListRouteConfig.MAX_XRAY_ROUTING_DIRECT_CIDRS, plan.androidExcludedRoutes.size)
+        assertTrue(plan.reachedEstablishRouteLimit)
+    }
+
+    @Test
+    fun prepareXrayBypassRoutes_onTelevision_usesTighterRoutingDirectCap() {
+        val priorityRoute = Ipv4CidrRoute("203.0.112.0", "255.255.252.0", 22)
+        val broadNoise = disjointBroadRoutes(2_000)
+        val plan = IpListRouteConfig.prepareXrayBypassRoutes(
+            routes = broadNoise,
+            priorityRoutes = listOf(priorityRoute),
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = false,
+            constrainedDevice = true,
+        )
+        assertEquals(IpListRouteDelivery.XRAY_ROUTING_DIRECT, plan.delivery)
+        assertEquals(IpListRouteConfig.MAX_XRAY_ROUTING_DIRECT_CIDRS_TV, plan.androidExcludedRoutes.size)
+        assertTrue(plan.androidExcludedRoutes.contains(priorityRoute))
+    }
+
+    @Test
+    fun xrayRoutingDirectCidrLimit_neverExceedsSoftCaps() {
+        assertEquals(
+            IpListRouteConfig.MAX_XRAY_ROUTING_DIRECT_CIDRS,
+            IpListRouteConfig.xrayRoutingDirectCidrLimit(3_000, constrainedDevice = false),
+        )
+        assertEquals(
+            IpListRouteConfig.MAX_XRAY_ROUTING_DIRECT_CIDRS_TV,
+            IpListRouteConfig.xrayRoutingDirectCidrLimit(3_000, constrainedDevice = true),
+        )
+        assertEquals(
+            100,
+            IpListRouteConfig.xrayRoutingDirectCidrLimit(100, constrainedDevice = false),
+        )
+    }
+
+    @Test
+    fun prepareXrayBypassRoutes_onAndroid13_matchesExcludeCaps() {
+        val routes = disjointBroadRoutes(2_500)
+        val plan = IpListRouteConfig.prepareXrayBypassRoutes(
+            routes = routes,
+            priorityRoutes = emptyList(),
+            coverageMode = IpListCoverageMode.FULL,
+            android12OvpnRouteLimit = IpListRouteConfig.DEFAULT_ANDROID12_OVPN_ROUTE_LIMIT,
+            supportsAndroidRouteExclusion = true,
+        )
+        assertEquals(IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE, plan.delivery)
+        assertEquals(IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL, plan.androidExcludedRoutes.size)
+    }
+
+    @Test
     fun prepareConnectionRoutes_safeLimitDisabled_skipsTruncation() {
         val routeCount = IpListRouteConfig.MAX_ANDROID_EXCLUDED_ROUTES_FULL + 500
         val routes = disjointHostRoutes(routeCount)

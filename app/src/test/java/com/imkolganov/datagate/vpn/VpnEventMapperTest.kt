@@ -2,6 +2,7 @@ package com.imkolganov.datagate.vpn
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.imkolganov.datagate.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -120,10 +121,71 @@ class VpnEventMapperTest {
     }
 
     @Test
-    fun map_disconnected_clearsSelectedServerIdAndName() {
+    fun map_disconnected_whileConnecting_clearsConnectBusyForNotificationCancel() {
+        // Notification Disconnect mid-connect must not leave connectBusy stuck.
+        // Peer OpenVPN↔Xray teardown is ignored by VpnController via VpnEngineStatusPolicy.
+        val previous = VpnStatusUiState(
+            isConnectRequested = true,
+            isVpnConnected = false,
+            selectedServerId = 42,
+            selectedServerName = "Frankfurt",
+        )
+        val next = VpnEventMapper.map(context.resources, previous, "DISCONNECTED", "")
+
+        assertFalse(next.isConnectRequested)
+        assertFalse(next.isVpnConnected)
+        assertNull(next.selectedServerId)
+        assertNull(next.selectedServerName)
+    }
+
+    @Test
+    fun map_disconnected_whileConnected_clearsConnectBusy() {
+        // Notification Disconnect does not go through VpnController.requestDisconnect().
         val previous = VpnStatusUiState(
             isConnectRequested = true,
             isVpnConnected = true,
+            selectedServerId = 7,
+            selectedServerName = "Berlin",
+        )
+        val next = VpnEventMapper.map(context.resources, previous, "DISCONNECTED", "")
+
+        assertFalse(next.isConnectRequested)
+        assertFalse(next.isVpnConnected)
+        assertNull(next.selectedServerId)
+        assertNull(next.selectedServerName)
+    }
+
+    @Test
+    fun map_engineSwitch_peerDisconnectedThenConnected_keepsServerNameInStatus() {
+        // Mapper clears on peer DISCONNECTED; VpnController ignores inactive-engine events so
+        // a live Xray session is not wiped — simulate ignore by keeping selection.
+        var state = VpnStatusUiState(
+            isConnectRequested = true,
+            isVpnConnected = false,
+            selectedServerId = 88,
+            selectedServerName = "DataGate+🇳🇴+Norway+xray",
+        )
+        state = VpnEventMapper.map(context.resources, state, "DISCONNECTED", "peer teardown")
+        assertNull(state.selectedServerName)
+        assertFalse(state.isConnectRequested)
+        state = state.copy(
+            isConnectRequested = true,
+            selectedServerId = 88,
+            selectedServerName = "DataGate+🇳🇴+Norway+xray",
+        )
+
+        state = VpnEventMapper.map(context.resources, state, "CONNECTED", "")
+        assertTrue(state.isVpnConnected)
+        assertTrue(state.lastMessage.contains("DataGate"))
+        assertTrue(state.lastMessage.contains("Norway"))
+        assertEquals(88, state.selectedServerId)
+    }
+
+    @Test
+    fun map_disconnected_afterUserDisconnect_clearsSelectedServerIdAndName() {
+        val previous = VpnStatusUiState(
+            isConnectRequested = false,
+            isVpnConnected = false,
             selectedServerId = 42,
             selectedServerName = "Frankfurt",
         )
@@ -131,6 +193,7 @@ class VpnEventMapperTest {
 
         assertNull(next.selectedServerId)
         assertNull(next.selectedServerName)
+        assertFalse(next.isConnectRequested)
         assertFalse(next.isVpnPaused)
     }
 
@@ -152,6 +215,26 @@ class VpnEventMapperTest {
             eventInfo = "192.168.0.1:54321 extra noise that should be hidden"
         )
         assertEquals("CUSTOM", sanitized)
+    }
+
+    @Test
+    fun map_unknownPlaceholder_showsDisconnectedWhenIdle() {
+        val previous = VpnStatusUiState(lastMessage = "")
+        val next = VpnEventMapper.map(context.resources, previous, "UNKNOWN", "No status yet")
+        assertEquals(
+            context.getString(R.string.vpn_msg_disconnected),
+            next.lastMessage,
+        )
+    }
+
+    @Test
+    fun map_unknownPlaceholder_doesNotOverwriteConnecting() {
+        val previous = VpnStatusUiState(
+            isConnectRequested = true,
+            lastMessage = "Connecting…",
+        )
+        val next = VpnEventMapper.map(context.resources, previous, "UNKNOWN", "No status yet")
+        assertEquals(previous, next)
     }
 
     @Test

@@ -4,6 +4,7 @@
 
     <string name="nav_home">Головна</string>
     <string name="nav_access">Доступ</string>
+    <string name="nav_quota">Квота</string>
     <string name="nav_statistics">Статистика</string>
     <string name="nav_settings">Налаштування</string>
 
@@ -194,6 +195,7 @@
     <string name="access_network_info_unavailable">Недоступно</string>
     <string name="access_users_footer">Усього користувачів: %1$d · онлайн %2$d із %3$d серверів</string>
     <string name="access_choose_server">Оберіть сервер</string>
+    <string name="access_servers_loading">Завантаження серверів…</string>
     <string name="access_refresh">Оновити</string>
     <string name="access_use_home_hint">На головній можна підключитися з автоматичним вибором сервера. Тут оберіть сервер і натисніть «Підключити» — або «Відключити» на активному.</string>
     <string name="access_vpn_active">VPN активний</string>
@@ -229,7 +231,14 @@
     <string name="vpn_server_manual_unavailable">Сервер №%1$d недоступний або не підходить для підключення в застосунку.</string>
     <string name="vpn_server_quota_blocked">Сервер «%1$s» не входить до вашого тарифного плану.</string>
     <string name="access_server_quota_blocked">Немає у вашому плані</string>
+    <string name="access_servers_available_title">Доступні вам</string>
+    <string name="access_servers_unavailable_title">Не входять до вашого плану</string>
+    <string name="access_upgrade_note_title">Повний доступ до серверів</string>
+    <string name="access_upgrade_note_body">Щоб отримати повний доступ до серверів, перейдіть у Telegram-бота @DataGateVPNBot для уточнення деталей — або поставте запитання напряму.</string>
+    <string name="access_upgrade_contact_email">Написати на %1$s</string>
     <string name="access_quota_section_title">Квота</string>
+    <string name="access_quota_loading">Завантаження плану…</string>
+    <string name="access_quota_traffic_loading">Завантаження трафіку…</string>
     <string name="access_quota_current_plan">Ваш поточний план</string>
     <string name="access_quota_no_active">Немає активного призначення квоти</string>
     <string name="access_quota_effective_from">Діє з: %1$s</string>
@@ -418,13 +427,9 @@
     <string name="settings_ip_lists_android_12_route_limit_label">Максимум OVPN-маршрутів</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Рекомендовано %1$d. Допустимо %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Введіть значення від %1$d до %2$d.</string>
-    <string name="vpn_ip_list_ready_limited">IP-список готовий (%1$d маршрутів; досягнуто ліміт профілю)</string>
-    <string name="access_xray_dialog_title">XRay не підтримується</string>
-    <string name="access_unsupported_server_type_dialog_title">Тип сервера не підтримується</string>
+    <string name="vpn_ip_list_ready_limited">IP-список готовий (%1$d маршрутів; досягнуто ліміт профілю)</string>    <string name="access_unsupported_server_type_dialog_title">Тип сервера не підтримується</string>
     <string name="label_server_type_xray">Xray</string>
-    <string name="label_server_type_unknown">Інший</string>
-    <string name="vpn_requires_xray_client">Цей застосунок не дозволяє підключатися до серверів XRay. Сервер: %1$s.\n\nБудь ласка, використайте інший клієнт.</string>
-    <string name="vpn_requires_unsupported_server_type">Цей застосунок не підтримує цей тип сервера. Сервер: %1$s.\n\nБудь ласка, використайте інший клієнт.</string>
+    <string name="label_server_type_unknown">Інший</string>    <string name="vpn_requires_unsupported_server_type">Цей застосунок не підтримує цей тип сервера. Сервер: %1$s.\n\nБудь ласка, використайте інший клієнт.</string>
     <string name="free_tier_title_link">Підключіть Telegram для доступу до VPN</string>
     <string name="free_tier_title_subscribe">Підпишіться на Telegram-канал</string>
     <string name="free_tier_body_link">Щоб використовувати VPN на тарифі Free або Default:\n• Підпишіться на %1$s\n• Або пов\'яжіть акаунт із Telegram-ботом DataGate</string>
@@ -485,4 +490,33 @@
     <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
     <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
 
+    <string name="nav_profiles">Профілі</string>
+    <string name="profiles_title">Профілі</string>
+    <string name="profiles_add">Додати профіль</string>
+    <string name="profiles_import_ovpn">Імпорт OpenVPN (.ovpn)</string>
+    <string name="profiles_import_confirm">Import</string>
+    <string name="profiles_import_xray_file">Import Xray JSON / links file</string>
+    <string name="profiles_import_xray_link">Paste Xray / VLESS link</string>    <string name="profiles_empty_title">Поки немає локальних профілів</string>
+    <string name="profiles_empty_body">Import an .ovpn file or paste a VLESS/Xray share link to connect from this device.</string>
+    <string name="profiles_imported">Імпортовано «%1$s»</string>
+    <string name="profiles_rename_title">Перейменувати профіль</string>
+    <string name="profiles_name_label">Назва</string>
+    <string name="profiles_rename">Перейменувати</string>
+    <string name="profiles_edit_creds">Логін / пароль</string>
+    <string name="profiles_creds_title">Облікові дані профілю</string>
+    <string name="profiles_creds_hint">Необовʼязково. Потрібні, якщо в .ovpn вказано auth-user-pass.</string>
+    <string name="profiles_username_label">Логін</string>
+    <string name="profiles_password_label">Пароль</string>
+    <string name="profiles_delete">Видалити</string>
+    <string name="profiles_delete_title">Видалити профіль?</string>
+    <string name="profiles_delete_message">Видалити «%1$s» з цього пристрою?</string>
+    <string name="profiles_delete_confirm">Видалити</string>
+    <string name="profiles_transport_direct">Прямий OpenVPN (без WSS)</string>
+    <string name="profiles_transport_xray">Xray (libXray)</string>
+        <string name="profiles_xray_paste_title">Import Xray link</string>
+    <string name="profiles_xray_paste_hint">Paste a vless://, vmess://, trojan://, or ss:// link, or a JSON config with outbounds.</string>
+    <string name="profiles_xray_paste_label">Share link or JSON</string>    <string name="profiles_error_unavailable">Локальні профілі недоступні</string>
+    <string name="profiles_error_not_found">Профіль не знайдено</string>
+    <string name="profiles_error_xray_unavailable">libXray is not included in this build. Rebuild with app/libs/libxray.aar.</string>
+    <string name="profiles_error_xray_not_supported">Неможливо підключитися до профілю Xray «%1$s» у цій версії застосунку.</string>
 </resources>

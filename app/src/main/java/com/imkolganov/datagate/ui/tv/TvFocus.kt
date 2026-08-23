@@ -1,7 +1,5 @@
 package com.imkolganov.datagate.ui.tv
 
-import androidx.compose.foundation.Indication
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -44,23 +42,25 @@ fun Modifier.tvFocusBorder(
 }
 
 /**
- * Focusable clickable with TV focus ring. On phone keeps default Material ripple indication.
+ * Focusable clickable with TV focus ring. On phone: plain [clickable] (no focus tracking).
  */
 fun Modifier.tvClickable(
     enabled: Boolean = true,
     shape: Shape = RectangleShape,
     onClick: () -> Unit,
 ): Modifier = composed {
-    val isTv = LocalIsTelevision.current
+    if (!LocalIsTelevision.current) {
+        return@composed clickable(enabled = enabled, onClick = onClick)
+    }
+
     val interactionSource = remember { MutableInteractionSource() }
     var focused by remember { mutableStateOf(false) }
     val ringColor = MaterialTheme.colorScheme.primary
-    val indication: Indication? = if (isTv) null else LocalIndication.current
 
     this
         .onFocusChanged { focused = it.isFocused || it.hasFocus }
         .then(
-            if (isTv && focused) {
+            if (focused) {
                 Modifier.border(width = 3.dp, color = ringColor, shape = shape)
             } else {
                 Modifier
@@ -69,7 +69,7 @@ fun Modifier.tvClickable(
         .clickable(
             enabled = enabled,
             interactionSource = interactionSource,
-            indication = indication,
+            indication = null,
             onClick = onClick,
         )
 }

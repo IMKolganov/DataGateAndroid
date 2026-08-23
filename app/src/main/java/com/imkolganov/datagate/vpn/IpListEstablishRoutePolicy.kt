@@ -13,7 +13,9 @@ internal object IpListEstablishRoutePolicy {
     fun excludeRouteCallsForPlan(plan: IpListConnectionRoutePlan): Int =
         when (plan.delivery) {
             IpListRouteDelivery.ANDROID_EXCLUDE_ROUTE -> plan.androidExcludedRoutes.size
-            IpListRouteDelivery.OVPN_PROFILE -> 0
+            IpListRouteDelivery.OVPN_PROFILE,
+            IpListRouteDelivery.XRAY_ROUTING_DIRECT,
+            -> 0
         }
 
     fun isWithinEstablishBudget(excludeRouteCalls: Int): Boolean =

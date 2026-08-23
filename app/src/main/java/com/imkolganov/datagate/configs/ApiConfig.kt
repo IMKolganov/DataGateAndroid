@@ -40,6 +40,9 @@ object ApiConfig {
     const val API_OPEN_VPN_FILES_ADD_WITH_TOKEN_PATH = "api/open-vpn-files/add-with-token"
     const val API_OPEN_VPN_FILES_DOWNLOAD_FILE_BY_CN_PATH = "api/open-vpn-files/download-file-by-cn"
 
+    const val API_XRAY_CLIENT_LINKS_ADD_WITH_TOKEN_PATH = "api/xray-client-links/add-with-token"
+    const val API_XRAY_CLIENT_LINKS_DOWNLOAD_FILE_BY_CN_PATH = "api/xray-client-links/download-file-by-cn"
+
     const val API_QUOTA_PLANS_GET_ALL = "api/quota-plans/get-all"
     const val API_USER_QUOTA_PLANS_GET_BY_USER_ID_PREFIX = "api/user-quota-plans/get-by-user-id/"
 }
