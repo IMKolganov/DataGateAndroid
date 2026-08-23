@@ -40,9 +40,9 @@ android {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 14
+        versionCode = 16
         // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
-        versionName = "1.0.14"
+        versionName = "1.0.16"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
             ?: "IMKolganov/DataGateAndroid"
@@ -141,6 +141,15 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.material.icons.extended)
+
+    // Official XTLS/libXray Android AAR (submodule: native-libxray).
+    // Produce with: ./scripts/libxray/build-android.sh download
+    val libXrayAar = file("libs/libxray.aar")
+    check(libXrayAar.isFile) {
+        "Missing ${libXrayAar.path}. Run: ./scripts/libxray/build-android.sh download " +
+            "(see docs/BUILD_LIBXRAY.md)"
+    }
+    implementation(files(libXrayAar))
 
     testImplementation(libs.junit)
     testImplementation(libs.json)

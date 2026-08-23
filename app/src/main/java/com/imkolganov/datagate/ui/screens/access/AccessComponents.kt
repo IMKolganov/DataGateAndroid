@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.imkolganov.datagate.ui.components.AppCards
@@ -58,6 +59,7 @@ fun ClientNetworkFooter(
     isLoading: Boolean,
     externalIpLoading: Boolean = false,
     showVpnIp: Boolean,
+    showPrivateDnsHint: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val unavailable = stringResource(R.string.access_network_info_unavailable)
@@ -105,6 +107,14 @@ fun ClientNetworkFooter(
                 label = stringResource(R.string.access_your_dns),
                 value = dnsText
             )
+            if (showPrivateDnsHint) {
+                Text(
+                    text = stringResource(R.string.access_private_dns_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
         }
     }
 }
@@ -257,14 +267,14 @@ fun ServerCard(
     }
 
     if (isVpnSessionOnThisServer) {
-        // Opaque fill + tonalElevation 0: avoids the “double frame” from semi-transparent Card layers.
+        // Opaque fill + no shadow: avoids double frame and scroll overdraw from elevation.
         Surface(
             modifier = outerModifier,
             shape = cardShape,
             color = connectedFill,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             tonalElevation = 0.dp,
-            shadowElevation = 2.dp
+            shadowElevation = 0.dp
         ) {
             inner()
         }
@@ -351,16 +361,22 @@ private fun ServerCardInner(
                     value = server.openVpnVersionText ?: "-"
                 )
                 server.uptimeText?.let { uptime ->
-                    val parts = uptime.split(", ")
+                    val primary = remember(uptime) {
+                        uptime.substringBefore(", ").ifBlank { uptime }
+                    }
+                    val secondary = remember(uptime) {
+                        uptime.substringAfter(", ", missingDelimiterValue = "")
+                            .takeIf { it.isNotBlank() && it != uptime }
+                    }
                     IconKeyValueRow(
                         icon = Icons.Outlined.Schedule,
                         label = stringResource(R.string.label_uptime),
-                        value = parts.firstOrNull() ?: uptime
+                        value = primary
                     )
-                    if (parts.size > 1) {
+                    secondary?.let { dayPart ->
                         Text(
                             modifier = Modifier.padding(start = 28.dp),
-                            text = parts[1],
+                            text = dayPart,
                             style = MaterialTheme.typography.bodySmall
                         )
                     }

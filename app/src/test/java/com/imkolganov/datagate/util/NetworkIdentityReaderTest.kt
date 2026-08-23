@@ -62,11 +62,13 @@ class NetworkIdentityReaderTest {
             fromSystem = NetworkIdentitySnapshot(vpnIpAddress = null, dnsServers = emptyList()),
             fromSession = NetworkIdentitySnapshot(
                 vpnIpAddress = "10.51.15.4",
-                dnsServers = listOf("8.8.8.8", "1.1.1.1")
+                dnsServers = listOf("8.8.8.8", "1.1.1.1"),
+                dnsIdentityEnabled = true,
             )
         )
         assertEquals("10.51.15.4", merged.vpnIpAddress)
         assertEquals(listOf("8.8.8.8", "1.1.1.1"), merged.dnsServers)
+        assertTrue(merged.dnsIdentityEnabled)
     }
 
     @Test
@@ -78,11 +80,25 @@ class NetworkIdentityReaderTest {
             ),
             fromSession = NetworkIdentitySnapshot(
                 vpnIpAddress = "10.51.15.4",
-                dnsServers = listOf("8.8.8.8")
+                dnsServers = listOf("8.8.8.8"),
+                dnsIdentityEnabled = true,
             )
         )
         assertEquals("10.8.0.2", merged.vpnIpAddress)
         assertEquals(listOf("9.9.9.9"), merged.dnsServers)
+        assertTrue(merged.dnsIdentityEnabled)
+    }
+
+    @Test
+    fun mergeWithSession_preservesDnsIdentityFlagFromSessionOnly() {
+        val merged = NetworkIdentityReader.mergeWithSession(
+            fromSystem = NetworkIdentitySnapshot(
+                vpnIpAddress = "10.8.0.2",
+                dnsServers = listOf("172.20.0.1"),
+            ),
+            fromSession = NetworkIdentitySnapshot(dnsIdentityEnabled = true),
+        )
+        assertTrue(merged.dnsIdentityEnabled)
     }
 
     @Test

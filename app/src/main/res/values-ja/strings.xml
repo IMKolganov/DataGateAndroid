@@ -3,6 +3,7 @@
     <string name="language_system">システムに合わせる</string>
     <string name="nav_home">ホーム</string>
     <string name="nav_access">アクセス</string>
+    <string name="nav_quota">クォータ</string>
     <string name="nav_statistics">統計</string>
     <string name="nav_settings">設定</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">利用不可</string>
     <string name="access_users_footer">ユーザー計 %1$d 人 · %3$d 台中 %2$d 台オンライン</string>
     <string name="access_choose_server">サーバーを選択</string>
+    <string name="access_servers_loading">サーバーを読み込み中…</string>
     <string name="access_refresh">更新</string>
     <string name="access_use_home_hint">ホームは自動接続します。ここでサーバーを選び「接続」— またはアクティブなサーバーで「切断」。</string>
     <string name="access_vpn_active">VPN 有効</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">サーバー #%1$d はオフラインかアプリから接続できません。</string>
     <string name="vpn_server_quota_blocked">サーバー「%1$s」はご利用プランに含まれていません。</string>
     <string name="access_server_quota_blocked">プランに含まれていません</string>
+    <string name="access_servers_available_title">利用可能なサーバー</string>
+    <string name="access_servers_unavailable_title">プランに含まれていません</string>
+    <string name="access_upgrade_note_title">すべてのサーバーへのアクセス</string>
+    <string name="access_upgrade_note_body">すべてのサーバーを利用するには、Telegramボット @DataGateVPNBot でプラン詳細を確認するか、直接お問い合わせください。</string>
+    <string name="access_upgrade_contact_email">メール %1$s</string>
     <string name="access_quota_section_title">クォータ</string>
+    <string name="access_quota_loading">プランを読み込み中…</string>
+    <string name="access_quota_traffic_loading">トラフィック使用量を読み込み中…</string>
     <string name="access_quota_current_plan">現在のプラン</string>
     <string name="access_quota_no_active">有効なクォータ割り当てがありません</string>
     <string name="access_quota_effective_from">適用開始：%1$s</string>
@@ -403,14 +412,9 @@
     <string name="settings_ip_lists_android_12_route_limit_label">Max. OVPN-Routen</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
-    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
-
-    <string name="access_xray_dialog_title">XRay 非対応</string>
-    <string name="access_unsupported_server_type_dialog_title">サーバータイプ非対応</string>
+    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>    <string name="access_unsupported_server_type_dialog_title">サーバータイプ非対応</string>
     <string name="label_server_type_xray">Xray</string>
-    <string name="label_server_type_unknown">その他</string>
-    <string name="vpn_requires_xray_client">このアプリは XRay サーバーに接続できません。サーバー: %1$s。\n\n別のクライアントをご利用ください。</string>
-    <string name="vpn_requires_unsupported_server_type">このアプリはこのサーバータイプに対応していません。サーバー: %1$s。\n\n別のクライアントをご利用ください。</string>
+    <string name="label_server_type_unknown">その他</string>    <string name="vpn_requires_unsupported_server_type">このアプリはこのサーバータイプに対応していません。サーバー: %1$s。\n\n別のクライアントをご利用ください。</string>
     <string name="free_tier_title_link">VPN 利用のために Telegram を連携</string>
     <string name="free_tier_title_subscribe">Telegram チャンネルを購読</string>
     <string name="free_tier_body_link">Free または Default プランで VPN を利用するには:\n• %1$s を購読\n• または DataGate Telegram ボットとアカウントを連携</string>
@@ -471,4 +475,33 @@
     <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
     <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
 
+    <string name="nav_profiles">Profiles</string>
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_add">Add profile</string>
+    <string name="profiles_import_ovpn">Import OpenVPN (.ovpn)</string>
+    <string name="profiles_import_confirm">Import</string>
+    <string name="profiles_import_xray_file">Import Xray JSON / links file</string>
+    <string name="profiles_import_xray_link">Paste Xray / VLESS link</string>    <string name="profiles_empty_title">No local profiles yet</string>
+    <string name="profiles_empty_body">Import an .ovpn file or paste a VLESS/Xray share link to connect from this device.</string>
+    <string name="profiles_imported">Imported “%1$s”</string>
+    <string name="profiles_rename_title">Rename profile</string>
+    <string name="profiles_name_label">Name</string>
+    <string name="profiles_rename">Rename</string>
+    <string name="profiles_edit_creds">Username / password</string>
+    <string name="profiles_creds_title">Profile credentials</string>
+    <string name="profiles_creds_hint">Optional. Used when the .ovpn profile expects auth-user-pass.</string>
+    <string name="profiles_username_label">Username</string>
+    <string name="profiles_password_label">Password</string>
+    <string name="profiles_delete">Delete</string>
+    <string name="profiles_delete_title">Delete profile?</string>
+    <string name="profiles_delete_message">Remove “%1$s” from this device?</string>
+    <string name="profiles_delete_confirm">Delete</string>
+    <string name="profiles_transport_direct">Direct OpenVPN (no WSS)</string>
+    <string name="profiles_transport_xray">Xray (libXray)</string>
+        <string name="profiles_xray_paste_title">Import Xray link</string>
+    <string name="profiles_xray_paste_hint">Paste a vless://, vmess://, trojan://, or ss:// link, or a JSON config with outbounds.</string>
+    <string name="profiles_xray_paste_label">Share link or JSON</string>    <string name="profiles_error_unavailable">Local profiles are not available</string>
+    <string name="profiles_error_not_found">Profile not found</string>
+    <string name="profiles_error_xray_unavailable">libXray is not included in this build. Rebuild with app/libs/libxray.aar.</string>
+    <string name="profiles_error_xray_not_supported">Cannot connect to Xray profile “%1$s” in this app version.</string>
 </resources>

@@ -16,6 +16,9 @@ import com.imkolganov.datagate.model.servers.OpenVpnServerWithStatusV2Item
 import com.imkolganov.datagate.model.servers.OpenVpnServersWithStatusV2Data
 import com.imkolganov.datagate.model.servers.QuotaPlanGroupDto
 import com.imkolganov.datagate.model.servers.UserQuotaPlanContextDto
+import executeSuspending
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -26,7 +29,7 @@ class OpenVpnServersApi(
     private val http: OkHttpClient,
     private val baseUrl: String = AuthConfig.BACKEND_BASE_URL
 ) {
-    fun getOpenVpnServersWithStatusV3(): ApiResponse<OpenVpnServersWithStatusV2Data> {
+    suspend fun getOpenVpnServersWithStatusV3(): ApiResponse<OpenVpnServersWithStatusV2Data> {
         val url = baseUrl.trimEnd('/') + "/" + ApiConfig.API_OPEN_VPN_SERVERS_V3_GET_ALL_WITH_STATUS_PATH.trimStart('/')
 
         val req = Request.Builder()
@@ -35,15 +38,18 @@ class OpenVpnServersApi(
             .header("Accept", "application/json")
             .build()
 
-        http.newCall(req).execute().use { resp ->
-            val code = resp.code
-            val body = resp.body.string().orEmpty()
+        // Body read must stay off Main: executeSuspending resumes on the caller's dispatcher.
+        return withContext(Dispatchers.IO) {
+            http.executeSuspending(req).use { resp ->
+                val code = resp.code
+                val body = resp.body.string().orEmpty()
 
-            if (code !in 200..299) {
-                throw IOException(formatHttpErrorDetail("Request failed", code, body))
+                if (code !in 200..299) {
+                    throw IOException(formatHttpErrorDetail("Request failed", code, body))
+                }
+
+                parseWithStatusResponse(body)
             }
-
-            return parseWithStatusResponse(body)
         }
     }
 
@@ -166,6 +172,15 @@ class OpenVpnServersApi(
             tags.add(tagsArr.optString(i))
         }
 
+        val dnsArr = o.optJSONArray("dnsServers") ?: o.optJSONArray("DnsServers")
+        val dnsServers = ArrayList<String>()
+        if (dnsArr != null) {
+            for (i in 0 until dnsArr.length()) {
+                val v = dnsArr.optString(i).trim()
+                if (v.isNotEmpty()) dnsServers.add(v)
+            }
+        }
+
         val qpgArr = o.optJSONArray("quotaPlanGroups")
             ?: o.optJSONArray("QuotaPlanGroups")
             ?: JSONArray()
@@ -200,7 +215,8 @@ class OpenVpnServersApi(
             isAccessibleForUserQuotaPlan = o.optBoolean(
                 "isAccessibleForUserQuotaPlan",
                 o.optBoolean("IsAccessibleForUserQuotaPlan", false)
-            )
+            ),
+            dnsServers = dnsServers,
         )
     }
 }

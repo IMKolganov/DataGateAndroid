@@ -12,4 +12,10 @@ object AccessSessionNetworkInfo {
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
     }
+
+    /** Private DNS Off hint only while connected with an identity-DNS issued profile. */
+    fun shouldShowPrivateDnsHint(
+        vpnConnected: Boolean,
+        dnsIdentityEnabled: Boolean,
+    ): Boolean = vpnConnected && dnsIdentityEnabled
 }

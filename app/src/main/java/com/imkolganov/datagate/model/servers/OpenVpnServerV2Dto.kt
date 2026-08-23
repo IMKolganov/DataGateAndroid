@@ -19,5 +19,9 @@ data class OpenVpnServerV2Dto(
     val dcoIsEnabled: Boolean?,
     val tags: List<String>,
     val quotaPlanGroups: List<QuotaPlanGroupDto>,
-    val isAccessibleForUserQuotaPlan: Boolean
+    val isAccessibleForUserQuotaPlan: Boolean,
+    /**
+     * Optional classic DNS from catalog list (Xray connect uses issued profile JSON instead).
+     */
+    val dnsServers: List<String> = emptyList(),
 )

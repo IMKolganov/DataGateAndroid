@@ -3,6 +3,7 @@
     <string name="language_system">Systemstandard</string>
     <string name="nav_home">Start</string>
     <string name="nav_access">Zugang</string>
+    <string name="nav_quota">Kontingent</string>
     <string name="nav_statistics">Statistik</string>
     <string name="nav_settings">Einstellungen</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Nicht verfügbar</string>
     <string name="access_users_footer">%1$d Nutzer gesamt · %2$d von %3$d Servern online</string>
     <string name="access_choose_server">Server wählen</string>
+    <string name="access_servers_loading">Server werden geladen…</string>
     <string name="access_refresh">Aktualisieren</string>
     <string name="access_use_home_hint">Auf „Start“ automatisch verbinden. Hier Server wählen und „Verbinden“ — oder „Trennen“ beim aktiven Server.</string>
     <string name="access_vpn_active">VPN aktiv</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Server #%1$d ist offline oder für die In-App-Verbindung nicht verfügbar.</string>
     <string name="vpn_server_quota_blocked">Server „%1$s“ ist in Ihrem Tarif nicht enthalten.</string>
     <string name="access_server_quota_blocked">Nicht in Ihrem Tarif</string>
+    <string name="access_servers_available_title">Für Sie verfügbar</string>
+    <string name="access_servers_unavailable_title">Nicht in Ihrem Tarif</string>
+    <string name="access_upgrade_note_title">Voller Serverzugang</string>
+    <string name="access_upgrade_note_body">Für vollen Serverzugang öffnen Sie den Telegram-Bot @DataGateVPNBot für Tarifdetails — oder fragen Sie mich direkt.</string>
+    <string name="access_upgrade_contact_email">E-Mail %1$s</string>
     <string name="access_quota_section_title">Kontingent</string>
+    <string name="access_quota_loading">Tarif wird geladen…</string>
+    <string name="access_quota_traffic_loading">Traffic-Nutzung wird geladen…</string>
     <string name="access_quota_current_plan">Ihr aktueller Tarif</string>
     <string name="access_quota_no_active">Keine aktive Kontingentzuweisung</string>
     <string name="access_quota_effective_from">Gültig ab: %1$s</string>
@@ -402,14 +411,9 @@ Sie können die Release-Seite öffnen oder die APK herunterladen. Mit der Option
     <string name="settings_ip_lists_android_12_route_limit_label">Max. OVPN-Routen</string>
     <string name="settings_ip_lists_android_12_route_limit_hint">Empfohlen %1$d. Erlaubt %2$d–%3$d.</string>
     <string name="settings_ip_lists_android_12_route_limit_error">Geben Sie einen Wert von %1$d bis %2$d ein.</string>
-    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>
-
-    <string name="access_xray_dialog_title">XRay wird nicht unterstützt</string>
-    <string name="access_unsupported_server_type_dialog_title">Servertyp wird nicht unterstützt</string>
+    <string name="vpn_ip_list_ready_limited">IP-Liste bereit (%1$d Routen; Profillimit erreicht)</string>    <string name="access_unsupported_server_type_dialog_title">Servertyp wird nicht unterstützt</string>
     <string name="label_server_type_xray">Xray</string>
-    <string name="label_server_type_unknown">Andere</string>
-    <string name="vpn_requires_xray_client">Diese App kann keine Verbindung zu XRay-Servern herstellen. Server: %1$s.\n\nBitte verwenden Sie einen anderen Client.</string>
-    <string name="vpn_requires_unsupported_server_type">Diese App unterstützt diesen Servertyp nicht. Server: %1$s.\n\nBitte verwenden Sie einen anderen Client.</string>
+    <string name="label_server_type_unknown">Andere</string>    <string name="vpn_requires_unsupported_server_type">Diese App unterstützt diesen Servertyp nicht. Server: %1$s.\n\nBitte verwenden Sie einen anderen Client.</string>
     <string name="free_tier_title_link">Telegram für VPN-Zugang verbinden</string>
     <string name="free_tier_title_subscribe">Telegram-Kanal abonnieren</string>
     <string name="free_tier_body_link">Für VPN im Free- oder Default-Tarif:\n• Abonnieren Sie %1$s\n• Oder verknüpfen Sie Ihr Konto mit dem DataGate Telegram-Bot</string>
@@ -470,4 +474,33 @@ Sie können die Release-Seite öffnen oder die APK herunterladen. Mit der Option
     <string name="tv_link_error_unavailable">TV sign-in is not available in this build.</string>
     <string name="tv_link_error_tokens_missing">Sign-in was approved, but tokens were not received. Try again.</string>
 
+    <string name="nav_profiles">Profiles</string>
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_add">Add profile</string>
+    <string name="profiles_import_ovpn">Import OpenVPN (.ovpn)</string>
+    <string name="profiles_import_confirm">Import</string>
+    <string name="profiles_import_xray_file">Import Xray JSON / links file</string>
+    <string name="profiles_import_xray_link">Paste Xray / VLESS link</string>    <string name="profiles_empty_title">No local profiles yet</string>
+    <string name="profiles_empty_body">Import an .ovpn file or paste a VLESS/Xray share link to connect from this device.</string>
+    <string name="profiles_imported">Imported “%1$s”</string>
+    <string name="profiles_rename_title">Rename profile</string>
+    <string name="profiles_name_label">Name</string>
+    <string name="profiles_rename">Rename</string>
+    <string name="profiles_edit_creds">Username / password</string>
+    <string name="profiles_creds_title">Profile credentials</string>
+    <string name="profiles_creds_hint">Optional. Used when the .ovpn profile expects auth-user-pass.</string>
+    <string name="profiles_username_label">Username</string>
+    <string name="profiles_password_label">Password</string>
+    <string name="profiles_delete">Delete</string>
+    <string name="profiles_delete_title">Delete profile?</string>
+    <string name="profiles_delete_message">Remove “%1$s” from this device?</string>
+    <string name="profiles_delete_confirm">Delete</string>
+    <string name="profiles_transport_direct">Direct OpenVPN (no WSS)</string>
+    <string name="profiles_transport_xray">Xray (libXray)</string>
+        <string name="profiles_xray_paste_title">Import Xray link</string>
+    <string name="profiles_xray_paste_hint">Paste a vless://, vmess://, trojan://, or ss:// link, or a JSON config with outbounds.</string>
+    <string name="profiles_xray_paste_label">Share link or JSON</string>    <string name="profiles_error_unavailable">Local profiles are not available</string>
+    <string name="profiles_error_not_found">Profile not found</string>
+    <string name="profiles_error_xray_unavailable">libXray is not included in this build. Rebuild with app/libs/libxray.aar.</string>
+    <string name="profiles_error_xray_not_supported">Cannot connect to Xray profile “%1$s” in this app version.</string>
 </resources>
