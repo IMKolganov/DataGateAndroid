@@ -3,6 +3,7 @@
     <string name="language_system">Predefinição do sistema</string>
     <string name="nav_home">Início</string>
     <string name="nav_access">Acesso</string>
+    <string name="nav_quota">Quota</string>
     <string name="nav_statistics">Estatísticas</string>
     <string name="nav_settings">Definições</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Indisponível</string>
     <string name="access_users_footer">%1$d utilizadores no total · %2$d de %3$d servidores online</string>
     <string name="access_choose_server">Escolher servidor</string>
+    <string name="access_servers_loading">A carregar servidores…</string>
     <string name="access_refresh">Atualizar</string>
     <string name="access_use_home_hint">O Início liga automaticamente. Aqui escolha um servidor e toque em Ligar — ou Desligar no ativo.</string>
     <string name="access_vpn_active">VPN ativa</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">O servidor n.º %1$d está offline ou indisponível para ligação na app.</string>
     <string name="vpn_server_quota_blocked">O servidor «%1$s» não está incluído no seu plano.</string>
     <string name="access_server_quota_blocked">Não está no seu plano</string>
+    <string name="access_servers_available_title">Disponíveis para si</string>
+    <string name="access_servers_unavailable_title">Não incluídos no seu plano</string>
+    <string name="access_upgrade_note_title">Acesso total aos servidores</string>
+    <string name="access_upgrade_note_body">Para desbloquear todos os servidores, abra o bot Telegram @DataGateVPNBot para detalhes do plano — ou pergunte-me diretamente.</string>
+    <string name="access_upgrade_contact_email">Email %1$s</string>
     <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_loading">A carregar plano…</string>
+    <string name="access_quota_traffic_loading">A carregar utilização de tráfego…</string>
     <string name="access_quota_current_plan">O seu plano atual</string>
     <string name="access_quota_no_active">Sem atribuição de quota ativa</string>
     <string name="access_quota_effective_from">Válido desde: %1$s</string>

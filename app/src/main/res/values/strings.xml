@@ -4,6 +4,7 @@
 
     <string name="nav_home">Home</string>
     <string name="nav_access">Access</string>
+    <string name="nav_quota">Quota</string>
     <string name="nav_profiles">Profiles</string>
     <string name="nav_statistics">Statistics</string>
     <string name="nav_settings">Settings</string>
@@ -442,6 +443,11 @@
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
     <string name="vpn_server_quota_blocked">Server \"%1$s\" is not included in your quota plan.</string>
     <string name="access_server_quota_blocked">Not in your plan</string>
+    <string name="access_servers_available_title">Available for you</string>
+    <string name="access_servers_unavailable_title">Not included in your plan</string>
+    <string name="access_upgrade_note_title">Full server access</string>
+    <string name="access_upgrade_note_body">To unlock all servers, open the Telegram bot @DataGateVPNBot for plan details — or ask me directly.</string>
+    <string name="access_upgrade_contact_email">Email %1$s</string>
     <string name="access_quota_section_title">Quota</string>
     <string name="access_quota_loading">Loading plan…</string>
     <string name="access_quota_traffic_loading">Loading traffic usage…</string>

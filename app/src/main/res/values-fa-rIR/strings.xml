@@ -3,6 +3,7 @@
     <string name="language_system">پیش‌فرض سیستم</string>
     <string name="nav_home">خانه</string>
     <string name="nav_access">دسترسی</string>
+    <string name="nav_quota">سهمیه</string>
     <string name="nav_statistics">آمار</string>
     <string name="nav_settings">تنظیمات</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">در دسترس نیست</string>
     <string name="access_users_footer">%1$d کاربر در مجموع · %2$d از %3$d سرور آنلاین</string>
     <string name="access_choose_server">انتخاب سرور</string>
+    <string name="access_servers_loading">در حال بارگذاری سرورها…</string>
     <string name="access_refresh">تازه‌سازی</string>
     <string name="access_use_home_hint">خانه خودکار متصل می‌شود. اینجا سرور را انتخاب و اتصال بزنید — یا قطع روی سرور فعال.</string>
     <string name="access_vpn_active">VPN فعال</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">سرور شماره %1$d آفلاین است یا برای اتصال در برنامه در دسترس نیست.</string>
     <string name="vpn_server_quota_blocked">سرور «%1$s» در پلان شما نیست.</string>
     <string name="access_server_quota_blocked">در پلان شما نیست</string>
+    <string name="access_servers_available_title">در دسترس شما</string>
+    <string name="access_servers_unavailable_title">در طرح شما نیستند</string>
+    <string name="access_upgrade_note_title">دسترسی کامل به سرورها</string>
+    <string name="access_upgrade_note_body">برای باز کردن همه سرورها، ربات تلگرام @DataGateVPNBot را برای جزئیات طرح باز کنید — یا مستقیماً از من بپرسید.</string>
+    <string name="access_upgrade_contact_email">ایمیل %1$s</string>
     <string name="access_quota_section_title">سهمیه</string>
+    <string name="access_quota_loading">در حال بارگذاری طرح…</string>
+    <string name="access_quota_traffic_loading">در حال بارگذاری مصرف ترافیک…</string>
     <string name="access_quota_current_plan">پلان فعلی شما</string>
     <string name="access_quota_no_active">سهمیهٔ فعال نیست</string>
     <string name="access_quota_effective_from">موثر از: %1$s</string>

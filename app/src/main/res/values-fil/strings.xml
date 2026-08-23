@@ -4,6 +4,7 @@
 
     <string name="nav_home">Home</string>
     <string name="nav_access">Access</string>
+    <string name="nav_quota">Quota</string>
     <string name="nav_statistics">Statistics</string>
     <string name="nav_settings">Settings</string>
 
@@ -155,6 +156,7 @@
     <string name="access_network_info_unavailable">Hindi available</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
+    <string name="access_servers_loading">Nilo-load ang mga server…</string>
     <string name="access_refresh">Refresh</string>
     <string name="access_use_home_hint">Use Home to connect with automatic server selection. Here, pick a server and tap Connect—or Disconnect on the active server.</string>
     <string name="access_vpn_active">VPN active</string>
@@ -191,7 +193,14 @@
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
     <string name="vpn_server_quota_blocked">Ang server na \"%1$s\" ay wala sa iyong plano.</string>
     <string name="access_server_quota_blocked">Wala sa iyong plano</string>
+    <string name="access_servers_available_title">Available para sa iyo</string>
+    <string name="access_servers_unavailable_title">Wala sa iyong plan</string>
+    <string name="access_upgrade_note_title">Buong access sa server</string>
+    <string name="access_upgrade_note_body">Para i-unlock ang lahat ng server, buksan ang Telegram bot na @DataGateVPNBot para sa detalye ng plan — o direktang tanungin ako.</string>
+    <string name="access_upgrade_contact_email">Email %1$s</string>
     <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_loading">Nilo-load ang plan…</string>
+    <string name="access_quota_traffic_loading">Nilo-load ang paggamit ng traffic…</string>
     <string name="access_quota_current_plan">Kasalukuyan mong plano</string>
     <string name="access_quota_no_active">Walang aktibong quota assignment</string>
     <string name="access_quota_effective_from">Epektibo mula: %1$s</string>

@@ -3,6 +3,7 @@
     <string name="language_system">Paramètres système</string>
     <string name="nav_home">Accueil</string>
     <string name="nav_access">Accès</string>
+    <string name="nav_quota">Quota</string>
     <string name="nav_statistics">Statistiques</string>
     <string name="nav_settings">Réglages</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Indisponible</string>
     <string name="access_users_footer">%1$d utilisateurs au total · %2$d / %3$d serveurs en ligne</string>
     <string name="access_choose_server">Choisir un serveur</string>
+    <string name="access_servers_loading">Chargement des serveurs…</string>
     <string name="access_refresh">Actualiser</string>
     <string name="access_use_home_hint">L\'accueil connecte automatiquement. Ici, choisissez un serveur et appuyez sur Connecter — ou Déconnecter sur le serveur actif.</string>
     <string name="access_vpn_active">VPN actif</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Le serveur n°%1$d est hors ligne ou indisponible pour la connexion dans l\'app.</string>
     <string name="vpn_server_quota_blocked">Le serveur « %1$s » n\'est pas inclus dans votre forfait.</string>
     <string name="access_server_quota_blocked">Pas dans votre forfait</string>
+    <string name="access_servers_available_title">Disponibles pour vous</string>
+    <string name="access_servers_unavailable_title">Hors de votre forfait</string>
+    <string name="access_upgrade_note_title">Accès complet aux serveurs</string>
+    <string name="access_upgrade_note_body">Pour débloquer tous les serveurs, ouvrez le bot Telegram @DataGateVPNBot pour les détails du forfait — ou contactez-moi directement.</string>
+    <string name="access_upgrade_contact_email">E-mail %1$s</string>
     <string name="access_quota_section_title">Forfait</string>
+    <string name="access_quota_loading">Chargement du forfait…</string>
+    <string name="access_quota_traffic_loading">Chargement de l’utilisation…</string>
     <string name="access_quota_current_plan">Votre forfait actuel</string>
     <string name="access_quota_no_active">Aucune attribution de forfait active</string>
     <string name="access_quota_effective_from">En vigueur depuis : %1$s</string>

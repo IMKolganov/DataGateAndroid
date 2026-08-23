@@ -3,6 +3,7 @@
     <string name="language_system">Sistem varsayılanı</string>
     <string name="nav_home">Ana sayfa</string>
     <string name="nav_access">Erişim</string>
+    <string name="nav_quota">Kota</string>
     <string name="nav_statistics">İstatistikler</string>
     <string name="nav_settings">Ayarlar</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Kullanılamıyor</string>
     <string name="access_users_footer">Toplam %1$d kullanıcı · %3$d sunucudan %2$d çevrimiçi</string>
     <string name="access_choose_server">Sunucu seç</string>
+    <string name="access_servers_loading">Sunucular yükleniyor…</string>
     <string name="access_refresh">Yenile</string>
     <string name="access_use_home_hint">Ana sayfa otomatik bağlanır. Burada sunucu seçip Bağlan veya aktif sunucuda Kes kullanın.</string>
     <string name="access_vpn_active">VPN açık</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Sunucu #%1$d çevrimdışı veya uygulama bağlantısı için uygun değil.</string>
     <string name="vpn_server_quota_blocked">\"%1$s\" sunucusu planınızda yok.</string>
     <string name="access_server_quota_blocked">Planınızda yok</string>
+    <string name="access_servers_available_title">Sizin için uygun</string>
+    <string name="access_servers_unavailable_title">Planınızda yok</string>
+    <string name="access_upgrade_note_title">Tam sunucu erişimi</string>
+    <string name="access_upgrade_note_body">Tüm sunucuların kilidini açmak için plan ayrıntıları için Telegram botu @DataGateVPNBot’u açın — veya bana doğrudan sorun.</string>
+    <string name="access_upgrade_contact_email">E-posta %1$s</string>
     <string name="access_quota_section_title">Kota</string>
+    <string name="access_quota_loading">Plan yükleniyor…</string>
+    <string name="access_quota_traffic_loading">Trafik kullanımı yükleniyor…</string>
     <string name="access_quota_current_plan">Mevcut planınız</string>
     <string name="access_quota_no_active">Aktif kota ataması yok</string>
     <string name="access_quota_effective_from">Geçerlilik: %1$s</string>

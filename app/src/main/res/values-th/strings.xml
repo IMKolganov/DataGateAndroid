@@ -3,6 +3,7 @@
     <string name="language_system">ค่าเริ่มต้นของระบบ</string>
     <string name="nav_home">หน้าแรก</string>
     <string name="nav_access">การเข้าถึง</string>
+    <string name="nav_quota">โควตา</string>
     <string name="nav_statistics">สถิติ</string>
     <string name="nav_settings">การตั้งค่า</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">ไม่พร้อมใช้งาน</string>
     <string name="access_users_footer">ผู้ใช้ %1$d คน · เซิร์ฟเวอร์ออนไลน์ %2$d จาก %3$d</string>
     <string name="access_choose_server">เลือกเซิร์ฟเวอร์</string>
+    <string name="access_servers_loading">กำลังโหลดเซิร์ฟเวอร์…</string>
     <string name="access_refresh">รีเฟรช</string>
     <string name="access_use_home_hint">หน้าแรกเชื่อมต่ออัตโนมัติ ที่นี่เลือกเซิร์ฟเวอร์แล้วแตะเชื่อมต่อ — หรือตัดบนเซิร์ฟเวอร์ที่ใช้งาน</string>
     <string name="access_vpn_active">VPN เปิดอยู่</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">เซิร์ฟเวอร์ #%1$d ออฟไลน์หรือเชื่อมต่อในแอปไม่ได้</string>
     <string name="vpn_server_quota_blocked">เซิร์ฟเวอร์ \"%1$s\" ไม่อยู่ในแพ็กเกจของคุณ</string>
     <string name="access_server_quota_blocked">ไม่อยู่ในแพ็กเกจ</string>
+    <string name="access_servers_available_title">พร้อมให้คุณใช้</string>
+    <string name="access_servers_unavailable_title">ไม่อยู่ในแผนของคุณ</string>
+    <string name="access_upgrade_note_title">เข้าถึงเซิร์ฟเวอร์ทั้งหมด</string>
+    <string name="access_upgrade_note_body">หากต้องการปลดล็อกเซิร์ฟเวอร์ทั้งหมด ให้เปิดบอท Telegram @DataGateVPNBot เพื่อดูรายละเอียดแผน — หรือถามฉันโดยตรง</string>
+    <string name="access_upgrade_contact_email">อีเมล %1$s</string>
     <string name="access_quota_section_title">โควตา</string>
+    <string name="access_quota_loading">กำลังโหลดแผน…</string>
+    <string name="access_quota_traffic_loading">กำลังโหลดการใช้ปริมาณข้อมูล…</string>
     <string name="access_quota_current_plan">แพ็กเกจปัจจุบัน</string>
     <string name="access_quota_no_active">ไม่มีการกำหนดโควตาที่ใช้งาน</string>
     <string name="access_quota_effective_from">มีผลตั้งแต่: %1$s</string>

@@ -4,6 +4,7 @@
 
     <string name="nav_home">Home</string>
     <string name="nav_access">Access</string>
+    <string name="nav_quota">Kvot</string>
     <string name="nav_statistics">Statistics</string>
     <string name="nav_settings">Settings</string>
 
@@ -155,6 +156,7 @@
     <string name="access_network_info_unavailable">Otillgänglig</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>
+    <string name="access_servers_loading">Läser in servrar…</string>
     <string name="access_refresh">Refresh</string>
     <string name="access_use_home_hint">Use Home to connect with automatic server selection. Here, pick a server and tap Connect—or Disconnect on the active server.</string>
     <string name="access_vpn_active">VPN active</string>
@@ -191,7 +193,14 @@
     <string name="vpn_server_manual_unavailable">Server #%1$d is offline or not available for in-app connection.</string>
     <string name="vpn_server_quota_blocked">Server "%1$s" is not included in your quota plan.</string>
     <string name="access_server_quota_blocked">Not in your plan</string>
+    <string name="access_servers_available_title">Tillgängliga för dig</string>
+    <string name="access_servers_unavailable_title">Ingår inte i din plan</string>
+    <string name="access_upgrade_note_title">Full serveråtkomst</string>
+    <string name="access_upgrade_note_body">För att låsa upp alla servrar, öppna Telegram-boten @DataGateVPNBot för plandetaljer — eller fråga mig direkt.</string>
+    <string name="access_upgrade_contact_email">E-post %1$s</string>
     <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_loading">Läser in plan…</string>
+    <string name="access_quota_traffic_loading">Läser in trafikförbrukning…</string>
     <string name="access_quota_current_plan">Your current plan</string>
     <string name="access_quota_no_active">No active quota assignment</string>
     <string name="access_quota_effective_from">Effective from: %1$s</string>

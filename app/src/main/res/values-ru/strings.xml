@@ -4,6 +4,7 @@
 
     <string name="nav_home">Главная</string>
     <string name="nav_access">Доступ</string>
+    <string name="nav_quota">Квота</string>
     <string name="nav_statistics">Статистика</string>
     <string name="nav_settings">Настройки</string>
 
@@ -374,6 +375,11 @@
     <string name="vpn_server_manual_unavailable">Сервер №%1$d недоступен или не подходит для подключения в приложении.</string>
     <string name="vpn_server_quota_blocked">Сервер «%1$s» не входит в ваш тарифный план.</string>
     <string name="access_server_quota_blocked">Нет в вашем плане</string>
+    <string name="access_servers_available_title">Доступны вам</string>
+    <string name="access_servers_unavailable_title">Не входят в ваш план</string>
+    <string name="access_upgrade_note_title">Полный доступ к серверам</string>
+    <string name="access_upgrade_note_body">Чтобы получить полный доступ к серверам, перейдите в Telegram-бота @DataGateVPNBot для уточнения деталей — или задайте вопрос напрямую.</string>
+    <string name="access_upgrade_contact_email">Написать на %1$s</string>
     <string name="access_quota_section_title">Квота</string>
     <string name="access_quota_loading">Загрузка плана…</string>
     <string name="access_quota_traffic_loading">Загрузка трафика…</string>

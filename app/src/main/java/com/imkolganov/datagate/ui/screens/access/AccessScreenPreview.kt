@@ -61,7 +61,8 @@ fun AccessScreenPreview() {
                         totalOutText = "1.10 GB",
                         subtitle = "High bandwidth",
                         loadPercent = 70,
-                        activeUsers = 42
+                        activeUsers = 42,
+                        isAccessibleForQuotaPlan = false,
                     )
                 ),
                 activeConnections = listOf(

@@ -3,6 +3,7 @@
     <string name="language_system">システムに合わせる</string>
     <string name="nav_home">ホーム</string>
     <string name="nav_access">アクセス</string>
+    <string name="nav_quota">クォータ</string>
     <string name="nav_statistics">統計</string>
     <string name="nav_settings">設定</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">利用不可</string>
     <string name="access_users_footer">ユーザー計 %1$d 人 · %3$d 台中 %2$d 台オンライン</string>
     <string name="access_choose_server">サーバーを選択</string>
+    <string name="access_servers_loading">サーバーを読み込み中…</string>
     <string name="access_refresh">更新</string>
     <string name="access_use_home_hint">ホームは自動接続します。ここでサーバーを選び「接続」— またはアクティブなサーバーで「切断」。</string>
     <string name="access_vpn_active">VPN 有効</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">サーバー #%1$d はオフラインかアプリから接続できません。</string>
     <string name="vpn_server_quota_blocked">サーバー「%1$s」はご利用プランに含まれていません。</string>
     <string name="access_server_quota_blocked">プランに含まれていません</string>
+    <string name="access_servers_available_title">利用可能なサーバー</string>
+    <string name="access_servers_unavailable_title">プランに含まれていません</string>
+    <string name="access_upgrade_note_title">すべてのサーバーへのアクセス</string>
+    <string name="access_upgrade_note_body">すべてのサーバーを利用するには、Telegramボット @DataGateVPNBot でプラン詳細を確認するか、直接お問い合わせください。</string>
+    <string name="access_upgrade_contact_email">メール %1$s</string>
     <string name="access_quota_section_title">クォータ</string>
+    <string name="access_quota_loading">プランを読み込み中…</string>
+    <string name="access_quota_traffic_loading">トラフィック使用量を読み込み中…</string>
     <string name="access_quota_current_plan">現在のプラン</string>
     <string name="access_quota_no_active">有効なクォータ割り当てがありません</string>
     <string name="access_quota_effective_from">適用開始：%1$s</string>

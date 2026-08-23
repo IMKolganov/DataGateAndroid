@@ -3,6 +3,7 @@
     <string name="language_system">सिस्टम डिफ़ॉल्ट</string>
     <string name="nav_home">होम</string>
     <string name="nav_access">एक्सेस</string>
+    <string name="nav_quota">कोटा</string>
     <string name="nav_statistics">आँकड़े</string>
     <string name="nav_settings">सेटिंग्स</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">अनुपलब्ध</string>
     <string name="access_users_footer">कुल %1$d उपयोगकर्ता · %3$d में से %2$d सर्वर ऑनलाइन</string>
     <string name="access_choose_server">सर्वर चुनें</string>
+    <string name="access_servers_loading">सर्वर लोड हो रहे हैं…</string>
     <string name="access_refresh">रीफ़्रेश</string>
     <string name="access_use_home_hint">होम स्वचालित कनेक्ट करता है। यहाँ सर्वर चुनकर कनेक्ट — या सक्रिय पर डिस्कनेक्ट।</string>
     <string name="access_vpn_active">VPN सक्रिय</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">सर्वर #%1$d ऑफ़लाइन है या ऐप कनेक्शन के लिए उपलब्ध नहीं।</string>
     <string name="vpn_server_quota_blocked">सर्वर \"%1$s\" आपकी योजना में शामिल नहीं है।</string>
     <string name="access_server_quota_blocked">आपकी योजना में नहीं</string>
+    <string name="access_servers_available_title">आपके लिए उपलब्ध</string>
+    <string name="access_servers_unavailable_title">आपकी योजना में नहीं</string>
+    <string name="access_upgrade_note_title">पूर्ण सर्वर पहुँच</string>
+    <string name="access_upgrade_note_body">सभी सर्वर अनलॉक करने के लिए प्लान विवरण हेतु Telegram बॉट @DataGateVPNBot खोलें — या मुझसे सीधे पूछें।</string>
+    <string name="access_upgrade_contact_email">ईमेल %1$s</string>
     <string name="access_quota_section_title">कोटा</string>
+    <string name="access_quota_loading">प्लान लोड हो रहा है…</string>
+    <string name="access_quota_traffic_loading">ट्रैफ़िक उपयोग लोड हो रहा है…</string>
     <string name="access_quota_current_plan">आपकी वर्तमान योजना</string>
     <string name="access_quota_no_active">कोई सक्रिय कोटा असाइनमेंट नहीं</string>
     <string name="access_quota_effective_from">प्रभावी: %1$s</string>

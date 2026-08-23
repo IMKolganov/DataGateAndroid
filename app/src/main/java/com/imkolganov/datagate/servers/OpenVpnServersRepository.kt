@@ -7,17 +7,16 @@ import kotlinx.coroutines.withContext
 class OpenVpnServersRepository(
     private val api: OpenVpnServersApi,
 ) {
-    suspend fun listServersWithStatus(): List<OpenVpnServerWithStatusV2Item> {
-        val response = withContext(Dispatchers.IO) {
-            api.getOpenVpnServersWithStatusV3()
-        }
+    suspend fun listServersWithStatus(): List<OpenVpnServerWithStatusV2Item> =
+        withContext(Dispatchers.IO) {
+            val response = api.getOpenVpnServersWithStatusV3()
 
-        if (!response.success) {
-            throw IllegalStateException(response.message ?: "Request failed")
-        }
+            if (!response.success) {
+                throw IllegalStateException(response.message ?: "Request failed")
+            }
 
-        return response.data?.openVpnServerWithStatuses ?: emptyList()
-    }
+            response.data?.openVpnServerWithStatuses ?: emptyList()
+        }
 
     suspend fun pickBestServer(): BestServerResult {
         return VpnServerConnectPolicy.pickBestServer(listServersWithStatus())

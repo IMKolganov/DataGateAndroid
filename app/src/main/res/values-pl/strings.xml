@@ -3,6 +3,7 @@
     <string name="language_system">Domyślne systemowe</string>
     <string name="nav_home">Strona główna</string>
     <string name="nav_access">Dostęp</string>
+    <string name="nav_quota">Limit</string>
     <string name="nav_statistics">Statystyki</string>
     <string name="nav_settings">Ustawienia</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Niedostępne</string>
     <string name="access_users_footer">Łącznie %1$d użytkowników · %2$d z %3$d serwerów online</string>
     <string name="access_choose_server">Wybierz serwer</string>
+    <string name="access_servers_loading">Ładowanie serwerów…</string>
     <string name="access_refresh">Odśwież</string>
     <string name="access_use_home_hint">Strona główna łączy automatycznie. Tu wybierz serwer i dotknij Połącz — lub Rozłącz przy aktywnym.</string>
     <string name="access_vpn_active">VPN aktywna</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Serwer nr %1$d jest offline lub niedostępny do połączenia w aplikacji.</string>
     <string name="vpn_server_quota_blocked">Serwer „%1$s” nie jest w Twoim planie.</string>
     <string name="access_server_quota_blocked">Nie w Twoim planie</string>
+    <string name="access_servers_available_title">Dostępne dla Ciebie</string>
+    <string name="access_servers_unavailable_title">Poza Twoim planem</string>
+    <string name="access_upgrade_note_title">Pełny dostęp do serwerów</string>
+    <string name="access_upgrade_note_body">Aby odblokować wszystkie serwery, otwórz bota Telegram @DataGateVPNBot, by poznać szczegóły planu — lub zapytaj mnie bezpośrednio.</string>
+    <string name="access_upgrade_contact_email">E-mail %1$s</string>
     <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_loading">Ładowanie planu…</string>
+    <string name="access_quota_traffic_loading">Ładowanie użycia transferu…</string>
     <string name="access_quota_current_plan">Twój obecny plan</string>
     <string name="access_quota_no_active">Brak aktywnego przypisania limitu</string>
     <string name="access_quota_effective_from">Obowiązuje od: %1$s</string>

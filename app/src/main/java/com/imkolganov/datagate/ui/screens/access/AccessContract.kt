@@ -1,10 +1,12 @@
 package com.imkolganov.datagate.ui.screens.access
 
+import androidx.compose.runtime.Immutable
 import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.vpn.ServerSelectionMode
 
 interface AccessContract {
 
+    @Immutable
     data class UiState(
         /** Server list (v3 get-all-with-status) in flight. Independent of quota. */
         val isServersLoading: Boolean = false,
@@ -27,6 +29,7 @@ interface AccessContract {
             get() = isServersLoading || isQuotaLoading || isTrafficLoading
     }
 
+    @Immutable
     data class QuotaUiState(
         val errorText: String? = null,
         /** Resolved name of the active quota plan (open-ended assignment), if any. */
@@ -43,6 +46,7 @@ interface AccessContract {
         val quotaPeriodIsMonthly: Boolean = true
     )
 
+    @Immutable
     data class QuotaPlanRow(
         val id: Int,
         val name: String,
@@ -51,6 +55,7 @@ interface AccessContract {
         val isDefault: Boolean
     )
 
+    @Immutable
     data class ServerItem(
         val id: Int,
         val name: String,
@@ -76,6 +81,7 @@ interface AccessContract {
         val isAccessibleForQuotaPlan: Boolean = true
     )
 
+    @Immutable
     data class ActiveConnectionItem(
         val id: String,
         val serverId: Int,
@@ -85,7 +91,10 @@ interface AccessContract {
     )
 
     sealed interface UiEvent {
+        /** Reload servers and quota (login / session ready). */
         data object Refresh : UiEvent
+        data object RefreshServers : UiEvent
+        data object RefreshQuota : UiEvent
         data class SetServerSelectionMode(val mode: ServerSelectionMode) : UiEvent
         data class SelectServer(val serverId: Int) : UiEvent
         data object ClearError : UiEvent

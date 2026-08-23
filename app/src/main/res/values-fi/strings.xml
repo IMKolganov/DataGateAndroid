@@ -3,6 +3,7 @@
     <string name="language_system">Järjestelmän oletus</string>
     <string name="nav_home">Koti</string>
     <string name="nav_access">Pääsy</string>
+    <string name="nav_quota">Kiintiö</string>
     <string name="nav_statistics">Tilastot</string>
     <string name="nav_settings">Asetukset</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Ei saatavilla</string>
     <string name="access_users_footer">%1$d käyttäjää yhteensä · %2$d / %3$d palvelinta verkossa</string>
     <string name="access_choose_server">Valitse palvelin</string>
+    <string name="access_servers_loading">Ladataan palvelimia…</string>
     <string name="access_refresh">Päivitä</string>
     <string name="access_use_home_hint">Koti yhdistää automaattisesti. Valitse palvelin ja napauta Yhdistä — tai Katkaise aktiivisella.</string>
     <string name="access_vpn_active">VPN aktiivinen</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Palvelin nro %1$d on offline tai ei saatavilla sovelluksen kautta.</string>
     <string name="vpn_server_quota_blocked">Palvelin \"%1$s\" ei kuulu tilaukseesi.</string>
     <string name="access_server_quota_blocked">Ei tilauksessasi</string>
+    <string name="access_servers_available_title">Käytettävissäsi</string>
+    <string name="access_servers_unavailable_title">Ei paketissasi</string>
+    <string name="access_upgrade_note_title">Täysi palvelin­pääsy</string>
+    <string name="access_upgrade_note_body">Avataksesi kaikki palvelimet avaa Telegram-botti @DataGateVPNBot paketin tiedoille — tai kysy minulta suoraan.</string>
+    <string name="access_upgrade_contact_email">Sähköposti %1$s</string>
     <string name="access_quota_section_title">Kiintiö</string>
+    <string name="access_quota_loading">Ladataan pakettia…</string>
+    <string name="access_quota_traffic_loading">Ladataan liikenteen käyttöä…</string>
     <string name="access_quota_current_plan">Nykyinen tilauksesi</string>
     <string name="access_quota_no_active">Ei aktiivista kiintiöitystä</string>
     <string name="access_quota_effective_from">Voimassa alkaen: %1$s</string>

@@ -174,6 +174,41 @@ class AccessViewModelRefreshRaceTest {
         assertEquals("Test Plan", vm.state.value.quota.currentPlanName)
     }
 
+    @Test
+    fun refresh_whileServersActive_doesNotRestartServersJob() = runTest(mainDispatcher) {
+        val repo = GatedAccessRepository()
+        val vm = AccessViewModel(repo, context)
+
+        repo.serversResult = listOf(server(69, accessible = true))
+        vm.onUserSessionReady()
+        assertEquals(1, repo.getServersCalls)
+
+        vm.onEvent(AccessContract.UiEvent.Refresh)
+        assertEquals(1, repo.getServersCalls)
+
+        repo.lastGetServersGate().complete(Unit)
+        mainDispatcher.scheduler.advanceUntilIdle()
+        assertFalse(vm.state.value.isServersLoading)
+        assertEquals(listOf(69), vm.state.value.servers.map { it.id })
+    }
+
+    @Test
+    fun onUserSessionReady_whileActive_restartsServersJob() = runTest(mainDispatcher) {
+        val repo = GatedAccessRepository()
+        val vm = AccessViewModel(repo, context)
+
+        repo.serversResult = listOf(server(69, accessible = true))
+        vm.onUserSessionReady()
+        assertEquals(1, repo.getServersCalls)
+
+        vm.onUserSessionReady()
+        assertEquals(2, repo.getServersCalls)
+
+        repo.lastGetServersGate().complete(Unit)
+        mainDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(listOf(69), vm.state.value.servers.map { it.id })
+    }
+
     private fun server(
         id: Int,
         accessible: Boolean,

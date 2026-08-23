@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -47,6 +48,7 @@ import com.imkolganov.datagate.ui.screens.access.AccessViewModel
 import com.imkolganov.datagate.ui.screens.connect.VpnStatusScreen
 import com.imkolganov.datagate.ui.screens.profiles.ProfilesScreen
 import com.imkolganov.datagate.ui.screens.profiles.ProfilesViewModel
+import com.imkolganov.datagate.ui.screens.quota.QuotaScreen
 import com.imkolganov.datagate.ui.screens.settings.SettingsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsScreen
 import com.imkolganov.datagate.ui.screens.stats.StatsViewModel
@@ -62,7 +64,7 @@ import kotlinx.coroutines.launch
 
 /** Main app tabs (bottom bar on phone, navigation rail on TV). */
 enum class MainTab {
-    Home, Access, Profiles, Statistics, Settings
+    Home, Access, Quota, Profiles, Statistics, Settings
 }
 
 /** @deprecated Use [MainTab]; kept as typealias for any leftover call sites. */
@@ -123,6 +125,7 @@ fun MainScreen(
     val tabs = listOf(
         MainTabSpec(MainTab.Home, R.string.nav_home, Icons.Default.Home),
         MainTabSpec(MainTab.Access, R.string.nav_access, Icons.Default.Lock),
+        MainTabSpec(MainTab.Quota, R.string.nav_quota, Icons.Default.Star),
         MainTabSpec(MainTab.Profiles, R.string.nav_profiles, Icons.Default.Folder),
         MainTabSpec(MainTab.Statistics, R.string.nav_statistics, Icons.Default.AccountBox),
         MainTabSpec(MainTab.Settings, R.string.nav_settings, Icons.Default.Settings),
@@ -158,6 +161,11 @@ fun MainScreen(
                 onPauseVpn = onRequestPause,
                 onResumeVpn = onRequestResume,
                 onReconnectVpn = onReconnectVpn,
+                primaryFocusRequester = if (isTelevision) contentFocusRequester else null,
+            )
+            MainTab.Quota -> QuotaScreen(
+                state = accessState,
+                onEvent = accessViewModel::onEvent,
                 primaryFocusRequester = if (isTelevision) contentFocusRequester else null,
             )
             MainTab.Profiles -> ProfilesScreen(

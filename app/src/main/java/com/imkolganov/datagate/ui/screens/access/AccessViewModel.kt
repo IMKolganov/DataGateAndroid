@@ -40,6 +40,8 @@ open class AccessViewModel(
     fun onEvent(event: AccessContract.UiEvent) {
         when (event) {
             AccessContract.UiEvent.Refresh -> refresh()
+            AccessContract.UiEvent.RefreshServers -> refreshServers(restartIfActive = false)
+            AccessContract.UiEvent.RefreshQuota -> refreshQuota(restartIfActive = false)
 
             is AccessContract.UiEvent.SetServerSelectionMode -> {
                 VpnServerSelectionStore.setMode(appContext, event.mode)
@@ -105,15 +107,21 @@ open class AccessViewModel(
                 selectedServerId = VpnServerSelectionStore.getSelectedServerId(appContext),
             )
         }
-        refresh()
+        // Always restart: account/token may have changed; cancel orphans via executeSuspending.
+        refreshServers(restartIfActive = true)
+        refreshQuota(restartIfActive = true)
     }
 
     private fun refresh() {
-        refreshServers()
-        refreshQuota()
+        // Pull-to-refresh while a request is in flight: keep the current job.
+        // Cancel+restart used to orphan blocking OkHttp execute() sockets (VPN hang → connect timeout).
+        refreshServers(restartIfActive = false)
+        refreshQuota(restartIfActive = false)
     }
 
-    private fun refreshServers() {
+    private fun refreshServers(restartIfActive: Boolean = true) {
+        if (!restartIfActive && serversJob?.isActive == true) return
+
         val generation = serversGeneration.incrementAndGet()
         serversJob?.cancel()
         serversJob = viewModelScope.launch {
@@ -158,7 +166,9 @@ open class AccessViewModel(
         }
     }
 
-    private fun refreshQuota() {
+    private fun refreshQuota(restartIfActive: Boolean = true) {
+        if (!restartIfActive && quotaJob?.isActive == true) return
+
         val generation = quotaGeneration.incrementAndGet()
         quotaJob?.cancel()
         quotaJob = viewModelScope.launch {

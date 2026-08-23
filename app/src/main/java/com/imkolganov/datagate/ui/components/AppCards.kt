@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
 /**
- * Shared panels: same look as server rows on Access (elevated card on screen background).
+ * Shared panels: tonal surface color, no per-card shadow (scroll-friendly on phone).
  */
 object AppCards {
     val shape = RoundedCornerShape(16.dp)
@@ -18,5 +18,5 @@ object AppCards {
     )
 
     @Composable
-    fun defaultElevation() = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    fun defaultElevation() = CardDefaults.cardElevation(defaultElevation = 0.dp)
 }

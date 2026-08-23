@@ -3,6 +3,7 @@
     <string name="language_system">الإعداد الافتراضي للنظام</string>
     <string name="nav_home">الرئيسية</string>
     <string name="nav_access">الوصول</string>
+    <string name="nav_quota">الحصة</string>
     <string name="nav_statistics">الإحصاءات</string>
     <string name="nav_settings">الإعدادات</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">غير متاح</string>
     <string name="access_users_footer">%1$d مستخدم إجمالًا · %2$d من %3$d خوادم متصلة</string>
     <string name="access_choose_server">اختر خادمًا</string>
+    <string name="access_servers_loading">جارٍ تحميل الخوادم…</string>
     <string name="access_refresh">تحديث</string>
     <string name="access_use_home_hint">الرئيسية تتصل تلقائيًا. هنا اختر خادمًا واضغط اتصال — أو قطع على النشط.</string>
     <string name="access_vpn_active">VPN نشط</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">الخادم رقم %1$d غير متصل أو غير متاح للاتصال من التطبيق.</string>
     <string name="vpn_server_quota_blocked">الخادم \"%1$s\" غير مضمن في خطتك.</string>
     <string name="access_server_quota_blocked">ليس في خطتك</string>
+    <string name="access_servers_available_title">متاحة لك</string>
+    <string name="access_servers_unavailable_title">غير مدرجة في خطتك</string>
+    <string name="access_upgrade_note_title">وصول كامل إلى الخوادم</string>
+    <string name="access_upgrade_note_body">لفتح جميع الخوادم، افتح بوت Telegram ‎@DataGateVPNBot لتفاصيل الخطة — أو اسألني مباشرة.</string>
+    <string name="access_upgrade_contact_email">البريد %1$s</string>
     <string name="access_quota_section_title">الحصة</string>
+    <string name="access_quota_loading">جارٍ تحميل الخطة…</string>
+    <string name="access_quota_traffic_loading">جارٍ تحميل استخدام البيانات…</string>
     <string name="access_quota_current_plan">خطتك الحالية</string>
     <string name="access_quota_no_active">لا يوجد تعيين حصة نشط</string>
     <string name="access_quota_effective_from">ساري من: %1$s</string>

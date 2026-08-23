@@ -3,6 +3,7 @@
     <string name="language_system">Default sistem</string>
     <string name="nav_home">Beranda</string>
     <string name="nav_access">Akses</string>
+    <string name="nav_quota">Kuota</string>
     <string name="nav_statistics">Statistik</string>
     <string name="nav_settings">Pengaturan</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Tidak tersedia</string>
     <string name="access_users_footer">%1$d pengguna · %2$d dari %3$d server online</string>
     <string name="access_choose_server">Pilih server</string>
+    <string name="access_servers_loading">Memuat server…</string>
     <string name="access_refresh">Segarkan</string>
     <string name="access_use_home_hint">Beranda menghubungkan otomatis. Di sini pilih server dan ketuk Hubungkan — atau Putuskan pada server aktif.</string>
     <string name="access_vpn_active">VPN aktif</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Server #%1$d offline atau tidak tersedia untuk koneksi dalam aplikasi.</string>
     <string name="vpn_server_quota_blocked">Server \"%1$s\" tidak termasuk paket Anda.</string>
     <string name="access_server_quota_blocked">Tidak dalam paket Anda</string>
+    <string name="access_servers_available_title">Tersedia untuk Anda</string>
+    <string name="access_servers_unavailable_title">Tidak termasuk dalam paket Anda</string>
+    <string name="access_upgrade_note_title">Akses server penuh</string>
+    <string name="access_upgrade_note_body">Untuk membuka semua server, buka bot Telegram @DataGateVPNBot untuk detail paket — atau tanyakan langsung kepada saya.</string>
+    <string name="access_upgrade_contact_email">Email %1$s</string>
     <string name="access_quota_section_title">Kuota</string>
+    <string name="access_quota_loading">Memuat paket…</string>
+    <string name="access_quota_traffic_loading">Memuat penggunaan traffic…</string>
     <string name="access_quota_current_plan">Paket Anda saat ini</string>
     <string name="access_quota_no_active">Tidak ada penugasan kuota aktif</string>
     <string name="access_quota_effective_from">Berlaku sejak: %1$s</string>

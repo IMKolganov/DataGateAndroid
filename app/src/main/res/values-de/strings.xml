@@ -3,6 +3,7 @@
     <string name="language_system">Systemstandard</string>
     <string name="nav_home">Start</string>
     <string name="nav_access">Zugang</string>
+    <string name="nav_quota">Kontingent</string>
     <string name="nav_statistics">Statistik</string>
     <string name="nav_settings">Einstellungen</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Nicht verfügbar</string>
     <string name="access_users_footer">%1$d Nutzer gesamt · %2$d von %3$d Servern online</string>
     <string name="access_choose_server">Server wählen</string>
+    <string name="access_servers_loading">Server werden geladen…</string>
     <string name="access_refresh">Aktualisieren</string>
     <string name="access_use_home_hint">Auf „Start“ automatisch verbinden. Hier Server wählen und „Verbinden“ — oder „Trennen“ beim aktiven Server.</string>
     <string name="access_vpn_active">VPN aktiv</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Server #%1$d ist offline oder für die In-App-Verbindung nicht verfügbar.</string>
     <string name="vpn_server_quota_blocked">Server „%1$s“ ist in Ihrem Tarif nicht enthalten.</string>
     <string name="access_server_quota_blocked">Nicht in Ihrem Tarif</string>
+    <string name="access_servers_available_title">Für Sie verfügbar</string>
+    <string name="access_servers_unavailable_title">Nicht in Ihrem Tarif</string>
+    <string name="access_upgrade_note_title">Voller Serverzugang</string>
+    <string name="access_upgrade_note_body">Für vollen Serverzugang öffnen Sie den Telegram-Bot @DataGateVPNBot für Tarifdetails — oder fragen Sie mich direkt.</string>
+    <string name="access_upgrade_contact_email">E-Mail %1$s</string>
     <string name="access_quota_section_title">Kontingent</string>
+    <string name="access_quota_loading">Tarif wird geladen…</string>
+    <string name="access_quota_traffic_loading">Traffic-Nutzung wird geladen…</string>
     <string name="access_quota_current_plan">Ihr aktueller Tarif</string>
     <string name="access_quota_no_active">Keine aktive Kontingentzuweisung</string>
     <string name="access_quota_effective_from">Gültig ab: %1$s</string>

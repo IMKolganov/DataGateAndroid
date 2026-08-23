@@ -3,6 +3,7 @@
     <string name="language_system">Systeemstandaard</string>
     <string name="nav_home">Start</string>
     <string name="nav_access">Toegang</string>
+    <string name="nav_quota">Quota</string>
     <string name="nav_statistics">Statistieken</string>
     <string name="nav_settings">Instellingen</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">Niet beschikbaar</string>
     <string name="access_users_footer">%1$d gebruikers totaal · %2$d van %3$d servers online</string>
     <string name="access_choose_server">Kies een server</string>
+    <string name="access_servers_loading">Servers laden…</string>
     <string name="access_refresh">Vernieuwen</string>
     <string name="access_use_home_hint">Start verbindt automatisch. Hier kiest u een server en tikt u op Verbinden — of Verbreken bij de actieve server.</string>
     <string name="access_vpn_active">VPN actief</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">Server nr. %1$d is offline of niet beschikbaar voor in-app verbinding.</string>
     <string name="vpn_server_quota_blocked">Server \"%1$s\" zit niet in uw abonnement.</string>
     <string name="access_server_quota_blocked">Niet in uw abonnement</string>
+    <string name="access_servers_available_title">Beschikbaar voor jou</string>
+    <string name="access_servers_unavailable_title">Niet in je abonnement</string>
+    <string name="access_upgrade_note_title">Volledige servertoegang</string>
+    <string name="access_upgrade_note_body">Om alle servers te ontgrendelen, open de Telegram-bot @DataGateVPNBot voor abonnementsdetails — of vraag het me rechtstreeks.</string>
+    <string name="access_upgrade_contact_email">E-mail %1$s</string>
     <string name="access_quota_section_title">Quota</string>
+    <string name="access_quota_loading">Abonnement laden…</string>
+    <string name="access_quota_traffic_loading">Verkeersgebruik laden…</string>
     <string name="access_quota_current_plan">Uw huidige abonnement</string>
     <string name="access_quota_no_active">Geen actieve quotatoewijzing</string>
     <string name="access_quota_effective_from">Geldig vanaf: %1$s</string>

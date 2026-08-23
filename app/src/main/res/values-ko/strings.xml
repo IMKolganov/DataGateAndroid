@@ -3,6 +3,7 @@
     <string name="language_system">시스템 기본값</string>
     <string name="nav_home">홈</string>
     <string name="nav_access">액세스</string>
+    <string name="nav_quota">할당량</string>
     <string name="nav_statistics">통계</string>
     <string name="nav_settings">설정</string>
     <string name="login_title">DataGate</string>
@@ -142,6 +143,7 @@
     <string name="access_network_info_unavailable">사용 불가</string>
     <string name="access_users_footer">사용자 총 %1$d명 · 서버 %3$d대 중 %2$d대 온라인</string>
     <string name="access_choose_server">서버 선택</string>
+    <string name="access_servers_loading">서버 불러오는 중…</string>
     <string name="access_refresh">새로고침</string>
     <string name="access_use_home_hint">홈은 자동 연결합니다. 여기서 서버를 고르고 연결 — 또는 활성 서버에서 끊기.</string>
     <string name="access_vpn_active">VPN 켜짐</string>
@@ -175,7 +177,14 @@
     <string name="vpn_server_manual_unavailable">서버 #%1$d는 오프라인이거나 앱에서 연결할 수 없습니다.</string>
     <string name="vpn_server_quota_blocked">서버 \"%1$s\"은(는) 요금제에 포함되어 있지 않습니다.</string>
     <string name="access_server_quota_blocked">요금제에 없음</string>
+    <string name="access_servers_available_title">이용 가능한 서버</string>
+    <string name="access_servers_unavailable_title">요금제에 포함되지 않음</string>
+    <string name="access_upgrade_note_title">전체 서버 이용</string>
+    <string name="access_upgrade_note_body">모든 서버를 잠금 해제하려면 Telegram 봇 @DataGateVPNBot에서 요금제 안내를 확인하거나 저에게 직접 문의하세요.</string>
+    <string name="access_upgrade_contact_email">이메일 %1$s</string>
     <string name="access_quota_section_title">쿼터</string>
+    <string name="access_quota_loading">요금제 불러오는 중…</string>
+    <string name="access_quota_traffic_loading">트래픽 사용량 불러오는 중…</string>
     <string name="access_quota_current_plan">현재 요금제</string>
     <string name="access_quota_no_active">활성 쿼터 할당 없음</string>
     <string name="access_quota_effective_from">적용 시작: %1$s</string>
