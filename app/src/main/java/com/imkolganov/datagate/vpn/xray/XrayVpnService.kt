@@ -24,6 +24,8 @@ import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -66,7 +68,11 @@ class XrayVpnService : VpnService() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
     private var tunPfd: ParcelFileDescriptor? = null
     private var sessionServerDisplayName: String? = null
+    private var notificationWatchdogJob: Job? = null
+    private var lastNotificationStatusText: String = ""
     @Volatile private var running = false
+    /** True while the FGS notification should remain visible (connecting or connected). */
+    @Volatile private var foregroundDesired = false
 
     private val statePrefs: SharedPreferences by lazy {
         getSharedPreferences(OpenVpn3Service.PREFS_VPN_STATE, Context.MODE_PRIVATE)
@@ -263,6 +269,8 @@ class XrayVpnService : VpnService() {
     }
 
     private fun startForegroundNow(statusText: String) {
+        lastNotificationStatusText = statusText
+        foregroundDesired = true
         val notification = buildNotification(statusText)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -273,6 +281,40 @@ class XrayVpnService : VpnService() {
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
+        ensureNotificationWatchdogRunning()
+    }
+
+    private fun requiresForegroundNotification(): Boolean = foregroundDesired
+
+    private fun isNotificationPosted(): Boolean {
+        val nm = getSystemService(NotificationManager::class.java)
+        return nm.activeNotifications.any { it.id == NOTIFICATION_ID }
+    }
+
+    /**
+     * Android 14+ allows dismissing FGS notifications; re-post like [OpenVpn3Service]
+     * so Pause/Disconnect stay available while the tunnel is up.
+     */
+    private fun ensureNotificationWatchdogRunning() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
+        if (notificationWatchdogJob?.isActive == true) return
+        notificationWatchdogJob = serviceScope.launch {
+            while (isActive && requiresForegroundNotification()) {
+                delay(3_000)
+                if (!isNotificationPosted()) {
+                    VpnDebugLogger.w(TAG, "VPN notification dismissed; re-posting foreground notification")
+                    val text = lastNotificationStatusText.ifBlank {
+                        getString(R.string.vpn_status_connected)
+                    }
+                    startForegroundNow(text)
+                }
+            }
+        }
+    }
+
+    private fun stopNotificationWatchdog() {
+        notificationWatchdogJob?.cancel()
+        notificationWatchdogJob = null
     }
 
     private fun buildNotification(statusText: String): Notification {
@@ -339,6 +381,8 @@ class XrayVpnService : VpnService() {
     }
 
     private fun stopForegroundCompat() {
+        foregroundDesired = false
+        stopNotificationWatchdog()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
