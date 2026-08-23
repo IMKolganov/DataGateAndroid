@@ -6,8 +6,14 @@ import com.imkolganov.datagate.vpn.ServerSelectionMode
 interface AccessContract {
 
     data class UiState(
-        val isLoading: Boolean = false,
-        val errorText: String? = null,
+        /** Server list (v3 get-all-with-status) in flight. Independent of quota. */
+        val isServersLoading: Boolean = false,
+        val serversErrorText: String? = null,
+
+        /** Quota plan catalog + assignment in flight. Independent of servers. */
+        val isQuotaLoading: Boolean = false,
+        /** Overview/summary traffic for the quota bar in flight. */
+        val isTrafficLoading: Boolean = false,
 
         val servers: List<ServerItem> = emptyList(),
         val activeConnections: List<ActiveConnectionItem> = emptyList(),
@@ -15,9 +21,11 @@ interface AccessContract {
         val serverSelectionMode: ServerSelectionMode = ServerSelectionMode.AUTO,
         val selectedServerId: Int? = null,
 
-        /** Quota plan summary + full list; loaded together with servers on refresh. */
         val quota: QuotaUiState = QuotaUiState()
-    )
+    ) {
+        val isRefreshing: Boolean
+            get() = isServersLoading || isQuotaLoading || isTrafficLoading
+    }
 
     data class QuotaUiState(
         val errorText: String? = null,

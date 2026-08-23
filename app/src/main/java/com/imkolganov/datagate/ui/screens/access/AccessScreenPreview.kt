@@ -13,7 +13,9 @@ fun AccessScreenPreview() {
     DataGateAndroidTheme {
         AccessScreen(
             state = AccessContract.UiState(
-                isLoading = false,
+                isServersLoading = false,
+                isQuotaLoading = false,
+                isTrafficLoading = false,
                 serverSelectionMode = ServerSelectionMode.MANUAL,
                 servers = listOf(
                     AccessContract.ServerItem(

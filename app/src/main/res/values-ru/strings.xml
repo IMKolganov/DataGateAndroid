@@ -320,6 +320,7 @@
     <string name="access_network_info_unavailable">Недоступно</string>
     <string name="access_users_footer">Всего пользователей: %1$d · онлайн %2$d из %3$d серверов</string>
     <string name="access_choose_server">Выберите сервер</string>
+    <string name="access_servers_loading">Загрузка серверов…</string>
     <string name="access_refresh">Обновить</string>
     <string name="access_use_home_hint">На главной можно подключиться с автовыбором сервера. Здесь выберите сервер и нажмите «Подключить» — или «Отключить» у активного.</string>
     <string name="access_vpn_active">VPN активен</string>
@@ -374,6 +375,8 @@
     <string name="vpn_server_quota_blocked">Сервер «%1$s» не входит в ваш тарифный план.</string>
     <string name="access_server_quota_blocked">Нет в вашем плане</string>
     <string name="access_quota_section_title">Квота</string>
+    <string name="access_quota_loading">Загрузка плана…</string>
+    <string name="access_quota_traffic_loading">Загрузка трафика…</string>
     <string name="access_quota_current_plan">Ваш текущий план</string>
     <string name="access_quota_no_active">Нет активного назначения квоты</string>
     <string name="access_quota_effective_from">Действует с: %1$s</string>

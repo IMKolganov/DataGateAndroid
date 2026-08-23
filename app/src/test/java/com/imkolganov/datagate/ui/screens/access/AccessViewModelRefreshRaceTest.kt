@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -74,7 +75,7 @@ class AccessViewModelRefreshRaceTest {
         assertNull(vm.state.value.selectedServerId)
         assertNull(VpnServerSelectionStore.getSelectedServerId(context))
         assertEquals(ServerSelectionMode.AUTO, VpnServerSelectionStore.getMode(context))
-        assertNull(vm.state.value.errorText)
+        assertNull(vm.state.value.serversErrorText)
     }
 
     @Test
@@ -114,7 +115,7 @@ class AccessViewModelRefreshRaceTest {
         assertEquals(false, vm.state.value.servers.first { it.id == 75 }.isAccessibleForQuotaPlan)
         assertEquals(69, vm.state.value.selectedServerId)
         assertEquals(69, VpnServerSelectionStore.getSelectedServerId(context))
-        assertNull(vm.state.value.errorText)
+        assertNull(vm.state.value.serversErrorText)
     }
 
     @Test
@@ -135,15 +136,42 @@ class AccessViewModelRefreshRaceTest {
 
         failGate.complete(Unit)
         mainDispatcher.scheduler.advanceUntilIdle()
-        assertNull(vm.state.value.errorText)
+        assertNull(vm.state.value.serversErrorText)
         assertTrue(vm.state.value.servers.isEmpty())
 
         okGate.complete(Unit)
         mainDispatcher.scheduler.advanceUntilIdle()
 
-        assertNull(vm.state.value.errorText)
+        assertNull(vm.state.value.serversErrorText)
         assertEquals(listOf(69), vm.state.value.servers.map { it.id })
-        assertEquals(false, vm.state.value.isLoading)
+        assertFalse(vm.state.value.isServersLoading)
+    }
+
+    @Test
+    fun serversFinish_whileQuotaStillLoading_areIndependent() = runTest(mainDispatcher) {
+        val repo = GatedAccessRepository()
+        val vm = AccessViewModel(repo, context)
+
+        repo.serversResult = listOf(server(69, accessible = true))
+        repo.gateQuota = true
+        vm.onUserSessionReady()
+
+        val serversGate = repo.lastGetServersGate()
+        val quotaGate = repo.lastQuotaGate()
+
+        serversGate.complete(Unit)
+        mainDispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(vm.state.value.isServersLoading)
+        assertEquals(listOf(69), vm.state.value.servers.map { it.id })
+        assertTrue(vm.state.value.isQuotaLoading)
+
+        quotaGate.complete(Unit)
+        mainDispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(vm.state.value.isQuotaLoading)
+        assertFalse(vm.state.value.isTrafficLoading)
+        assertEquals("Test Plan", vm.state.value.quota.currentPlanName)
     }
 
     private fun server(
@@ -165,17 +193,21 @@ class AccessViewModelRefreshRaceTest {
     )
 
     /**
-     * Each [getServers] awaits its own gate so tests can release older refreshes after newer ones.
+     * Each [getServers] / [loadQuotaPlanUi] awaits its own gate so tests can release older
+     * refreshes after newer ones.
      */
     private class GatedAccessRepository : AccessRepository {
         var getServersCalls = 0
             private set
         var serversResult: List<AccessContract.ServerItem> = emptyList()
         var failGetServers = false
+        var gateQuota = false
 
         private val getServersGates = mutableListOf<CompletableDeferred<Unit>>()
+        private val quotaGates = mutableListOf<CompletableDeferred<Unit>>()
 
         fun lastGetServersGate(): CompletableDeferred<Unit> = getServersGates.last()
+        fun lastQuotaGate(): CompletableDeferred<Unit> = quotaGates.last()
 
         override suspend fun getServers(): List<AccessContract.ServerItem> {
             getServersCalls++
@@ -189,7 +221,15 @@ class AccessViewModelRefreshRaceTest {
         override suspend fun getMyActiveConnections(): List<AccessContract.ActiveConnectionItem> =
             emptyList()
 
-        override suspend fun loadQuotaUi(): AccessContract.QuotaUiState =
-            AccessContract.QuotaUiState()
+        override suspend fun loadQuotaPlanUi(): AccessContract.QuotaUiState {
+            if (gateQuota) {
+                val gate = CompletableDeferred<Unit>()
+                quotaGates += gate
+                gate.await()
+            }
+            return AccessContract.QuotaUiState(currentPlanName = "Test Plan")
+        }
+
+        override suspend fun loadQuotaTrafficUsedBytes(periodIsMonthly: Boolean): Long = -1L
     }
 }

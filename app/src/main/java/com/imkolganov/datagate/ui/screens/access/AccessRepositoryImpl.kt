@@ -59,7 +59,7 @@ class AccessRepositoryImpl(
         return s.quotaPlanGroups.joinToString(separator = ", ") { it.name }
     }
 
-    override suspend fun loadQuotaUi(): AccessContract.QuotaUiState = withContext(Dispatchers.IO) {
+    override suspend fun loadQuotaPlanUi(): AccessContract.QuotaUiState = withContext(Dispatchers.IO) {
         val auth = tokenStore.getAuthInfo()
         val uid = auth.userId?.toIntOrNull()
             ?: return@withContext AccessContract.QuotaUiState()
@@ -110,21 +110,7 @@ class AccessRepositoryImpl(
             }
 
             val ext = auth.externalId?.trim()?.takeIf { it.isNotEmpty() }
-            var trafficUsageNeedsExternalId = false
-            var trafficUsedBytesForPeriod = -1L
-            if (quotaLimitBytes > 0L) {
-                if (ext.isNullOrEmpty()) {
-                    trafficUsageNeedsExternalId = true
-                } else {
-                    val (fromIso, toIso) = quotaPeriodUtcIsoPair(quotaPeriodIsMonthly)
-                    trafficUsedBytesForPeriod = try {
-                        val sumResp = statsApi.getOverviewSummary(fromIso, toIso, ext)
-                        if (sumResp.success && sumResp.data != null) sumResp.data.trafficTotalBytes else -1L
-                    } catch (_: Exception) {
-                        -1L
-                    }
-                }
-            }
+            val trafficUsageNeedsExternalId = quotaLimitBytes > 0L && ext.isNullOrEmpty()
 
             val rows = plans.map { p ->
                 AccessContract.QuotaPlanRow(
@@ -144,13 +130,26 @@ class AccessRepositoryImpl(
                 allPlans = rows,
                 trafficUsageNeedsExternalId = trafficUsageNeedsExternalId,
                 quotaLimitBytes = quotaLimitBytes,
-                trafficUsedBytesForPeriod = trafficUsedBytesForPeriod,
+                trafficUsedBytesForPeriod = -1L,
                 quotaPeriodIsMonthly = quotaPeriodIsMonthly
             )
         } catch (e: Exception) {
             AccessContract.QuotaUiState(errorText = e.message ?: "Quota load failed")
         }
     }
+
+    override suspend fun loadQuotaTrafficUsedBytes(periodIsMonthly: Boolean): Long =
+        withContext(Dispatchers.IO) {
+            val ext = tokenStore.getAuthInfo().externalId?.trim()?.takeIf { it.isNotEmpty() }
+                ?: return@withContext -1L
+            val (fromIso, toIso) = quotaPeriodUtcIsoPair(periodIsMonthly)
+            try {
+                val sumResp = statsApi.getOverviewSummary(fromIso, toIso, ext)
+                if (sumResp.success && sumResp.data != null) sumResp.data.trafficTotalBytes else -1L
+            } catch (_: Exception) {
+                -1L
+            }
+        }
 
     /**
      * Matches Linux [pickActiveAssignmentValidNow]: assignment valid for "now" by [effectiveFrom]/[effectiveTo],

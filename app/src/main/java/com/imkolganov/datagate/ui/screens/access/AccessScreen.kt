@@ -20,6 +20,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.IconButton
@@ -73,7 +74,7 @@ fun AccessScreen(
 ) {
     val isTelevision = com.imkolganov.datagate.ui.tv.LocalIsTelevision.current
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = state.isLoading,
+        refreshing = state.isRefreshing,
         onRefresh = { onEvent(AccessContract.UiEvent.Refresh) }
     )
 
@@ -96,7 +97,7 @@ fun AccessScreen(
     )
     val sessionServerId = activeSessionServerId
     val externalIpAddress = AccessSessionNetworkInfo.resolveExternalIp(sessionServerId, state.servers)
-    val externalIpLoading = state.isLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
+    val externalIpLoading = state.isServersLoading && sessionServerId != null && externalIpAddress.isNullOrBlank()
 
     var switchTargetServer by remember { mutableStateOf<AccessContract.ServerItem?>(null) }
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -104,7 +105,7 @@ fun AccessScreen(
     var networkIdentity by remember { mutableStateOf(NetworkIdentitySnapshot()) }
     var networkIdentityLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(vpnConnected, connectBusy, state.isLoading) {
+    LaunchedEffect(vpnConnected, connectBusy, state.isServersLoading) {
         networkIdentityLoading = true
         if (connectBusy) {
             networkIdentity = NetworkIdentitySnapshot()
@@ -265,13 +266,38 @@ fun AccessScreen(
                 VpnStatusCard(vpnState = vpnState)
             }
 
-            state.errorText?.let { err ->
+            state.serversErrorText?.let { err ->
                 item {
                     Text(
                         text = err,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
+                }
+            }
+
+            if (state.isServersLoading && state.servers.isEmpty() && state.serversErrorText == null) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.padding(end = 12.dp))
+                        Text(
+                            text = stringResource(R.string.access_servers_loading),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (state.isServersLoading && state.servers.isNotEmpty()) {
+                item {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
             }
 
@@ -308,7 +334,11 @@ fun AccessScreen(
             }
 
             item {
-                AccessQuotaSection(quota = state.quota)
+                AccessQuotaSection(
+                    quota = state.quota,
+                    isQuotaLoading = state.isQuotaLoading,
+                    isTrafficLoading = state.isTrafficLoading,
+                )
             }
 
             if (state.activeConnections.isNotEmpty()) {
@@ -352,7 +382,7 @@ fun AccessScreen(
 
         if (!isTelevision) {
             PullRefreshIndicator(
-                refreshing = state.isLoading,
+                refreshing = state.isRefreshing,
                 state = pullRefreshState,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
@@ -453,7 +483,11 @@ private fun VpnStatusCard(vpnState: VpnStatusUiState) {
 }
 
 @Composable
-private fun AccessQuotaSection(quota: AccessContract.QuotaUiState) {
+private fun AccessQuotaSection(
+    quota: AccessContract.QuotaUiState,
+    isQuotaLoading: Boolean,
+    isTrafficLoading: Boolean,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -463,6 +497,10 @@ private fun AccessQuotaSection(quota: AccessContract.QuotaUiState) {
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        if (isQuotaLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
 
         quota.errorText?.let { err ->
             Text(
@@ -487,36 +525,46 @@ private fun AccessQuotaSection(quota: AccessContract.QuotaUiState) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                if (quota.currentPlanName != null) {
-                    Text(
-                        text = quota.currentPlanName,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    quota.currentEffectiveFrom?.takeIf { it.isNotBlank() }?.let { from ->
-                        Spacer(modifier = Modifier.height(4.dp))
+                when {
+                    isQuotaLoading && quota.currentPlanName == null && quota.errorText == null -> {
                         Text(
-                            text = stringResource(
-                                R.string.access_quota_effective_from,
-                                formatQuotaEffectiveFromForDisplay(from)
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
+                            text = stringResource(R.string.access_quota_loading),
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    quota.currentNote?.takeIf { it.isNotBlank() }?.let { note ->
-                        Spacer(modifier = Modifier.height(4.dp))
+                    quota.currentPlanName != null -> {
                         Text(
-                            text = note,
-                            style = MaterialTheme.typography.bodySmall,
+                            text = quota.currentPlanName,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        quota.currentEffectiveFrom?.takeIf { it.isNotBlank() }?.let { from ->
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(
+                                    R.string.access_quota_effective_from,
+                                    formatQuotaEffectiveFromForDisplay(from)
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        quota.currentNote?.takeIf { it.isNotBlank() }?.let { note ->
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = note,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    else -> {
+                        Text(
+                            text = stringResource(R.string.access_quota_no_active),
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                } else {
-                    Text(
-                        text = stringResource(R.string.access_quota_no_active),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
         }
@@ -529,6 +577,16 @@ private fun AccessQuotaSection(quota: AccessContract.QuotaUiState) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             when {
+                isQuotaLoading || isTrafficLoading -> {
+                    Text(
+                        text = stringResource(R.string.access_quota_traffic_loading),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+
                 quota.trafficUsageNeedsExternalId -> {
                     Text(
                         text = stringResource(R.string.access_quota_needs_external_id),

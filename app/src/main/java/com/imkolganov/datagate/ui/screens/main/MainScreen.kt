@@ -247,7 +247,8 @@ private class PreviewAccessViewModel(
     repo = object : com.imkolganov.datagate.ui.screens.access.AccessRepository {
         override suspend fun getServers(): List<AccessContract.ServerItem> = emptyList()
         override suspend fun getMyActiveConnections(): List<AccessContract.ActiveConnectionItem> = emptyList()
-        override suspend fun loadQuotaUi(): AccessContract.QuotaUiState = AccessContract.QuotaUiState()
+        override suspend fun loadQuotaPlanUi(): AccessContract.QuotaUiState = AccessContract.QuotaUiState()
+        override suspend fun loadQuotaTrafficUsedBytes(periodIsMonthly: Boolean): Long = -1L
     },
     appContext = appContext
 )
