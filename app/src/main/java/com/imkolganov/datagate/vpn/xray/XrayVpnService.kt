@@ -20,6 +20,7 @@ import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.OpenVpn3Service
 import com.imkolganov.datagate.vpn.VpnExcludeRoutes
+import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,6 +48,10 @@ class XrayVpnService : VpnService() {
         const val EXTRA_SERVER_DISPLAY_NAME = "com.imkolganov.datagate.vpn.xray.EXTRA_SERVER_DISPLAY_NAME"
         /** Same CIDR list format as OpenVPN [OpenVpn3Service.EXTRA_EXCLUDED_ROUTES_PATH]. */
         const val EXTRA_EXCLUDED_ROUTES_PATH = "com.imkolganov.datagate.vpn.xray.EXTRA_EXCLUDED_ROUTES_PATH"
+        /** Classic IPv4 DNS servers for [Builder.addDnsServer] (comma-free list via ArrayList). */
+        const val EXTRA_DNS_SERVERS = "com.imkolganov.datagate.vpn.xray.EXTRA_DNS_SERVERS"
+        /** When true, Access UI shows Private DNS Off hint (issued profile flag). */
+        const val EXTRA_DNS_IDENTITY_ENABLED = "com.imkolganov.datagate.vpn.xray.EXTRA_DNS_IDENTITY_ENABLED"
 
         private const val NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "xray_vpn_channel"
@@ -148,14 +153,15 @@ class XrayVpnService : VpnService() {
                 }
                 ?: emptyList()
 
+            val dnsServers = resolveDnsServers(intent)
+            val dnsIdentityEnabled = intent.getBooleanExtra(EXTRA_DNS_IDENTITY_ENABLED, false)
             val builder = Builder()
                 .setSession(sessionServerDisplayName ?: "DataGate Xray")
                 .setMtu(1500)
                 .addAddress("10.10.10.2", 30)
                 .addRoute("0.0.0.0", 0)
-                .addDnsServer("1.1.1.1")
-                .addDnsServer("8.8.8.8")
                 .setBlocking(false)
+            dnsServers.forEach { builder.addDnsServer(it) }
 
             // IPv4-only TUN: keep native IPv6 on the underlying network (same as OpenVPN on TV).
             // Without this, some OEMs still try to send IPv6 into the VPN and blackhole dual-stack apps.
@@ -183,6 +189,7 @@ class XrayVpnService : VpnService() {
                     "excludeRoutes" to excludedRoutes.size,
                     "excludeApplied" to appliedExcludes,
                     "routingDirectBypass" to routingBypassCidrs.size,
+                    "dnsServers" to dnsServers.joinToString(","),
                     "sdk" to Build.VERSION.SDK_INT,
                 ),
             )
@@ -198,11 +205,27 @@ class XrayVpnService : VpnService() {
                 return
             }
             tunPfd = pfd
+            VpnTunnelSessionStore.recordVpnIp(
+                applicationContext,
+                "10.10.10.2",
+                owner = VpnTunnelSessionStore.OWNER_XRAY,
+            )
+            VpnTunnelSessionStore.recordDnsServers(
+                applicationContext,
+                dnsServers,
+                owner = VpnTunnelSessionStore.OWNER_XRAY,
+            )
+            VpnTunnelSessionStore.recordDnsIdentityEnabled(
+                applicationContext,
+                dnsIdentityEnabled,
+                owner = VpnTunnelSessionStore.OWNER_XRAY,
+            )
 
             val fullConfig = XrayConfigBuilder.buildTunClientConfig(
                 outboundsJson = raw,
                 tunFd = pfd.fd,
                 directBypassCidrs = routingBypassCidrs,
+                tunnelDnsServers = dnsServers,
             )
             XrayCoreFacade.runFromJson(fullConfig)
             running = true
@@ -224,9 +247,18 @@ class XrayVpnService : VpnService() {
         runCatching { XrayCoreFacade.stop() }
         tunPfd.safeClose()
         tunPfd = null
+        VpnTunnelSessionStore.clear(applicationContext, expectedOwner = VpnTunnelSessionStore.OWNER_XRAY)
         if (broadcast) {
             broadcastStatus("DISCONNECTED", getString(R.string.vpn_msg_disconnected))
         }
+    }
+
+    private fun resolveDnsServers(intent: Intent): List<String> {
+        val fromExtra = intent.getStringArrayListExtra(EXTRA_DNS_SERVERS)
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            .orEmpty()
+        return XrayVpnDns.resolve(explicitDnsServers = fromExtra)
     }
 
     /** Prefer "Server · Connected" so status stays visible when a display name is set. */

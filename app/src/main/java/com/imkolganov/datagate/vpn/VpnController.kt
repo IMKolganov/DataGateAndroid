@@ -11,6 +11,7 @@ import com.imkolganov.datagate.logger.VpnDebugLogger
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.edit
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.vpn.xray.XrayVpnDns
 import com.imkolganov.datagate.vpn.xray.XrayVpnService
 import java.io.File
 
@@ -29,6 +30,8 @@ class VpnController(
     private var pendingUsername: String = ""
     private var pendingPassword: String = ""
     private var pendingXrayConfigText: String? = null
+    private var pendingXrayDnsServers: List<String> = emptyList()
+    private var pendingXrayDnsIdentityEnabled: Boolean = false
     private var pendingEngine: VpnEngine = VpnEngine.OpenVpn
     private val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
 
@@ -286,6 +289,8 @@ class VpnController(
     fun startWithXrayConfig(
         configText: String,
         bypassRoutes: List<IpCidrRoute> = emptyList(),
+        dnsServers: List<String> = emptyList(),
+        dnsIdentityEnabled: Boolean = false,
     ) {
         pendingEngine = VpnEngine.Xray
         pendingXrayConfigText = configText
@@ -293,6 +298,8 @@ class VpnController(
         pendingWssLink = null
         pendingLinkProtocol = null
         pendingBypassRoutes = bypassRoutes
+        pendingXrayDnsServers = dnsServers
+        pendingXrayDnsIdentityEnabled = dnsIdentityEnabled
         pendingUsername = ""
         pendingPassword = ""
 
@@ -302,10 +309,12 @@ class VpnController(
             details = mapOf(
                 "configBytes" to configText.length,
                 "excludeRoutes" to bypassRoutes.size,
+                "dnsServers" to dnsServers.joinToString(","),
+                "dnsIdentityEnabled" to dnsIdentityEnabled,
             ),
         )
         requestVpnPermissionOrStart {
-            startXrayServiceWithConfig(configText, bypassRoutes)
+            startXrayServiceWithConfig(configText, bypassRoutes, dnsServers, dnsIdentityEnabled)
         }
     }
 
@@ -342,6 +351,8 @@ class VpnController(
         val transport = pendingTransport
         val linkProtocol = pendingLinkProtocol
         val bypassRoutes = pendingBypassRoutes
+        val xrayDnsServers = pendingXrayDnsServers
+        val xrayDnsIdentityEnabled = pendingXrayDnsIdentityEnabled
         val username = pendingUsername
         val password = pendingPassword
         clearPendingConnect()
@@ -352,7 +363,12 @@ class VpnController(
                     showError(activity.getString(R.string.vpn_error_permission_missing_config))
                     return
                 }
-                startXrayServiceWithConfig(xrayCfg, bypassRoutes)
+                startXrayServiceWithConfig(
+                    xrayCfg,
+                    bypassRoutes,
+                    xrayDnsServers,
+                    xrayDnsIdentityEnabled,
+                )
             }
             VpnEngine.OpenVpn -> {
                 val missingWss = transport == VpnTransport.Wss && wss.isNullOrBlank()
@@ -486,6 +502,8 @@ class VpnController(
         pendingTransport = VpnTransport.Wss
         pendingLinkProtocol = null
         pendingBypassRoutes = emptyList()
+        pendingXrayDnsServers = emptyList()
+        pendingXrayDnsIdentityEnabled = false
         pendingUsername = ""
         pendingPassword = ""
         pendingEngine = VpnEngine.OpenVpn
@@ -585,6 +603,8 @@ class VpnController(
     private fun startXrayServiceWithConfig(
         configText: String,
         bypassRoutes: List<IpCidrRoute>,
+        dnsServers: List<String>,
+        dnsIdentityEnabled: Boolean,
     ) {
         // Mark active engine before peer teardown so peer DISCONNECTED cannot wipe UI.
         setActiveEngine(VpnEngine.Xray)
@@ -594,6 +614,7 @@ class VpnController(
                 ?: prefs.getString("selected_server_name", null)?.takeIf { it.isNotBlank() }
         val configFile = writeXrayConfigForService(configText)
         val routesFile = writeRoutesForService(bypassRoutes)
+        val resolvedDns = XrayVpnDns.resolve(explicitDnsServers = dnsServers)
 
         val intent = Intent(activity, XrayVpnService::class.java).apply {
             action = XrayVpnService.ACTION_CONNECT
@@ -604,6 +625,11 @@ class VpnController(
             if (serverDisplayName != null) {
                 putExtra(XrayVpnService.EXTRA_SERVER_DISPLAY_NAME, serverDisplayName)
             }
+            putStringArrayListExtra(
+                XrayVpnService.EXTRA_DNS_SERVERS,
+                ArrayList(resolvedDns),
+            )
+            putExtra(XrayVpnService.EXTRA_DNS_IDENTITY_ENABLED, dnsIdentityEnabled)
         }
 
         try {

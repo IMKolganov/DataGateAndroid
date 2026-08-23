@@ -14,6 +14,10 @@ data class LocalVpnProfile(
     val createdAtEpochMs: Long,
     val hasUsername: Boolean = false,
     val hasPassword: Boolean = false,
+    /** Classic VPN DNS from issued profile JSON (`dnsServers`). Empty → public fallback at connect. */
+    val dnsServers: List<String> = emptyList(),
+    /** From issued profile; when true, UI shows Private DNS Off hint. */
+    val dnsIdentityEnabled: Boolean = false,
 )
 
 data class LocalVpnProfileCredentials(

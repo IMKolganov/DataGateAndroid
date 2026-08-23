@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.vpn.xray.XrayConfigBuilder
+import com.imkolganov.datagate.vpn.xray.XrayVpnDns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -114,6 +115,8 @@ class LocalVpnProfilesRepository(
         val normalized = normalize(trimmed)
         // Validate outbounds exist.
         XrayConfigBuilder.extractOutbounds(normalized)
+        val dnsServers = XrayVpnDns.extractExplicitDnsServers(trimmed)
+        val dnsIdentityEnabled = XrayVpnDns.extractDnsIdentityEnabled(trimmed) == true
         val id = UUID.randomUUID().toString()
         val fileName = "$id.json"
         File(profilesDir, fileName).writeText(normalized)
@@ -131,6 +134,8 @@ class LocalVpnProfilesRepository(
             type = VpnServerType.Xray,
             configFileName = fileName,
             createdAtEpochMs = System.currentTimeMillis(),
+            dnsServers = dnsServers,
+            dnsIdentityEnabled = dnsIdentityEnabled,
         )
         upsert(profile)
         profile
@@ -210,16 +215,21 @@ class LocalVpnProfilesRepository(
     private suspend fun writeIndex(profiles: List<LocalVpnProfile>) {
         val json = JSONArray()
         for (p in profiles) {
-            json.put(
-                JSONObject()
-                    .put("id", p.id)
-                    .put("name", p.name)
-                    .put("type", p.type.name)
-                    .put("configFileName", p.configFileName)
-                    .put("createdAtEpochMs", p.createdAtEpochMs)
-                    .put("hasUsername", p.hasUsername)
-                    .put("hasPassword", p.hasPassword)
-            )
+            val obj = JSONObject()
+                .put("id", p.id)
+                .put("name", p.name)
+                .put("type", p.type.name)
+                .put("configFileName", p.configFileName)
+                .put("createdAtEpochMs", p.createdAtEpochMs)
+                .put("hasUsername", p.hasUsername)
+                .put("hasPassword", p.hasPassword)
+            if (p.dnsServers.isNotEmpty()) {
+                obj.put("dnsServers", JSONArray().also { arr -> p.dnsServers.forEach { arr.put(it) } })
+            }
+            if (p.dnsIdentityEnabled) {
+                obj.put("dnsIdentityEnabled", true)
+            }
+            json.put(obj)
         }
         appContext.profilesDataStore.edit { prefs ->
             prefs[indexKey] = json.toString()
@@ -236,6 +246,17 @@ class LocalVpnProfilesRepository(
                     val type = runCatching {
                         VpnServerType.valueOf(o.getString("type"))
                     }.getOrDefault(VpnServerType.Unknown)
+                    val dnsArr = o.optJSONArray("dnsServers")
+                    val dnsServers = if (dnsArr == null) {
+                        emptyList()
+                    } else {
+                        buildList {
+                            for (j in 0 until dnsArr.length()) {
+                                val v = dnsArr.optString(j).trim()
+                                if (v.isNotEmpty()) add(v)
+                            }
+                        }
+                    }
                     add(
                         LocalVpnProfile(
                             id = o.getString("id"),
@@ -245,6 +266,8 @@ class LocalVpnProfilesRepository(
                             createdAtEpochMs = o.optLong("createdAtEpochMs", 0L),
                             hasUsername = o.optBoolean("hasUsername", false),
                             hasPassword = o.optBoolean("hasPassword", false),
+                            dnsServers = dnsServers,
+                            dnsIdentityEnabled = o.optBoolean("dnsIdentityEnabled", false),
                         )
                     )
                 }

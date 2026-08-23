@@ -22,6 +22,68 @@ class XrayConfigBuilderTest {
     }
 
     @Test
+    fun extractShareLink_fromIssuedProfileJsonVlessField() {
+        val raw = """
+            {
+              "vless":"vless://uuid@host:443?encryption=none#Node",
+              "dnsServers":["172.20.0.1"],
+              "dnsIdentityEnabled":true
+            }
+        """.trimIndent()
+        assertEquals(
+            "vless://uuid@host:443?encryption=none#Node",
+            XrayConfigBuilder.extractShareLink(raw),
+        )
+    }
+
+    @Test
+    fun extractShareLink_monitorExportTemplateShape() {
+        // frontend/src/utils/exportConfigTemplates.ts XRAY_EXPORT_TEMPLATE after issue.
+        val raw =
+            """{"vless":"vless://11111111-1111-1111-1111-111111111111@node.example.com:443?encryption=none&security=tls&type=tcp#DataGate","dnsServers":["172.20.0.1","8.8.8.8"],"dnsIdentityEnabled":true,"friendlyName":"Norway [1]","uuid":"11111111-1111-1111-1111-111111111111","endpoint":"node.example.com:443"}"""
+        assertEquals(
+            "vless://11111111-1111-1111-1111-111111111111@node.example.com:443?encryption=none&security=tls&type=tcp#DataGate",
+            XrayConfigBuilder.extractShareLink(raw),
+        )
+    }
+
+    @Test
+    fun buildTunClientConfig_fromMonitorDns_routesBeforePrivateAndOmitsCoreDns() {
+        val dns = XrayVpnDns.extractExplicitDnsServers(
+            """{"vless":"vless://u@h:1","dnsServers":["172.20.0.1","8.8.8.8"],"dnsIdentityEnabled":true}""",
+        )
+        val outbounds = """
+            [{
+              "tag":"proxy",
+              "protocol":"vless",
+              "settings":{"vnext":[{"address":"node.example.com","port":443,"users":[{"id":"u","encryption":"none"}]}]}
+            }]
+        """.trimIndent()
+        val obj = JSONObject(
+            XrayConfigBuilder.buildTunClientConfig(
+                outboundsJson = outbounds,
+                tunFd = 5,
+                tunnelDnsServers = dns,
+            ),
+        )
+        assertTrue(!obj.has("dns"))
+        val sniff = obj.getJSONArray("inbounds").getJSONObject(0).getJSONObject("sniffing")
+        val destOverride = sniff.getJSONArray("destOverride").toString()
+        assertTrue(!destOverride.contains("fakedns", ignoreCase = true))
+        assertTrue(!destOverride.contains("\"dns\""))
+
+        val rules = obj.getJSONObject("routing").getJSONArray("rules")
+        val dnsRule = rules.getJSONObject(0)
+        assertEquals("proxy", dnsRule.getString("outboundTag"))
+        val dnsIps = dnsRule.getJSONArray("ip")
+        assertEquals(2, dnsIps.length())
+        assertEquals("172.20.0.1/32", dnsIps.getString(0))
+        assertEquals("8.8.8.8/32", dnsIps.getString(1))
+        assertEquals("direct", rules.getJSONObject(1).getString("outboundTag"))
+        assertTrue(rules.getJSONObject(1).getJSONArray("ip").toString().contains("172.16.0.0/12"))
+    }
+
+    @Test
     fun extractShareLink_ignoresBlankAndComments() {
         assertEquals(null, XrayConfigBuilder.extractShareLink("# only comment\n\n"))
         assertEquals(
@@ -55,6 +117,7 @@ class XrayConfigBuilderTest {
         assertEquals("tun", obj.getJSONArray("inbounds").getJSONObject(0).getString("protocol"))
         assertNotNull(obj.getJSONArray("outbounds"))
         assertTrue(obj.getJSONArray("outbounds").length() >= 2) // proxy + direct (+ block)
+        assertTrue(!obj.has("dns")) // OS VPN DNS only — no core DoH/DoT/FakeDNS
 
         val rules = obj.getJSONObject("routing").getJSONArray("rules")
         val privateRule = rules.getJSONObject(0)
@@ -70,6 +133,25 @@ class XrayConfigBuilderTest {
         }
         assertTrue(ips.toString().contains("10.0.0.0/8"))
         assertTrue(ips.toString().contains("192.168.0.0/16"))
+    }
+
+    @Test
+    fun buildTunClientConfig_routesTunnelDnsViaProxyBeforePrivate() {
+        val outbounds = """[{"tag":"proxy","protocol":"freedom","settings":{}}]"""
+        val obj = JSONObject(
+            XrayConfigBuilder.buildTunClientConfig(
+                outboundsJson = outbounds,
+                tunFd = 1,
+                tunnelDnsServers = listOf("172.20.0.1"),
+            ),
+        )
+        assertTrue(!obj.has("dns"))
+        val rules = obj.getJSONObject("routing").getJSONArray("rules")
+        val dnsRule = rules.getJSONObject(0)
+        assertEquals("proxy", dnsRule.getString("outboundTag"))
+        assertEquals("172.20.0.1/32", dnsRule.getJSONArray("ip").getString(0))
+        assertEquals("direct", rules.getJSONObject(1).getString("outboundTag"))
+        assertEquals("proxy", rules.getJSONObject(2).getString("outboundTag"))
     }
 
     @Test

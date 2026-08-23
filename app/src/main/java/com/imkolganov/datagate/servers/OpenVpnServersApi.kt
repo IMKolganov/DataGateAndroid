@@ -166,6 +166,15 @@ class OpenVpnServersApi(
             tags.add(tagsArr.optString(i))
         }
 
+        val dnsArr = o.optJSONArray("dnsServers") ?: o.optJSONArray("DnsServers")
+        val dnsServers = ArrayList<String>()
+        if (dnsArr != null) {
+            for (i in 0 until dnsArr.length()) {
+                val v = dnsArr.optString(i).trim()
+                if (v.isNotEmpty()) dnsServers.add(v)
+            }
+        }
+
         val qpgArr = o.optJSONArray("quotaPlanGroups")
             ?: o.optJSONArray("QuotaPlanGroups")
             ?: JSONArray()
@@ -200,7 +209,8 @@ class OpenVpnServersApi(
             isAccessibleForUserQuotaPlan = o.optBoolean(
                 "isAccessibleForUserQuotaPlan",
                 o.optBoolean("IsAccessibleForUserQuotaPlan", false)
-            )
+            ),
+            dnsServers = dnsServers,
         )
     }
 }

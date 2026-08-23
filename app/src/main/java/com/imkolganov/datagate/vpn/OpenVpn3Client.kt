@@ -370,7 +370,10 @@ class OpenVpn3Client(
     override fun tun_builder_teardown(disconnect: Boolean) {
         VpnDebugLogger.d(TAG, "tun_builder_teardown(disconnect=$disconnect)")
         if (disconnect) {
-            VpnTunnelSessionStore.clear(service.applicationContext)
+            VpnTunnelSessionStore.clear(
+                service.applicationContext,
+                expectedOwner = VpnTunnelSessionStore.OWNER_OPENVPN,
+            )
         }
         onTunChanged(null)
         builder = null

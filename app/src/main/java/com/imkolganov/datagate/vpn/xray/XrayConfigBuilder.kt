@@ -48,13 +48,18 @@ object XrayConfigBuilder {
      * @param tunFd Android TUN file descriptor from [android.net.VpnService.Builder.establish].
      * @param directBypassCidrs Extra CIDRs routed to `direct` (freedom + VpnService.protect).
      *   Used on Android 12 and below where [android.net.VpnService.Builder.excludeRoute] is unavailable.
+     * @param tunnelDnsServers Classic DNS IPs pushed via [android.net.VpnService.Builder.addDnsServer].
+     *   Forced through [proxyTag] before the private/direct rule — otherwise addresses inside
+     *   `172.16.0.0/12` would match private → direct and bypass the VLESS tunnel.
+     *
+     * No Xray built-in DNS / FakeDNS / DoH / DoT block: OS resolves via classic UDP/TCP :53 on TUN.
      */
     fun buildTunClientConfig(
         outboundsJson: String,
         tunFd: Int,
-        dnsServers: List<String> = listOf("1.1.1.1", "8.8.8.8"),
         mtu: Int = 1500,
         directBypassCidrs: List<String> = emptyList(),
+        tunnelDnsServers: List<String> = emptyList(),
     ): String {
         val outbounds = extractOutbounds(outboundsJson)
         require(outbounds.length() > 0) { "No Xray outbounds in config" }
@@ -89,11 +94,6 @@ object XrayConfigBuilder {
             )
         }
 
-        val dnsJson = JSONObject().put(
-            "servers",
-            JSONArray().also { arr -> dnsServers.forEach { arr.put(it) } },
-        )
-
         val tunInbound = JSONObject()
             .put("tag", "tun-in")
             .put("protocol", "tun")
@@ -108,17 +108,20 @@ object XrayConfigBuilder {
                 "sniffing",
                 JSONObject()
                     .put("enabled", true)
+                    // http/tls/quic only — no fakedns / dns override.
                     .put("destOverride", JSONArray().put("http").put("tls").put("quic")),
             )
 
-        val privateIps = JSONArray().also { arr -> PRIVATE_DIRECT_IPS.forEach { arr.put(it) } }
         val rules = JSONArray()
-            .put(
-                JSONObject()
-                    .put("type", "field")
-                    .put("outboundTag", "direct")
-                    .put("ip", privateIps),
-            )
+        // VPN DNS destinations must hit the proxy before private CIDRs → direct.
+        appendProxyDnsRules(rules, proxyTag, tunnelDnsServers)
+        val privateIps = JSONArray().also { arr -> PRIVATE_DIRECT_IPS.forEach { arr.put(it) } }
+        rules.put(
+            JSONObject()
+                .put("type", "field")
+                .put("outboundTag", "direct")
+                .put("ip", privateIps),
+        )
         // IP-list bypass must sit before the catch-all proxy rule.
         appendDirectBypassRules(rules, directBypassCidrs)
         rules.put(
@@ -133,7 +136,6 @@ object XrayConfigBuilder {
 
         return JSONObject()
             .put("log", JSONObject().put("loglevel", "warning"))
-            .put("dns", dnsJson)
             .put("inbounds", JSONArray().put(tunInbound))
             .put("outbounds", outbounds)
             .put("routing", routing)
@@ -166,9 +168,16 @@ object XrayConfigBuilder {
         }
     }
 
-    /** First `vless://` / `vmess://` / `trojan://` / `ss://` line from exported link text. */
+    /** First `vless://` / `vmess://` / … line, or JSON object field `"vless"`. */
     fun extractShareLink(text: String): String? {
-        for (raw in text.replace("\r\n", "\n").split('\n')) {
+        val trimmed = text.trim()
+        if (trimmed.startsWith("{")) {
+            runCatching {
+                val vless = JSONObject(trimmed).optString("vless").trim()
+                if (vless.startsWith("vless://", ignoreCase = true)) return vless
+            }
+        }
+        for (raw in trimmed.replace("\r\n", "\n").split('\n')) {
             val line = raw.trim()
             if (line.isEmpty() || line.startsWith("#")) continue
             val lower = line.lowercase()
@@ -198,5 +207,20 @@ object XrayConfigBuilder {
                     .put("ip", ips),
             )
         }
+    }
+
+    private fun appendProxyDnsRules(rules: JSONArray, proxyTag: String, dnsServers: List<String>) {
+        val ips = dnsServers
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .map { if (it.contains('/')) it else "$it/32" }
+            .distinct()
+        if (ips.isEmpty()) return
+        rules.put(
+            JSONObject()
+                .put("type", "field")
+                .put("outboundTag", proxyTag)
+                .put("ip", JSONArray().also { arr -> ips.forEach { arr.put(it) } }),
+        )
     }
 }

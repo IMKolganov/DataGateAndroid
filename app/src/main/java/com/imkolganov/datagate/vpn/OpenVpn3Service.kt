@@ -1331,7 +1331,10 @@ class OpenVpn3Service : VpnService() {
         try { bridgeHttp?.dispatcher?.executorService?.shutdown() } catch (_: Throwable) {}
         try { bridgeHttp?.connectionPool?.evictAll() } catch (_: Throwable) {}
         bridgeHttp = null
-        VpnTunnelSessionStore.clear(applicationContext)
+        VpnTunnelSessionStore.clear(
+            applicationContext,
+            expectedOwner = VpnTunnelSessionStore.OWNER_OPENVPN,
+        )
     }
 
     private fun broadcastStatus(name: String, info: String, fromQuery: Boolean = false) {

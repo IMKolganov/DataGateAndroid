@@ -316,4 +316,46 @@ class OpenVpnServersApiTest {
             response.data!!.openVpnServerWithStatuses.single().server.isAccessibleForUserQuotaPlan,
         )
     }
+
+    @Test
+    fun parseWithStatusResponse_readsDnsServers() {
+        val response = api.parseWithStatusResponse(
+            """
+            {
+              "success": true,
+              "message": "Success",
+              "data": {
+                "vpnServerWithStatuses": [
+                  {
+                    "vpnServerResponses": {
+                      "vpnServer": {
+                        "id": 2,
+                        "serverName": "xs2",
+                        "serverType": "Xray",
+                        "isOnline": true,
+                        "isDefault": false,
+                        "apiUrl": "https://api.example",
+                        "isEnableWss": false,
+                        "isDeleted": false,
+                        "tags": ["pihole"],
+                        "dnsServers": ["172.20.0.1"],
+                        "quotaPlanGroups": [],
+                        "isAccessibleForUserQuotaPlan": true
+                      }
+                    },
+                    "countConnectedClients": 0,
+                    "countSessions": 0,
+                    "totalBytesIn": 0,
+                    "totalBytesOut": 0
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+        val server = response.data!!.openVpnServerWithStatuses.single().server
+        assertEquals(listOf("172.20.0.1"), server.dnsServers)
+        assertEquals(listOf("pihole"), server.tags)
+        assertEquals(VpnServerType.Xray, server.serverType)
+    }
 }

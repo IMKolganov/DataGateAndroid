@@ -11,4 +11,7 @@ data class BestServerResult(
     /** When false, connect with [com.imkolganov.datagate.vpn.VpnTransport.Direct] (no WSS bridge). */
     val useWss: Boolean = true,
     val serverType: VpnServerType = VpnServerType.OpenVpn,
+    /** Optional classic DNS from catalog (unused for Xray; DNS comes from issued profile JSON). */
+    val dnsServers: List<String> = emptyList(),
+    val tags: List<String> = emptyList(),
 )

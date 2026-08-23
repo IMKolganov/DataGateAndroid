@@ -241,7 +241,43 @@ class VpnControllerPermissionTest {
         val startedIntent = findStartedService(activity, XrayVpnService.ACTION_CONNECT)
         assertNotNull(startedIntent)
         assertNotNull(startedIntent?.getStringExtra(XrayVpnService.EXTRA_CONFIG_PATH))
+        assertEquals(
+            listOf("1.1.1.1", "8.8.8.8"),
+            startedIntent?.getStringArrayListExtra(XrayVpnService.EXTRA_DNS_SERVERS),
+        )
         assertTrue(state.isConnectRequested)
+    }
+
+    @Test
+    fun startWithXrayConfig_withDnsServers_passesDnsExtra() {
+        ShadowVpnService.setPrepareResult(null)
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        var state = VpnStatusUiState()
+        val controller = VpnController(
+            activity = activity,
+            permissionLauncher = noopLauncher,
+            onStateChange = { state = it },
+            getState = { state }
+        )
+
+        val cfg = """{"outbounds":[{"tag":"proxy","protocol":"freedom","settings":{
+          "vnext":[{"address":"node.example.com","port":443}]
+        }}]}"""
+        controller.startWithXrayConfig(
+            configText = cfg,
+            dnsServers = listOf("172.20.0.1"),
+            dnsIdentityEnabled = true,
+        )
+
+        val startedIntent = findStartedService(activity, XrayVpnService.ACTION_CONNECT)
+        assertEquals(
+            listOf("172.20.0.1"),
+            startedIntent?.getStringArrayListExtra(XrayVpnService.EXTRA_DNS_SERVERS),
+        )
+        assertEquals(
+            true,
+            startedIntent?.getBooleanExtra(XrayVpnService.EXTRA_DNS_IDENTITY_ENABLED, false),
+        )
     }
 
     @Test

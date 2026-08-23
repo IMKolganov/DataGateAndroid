@@ -58,6 +58,7 @@ fun ClientNetworkFooter(
     isLoading: Boolean,
     externalIpLoading: Boolean = false,
     showVpnIp: Boolean,
+    showPrivateDnsHint: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val unavailable = stringResource(R.string.access_network_info_unavailable)
@@ -105,6 +106,14 @@ fun ClientNetworkFooter(
                 label = stringResource(R.string.access_your_dns),
                 value = dnsText
             )
+            if (showPrivateDnsHint) {
+                Text(
+                    text = stringResource(R.string.access_private_dns_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
         }
     }
 }

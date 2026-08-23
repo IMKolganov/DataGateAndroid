@@ -383,6 +383,7 @@
     <string name="access_your_vpn_ip">VPN IP</string>
     <string name="access_your_external_ip">External IP</string>
     <string name="access_your_dns">Your DNS</string>
+    <string name="access_private_dns_hint" translatable="false">Turn Private DNS Off (Settings → Network &amp; internet → Private DNS). Otherwise Android bypasses VPN DNS via DoT.</string>
     <string name="access_network_info_unavailable">Unavailable</string>
     <string name="access_users_footer">%1$d users total · %2$d of %3$d servers online</string>
     <string name="access_choose_server">Choose a server</string>

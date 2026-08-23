@@ -48,6 +48,8 @@ object VpnServerConnectPolicy {
                         isDefault = s.isDefault,
                         useWss = s.isEnableWss,
                         serverType = VpnServerType.OpenVpn,
+                        dnsServers = s.dnsServers,
+                        tags = s.tags,
                     )
                 )
                 VpnServerType.Xray -> ManualServerResolve.Ok(
@@ -59,6 +61,8 @@ object VpnServerConnectPolicy {
                         isDefault = s.isDefault,
                         useWss = false,
                         serverType = VpnServerType.Xray,
+                        dnsServers = s.dnsServers,
+                        tags = s.tags,
                     )
                 )
                 VpnServerType.Unknown -> ManualServerResolve.RequiresUnsupportedServerType(name)
@@ -89,6 +93,8 @@ object VpnServerConnectPolicy {
                     isDefault = s.isDefault,
                     useWss = true,
                     serverType = VpnServerType.OpenVpn,
+                    dnsServers = s.dnsServers,
+                    tags = s.tags,
                 )
             }
             VpnServerType.Xray -> BestServerResult(
@@ -99,6 +105,8 @@ object VpnServerConnectPolicy {
                 isDefault = s.isDefault,
                 useWss = false,
                 serverType = VpnServerType.Xray,
+                dnsServers = s.dnsServers,
+                tags = s.tags,
             )
             VpnServerType.Unknown -> null
         }
