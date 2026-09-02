@@ -43,8 +43,20 @@ object XrayConfigBuilder {
      */
     const val DIRECT_BYPASS_CIDRS_PER_RULE = 250
 
+    /** Default Mux TCP sub-connection concurrency when profile `mux` omits / invalidates the field. */
+    const val DEFAULT_MUX_CONCURRENCY = 8
+
+    /** Default XUDP concurrency when profile `mux` omits / invalidates the field. */
+    const val DEFAULT_MUX_XUDP_CONCURRENCY = 16
+
+    private const val MUX_CONCURRENCY_MIN = 1
+    private const val MUX_CONCURRENCY_MAX = 128
+    private const val MUX_XUDP_CONCURRENCY_MIN = 1
+    private const val MUX_XUDP_CONCURRENCY_MAX = 1024
+
     /**
-     * @param outboundsJson JSON array of outbound objects, or a full config object containing `outbounds`.
+     * @param outboundsJson JSON array of outbound objects, or a full config / issued-profile object
+     *   containing `outbounds` (and optionally top-level `mux`, same shape as `dnsServers`).
      * @param tunFd Android TUN file descriptor from [android.net.VpnService.Builder.establish].
      * @param directBypassCidrs Extra CIDRs routed to `direct` (freedom + VpnService.protect).
      *   Used on Android 12 and below where [android.net.VpnService.Builder.excludeRoute] is unavailable.
@@ -53,6 +65,9 @@ object XrayConfigBuilder {
      *   `172.16.0.0/12` would match private → direct and bypass the VLESS tunnel.
      *
      * No Xray built-in DNS / FakeDNS / DoH / DoT block: OS resolves via classic UDP/TCP :53 on TUN.
+     *
+     * When [outboundsJson] contains a top-level `mux` object, it is applied only to the first
+     * (proxy) outbound. Absent `mux` leaves outbounds unchanged (no Mux). See [normalizeMux].
      */
     fun buildTunClientConfig(
         outboundsJson: String,
@@ -74,6 +89,7 @@ object XrayConfigBuilder {
             first.put("tag", "proxy")
         }
         val proxyTag = first.getString("tag")
+        normalizeMux(outboundsJson)?.let { first.put("mux", it) }
 
         // Append direct/block if missing.
         val tags = (0 until outbounds.length()).map { outbounds.getJSONObject(it).optString("tag") }.toSet()
@@ -161,12 +177,92 @@ object XrayConfigBuilder {
     /**
      * Removes libXray share-link metadata that is invalid for a live Xray instance.
      * See native-libxray README: "libXray uses sendThrough to store outbound names."
+     *
+     * Only strips `sendThrough` — does not touch `streamSettings` (including `network=xhttp`
+     * / `xhttpSettings` produced by libXray share-link convert).
      */
     fun sanitizeOutboundsForRuntime(outbounds: JSONArray) {
         for (i in 0 until outbounds.length()) {
             outbounds.getJSONObject(i).remove("sendThrough")
         }
     }
+
+    /**
+     * Builds `{ "outbounds": [...] }` and copies a validated top-level `mux` from [sourceRaw]
+     * when present (issued profile / already-normalized config). Used by import + connect
+     * normalize so Mux survives share-link conversion the same way `dnsServers` is read
+     * from the original profile body.
+     */
+    fun wrapOutboundsPreservingProfileExtras(outbounds: JSONArray, sourceRaw: String): String {
+        val result = JSONObject().put("outbounds", outbounds)
+        normalizeMux(sourceRaw)?.let { result.put("mux", it) }
+        return result.toString()
+    }
+
+    /**
+     * Reads optional top-level `"mux"` from issued / normalized profile JSON.
+     *
+     * Returns `null` when the block is absent or `enabled` is explicitly `false` — callers
+     * must not inject Mux (existing profiles stay unchanged).
+     *
+     * When present, returns a cleaned MuxObject with `enabled=true` and:
+     * - `concurrency` in 1..128 (default [DEFAULT_MUX_CONCURRENCY])
+     * - `xudpConcurrency` in 1..1024 (default [DEFAULT_MUX_XUDP_CONCURRENCY])
+     * - `xudpProxyUDP443`: `reject` | `allow` | `skip` (default `reject`)
+     *
+     * Under a full TUN tunnel, `xudpProxyUDP443` decides how QUIC (UDP/443) is handled:
+     * - `reject` — Mux drops UDP/443 (browsers usually fall back to TCP/HTTP2); fewer
+     *   QUIC flows through the tunnel
+     * - `allow` — UDP/443 is carried inside Mux
+     * - `skip` — UDP/443 bypasses Mux (protocol-native UDP / UoT)
+     *
+     * Invalid numeric / enum values are ignored and replaced by the defaults above.
+     */
+    fun normalizeMux(raw: String): JSONObject? {
+        val trimmed = raw.trim()
+        if (!trimmed.startsWith("{")) return null
+        return runCatching {
+            val root = JSONObject(trimmed)
+            if (!root.has("mux") || root.isNull("mux")) return null
+            val mux = root.optJSONObject("mux") ?: return null
+            if (mux.has("enabled") && !mux.optBoolean("enabled", true)) return null
+            JSONObject()
+                .put("enabled", true)
+                .put("concurrency", readMuxConcurrency(mux))
+                .put("xudpConcurrency", readMuxXudpConcurrency(mux))
+                .put("xudpProxyUDP443", readMuxXudpProxyUdp443(mux))
+        }.getOrNull()
+    }
+
+    private fun readMuxConcurrency(mux: JSONObject): Int {
+        if (!mux.has("concurrency")) return DEFAULT_MUX_CONCURRENCY
+        val n = mux.optInt("concurrency", Int.MIN_VALUE)
+        // optInt returns 0 for non-numeric; treat missing-range / garbage as default.
+        if (n !in MUX_CONCURRENCY_MIN..MUX_CONCURRENCY_MAX) return DEFAULT_MUX_CONCURRENCY
+        // Reject string garbage that JSONObject coerced oddly: require the raw value to be numeric.
+        if (!isJsonNumber(mux.opt("concurrency"))) return DEFAULT_MUX_CONCURRENCY
+        return n
+    }
+
+    private fun readMuxXudpConcurrency(mux: JSONObject): Int {
+        if (!mux.has("xudpConcurrency")) return DEFAULT_MUX_XUDP_CONCURRENCY
+        val n = mux.optInt("xudpConcurrency", Int.MIN_VALUE)
+        if (n !in MUX_XUDP_CONCURRENCY_MIN..MUX_XUDP_CONCURRENCY_MAX) return DEFAULT_MUX_XUDP_CONCURRENCY
+        if (!isJsonNumber(mux.opt("xudpConcurrency"))) return DEFAULT_MUX_XUDP_CONCURRENCY
+        return n
+    }
+
+    private fun readMuxXudpProxyUdp443(mux: JSONObject): String {
+        if (!mux.has("xudpProxyUDP443")) return "reject"
+        val raw = mux.optString("xudpProxyUDP443", "").trim().lowercase()
+        return when (raw) {
+            "reject", "allow", "skip" -> raw
+            else -> "reject"
+        }
+    }
+
+    private fun isJsonNumber(value: Any?): Boolean =
+        value is Number || (value is String && value.trim().toIntOrNull() != null)
 
     /** First `vless://` / `vmess://` / … line, or JSON object field `"vless"`. */
     fun extractShareLink(text: String): String? {

@@ -40,9 +40,9 @@ android {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 16
+        versionCode = 17
         // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
-        versionName = "1.0.16"
+        versionName = "1.0.17"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
             ?: "IMKolganov/DataGateAndroid"
@@ -127,6 +127,20 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
+}
+
+// BouncyCastle is not an app dependency: it only reaches the Robolectric unit-test classpath and the
+// lint/test-platform tool classpaths, so it never ships in the APK and minSdk is unaffected. The
+// stale transitive versions (1.78.1, 1.79) still trip dependency scanners on CVE-2026-8763, so pin
+// the whole group — bcprov/bcpkix/bcutil must stay on one version.
+val bouncyCastleVersion = libs.versions.bouncycastle.get()
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.bouncycastle") {
+            useVersion(bouncyCastleVersion)
+            because("CVE-2026-8763: name-constraint bypass, fixed in 1.85")
+        }
     }
 }
 

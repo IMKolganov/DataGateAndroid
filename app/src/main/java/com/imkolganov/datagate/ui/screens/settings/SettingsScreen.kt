@@ -27,6 +27,7 @@ import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Route
 import androidx.compose.material.icons.outlined.MailOutline
@@ -93,6 +94,7 @@ import com.imkolganov.datagate.vpn.IpListStatus
 import com.imkolganov.datagate.vpn.IpListUpdateFrequency
 import com.imkolganov.datagate.vpn.LocalBridgePortPool
 import com.imkolganov.datagate.vpn.LocalBridgePortPreferences
+import com.imkolganov.datagate.vpn.SplitTunnelStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -140,16 +142,24 @@ fun SettingsScreen(
     var updateCheckIsError by remember { mutableStateOf(false) }
     val updateCheckInFlight = remember { AtomicBoolean(false) }
     var showIpListSettings by remember { mutableStateOf(false) }
+    var showSplitTunnelSettings by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     var authInfo by remember { mutableStateOf(tokenStore.getAuthInfo()) }
     var cidrListsEnabledMain by remember { mutableStateOf(true) }
+    var splitTunnelEnabledMain by remember { mutableStateOf(false) }
+    var splitTunnelAppCount by remember { mutableStateOf(0) }
     var bridgePoolStartText by remember { mutableStateOf(LocalBridgePortPool.DEFAULT_POOL_START.toString()) }
     var bridgePoolEndText by remember { mutableStateOf(LocalBridgePortPool.DEFAULT_POOL_END.toString()) }
     var bridgePortsSavedVisible by remember { mutableStateOf(false) }
 
     if (showIpListSettings) {
         IpListSettingsScreen(onBack = { showIpListSettings = false })
+        return
+    }
+
+    if (showSplitTunnelSettings) {
+        SplitTunnelScreen(onBack = { showSplitTunnelSettings = false })
         return
     }
 
@@ -175,6 +185,15 @@ fun SettingsScreen(
             cidrListsEnabledMain = withContext(Dispatchers.IO) {
                 IpListPreferences.getSettings(appCtx).cidrListsEnabled
             }
+        }
+    }
+
+    LaunchedEffect(showSplitTunnelSettings) {
+        if (!showSplitTunnelSettings) {
+            val appCtx = context.applicationContext
+            val splitTunnel = withContext(Dispatchers.IO) { SplitTunnelStore.getSettings(appCtx) }
+            splitTunnelEnabledMain = splitTunnel.enabled
+            splitTunnelAppCount = splitTunnel.bypassPackages.size
         }
     }
 
@@ -339,6 +358,72 @@ fun SettingsScreen(
                     Icon(Icons.Outlined.Route, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.settings_ip_lists_open))
+                }
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = AppCards.shape,
+            colors = AppCards.defaultColors(),
+            elevation = AppCards.defaultElevation()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    stringResource(R.string.settings_split_tunnel),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_split_tunnel_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_split_tunnel_enable_title),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            if (splitTunnelAppCount == 0) {
+                                stringResource(R.string.settings_split_tunnel_summary_none)
+                            } else {
+                                stringResource(
+                                    R.string.settings_split_tunnel_summary_count,
+                                    splitTunnelAppCount
+                                )
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = splitTunnelEnabledMain,
+                        onCheckedChange = { v ->
+                            splitTunnelEnabledMain = v
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    SplitTunnelStore.setEnabled(context.applicationContext, v)
+                                }
+                            }
+                        }
+                    )
+                }
+                TextButton(onClick = { showSplitTunnelSettings = true }) {
+                    Icon(Icons.Outlined.Apps, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.settings_split_tunnel_open))
                 }
             }
         }

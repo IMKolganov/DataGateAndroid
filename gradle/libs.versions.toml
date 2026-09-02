@@ -21,6 +21,8 @@ work = "2.10.0"
 desugarJdkLibs = "2.1.5"
 zxing = "3.5.3"
 robolectric = "4.14.1"
+# Pinned only to clear CVE-2026-8763 out of transitive test/lint classpaths; not an app dependency.
+bouncycastle = "1.85"
 coroutines = "1.9.0"
 signalr = "8.0.17"
 gson = "2.11.0"

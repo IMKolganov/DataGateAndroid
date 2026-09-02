@@ -32,8 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.BuildConfig
@@ -74,6 +76,7 @@ private data class MainTabSpec(
     val tab: MainTab,
     val labelRes: Int,
     val icon: ImageVector,
+    val compactLabelRes: Int? = null,
 )
 
 @Composable
@@ -100,6 +103,7 @@ fun MainScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val isTelevision = LocalIsTelevision.current
+    val compactBottomNav = LocalConfiguration.current.screenWidthDp < 400
     val bannerFlow = remember(context) {
         UpdatePreferences.homeBannerReleaseFlow(context, BuildConfig.VERSION_NAME)
     }
@@ -127,7 +131,7 @@ fun MainScreen(
         MainTabSpec(MainTab.Access, R.string.nav_access, Icons.Default.Lock),
         MainTabSpec(MainTab.Quota, R.string.nav_quota, Icons.Default.Star),
         MainTabSpec(MainTab.Profiles, R.string.nav_profiles, Icons.Default.Folder),
-        MainTabSpec(MainTab.Statistics, R.string.nav_statistics, Icons.Default.AccountBox),
+        MainTabSpec(MainTab.Statistics, R.string.nav_statistics, Icons.Default.AccountBox, R.string.nav_statistics_short),
         MainTabSpec(MainTab.Settings, R.string.nav_settings, Icons.Default.Settings),
     )
 
@@ -230,13 +234,25 @@ fun MainScreen(
             bottomBar = {
                 NavigationBar {
                     tabs.forEach { spec ->
+                        val labelRes = if (compactBottomNav && spec.compactLabelRes != null) {
+                            spec.compactLabelRes
+                        } else {
+                            spec.labelRes
+                        }
                         NavigationBarItem(
                             selected = selectedTab == spec.tab,
                             onClick = { selectedTabKey = spec.tab.name },
                             icon = {
                                 Icon(spec.icon, contentDescription = stringResource(spec.labelRes))
                             },
-                            label = { Text(stringResource(spec.labelRes)) },
+                            label = {
+                                Text(
+                                    text = stringResource(labelRes),
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
                         )
                     }
                 }
