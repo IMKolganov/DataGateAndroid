@@ -250,6 +250,26 @@
     <string name="settings_ip_lists_update_failed_prefix">Échec de la mise à jour</string>
     <string name="settings_ip_lists_update_failed">Échec de la mise à jour : %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Échec de la mise à jour : %1$s. Utilisation de la liste en cache ou intégrée.</string>
+
+
+    <string name="settings_split_tunnel">Split tunneling</string>
+    <string name="settings_split_tunnel_subtitle">Keep chosen apps outside the tunnel so they connect directly. Useful for apps that break under VPN, such as car head units, banking or streaming apps.</string>
+    <string name="settings_split_tunnel_enable_title">Bypass VPN for chosen apps</string>
+    <string name="settings_split_tunnel_enable_subtitle">When off, every app uses the VPN tunnel.</string>
+    <string name="settings_split_tunnel_summary_none">No apps chosen yet.</string>
+    <string name="settings_split_tunnel_summary_count">%1$d apps bypass the VPN.</string>
+    <string name="settings_split_tunnel_open">Choose apps</string>
+    <string name="settings_split_tunnel_title">Apps outside the VPN</string>
+    <string name="settings_split_tunnel_disabled_notice">Split tunneling is off. Enable the switch above to apply the list below.</string>
+    <string name="settings_split_tunnel_reconnect_notice">Changes apply on the next connect. Reconnect to move an app in or out of the tunnel.</string>
+    <string name="settings_split_tunnel_search_label">Search apps</string>
+    <string name="settings_split_tunnel_filter_all">All apps</string>
+    <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
+    <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
+    <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_loading">Loading installed apps…</string>
+    <string name="settings_split_tunnel_empty">No apps match this search.</string>
+    <string name="settings_split_tunnel_system_app">System app</string>
     <string name="vpn_updating_ip_list">Mise à jour de la liste IP…</string>
     <string name="vpn_ip_list_ready">Liste IP prête (%1$d routes)</string>
 

@@ -6,6 +6,7 @@
     <string name="nav_access">Доступ</string>
     <string name="nav_quota">Квота</string>
     <string name="nav_statistics">Статистика</string>
+    <string name="nav_statistics_short">Стат.</string>
     <string name="nav_settings">Настройки</string>
 
     <string name="login_title">DataGate</string>
@@ -434,6 +435,25 @@
     <string name="settings_ip_lists_update_failed_prefix">Ошибка обновления</string>
     <string name="settings_ip_lists_update_failed">Ошибка обновления: %1$s</string>
     <string name="settings_ip_lists_update_failed_fallback">Ошибка обновления: %1$s. Используется кешированный или встроенный список.</string>
+
+    <string name="settings_split_tunnel">Раздельное туннелирование</string>
+    <string name="settings_split_tunnel_subtitle">Выбранные приложения работают вне туннеля, напрямую. Помогает приложениям, которые ломаются под VPN: автомобильным головным устройствам, банкам, стримингу.</string>
+    <string name="settings_split_tunnel_enable_title">Исключить приложения из VPN</string>
+    <string name="settings_split_tunnel_enable_subtitle">Когда выключено, весь трафик приложений идёт через VPN-туннель.</string>
+    <string name="settings_split_tunnel_summary_none">Приложения ещё не выбраны.</string>
+    <string name="settings_split_tunnel_summary_count">Вне VPN: %1$d приложений.</string>
+    <string name="settings_split_tunnel_open">Выбрать приложения</string>
+    <string name="settings_split_tunnel_title">Приложения вне VPN</string>
+    <string name="settings_split_tunnel_disabled_notice">Раздельное туннелирование выключено. Включите переключатель выше, чтобы список ниже применялся.</string>
+    <string name="settings_split_tunnel_reconnect_notice">Изменения применяются при следующем подключении. Переподключите VPN, чтобы приложение вышло из туннеля или вернулось в него.</string>
+    <string name="settings_split_tunnel_search_label">Поиск приложений</string>
+    <string name="settings_split_tunnel_filter_all">Все приложения</string>
+    <string name="settings_split_tunnel_filter_selected">Вне VPN</string>
+    <string name="settings_split_tunnel_count">Вне VPN: %1$d из %2$d приложений</string>
+    <string name="settings_split_tunnel_clear">Очистить список</string>
+    <string name="settings_split_tunnel_loading">Загрузка установленных приложений…</string>
+    <string name="settings_split_tunnel_empty">Нет приложений по этому запросу.</string>
+    <string name="settings_split_tunnel_system_app">Системное приложение</string>
 
     <string name="free_tier_title_link">Подключите Telegram для доступа к VPN</string>
     <string name="free_tier_title_subscribe">Подпишитесь на Telegram-канал</string>

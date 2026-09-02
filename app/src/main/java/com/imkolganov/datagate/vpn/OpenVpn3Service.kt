@@ -502,6 +502,7 @@ class OpenVpn3Service : VpnService() {
                 "wssHost" to wssUrl?.let { runCatching { java.net.URI(it).host }.getOrNull() },
                 "configBytes" to configText.length,
                 "excludeRoutes" to excludedRoutes.size,
+                "bypassApps" to SplitTunnelSession.resolveBypassApps(this).size,
                 "server" to sessionServerDisplayName,
                 "network" to networkAvailable,
                 "netTransport" to currentTransportLabel(),
@@ -1122,6 +1123,7 @@ class OpenVpn3Service : VpnService() {
                 val client = OpenVpn3Client(
                     service = this@OpenVpn3Service,
                     excludedRoutes = excludedRoutes,
+                    bypassApps = SplitTunnelSession.bypassAppsResolver(this@OpenVpn3Service),
                     onTunChanged = { fd ->
                         VpnDebugLogger.d(TAG, "TUN changed (fd=${fd?.fd ?: -1})")
                     },
