@@ -114,9 +114,10 @@ class ProfilesViewModel(
             if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
                 val outbounds = com.imkolganov.datagate.vpn.xray.XrayConfigBuilder.extractOutbounds(trimmed)
                 com.imkolganov.datagate.vpn.xray.XrayConfigBuilder.sanitizeOutboundsForRuntime(outbounds)
-                return org.json.JSONObject()
-                    .put("outbounds", outbounds)
-                    .toString()
+                return com.imkolganov.datagate.vpn.xray.XrayConfigBuilder.wrapOutboundsPreservingProfileExtras(
+                    outbounds,
+                    trimmed,
+                )
             }
             error(getApplication<Application>().getString(com.imkolganov.datagate.R.string.profiles_error_xray_unavailable))
         }

@@ -18,6 +18,11 @@ import java.net.InetAddress
 class OpenVpn3Client(
     private val service: VpnService,
     private val excludedRoutes: List<IpCidrRoute>,
+    /**
+     * Split tunneling: resolved per [tun_builder_establish] via [VpnBypassApps], so a reconnect
+     * inside this session applies the current selection rather than a start-of-session snapshot.
+     */
+    private val bypassApps: () -> List<String>,
     private val onTunChanged: (ParcelFileDescriptor?) -> Unit,
     private val onCoreEvent: (String, String) -> Unit
 ) : ClientAPI_OpenVPNClient() {
@@ -322,6 +327,9 @@ class OpenVpn3Client(
                 TAG,
                 "excludeRoute establish: requested=${excludedRoutes.size} applied=$appliedExcludes dropped=$dropped"
             )
+
+            val appliedBypassApps = VpnBypassApps.applyToBuilder(b, bypassApps)
+            VpnDebugLogger.i(TAG, "bypass apps establish: applied=$appliedBypassApps")
 
             val pfd = b.establish()
 

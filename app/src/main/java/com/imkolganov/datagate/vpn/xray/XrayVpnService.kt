@@ -19,6 +19,8 @@ import com.imkolganov.datagate.R
 import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.OpenVpn3Service
+import com.imkolganov.datagate.vpn.SplitTunnelSession
+import com.imkolganov.datagate.vpn.VpnBypassApps
 import com.imkolganov.datagate.vpn.VpnExcludeRoutes
 import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
 import kotlinx.coroutines.CoroutineScope
@@ -179,6 +181,9 @@ class XrayVpnService : VpnService() {
                 builder.setMetered(false)
             }
 
+            val bypassApps = SplitTunnelSession.bypassAppsResolver(this)
+            val appliedBypassApps = VpnBypassApps.applyToBuilder(builder, bypassApps)
+
             val appliedExcludes = VpnExcludeRoutes.applyToBuilder(builder, excludedRoutes)
             // Android 12-: excludeRoute is a no-op; inject the same CIDRs into Xray routing → direct.
             // Requires VpnService.protect on freedom sockets (registered below before runFromJson).
@@ -194,6 +199,7 @@ class XrayVpnService : VpnService() {
                 details = mapOf(
                     "excludeRoutes" to excludedRoutes.size,
                     "excludeApplied" to appliedExcludes,
+                    "bypassAppsApplied" to appliedBypassApps,
                     "routingDirectBypass" to routingBypassCidrs.size,
                     "dnsServers" to dnsServers.joinToString(","),
                     "sdk" to Build.VERSION.SDK_INT,

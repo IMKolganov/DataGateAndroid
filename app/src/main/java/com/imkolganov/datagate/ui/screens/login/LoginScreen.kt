@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -470,7 +471,7 @@ fun LoginScreenContent(
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(
                             horizontal = when {
                                 isTelevision -> 48.dp
@@ -479,6 +480,7 @@ fun LoginScreenContent(
                             },
                             vertical = if (isTelevision) 28.dp else 16.dp,
                         )
+                        .navigationBarsPadding()
                         .imePadding()
                         .verticalScroll(scroll),
                     verticalArrangement = Arrangement.spacedBy(

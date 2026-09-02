@@ -105,6 +105,8 @@ object XrayCoreFacade {
     /**
      * Parses share text (or raw JSON with outbounds) into a normalized outbounds JSON object string
      * suitable for persistence / [XrayConfigBuilder.buildTunClientConfig].
+     *
+     * Preserves top-level profile extras such as `mux` (see [XrayConfigBuilder.wrapOutboundsPreservingProfileExtras]).
      */
     fun normalizeToOutboundsConfig(input: String): String {
         val trimmed = input.trim()
@@ -113,14 +115,14 @@ object XrayCoreFacade {
             if (obj.has("outbounds") || obj.has("OutboundConfigs")) {
                 val outbounds = XrayConfigBuilder.extractOutbounds(trimmed)
                 XrayConfigBuilder.sanitizeOutboundsForRuntime(outbounds)
-                return JSONObject().put("outbounds", outbounds).toString()
+                return XrayConfigBuilder.wrapOutboundsPreservingProfileExtras(outbounds, trimmed)
             }
         }
         val share = XrayConfigBuilder.extractShareLink(trimmed) ?: trimmed
         val converted = convertShareLinksToXrayJson(share)
         val outbounds = XrayConfigBuilder.extractOutbounds(converted)
         XrayConfigBuilder.sanitizeOutboundsForRuntime(outbounds)
-        return JSONObject().put("outbounds", outbounds).toString()
+        return XrayConfigBuilder.wrapOutboundsPreservingProfileExtras(outbounds, trimmed)
     }
 
     private fun ensureAvailable() {
