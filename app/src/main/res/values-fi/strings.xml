@@ -38,6 +38,11 @@
     <string name="home_telegram_channel_body">Projektin Telegram-kanava: uutiset ja ilmoitukset palveluhäiriöistä.</string>
     <string name="home_grace_banner_title">Yhdistetty — väliaikainen käyttöoikeus</string>
     <string name="home_grace_banner_body">Liitä tilisi tai tilaa %1$s kuluessa, tai tämä istunto katkaistaan.</string>
+    <string name="home_traffic">Liikenne</string>
+    <string name="home_traffic_hint">Tämän laitteen live-nopeus VPN-tunnelin kautta.</string>
+    <string name="home_traffic_download">Lataus</string>
+    <string name="home_traffic_upload">Lähetys</string>
+    <string name="home_traffic_waiting">Odotetaan liikennettä…</string>
     <string name="stats_filters">Suodattimet</string>
     <string name="stats_overview">Yleiskuva</string>
     <string name="stats_chart_hint">Napauta kaaviota · nipistä zoom · vedä vieritys</string>

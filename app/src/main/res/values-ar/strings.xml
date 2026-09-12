@@ -38,6 +38,11 @@
     <string name="home_telegram_channel_body">انضم إلى قناة Telegram للحصول على آخر الأخبار وإعلانات انقطاع الخدمة.</string>
     <string name="home_grace_banner_title">متصل — وصول مؤقت</string>
     <string name="home_grace_banner_body">اربط حسابك أو اشترك خلال %1$s وإلا سيتم قطع هذا الاتصال.</string>
+    <string name="home_traffic">حركة البيانات</string>
+    <string name="home_traffic_hint">معدل النقل المباشر على هذا الجهاز عبر نفق VPN.</string>
+    <string name="home_traffic_download">تنزيل</string>
+    <string name="home_traffic_upload">رفع</string>
+    <string name="home_traffic_waiting">في انتظار حركة البيانات…</string>
     <string name="stats_filters">عوامل التصفية</string>
     <string name="stats_overview">نظرة عامة</string>
     <string name="stats_chart_hint">المس الرسم · قرص للتكبير · اسحب للتمرير</string>

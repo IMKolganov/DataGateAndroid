@@ -26,3 +26,9 @@ fun formatBytes(bytes: Long?): String {
     val sign = if (negative) "−" else ""
     return "$sign$num ${units[u]}"
 }
+
+/** Human-readable throughput using the same binary units as [formatBytes]. */
+fun formatBytesPerSecond(bytesPerSec: Long?): String {
+    if (bytesPerSec == null) return "—"
+    return "${formatBytes(bytesPerSec)}/s"
+}

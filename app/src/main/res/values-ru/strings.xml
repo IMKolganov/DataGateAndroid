@@ -125,6 +125,11 @@
     <string name="home_telegram_channel_body">Telegram-канал проекта: актуальные новости и объявления при проблемах с сервисом.</string>
     <string name="home_grace_banner_title">Подключено — временный доступ</string>
     <string name="home_grace_banner_body">Свяжите аккаунт или оформите подписку в течение %1$s, иначе сессия будет отключена.</string>
+    <string name="home_traffic">Трафик</string>
+    <string name="home_traffic_hint">Живая скорость на этом устройстве через VPN-туннель.</string>
+    <string name="home_traffic_download">Загрузка</string>
+    <string name="home_traffic_upload">Отдача</string>
+    <string name="home_traffic_waiting">Ожидание трафика…</string>
 
     <string name="stats_filters">Фильтры</string>
     <string name="stats_overview">Обзор</string>

@@ -70,6 +70,8 @@ import com.imkolganov.datagate.update.GitHubLatestRelease
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.VpnCommandContract
 import com.imkolganov.datagate.vpn.VpnStatusUiState
+import com.imkolganov.datagate.vpn.traffic.TrafficSample
+import com.imkolganov.datagate.vpn.traffic.VpnTrafficUiState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -84,6 +86,7 @@ fun VpnStatusScreen(
     onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
     graceExpiresAtUtcMs: Long? = null,
     primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
+    traffic: VpnTrafficUiState = VpnTrafficUiState(),
 ) {
     val context = LocalContext.current
     val supportEmail = stringResource(R.string.support_contact_email)
@@ -376,6 +379,10 @@ fun VpnStatusScreen(
             }
             }
 
+            if (isConnected && traffic.isActive) {
+                LiveTrafficCard(traffic = traffic)
+            }
+
             Text(
                 modifier = Modifier
                     .widthIn(max = 520.dp)
@@ -623,7 +630,20 @@ fun VpnStatusScreenPreview_Connected() {
                 lastMessage = "Connected to DataGate VPN (10.0.0.2)"
             ),
             onConnectClick = {},
-            onDisconnectClick = {}
+            onDisconnectClick = {},
+            traffic = VpnTrafficUiState(
+                isActive = true,
+                speedInBps = 1_250_000,
+                speedOutBps = 80_000,
+                sessionBytesIn = 12_000_000,
+                sessionBytesOut = 900_000,
+                samples = List(20) { i ->
+                    TrafficSample(
+                        speedInBps = (200_000 + i * 40_000).toLong(),
+                        speedOutBps = (20_000 + i * 3_000).toLong(),
+                    )
+                },
+            ),
         )
     }
 }

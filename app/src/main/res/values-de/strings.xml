@@ -38,6 +38,11 @@
     <string name="home_telegram_channel_body">Telegram-Kanal des Projekts: aktuelle News und Ankündigungen bei Serviceproblemen.</string>
     <string name="home_grace_banner_title">Verbunden — vorübergehender Zugriff</string>
     <string name="home_grace_banner_body">Verknüpfe dein Konto oder abonniere innerhalb von %1$s, sonst wird diese Sitzung getrennt.</string>
+    <string name="home_traffic">Traffic</string>
+    <string name="home_traffic_hint">Live-Durchsatz auf diesem Gerät durch den VPN-Tunnel.</string>
+    <string name="home_traffic_download">Download</string>
+    <string name="home_traffic_upload">Upload</string>
+    <string name="home_traffic_waiting">Warte auf Datenverkehr…</string>
     <string name="stats_filters">Filter</string>
     <string name="stats_overview">Übersicht</string>
     <string name="stats_chart_hint">Tippen für Werte · zoomen · schieben zum Scrollen</string>

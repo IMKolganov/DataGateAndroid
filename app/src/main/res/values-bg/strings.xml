@@ -42,6 +42,11 @@
     <string name="home_telegram_channel_body">Telegram каналът на проекта: актуални новини и съобщения при проблеми с услугата.</string>
     <string name="home_grace_banner_title">Свързан — временен достъп</string>
     <string name="home_grace_banner_body">Свържете акаунта си или се абонирайте до %1$s, иначе тази сесия ще бъде прекратена.</string>
+    <string name="home_traffic">Traffic</string>
+    <string name="home_traffic_hint">Live throughput on this device through the VPN tunnel.</string>
+    <string name="home_traffic_download">Download</string>
+    <string name="home_traffic_upload">Upload</string>
+    <string name="home_traffic_waiting">Waiting for traffic…</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>

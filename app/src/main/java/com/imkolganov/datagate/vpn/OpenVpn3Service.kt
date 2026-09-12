@@ -23,6 +23,9 @@ import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import com.imkolganov.datagate.freetier.isDisconnectAttributableToGraceExpiry
 import com.imkolganov.datagate.logger.CrashLogger
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.vpn.traffic.TrafficCounters
+import com.imkolganov.datagate.vpn.traffic.VpnTrafficMonitor
+import com.imkolganov.datagate.vpn.traffic.VpnTunIfaceCounters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -961,6 +964,21 @@ class OpenVpn3Service : VpnService() {
                 "paused" to isPaused,
             ),
         )
+        if (next == VpnRuntimeState.CONNECTED && previous != VpnRuntimeState.CONNECTED) {
+            startTrafficMonitor()
+        } else if (previous == VpnRuntimeState.CONNECTED && next != VpnRuntimeState.CONNECTED) {
+            VpnTrafficMonitor.stop()
+        }
+    }
+
+    private fun startTrafficMonitor() {
+        VpnTrafficMonitor.start {
+            VpnTunIfaceCounters.read(applicationContext)
+                ?: run {
+                    val stats = runCatching { vpnClient?.tun_stats() }.getOrNull() ?: return@start null
+                    TrafficCounters(bytesIn = stats.bytesIn, bytesOut = stats.bytesOut)
+                }
+        }
     }
 
     private fun logCommandDropped(command: String, reason: String) {
@@ -1298,6 +1316,7 @@ class OpenVpn3Service : VpnService() {
 
     private fun stopVpnInternal() {
         VpnDebugLogger.d(TAG, "stopVpnInternal")
+        VpnTrafficMonitor.stop()
 
         val job = vpnJob
         vpnJob = null

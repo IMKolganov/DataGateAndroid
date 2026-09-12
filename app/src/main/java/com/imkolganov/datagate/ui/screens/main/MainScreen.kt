@@ -62,6 +62,7 @@ import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import com.imkolganov.datagate.update.UpdatePreferences
 import com.imkolganov.datagate.update.UpdatePromptController
 import com.imkolganov.datagate.vpn.VpnStatusUiState
+import com.imkolganov.datagate.vpn.traffic.VpnTrafficMonitor
 import kotlinx.coroutines.launch
 
 /** Main app tabs (bottom bar on phone, navigation rail on TV). */
@@ -109,6 +110,7 @@ fun MainScreen(
     }
     val homeUpdateBanner by bannerFlow.collectAsState(initial = null)
     val graceExpiresAtUtcMs by FreeTierComplianceController.graceExpiresAtUtcMs.collectAsState()
+    val traffic by VpnTrafficMonitor.uiState.collectAsState()
 
     var selectedTabKey by rememberSaveable { mutableStateOf(MainTab.Home.name) }
     val selectedTab = MainTab.entries.find { it.name == selectedTabKey } ?: MainTab.Home
@@ -155,6 +157,7 @@ fun MainScreen(
                 },
                 graceExpiresAtUtcMs = graceExpiresAtUtcMs,
                 primaryFocusRequester = if (isTelevision) contentFocusRequester else null,
+                traffic = traffic,
             )
             MainTab.Access -> AccessScreen(
                 state = accessState,

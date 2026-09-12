@@ -38,6 +38,11 @@
     <string name="home_telegram_channel_body">Kênh Telegram của dự án: tin mới và thông báo khi dịch vụ gặp sự cố.</string>
     <string name="home_grace_banner_title">Đã kết nối — quyền truy cập tạm thời</string>
     <string name="home_grace_banner_body">Liên kết tài khoản hoặc đăng ký trong vòng %1$s, nếu không phiên này sẽ bị ngắt kết nối.</string>
+    <string name="home_traffic">Lưu lượng</string>
+    <string name="home_traffic_hint">Thông lượng trực tiếp trên thiết bị này qua đường hầm VPN.</string>
+    <string name="home_traffic_download">Tải xuống</string>
+    <string name="home_traffic_upload">Tải lên</string>
+    <string name="home_traffic_waiting">Đang chờ lưu lượng…</string>
     <string name="stats_filters">Bộ lọc</string>
     <string name="stats_overview">Tổng quan</string>
     <string name="stats_chart_hint">Chạm biểu đồ · chụm để phóng to · kéo để cuộn</string>

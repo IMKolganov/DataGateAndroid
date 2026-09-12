@@ -38,6 +38,11 @@
     <string name="home_telegram_channel_body">Saluran Telegram proyek: berita terbaru dan pengumuman jika layanan bermasalah.</string>
     <string name="home_grace_banner_title">Tersambung — akses sementara</string>
     <string name="home_grace_banner_body">Tautkan akun Anda atau berlangganan dalam %1$s atau sesi ini akan diputus.</string>
+    <string name="home_traffic">Lalu lintas</string>
+    <string name="home_traffic_hint">Throughput langsung di perangkat ini melalui terowongan VPN.</string>
+    <string name="home_traffic_download">Unduh</string>
+    <string name="home_traffic_upload">Unggah</string>
+    <string name="home_traffic_waiting">Menunggu lalu lintas…</string>
     <string name="stats_filters">Filter</string>
     <string name="stats_overview">Ringkasan</string>
     <string name="stats_chart_hint">Ketuk grafik · cubit untuk zoom · seret untuk gulir</string>

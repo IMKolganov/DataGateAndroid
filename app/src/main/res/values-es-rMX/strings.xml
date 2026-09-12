@@ -38,6 +38,11 @@
     <string name="home_telegram_channel_body">Canal de Telegram del proyecto: noticias y avisos si hay problemas del servicio.</string>
     <string name="home_grace_banner_title">Conectado — acceso temporal</string>
     <string name="home_grace_banner_body">Vincula tu cuenta o suscríbete en %1$s o esta sesión se desconectará.</string>
+    <string name="home_traffic">Tráfico</string>
+    <string name="home_traffic_hint">Rendimiento en vivo en este dispositivo a través del túnel VPN.</string>
+    <string name="home_traffic_download">Descarga</string>
+    <string name="home_traffic_upload">Subida</string>
+    <string name="home_traffic_waiting">Esperando tráfico…</string>
     <string name="stats_filters">Filtros</string>
     <string name="stats_overview">Resumen</string>
     <string name="stats_chart_hint">Toca el gráfico · pellizca para ampliar · arrastra para desplazar</string>

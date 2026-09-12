@@ -23,6 +23,8 @@ import com.imkolganov.datagate.vpn.SplitTunnelSession
 import com.imkolganov.datagate.vpn.VpnBypassApps
 import com.imkolganov.datagate.vpn.VpnExcludeRoutes
 import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
+import com.imkolganov.datagate.vpn.traffic.VpnTrafficMonitor
+import com.imkolganov.datagate.vpn.traffic.VpnTunIfaceCounters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -243,6 +245,7 @@ class XrayVpnService : VpnService() {
             running = true
             broadcastStatus("CONNECTED", getString(R.string.vpn_msg_connected))
             startForegroundNow(getString(R.string.vpn_status_connected))
+            VpnTrafficMonitor.start { VpnTunIfaceCounters.read(applicationContext) }
             runCatching { path?.let { File(it).delete() } }
             excludedRoutesPath?.let { runCatching { File(it).delete() } }
         } catch (t: Throwable) {
@@ -256,6 +259,7 @@ class XrayVpnService : VpnService() {
 
     private fun stopXraySession(broadcast: Boolean) {
         running = false
+        VpnTrafficMonitor.stop()
         runCatching { XrayCoreFacade.stop() }
         tunPfd.safeClose()
         tunPfd = null

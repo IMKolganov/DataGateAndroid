@@ -41,6 +41,11 @@
     <string name="home_telegram_channel_body">Telegram-канал проєкту: актуальні новини та оголошення при проблемах із сервісом.</string>
     <string name="home_grace_banner_title">Підключено — тимчасовий доступ</string>
     <string name="home_grace_banner_body">Прив\'яжіть акаунт або оформіть підписку протягом %1$s, інакше сесію буде відключено.</string>
+    <string name="home_traffic">Трафік</string>
+    <string name="home_traffic_hint">Жива швидкість на цьому пристрої через VPN-тунель.</string>
+    <string name="home_traffic_download">Завантаження</string>
+    <string name="home_traffic_upload">Віддача</string>
+    <string name="home_traffic_waiting">Очікування трафіку…</string>
 
     <string name="stats_filters">Фільтри</string>
     <string name="stats_overview">Огляд</string>
