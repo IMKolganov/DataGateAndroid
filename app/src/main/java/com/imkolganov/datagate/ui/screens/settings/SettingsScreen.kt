@@ -128,6 +128,7 @@ fun SettingsScreen(
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
     var vpnDebugModeEnabled by remember { mutableStateOf(false) }
+    var engineJournalEnabled by remember { mutableStateOf(false) }
     var debugLogStatus by remember { mutableStateOf("0 B") }
     var hasDebugLogs by remember { mutableStateOf(false) }
     var debugLogPath by remember { mutableStateOf("") }
@@ -204,6 +205,9 @@ fun SettingsScreen(
         val appCtx = context.applicationContext
         vpnDebugModeEnabled = withContext(Dispatchers.IO) {
             DebugPreferences.isVpnDebugModeEnabled(appCtx)
+        }
+        engineJournalEnabled = withContext(Dispatchers.IO) {
+            DebugPreferences.isEngineJournalEnabled(appCtx)
         }
         refreshDebugLogUi(appCtx) { size, has, path, preview ->
             debugLogStatus = size
@@ -712,8 +716,46 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    stringResource(R.string.settings_vpn_debug_title),
+                    stringResource(R.string.settings_development_title),
                     style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_engine_journal_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.settings_engine_journal),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = engineJournalEnabled,
+                        onCheckedChange = { enabled ->
+                            engineJournalEnabled = enabled
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    DebugPreferences.setEngineJournalEnabled(
+                                        context.applicationContext,
+                                        enabled
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+
+                HorizontalDivider()
+
+                Text(
+                    stringResource(R.string.settings_vpn_debug_title),
+                    style = MaterialTheme.typography.titleSmall
                 )
                 Text(
                     stringResource(R.string.settings_debug_mode_subtitle),

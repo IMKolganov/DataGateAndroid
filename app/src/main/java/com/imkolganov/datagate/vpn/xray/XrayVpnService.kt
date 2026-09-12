@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import com.imkolganov.datagate.MainActivity
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.vpn.diag.VpnDiagnostics
 import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.OpenVpn3Service
 import com.imkolganov.datagate.vpn.SplitTunnelSession
@@ -246,6 +247,7 @@ class XrayVpnService : VpnService() {
             broadcastStatus("CONNECTED", getString(R.string.vpn_msg_connected))
             startForegroundNow(getString(R.string.vpn_status_connected))
             VpnTrafficMonitor.start { VpnTunIfaceCounters.read(applicationContext) }
+            VpnDiagnostics.schedulePostConnect(applicationContext, engine = "xray")
             runCatching { path?.let { File(it).delete() } }
             excludedRoutesPath?.let { runCatching { File(it).delete() } }
         } catch (t: Throwable) {
@@ -449,7 +451,16 @@ class XrayVpnService : VpnService() {
                 .putLong(OpenVpn3Service.PREF_LAST_EVENT_AT_MS, System.currentTimeMillis())
                 .apply()
         }
-        VpnDebugLogger.d(TAG, "broadcast $name: $info (fromQuery=$fromQuery running=$running)")
+        VpnDebugLogger.event(
+            category = "service.broadcast",
+            action = name,
+            details = mapOf(
+                "info" to info,
+                "fromQuery" to fromQuery,
+                "engine" to OpenVpn3Service.ENGINE_XRAY,
+                "running" to running,
+            ),
+        )
         val intent = Intent(OpenVpn3Service.ACTION_STATUS)
             .setPackage(packageName)
             .apply {

@@ -147,7 +147,7 @@ private fun LiveTrafficChart(
     samples: List<TrafficSample>,
     modifier: Modifier = Modifier,
 ) {
-    if (samples.size < TrafficDelta.MIN_CHART_SAMPLES) {
+    if (!TrafficDelta.shouldShowChart(samples.size)) {
         Box(
             modifier = modifier.height(80.dp),
             contentAlignment = Alignment.Center,

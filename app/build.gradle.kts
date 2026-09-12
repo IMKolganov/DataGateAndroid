@@ -21,16 +21,31 @@ val keystoreProps = loadProps("keystore.properties")
 fun env(name: String): String =
     envProps.getProperty(name)
         ?: System.getenv(name)
+        ?: dummyEnv[name]
         ?: error("Missing env property: $name")
 
 fun envOpt(name: String): String? =
     envProps.getProperty(name)
         ?: System.getenv(name)
 
-fun ks(name: String): String =
-    keystoreProps.getProperty(name)
-        ?: System.getenv(name)
-        ?: error("Missing keystore property: $name")
+fun ksOpt(name: String): String? =
+    keystoreProps.getProperty(name)?.takeIf { it.isNotBlank() }
+        ?: System.getenv(name)?.takeIf { it.isNotBlank() }
+
+/** Lets unit tests / local debug configure without env.properties. */
+val dummyEnv = mapOf(
+    "DEV_BACKEND_URL" to "https://dev.invalid",
+    "DEV_WEB_CLIENT_ID" to "dummy-dev-web-client-id.apps.googleusercontent.com",
+    "PROD_BACKEND_URL" to "https://prod.invalid",
+    "PROD_WEB_CLIENT_ID" to "dummy-prod-web-client-id.apps.googleusercontent.com",
+)
+
+val releaseStorePath = ksOpt("storeFile")
+val canSignRelease = !releaseStorePath.isNullOrBlank() &&
+    !ksOpt("storePassword").isNullOrBlank() &&
+    !ksOpt("keyAlias").isNullOrBlank() &&
+    !ksOpt("keyPassword").isNullOrBlank() &&
+    file(releaseStorePath!!).isFile
 
 android {
     namespace = "com.imkolganov.datagate"
@@ -57,11 +72,13 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = file(ks("storeFile"))
-            storePassword = ks("storePassword")
-            keyAlias = ks("keyAlias")
-            keyPassword = ks("keyPassword")
+        if (canSignRelease) {
+            create("release") {
+                storeFile = file(releaseStorePath!!)
+                storePassword = ksOpt("storePassword")
+                keyAlias = ksOpt("keyAlias")
+                keyPassword = ksOpt("keyPassword")
+            }
         }
     }
 
@@ -72,7 +89,9 @@ android {
 
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+            if (canSignRelease) {
+                signingConfig = signingConfigs.getByName("release")
+            }
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

@@ -114,6 +114,11 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Розробка</string>
+    <string name="settings_engine_journal">Показувати журнал рушія</string>
+    <string name="settings_engine_journal_subtitle">Останні 1000 рядків рушія на головній. Поки вимкнено — нічого не пишеться.</string>
+    <string name="home_engine_logs">Журнал рушія</string>
+    <string name="home_engine_logs_waiting">Очікування подій рушія…</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>

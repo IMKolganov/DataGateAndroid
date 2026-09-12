@@ -2,6 +2,7 @@ package com.imkolganov.datagate.vpn
 
 import android.net.VpnService
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.vpn.diag.VpnDiagnostics
 
 /**
  * Applies per-app split tunneling via [VpnService.Builder.addDisallowedApplication].
@@ -46,6 +47,7 @@ object VpnBypassApps {
             }
         }
         VpnDebugLogger.d(TAG, "Applied bypass apps: $applied/${bypassPackages.size}")
+        VpnDiagnostics.emitSplitTunnel(bypassPackages, applied)
         return applied
     }
 }

@@ -39,21 +39,24 @@ object VpnTunIfaceCounters {
     }
 
     internal fun findVpnInterfaceName(cm: ConnectivityManager): String? {
-        var fallback: String? = null
+        val candidates = ArrayList<TunIfaceCandidate>()
         @Suppress("DEPRECATION")
         for (network in cm.allNetworks) {
             val caps = cm.getNetworkCapabilities(network) ?: continue
-            if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
-            val props = cm.getLinkProperties(network) ?: continue
-            val name = props.interfaceName?.trim()?.takeIf { it.isNotEmpty() } ?: continue
-            fallback = name
-            val hasTunnelIpv4 = props.linkAddresses.any { link ->
+            val props = cm.getLinkProperties(network)
+            val hasTunnelIpv4 = props?.linkAddresses.orEmpty().any { link ->
                 val host = link.address
                 host is Inet4Address && !host.isLoopbackAddress
             }
-            if (hasTunnelIpv4) return name
+            candidates.add(
+                TunIfaceCandidate(
+                    isVpn = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
+                    interfaceName = props?.interfaceName,
+                    hasTunnelIpv4 = hasTunnelIpv4,
+                )
+            )
         }
-        return fallback
+        return VpnTunIfacePick.pickName(candidates)
     }
 
     private fun warnOnce(message: String) {

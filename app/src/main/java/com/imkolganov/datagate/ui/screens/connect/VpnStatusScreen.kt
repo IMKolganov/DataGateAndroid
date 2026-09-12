@@ -68,10 +68,12 @@ import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.update.GitHubLatestRelease
 import com.imkolganov.datagate.util.userFriendlyApiError
+import com.imkolganov.datagate.logger.EngineJournal
 import com.imkolganov.datagate.vpn.VpnCommandContract
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 import com.imkolganov.datagate.vpn.traffic.TrafficSample
 import com.imkolganov.datagate.vpn.traffic.VpnTrafficUiState
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -88,6 +90,8 @@ fun VpnStatusScreen(
     primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
     traffic: VpnTrafficUiState = VpnTrafficUiState(),
 ) {
+    val engineJournalEnabled by EngineJournal.enabled.collectAsState()
+    val engineJournalText by EngineJournal.text.collectAsState()
     val context = LocalContext.current
     val supportEmail = stringResource(R.string.support_contact_email)
     val supportEmailSubject = stringResource(R.string.home_report_email_subject)
@@ -395,6 +399,10 @@ fun VpnStatusScreen(
             HomeTelegramChannelBanner(
                 onOpenChannel = { openUrl(projectTelegramUrl) },
             )
+
+            if (engineJournalEnabled) {
+                EngineJournalCard(text = engineJournalText)
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }

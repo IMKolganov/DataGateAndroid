@@ -23,6 +23,8 @@ import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import com.imkolganov.datagate.freetier.isDisconnectAttributableToGraceExpiry
 import com.imkolganov.datagate.logger.CrashLogger
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.vpn.diag.VpnDiagnostics
+import com.imkolganov.datagate.vpn.traffic.OpenVpnLiveTrafficRead
 import com.imkolganov.datagate.vpn.traffic.TrafficCounters
 import com.imkolganov.datagate.vpn.traffic.VpnTrafficMonitor
 import com.imkolganov.datagate.vpn.traffic.VpnTunIfaceCounters
@@ -881,6 +883,9 @@ class OpenVpn3Service : VpnService() {
             ),
         )
         runSystemVpnHealthCheck("network_changed_$source")
+        if (runtimeState == VpnRuntimeState.CONNECTED) {
+            VpnDiagnostics.onNetworkChanged(applicationContext, engine = "openvpn")
+        }
         if (!hasActiveSession && (connectInProgress || desiredConnection)) {
             broadcastStatus("NETWORK_CHANGED", info)
         } else {
@@ -966,6 +971,7 @@ class OpenVpn3Service : VpnService() {
         )
         if (next == VpnRuntimeState.CONNECTED && previous != VpnRuntimeState.CONNECTED) {
             startTrafficMonitor()
+            VpnDiagnostics.schedulePostConnect(applicationContext, engine = "openvpn")
         } else if (previous == VpnRuntimeState.CONNECTED && next != VpnRuntimeState.CONNECTED) {
             VpnTrafficMonitor.stop()
         }
@@ -973,11 +979,16 @@ class OpenVpn3Service : VpnService() {
 
     private fun startTrafficMonitor() {
         VpnTrafficMonitor.start {
-            VpnTunIfaceCounters.read(applicationContext)
-                ?: run {
-                    val stats = runCatching { vpnClient?.tun_stats() }.getOrNull() ?: return@start null
-                    TrafficCounters(bytesIn = stats.bytesIn, bytesOut = stats.bytesOut)
-                }
+            OpenVpnLiveTrafficRead.resolve(
+                ifaceCounters = VpnTunIfaceCounters.read(applicationContext),
+                tunStatsProvider = {
+                    runCatching {
+                        vpnClient?.tun_stats()?.let { stats ->
+                            TrafficCounters(bytesIn = stats.bytesIn, bytesOut = stats.bytesOut)
+                        }
+                    }.getOrNull()
+                },
+            )
         }
     }
 

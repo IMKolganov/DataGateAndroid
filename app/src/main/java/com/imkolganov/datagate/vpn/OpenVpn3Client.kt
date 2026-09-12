@@ -6,6 +6,9 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.OsConstants
+import com.imkolganov.datagate.logger.EngineJournal
+import com.imkolganov.datagate.logger.EngineJournalCoreLogPolicy
+import com.imkolganov.datagate.logger.EngineJournalCoreLogSink
 import com.imkolganov.datagate.logger.VpnDebugLogger
 import net.openvpn.ovpn3.ClientAPI_Event
 import net.openvpn.ovpn3.ClientAPI_LogInfo
@@ -41,8 +44,15 @@ class OpenVpn3Client(
         val text = info.text ?: ""
         // Always logcat; file only W/E-ish lines (core.log storms fill the 8MB debug file).
         android.util.Log.d(TAG, "core log: $text")
-        if (OpenVpnCoreLogFilter.shouldPersistToDebugFile(text)) {
-            VpnDebugLogger.w(TAG, "core: $text")
+        when (
+            EngineJournalCoreLogPolicy.sink(
+                persistToDebugFile = OpenVpnCoreLogFilter.shouldPersistToDebugFile(text),
+                journalEnabled = EngineJournal.isEnabled(),
+            )
+        ) {
+            EngineJournalCoreLogSink.DebugLoggerWarn -> VpnDebugLogger.w(TAG, "core: $text")
+            EngineJournalCoreLogSink.JournalDebug -> EngineJournal.append("D", TAG, "core: $text")
+            EngineJournalCoreLogSink.None -> Unit
         }
     }
 

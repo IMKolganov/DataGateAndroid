@@ -1,15 +1,16 @@
 package com.imkolganov.datagate.vpn.traffic
 
+import com.imkolganov.datagate.vpn.diag.VpnDiagnostics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Process-wide 1 Hz sampler. Services [start] a [VpnTrafficSource] while the tunnel is up
@@ -30,34 +31,17 @@ object VpnTrafficMonitor {
         synchronized(lock) {
             job?.cancel()
             val session = ++generation
+            VpnDiagnostics.onMonitorStarted()
             _uiState.value = VpnTrafficUiState(isActive = true)
             job = scope.launch {
-                var previous: TrafficCounters? = null
-                var previousAtMs = 0L
-                var sessionBytesIn = 0L
-                var sessionBytesOut = 0L
-                var samples = emptyList<TrafficSample>()
+                val engine = VpnTrafficTickEngine()
                 while (isActive) {
                     val nowMs = System.currentTimeMillis()
                     val current = runCatching { source.read() }.getOrNull()
-                    val tick = TrafficDelta.apply(
-                        previous = previous,
-                        previousAtMs = previousAtMs,
-                        current = current,
-                        nowMs = nowMs,
-                        sessionBytesIn = sessionBytesIn,
-                        sessionBytesOut = sessionBytesOut,
-                        samples = samples,
-                        lastSpeedInBps = _uiState.value.speedInBps,
-                        lastSpeedOutBps = _uiState.value.speedOutBps,
-                    )
-                    previous = tick.previous
-                    previousAtMs = tick.previousAtMs
-                    sessionBytesIn = tick.sessionBytesIn
-                    sessionBytesOut = tick.sessionBytesOut
-                    samples = tick.samples
+                    val next = engine.tick(current, nowMs)
                     if (session != generation) return@launch
-                    _uiState.value = tick.toUiState(isActive = true)
+                    _uiState.value = next
+                    VpnDiagnostics.onTrafficTick(next, sourceMissing = current == null)
                     delay(SAMPLE_INTERVAL_MS)
                 }
             }
@@ -69,6 +53,7 @@ object VpnTrafficMonitor {
             generation++
             job?.cancel()
             job = null
+            VpnDiagnostics.cancel()
             _uiState.value = VpnTrafficUiState()
         }
     }

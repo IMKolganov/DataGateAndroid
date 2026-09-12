@@ -38,4 +38,31 @@ class VpnTrafficMonitorTest {
         VpnTrafficMonitor.stop()
         assertFalse(VpnTrafficMonitor.uiState.value.isActive)
     }
+
+    @Test
+    fun throwingSource_doesNotCrashAndKeepsSessionActive() = runBlocking {
+        VpnTrafficMonitor.start { error("source exploded") }
+        val active = withTimeout(3_000) {
+            while (!VpnTrafficMonitor.uiState.value.isActive) {
+                delay(20)
+            }
+            VpnTrafficMonitor.uiState.value
+        }
+        assertTrue(active.isActive)
+        delay(50)
+        assertTrue(VpnTrafficMonitor.uiState.value.isActive)
+        assertTrue(VpnTrafficMonitor.uiState.value.samples.isEmpty())
+    }
+
+    @Test
+    fun reset_clearsActiveSession() = runBlocking {
+        VpnTrafficMonitor.start { TrafficCounters(1, 1) }
+        withTimeout(3_000) {
+            while (!VpnTrafficMonitor.uiState.value.isActive) {
+                delay(20)
+            }
+        }
+        VpnTrafficMonitor.reset()
+        assertFalse(VpnTrafficMonitor.uiState.value.isActive)
+    }
 }

@@ -93,6 +93,8 @@ object TrafficDelta {
         )
     }
 
+    fun shouldShowChart(sampleCount: Int): Boolean = sampleCount >= MIN_CHART_SAMPLES
+
     fun append(
         samples: List<TrafficSample>,
         sample: TrafficSample,

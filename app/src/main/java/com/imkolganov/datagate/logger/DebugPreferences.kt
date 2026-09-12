@@ -15,6 +15,7 @@ private val Context.debugDataStore: DataStore<Preferences> by preferencesDataSto
 
 object DebugPreferences {
     private val KEY_VPN_DEBUG_MODE = booleanPreferencesKey("vpn_debug_mode_enabled")
+    private val KEY_ENGINE_JOURNAL = booleanPreferencesKey("engine_journal_enabled")
 
     fun vpnDebugModeFlow(context: Context): Flow<Boolean> =
         context.debugDataStore.data
@@ -26,5 +27,17 @@ object DebugPreferences {
 
     suspend fun setVpnDebugModeEnabled(context: Context, enabled: Boolean) {
         context.debugDataStore.edit { it[KEY_VPN_DEBUG_MODE] = enabled }
+    }
+
+    fun engineJournalEnabledFlow(context: Context): Flow<Boolean> =
+        context.debugDataStore.data
+            .map { prefs -> prefs[KEY_ENGINE_JOURNAL] ?: false }
+            .distinctUntilChanged()
+
+    suspend fun isEngineJournalEnabled(context: Context): Boolean =
+        context.debugDataStore.data.map { it[KEY_ENGINE_JOURNAL] ?: false }.first()
+
+    suspend fun setEngineJournalEnabled(context: Context, enabled: Boolean) {
+        context.debugDataStore.edit { it[KEY_ENGINE_JOURNAL] = enabled }
     }
 }
