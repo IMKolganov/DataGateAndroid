@@ -90,6 +90,9 @@ class VpnController(
         if (eventName == "DISCONNECTED" && !fromQuery) {
             prefs.edit { remove(KEY_SESSION_SERVER_ID) }
         }
+        if (VpnActiveEnginePolicy.shouldClearActiveEngine(eventName, fromQuery)) {
+            prefs.edit { remove(KEY_ACTIVE_ENGINE) }
+        }
         onStateChange(mapped)
         VpnDebugLogger.event(
             category = "ui.status",

@@ -251,6 +251,7 @@ class VpnConnectInteractor(
                     "delivery" to routePlan.delivery.name,
                 ),
             )
+            ExcludeRouteSession.publish(connectionRoutes, ipListSettings)
             vpnController.startWithConfig(
                 configText = routePlan.config,
                 wssLink = wssUrl,

@@ -948,7 +948,11 @@ class OpenVpn3Service : VpnService() {
             wssUrl = request.wssUrl,
             transport = request.transport,
             linkProtocol = request.linkProtocol,
-            excludedRoutes = request.excludedRoutes,
+            excludedRoutes = ExcludeRouteSession.resolveForEstablish(
+                intentRoutes = request.excludedRoutes,
+                forXray = false,
+                supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+            ),
             username = request.username,
             password = request.password,
         )
@@ -973,12 +977,12 @@ class OpenVpn3Service : VpnService() {
             startTrafficMonitor()
             VpnDiagnostics.schedulePostConnect(applicationContext, engine = "openvpn")
         } else if (previous == VpnRuntimeState.CONNECTED && next != VpnRuntimeState.CONNECTED) {
-            VpnTrafficMonitor.stop()
+            VpnTrafficMonitor.stop(VpnTunnelSessionStore.OWNER_OPENVPN)
         }
     }
 
     private fun startTrafficMonitor() {
-        VpnTrafficMonitor.start {
+        VpnTrafficMonitor.start(owner = VpnTunnelSessionStore.OWNER_OPENVPN) {
             OpenVpnLiveTrafficRead.resolve(
                 ifaceCounters = VpnTunIfaceCounters.read(applicationContext),
                 tunStatsProvider = {
@@ -1327,7 +1331,7 @@ class OpenVpn3Service : VpnService() {
 
     private fun stopVpnInternal() {
         VpnDebugLogger.d(TAG, "stopVpnInternal")
-        VpnTrafficMonitor.stop()
+        VpnTrafficMonitor.stop(VpnTunnelSessionStore.OWNER_OPENVPN)
 
         val job = vpnJob
         vpnJob = null

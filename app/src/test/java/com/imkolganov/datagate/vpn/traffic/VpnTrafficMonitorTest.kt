@@ -65,4 +65,36 @@ class VpnTrafficMonitorTest {
         VpnTrafficMonitor.reset()
         assertFalse(VpnTrafficMonitor.uiState.value.isActive)
     }
+
+    @Test
+    fun stop_ignoresPeerEngineOwner() = runBlocking {
+        VpnTrafficMonitor.start(owner = "openvpn") { TrafficCounters(10, 4) }
+        withTimeout(3_000) {
+            while (!VpnTrafficMonitor.uiState.value.isActive) {
+                delay(20)
+            }
+        }
+
+        VpnTrafficMonitor.stop("xray")
+        delay(50)
+        assertTrue(VpnTrafficMonitor.uiState.value.isActive)
+
+        VpnTrafficMonitor.stop("openvpn")
+        delay(50)
+        assertFalse(VpnTrafficMonitor.uiState.value.isActive)
+    }
+
+    @Test
+    fun stop_withoutOwner_forceClearsAnySession() = runBlocking {
+        VpnTrafficMonitor.start(owner = "xray") { TrafficCounters(3, 1) }
+        withTimeout(3_000) {
+            while (!VpnTrafficMonitor.uiState.value.isActive) {
+                delay(20)
+            }
+        }
+
+        VpnTrafficMonitor.stop()
+        delay(50)
+        assertFalse(VpnTrafficMonitor.uiState.value.isActive)
+    }
 }

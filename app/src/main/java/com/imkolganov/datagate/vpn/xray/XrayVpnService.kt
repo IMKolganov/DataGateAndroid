@@ -9,6 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -17,7 +20,9 @@ import androidx.core.app.NotificationCompat
 import com.imkolganov.datagate.MainActivity
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.ui.tv.isTelevision
 import com.imkolganov.datagate.vpn.diag.VpnDiagnostics
+import com.imkolganov.datagate.vpn.ExcludeRouteSession
 import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.OpenVpn3Service
 import com.imkolganov.datagate.vpn.SplitTunnelSession
@@ -29,6 +34,7 @@ import com.imkolganov.datagate.vpn.traffic.VpnTunIfaceCounters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -74,23 +80,66 @@ class XrayVpnService : VpnService() {
     private var tunPfd: ParcelFileDescriptor? = null
     private var sessionServerDisplayName: String? = null
     private var notificationWatchdogJob: Job? = null
+    private var connectJob: Job? = null
     private var lastNotificationStatusText: String = ""
     @Volatile private var running = false
     /** True while the FGS notification should remain visible (connecting or connected). */
     @Volatile private var foregroundDesired = false
+    /** Bumped on every connect / stop so a stale blocking [connect] cannot tear down a newer session. */
+    @Volatile private var connectGeneration = 0
+    @Volatile private var isStopping = false
+    @Volatile private var desiredConnection = false
+    @Volatile private var networkAvailable = true
+    private var isNetworkCallbackRegistered = false
+    private var pendingConnect: PendingXrayConnect? = null
+    private val sessionLock = Any()
+
+    private data class PendingXrayConnect(
+        val configText: String,
+        val excludedRoutesPath: String?,
+        val dnsServers: List<String>,
+        val dnsIdentityEnabled: Boolean,
+    )
 
     private val statePrefs: SharedPreferences by lazy {
         getSharedPreferences(OpenVpn3Service.PREFS_VPN_STATE, Context.MODE_PRIVATE)
     }
 
+    private val connectivityManager: ConnectivityManager by lazy {
+        getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            onNetworkStateChanged("AVAILABLE")
+        }
+
+        override fun onLost(network: Network) {
+            onNetworkStateChanged("LOST")
+        }
+
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            onNetworkStateChanged("CAP_CHANGED")
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        networkAvailable = hasUsableNetwork()
+        registerNetworkCallbackSafely()
         VpnDebugLogger.d(TAG, "Service created")
     }
 
     override fun onDestroy() {
+        isStopping = true
+        desiredConnection = false
+        connectGeneration++
+        connectJob?.cancel()
+        connectJob = null
+        unregisterNetworkCallbackSafely()
         stopXraySession(broadcast = false)
+        serviceScope.cancel()
         super.onDestroy()
     }
 
@@ -105,33 +154,57 @@ class XrayVpnService : VpnService() {
                     ?.trim()?.takeIf { it.isNotEmpty() }
                     ?: statePrefs.getString("selected_server_name", null)
                         ?.trim()?.takeIf { it.isNotEmpty() }
-                serviceScope.launch { connect(intent) }
+                desiredConnection = true
+                isStopping = false
+                val session = ++connectGeneration
+                connectJob?.cancel()
+                connectJob = serviceScope.launch { connect(intent, session) }
             }
             ACTION_DISCONNECT, ACTION_PAUSE -> {
+                desiredConnection = false
+                pendingConnect = null
+                isStopping = true
+                val stopSession = ++connectGeneration
+                connectJob?.cancel()
+                connectJob = null
                 serviceScope.launch {
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(stopSession, connectGeneration)) {
+                        return@launch
+                    }
                     stopXraySession(broadcast = true)
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(stopSession, connectGeneration)) {
+                        return@launch
+                    }
                     stopForegroundCompat()
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(stopSession, connectGeneration)) {
+                        return@launch
+                    }
                     stopSelf()
                 }
             }
             ACTION_QUERY_STATUS -> {
-                val (name, info) = resolvedCachedStatusForUi()
+                val (name, info) = resolveLiveStatusForQuery()
+                runHealthCheck("query_status")
                 broadcastStatus(name, info, fromQuery = true)
+                if (!desiredConnection && !running && tunPfd == null) {
+                    stopSelf()
+                }
             }
             else -> Unit
         }
         return START_STICKY
     }
 
-    private fun connect(intent: Intent) {
+    private fun connect(intent: Intent, session: Int) {
+        var localPfd: ParcelFileDescriptor? = null
         try {
+            if (!isCurrentConnect(session)) return
+
             if (!XrayCoreFacade.isAvailable()) {
-                broadcastStatus(
-                    "ERROR",
+                failCurrentConnect(
+                    session,
                     "libXray is not available on this device (${Build.SUPPORTED_ABIS.joinToString()})",
                 )
-                stopForegroundCompat()
-                stopSelf()
                 return
             }
 
@@ -141,21 +214,15 @@ class XrayVpnService : VpnService() {
                 !path.isNullOrBlank() -> File(path).readText()
                 !inline.isNullOrBlank() -> inline
                 else -> {
-                    broadcastStatus("ERROR", "Missing Xray config")
-                    stopForegroundCompat()
-                    stopSelf()
+                    failCurrentConnect(session, "Missing Xray config")
                     return
                 }
             }
 
-            broadcastStatus("CONNECTING", getString(R.string.vpn_connecting_generic))
-            startForegroundNow(getString(R.string.vpn_connecting_generic))
-
-            // Tear down any previous session in this service.
-            stopXraySession(broadcast = false)
+            if (!isCurrentConnect(session)) return
 
             val excludedRoutesPath = intent.getStringExtra(EXTRA_EXCLUDED_ROUTES_PATH)
-            val excludedRoutes = excludedRoutesPath
+            val intentRoutes = excludedRoutesPath
                 ?.takeIf { it.isNotBlank() }
                 ?.let { path ->
                     runCatching {
@@ -163,9 +230,44 @@ class XrayVpnService : VpnService() {
                     }.getOrElse { emptyList() }
                 }
                 ?: emptyList()
-
             val dnsServers = resolveDnsServers(intent)
             val dnsIdentityEnabled = intent.getBooleanExtra(EXTRA_DNS_IDENTITY_ENABLED, false)
+            pendingConnect = PendingXrayConnect(
+                configText = raw,
+                excludedRoutesPath = excludedRoutesPath,
+                dnsServers = dnsServers,
+                dnsIdentityEnabled = dnsIdentityEnabled,
+            )
+
+            if (!networkAvailable &&
+                XrayNetworkPolicy.shouldWaitForNetwork(
+                    desiredConnection = desiredConnection,
+                    stopping = isStopping,
+                    running = running,
+                    networkAvailable = false,
+                )
+            ) {
+                broadcastStatus("WAITING_NETWORK", getString(R.string.vpn_msg_reconnecting))
+                startForegroundNow(getString(R.string.vpn_msg_reconnecting))
+                return
+            }
+
+            broadcastStatus("CONNECTING", getString(R.string.vpn_connecting_generic))
+            startForegroundNow(getString(R.string.vpn_connecting_generic))
+
+            if (!isCurrentConnect(session)) return
+
+            // Tear down any previous session in this service.
+            stopXraySession(broadcast = false)
+
+            if (!isCurrentConnect(session)) return
+
+            val excludedRoutes = ExcludeRouteSession.resolveForEstablish(
+                intentRoutes = intentRoutes,
+                forXray = true,
+                supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+                constrainedDevice = isTelevision(this),
+            )
             val builder = Builder()
                 .setSession(sessionServerDisplayName ?: "DataGate Xray")
                 .setMtu(1500)
@@ -209,14 +311,21 @@ class XrayVpnService : VpnService() {
                 ),
             )
 
+            if (!isCurrentConnect(session)) return
+
             // Register protect before establish/run so any early dials cannot loop into TUN.
             XrayCoreFacade.registerProtect(this)
 
+            if (!isCurrentConnect(session)) return
+
             val pfd = builder.establish()
+            localPfd = pfd
             if (pfd == null) {
-                broadcastStatus("ERROR", "VpnService.Builder.establish() returned null")
-                stopForegroundCompat()
-                stopSelf()
+                failCurrentConnect(session, "VpnService.Builder.establish() returned null")
+                return
+            }
+            if (!isCurrentConnect(session)) {
+                abandonLocalTun(pfd)
                 return
             }
             tunPfd = pfd
@@ -236,22 +345,49 @@ class XrayVpnService : VpnService() {
                 owner = VpnTunnelSessionStore.OWNER_XRAY,
             )
 
+            if (!isCurrentConnect(session)) {
+                abandonLocalTun(pfd)
+                return
+            }
+
             val fullConfig = XrayConfigBuilder.buildTunClientConfig(
                 outboundsJson = raw,
                 tunFd = pfd.fd,
                 directBypassCidrs = routingBypassCidrs,
                 tunnelDnsServers = dnsServers,
             )
-            XrayCoreFacade.runFromJson(fullConfig)
+            val startedCore = synchronized(sessionLock) {
+                if (!isCurrentConnect(session)) {
+                    false
+                } else {
+                    XrayCoreFacade.runFromJson(fullConfig)
+                    true
+                }
+            }
+            if (!startedCore || !isCurrentConnect(session)) {
+                // A newer connect or stop owns teardown. Closing only our TUN avoids
+                // XrayCoreFacade.stop() killing a session that already replaced us.
+                abandonLocalTun(pfd)
+                return
+            }
             running = true
             broadcastStatus("CONNECTED", getString(R.string.vpn_msg_connected))
             startForegroundNow(getString(R.string.vpn_status_connected))
-            VpnTrafficMonitor.start { VpnTunIfaceCounters.read(applicationContext) }
+            VpnTrafficMonitor.start(owner = VpnTunnelSessionStore.OWNER_XRAY) {
+                VpnTunIfaceCounters.read(applicationContext)
+            }
             VpnDiagnostics.schedulePostConnect(applicationContext, engine = "xray")
+            runHealthCheck("post_connected")
             runCatching { path?.let { File(it).delete() } }
             excludedRoutesPath?.let { runCatching { File(it).delete() } }
         } catch (t: Throwable) {
+            if (!isCurrentConnect(session)) {
+                localPfd?.let { abandonLocalTun(it) }
+                return
+            }
             VpnDebugLogger.e(TAG, "Xray connect failed", t)
+            desiredConnection = false
+            pendingConnect = null
             stopXraySession(broadcast = false)
             broadcastStatus("ERROR", t.message ?: t.javaClass.simpleName)
             stopForegroundCompat()
@@ -259,16 +395,165 @@ class XrayVpnService : VpnService() {
         }
     }
 
+    private fun isCurrentConnect(session: Int): Boolean =
+        XrayConnectSessionPolicy.isCurrent(session, connectGeneration, isStopping)
+
+    private fun failCurrentConnect(session: Int, message: String) {
+        if (!isCurrentConnect(session)) return
+        desiredConnection = false
+        pendingConnect = null
+        stopXraySession(broadcast = false)
+        broadcastStatus("ERROR", message)
+        stopForegroundCompat()
+        stopSelf()
+    }
+
+    private fun abandonLocalTun(pfd: ParcelFileDescriptor) {
+        pfd.safeClose()
+        if (tunPfd === pfd) {
+            tunPfd = null
+        }
+    }
+
     private fun stopXraySession(broadcast: Boolean) {
-        running = false
-        VpnTrafficMonitor.stop()
-        runCatching { XrayCoreFacade.stop() }
-        tunPfd.safeClose()
-        tunPfd = null
-        VpnTunnelSessionStore.clear(applicationContext, expectedOwner = VpnTunnelSessionStore.OWNER_XRAY)
+        synchronized(sessionLock) {
+            running = false
+            VpnTrafficMonitor.stop(VpnTunnelSessionStore.OWNER_XRAY)
+            runCatching { XrayCoreFacade.stop() }
+            tunPfd.safeClose()
+            tunPfd = null
+            VpnTunnelSessionStore.clear(
+                applicationContext,
+                expectedOwner = VpnTunnelSessionStore.OWNER_XRAY,
+            )
+        }
         if (broadcast) {
             broadcastStatus("DISCONNECTED", getString(R.string.vpn_msg_disconnected))
         }
+    }
+
+    private fun resolveLiveStatusForQuery(): Pair<String, String> =
+        XrayQueryStatusPolicy.resolve(
+            running = running,
+            hasTun = tunPfd != null,
+            stopping = isStopping,
+            lastEventName = lastEventName,
+            lastEventInfo = lastEventInfo,
+            disconnectedInfo = getString(R.string.vpn_msg_disconnected),
+            connectedInfo = getString(R.string.vpn_msg_connected),
+            connectingInfo = getString(R.string.vpn_connecting_generic),
+        )
+
+    private fun hasUsableNetwork(): Boolean {
+        val network = connectivityManager.activeNetwork ?: return false
+        val caps = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return XrayNetworkPolicy.hasUsableNetwork(
+            hasInternet = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET),
+            validated = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED),
+        )
+    }
+
+    private fun runHealthCheck(trigger: String) {
+        val caps = connectivityManager.activeNetwork?.let { connectivityManager.getNetworkCapabilities(it) }
+        val hasVpnTransport = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
+        if (XrayNetworkPolicy.shouldWarnMissingVpnTransport(running, hasVpnTransport)) {
+            VpnDebugLogger.w(
+                TAG,
+                "system_vpn_transport_mismatch trigger=$trigger running=$running hasVpnTransport=$hasVpnTransport",
+            )
+        }
+        if (running) {
+            val coreRunning = runCatching { XrayCoreFacade.isRunning() }.getOrDefault(true)
+            if (XrayNetworkPolicy.shouldRestartUnhealthySession(
+                    desiredConnection = desiredConnection,
+                    stopping = isStopping,
+                    running = running,
+                    coreRunning = coreRunning,
+                    networkAvailable = networkAvailable,
+                )
+            ) {
+                VpnDebugLogger.w(TAG, "xray core not running; reconnecting trigger=$trigger")
+                reconnectFromPending()
+            }
+        }
+    }
+
+    private fun onNetworkStateChanged(source: String) {
+        networkAvailable = hasUsableNetwork()
+        VpnDebugLogger.event(
+            category = "network",
+            action = "changed",
+            details = mapOf(
+                "source" to source,
+                "usable" to networkAvailable,
+                "running" to running,
+                "desired" to desiredConnection,
+                "engine" to OpenVpn3Service.ENGINE_XRAY,
+            ),
+        )
+        if (running) {
+            VpnDiagnostics.onNetworkChanged(applicationContext, engine = "xray")
+        }
+        runHealthCheck("network_changed_$source")
+        when {
+            XrayNetworkPolicy.shouldReconnect(
+                desiredConnection = desiredConnection,
+                stopping = isStopping,
+                running = running,
+                networkAvailable = networkAvailable,
+            ) -> {
+                broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+                reconnectFromPending()
+            }
+            XrayNetworkPolicy.shouldWaitForNetwork(
+                desiredConnection = desiredConnection,
+                stopping = isStopping,
+                running = running,
+                networkAvailable = networkAvailable,
+            ) -> {
+                broadcastStatus("WAITING_NETWORK", getString(R.string.vpn_msg_reconnecting))
+            }
+        }
+    }
+
+    private fun reconnectFromPending() {
+        val pending = pendingConnect ?: return
+        isStopping = false
+        val session = ++connectGeneration
+        connectJob?.cancel()
+        connectJob = serviceScope.launch {
+            connectFromPending(pending, session)
+        }
+    }
+
+    private fun connectFromPending(pending: PendingXrayConnect, session: Int) {
+        val intent = Intent().apply {
+            putExtra(EXTRA_CONFIG_TEXT, pending.configText)
+            pending.excludedRoutesPath?.let { putExtra(EXTRA_EXCLUDED_ROUTES_PATH, it) }
+            putStringArrayListExtra(EXTRA_DNS_SERVERS, ArrayList(pending.dnsServers))
+            putExtra(EXTRA_DNS_IDENTITY_ENABLED, pending.dnsIdentityEnabled)
+        }
+        connect(intent, session)
+    }
+
+    private fun registerNetworkCallbackSafely() {
+        if (isNetworkCallbackRegistered) return
+        runCatching {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+            isNetworkCallbackRegistered = true
+        }.onFailure {
+            VpnDebugLogger.w(TAG, "registerDefaultNetworkCallback failed", it)
+        }
+    }
+
+    private fun unregisterNetworkCallbackSafely() {
+        if (!isNetworkCallbackRegistered) return
+        runCatching {
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        }.onFailure {
+            VpnDebugLogger.w(TAG, "unregisterNetworkCallback failed", it)
+        }
+        isNetworkCallbackRegistered = false
     }
 
     private fun resolveDnsServers(intent: Intent): List<String> =
