@@ -96,6 +96,23 @@ class XrayQueryStatusPolicyTest {
     }
 
     @Test
+    fun paused_winsOverStaleConnectedAndStopping() {
+        val resolved = XrayQueryStatusPolicy.resolve(
+            running = false,
+            hasTun = false,
+            stopping = false,
+            paused = true,
+            lastEventName = "CONNECTED",
+            lastEventInfo = "up",
+            disconnectedInfo = "down",
+            connectedInfo = "up",
+            connectingInfo = "wait",
+            pausedInfo = "paused",
+        )
+        assertEquals("PAUSED" to "paused", resolved)
+    }
+
+    @Test
     fun stopping_alwaysDisconnected() {
         val resolved = XrayQueryStatusPolicy.resolve(
             running = true,

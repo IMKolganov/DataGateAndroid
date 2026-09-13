@@ -10,14 +10,16 @@ internal object XrayNetworkPolicy {
         stopping: Boolean,
         running: Boolean,
         networkAvailable: Boolean,
-    ): Boolean = desiredConnection && !stopping && !running && networkAvailable
+        paused: Boolean = false,
+    ): Boolean = desiredConnection && !stopping && !paused && !running && networkAvailable
 
     fun shouldWaitForNetwork(
         desiredConnection: Boolean,
         stopping: Boolean,
         running: Boolean,
         networkAvailable: Boolean,
-    ): Boolean = desiredConnection && !stopping && !running && !networkAvailable
+        paused: Boolean = false,
+    ): Boolean = desiredConnection && !stopping && !paused && !running && !networkAvailable
 
     fun shouldRestartUnhealthySession(
         desiredConnection: Boolean,
@@ -25,7 +27,8 @@ internal object XrayNetworkPolicy {
         running: Boolean,
         coreRunning: Boolean,
         networkAvailable: Boolean,
-    ): Boolean = desiredConnection && !stopping && running && !coreRunning && networkAvailable
+        paused: Boolean = false,
+    ): Boolean = desiredConnection && !stopping && !paused && running && !coreRunning && networkAvailable
 
     fun shouldWarnMissingVpnTransport(running: Boolean, hasVpnTransport: Boolean): Boolean =
         running && !hasVpnTransport

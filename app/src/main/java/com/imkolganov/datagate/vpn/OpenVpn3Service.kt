@@ -943,16 +943,17 @@ class OpenVpn3Service : VpnService() {
         connectInProgress = true
         hasActiveSession = false
         transitionState(VpnRuntimeState.CONNECTING, reason)
+        val establish = ExcludeRouteSession.resolveOpenVpnEstablish(
+            storedConfig = request.configText,
+            intentRoutes = request.excludedRoutes,
+            supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+        )
         startVpn(
-            configText = request.configText,
+            configText = establish.configText,
             wssUrl = request.wssUrl,
             transport = request.transport,
             linkProtocol = request.linkProtocol,
-            excludedRoutes = ExcludeRouteSession.resolveForEstablish(
-                intentRoutes = request.excludedRoutes,
-                forXray = false,
-                supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
-            ),
+            excludedRoutes = establish.excludedRoutes,
             username = request.username,
             password = request.password,
         )

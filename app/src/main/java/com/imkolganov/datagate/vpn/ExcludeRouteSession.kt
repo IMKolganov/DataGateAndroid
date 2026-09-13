@@ -45,7 +45,55 @@ object ExcludeRouteSessionPolicy {
             ).androidExcludedRoutes
         }
     }
+
+    /**
+     * Android 13+ keeps the base OVPN text and applies [excludedRoutes] via excludeRoute.
+     * Android 12 rewrites the `net_gateway` block from the live IP list on every establish.
+     */
+    fun resolveOpenVpnEstablish(
+        storedConfig: String,
+        intentRoutes: List<IpCidrRoute>,
+        live: ExcludeRouteLiveInput?,
+        supportsAndroidRouteExclusion: Boolean,
+    ): OpenVpnEstablishPlan {
+        val base = IpListRouteConfig.stripAppendedBypassRoutes(storedConfig)
+        if (supportsAndroidRouteExclusion) {
+            return OpenVpnEstablishPlan(
+                configText = base,
+                excludedRoutes = resolveForEstablish(
+                    intentRoutes = intentRoutes,
+                    live = live,
+                    forXray = false,
+                    supportsAndroidRouteExclusion = true,
+                ),
+            )
+        }
+        if (live == null) {
+            return OpenVpnEstablishPlan(configText = storedConfig, excludedRoutes = emptyList())
+        }
+        if (!live.enabled) {
+            return OpenVpnEstablishPlan(configText = base, excludedRoutes = emptyList())
+        }
+        val plan = IpListRouteConfig.prepareConnectionRoutes(
+            config = base,
+            routes = live.generalRoutes,
+            priorityRoutes = live.priorityRoutes,
+            coverageMode = live.coverageMode,
+            android12OvpnRouteLimit = live.android12OvpnRouteLimit,
+            supportsAndroidRouteExclusion = false,
+            safeRouteLimitEnabled = live.safeRouteLimitEnabled,
+        )
+        return OpenVpnEstablishPlan(
+            configText = plan.config,
+            excludedRoutes = emptyList(),
+        )
+    }
 }
+
+data class OpenVpnEstablishPlan(
+    val configText: String,
+    val excludedRoutes: List<IpCidrRoute>,
+)
 
 object ExcludeRouteSession {
     @Volatile
@@ -84,6 +132,17 @@ object ExcludeRouteSession {
         forXray = forXray,
         supportsAndroidRouteExclusion = supportsAndroidRouteExclusion,
         constrainedDevice = constrainedDevice,
+    )
+
+    fun resolveOpenVpnEstablish(
+        storedConfig: String,
+        intentRoutes: List<IpCidrRoute>,
+        supportsAndroidRouteExclusion: Boolean,
+    ): OpenVpnEstablishPlan = ExcludeRouteSessionPolicy.resolveOpenVpnEstablish(
+        storedConfig = storedConfig,
+        intentRoutes = intentRoutes,
+        live = live,
+        supportsAndroidRouteExclusion = supportsAndroidRouteExclusion,
     )
 
     fun resetForTests() {

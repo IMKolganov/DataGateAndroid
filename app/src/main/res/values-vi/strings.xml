@@ -5,6 +5,7 @@
     <string name="nav_access">Truy cập</string>
     <string name="nav_quota">Hạn mức</string>
     <string name="nav_statistics">Thống kê</string>
+    <string name="nav_statistics_short">TK</string>
     <string name="nav_settings">Cài đặt</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Đăng nhập bằng Google</string>

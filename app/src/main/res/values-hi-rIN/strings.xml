@@ -5,6 +5,7 @@
     <string name="nav_access">एक्सेस</string>
     <string name="nav_quota">कोटा</string>
     <string name="nav_statistics">आँकड़े</string>
+    <string name="nav_statistics_short">आँक.</string>
     <string name="nav_settings">सेटिंग्स</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Google से साइन इन करें</string>

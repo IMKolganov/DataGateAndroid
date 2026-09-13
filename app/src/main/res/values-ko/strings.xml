@@ -5,6 +5,7 @@
     <string name="nav_access">액세스</string>
     <string name="nav_quota">할당량</string>
     <string name="nav_statistics">통계</string>
+    <string name="nav_statistics_short">통계</string>
     <string name="nav_settings">설정</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Google로 로그인</string>

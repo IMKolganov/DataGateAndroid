@@ -73,6 +73,58 @@ class ExcludeRouteSessionPolicyTest {
     }
 
     @Test
+    fun android12_rewritesOvpnProfileFromLiveList() {
+        val stale = IpListRouteConfig.appendBypassRoutes(
+            "client\ndev tun\n",
+            listOf(Ipv4CidrRoute("9.9.9.0", "255.255.255.0", 24)),
+        )
+        val live = liveInput(enabled = true, general = liveGeneral)
+        val plan = ExcludeRouteSessionPolicy.resolveOpenVpnEstablish(
+            storedConfig = stale,
+            intentRoutes = intentRoutes,
+            live = live,
+            supportsAndroidRouteExclusion = false,
+        )
+        assertTrue(plan.configText.contains("8.8.8.0"))
+        assertTrue("stale baked route must be replaced", !plan.configText.contains("9.9.9.0"))
+        assertTrue(plan.configText.contains(IpListRouteConfig.BYPASS_ROUTES_MARKER))
+        assertTrue(plan.excludedRoutes.isEmpty())
+    }
+
+    @Test
+    fun android12_disabledLive_stripsBakedRoutes() {
+        val stale = IpListRouteConfig.appendBypassRoutes(
+            "client\ndev tun\n",
+            listOf(Ipv4CidrRoute("9.9.9.0", "255.255.255.0", 24)),
+        )
+        val plan = ExcludeRouteSessionPolicy.resolveOpenVpnEstablish(
+            storedConfig = stale,
+            intentRoutes = intentRoutes,
+            live = liveInput(enabled = false),
+            supportsAndroidRouteExclusion = false,
+        )
+        assertTrue(!plan.configText.contains("9.9.9.0"))
+        assertTrue(!plan.configText.contains(IpListRouteConfig.BYPASS_ROUTES_MARKER))
+    }
+
+    @Test
+    fun android13_keepsBaseProfileAndUsesExcludeRoutes() {
+        val stale = IpListRouteConfig.appendBypassRoutes(
+            "client\ndev tun\n",
+            listOf(Ipv4CidrRoute("9.9.9.0", "255.255.255.0", 24)),
+        )
+        val plan = ExcludeRouteSessionPolicy.resolveOpenVpnEstablish(
+            storedConfig = stale,
+            intentRoutes = intentRoutes,
+            live = liveInput(enabled = true, general = liveGeneral),
+            supportsAndroidRouteExclusion = true,
+        )
+        assertTrue(!plan.configText.contains("9.9.9.0"))
+        assertTrue(!plan.configText.contains(IpListRouteConfig.BYPASS_ROUTES_MARKER))
+        assertTrue(plan.excludedRoutes.map { it.toCidrString() }.contains("8.8.8.0/24"))
+    }
+
+    @Test
     fun processCache_disabledPublishClearsIntentRoutes() {
         ExcludeRouteSession.publishDisabled()
         val resolved = ExcludeRouteSession.resolveForEstablish(

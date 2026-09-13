@@ -5,6 +5,7 @@
     <string name="nav_access">Acesso</string>
     <string name="nav_quota">Cota</string>
     <string name="nav_statistics">Estatísticas</string>
+    <string name="nav_statistics_short">Estat.</string>
     <string name="nav_settings">Configurações</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Entrar com Google</string>

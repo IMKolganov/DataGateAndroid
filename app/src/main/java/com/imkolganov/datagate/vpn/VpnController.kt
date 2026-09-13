@@ -446,16 +446,16 @@ class VpnController(
             VpnDebugLogger.w(TAG, "Ignoring pause request in state connected=${current.isVpnConnected} paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
             return
         }
-        // Xray v1 has no pause — treat as disconnect.
-        if (activeEngine() == VpnEngine.Xray) {
-            VpnDebugLogger.event("ui.user", "pause_as_disconnect_xray")
-            requestDisconnect()
-            return
-        }
         VpnDebugLogger.event("ui.user", "pause")
         pendingCommandRollback = current
-        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
-            action = OpenVpn3Service.ACTION_PAUSE
+        val intent = if (activeEngine() == VpnEngine.Xray) {
+            Intent(activity, XrayVpnService::class.java).apply {
+                action = XrayVpnService.ACTION_PAUSE
+            }
+        } else {
+            Intent(activity, OpenVpn3Service::class.java).apply {
+                action = OpenVpn3Service.ACTION_PAUSE
+            }
         }
         startServiceCompat(intent)
         onStateChange(VpnCommandContract.beginPauseRequest(current))
@@ -475,14 +475,16 @@ class VpnController(
             VpnDebugLogger.w(TAG, "Ignoring resume request in state paused=${current.isVpnPaused} pending=${current.pendingUserCommand}")
             return
         }
-        if (activeEngine() == VpnEngine.Xray) {
-            VpnDebugLogger.w(TAG, "Ignoring resume: Xray has no pause/resume")
-            return
-        }
         VpnDebugLogger.event("ui.user", "resume")
         pendingCommandRollback = current
-        val intent = Intent(activity, OpenVpn3Service::class.java).apply {
-            action = OpenVpn3Service.ACTION_RESUME
+        val intent = if (activeEngine() == VpnEngine.Xray) {
+            Intent(activity, XrayVpnService::class.java).apply {
+                action = XrayVpnService.ACTION_RESUME
+            }
+        } else {
+            Intent(activity, OpenVpn3Service::class.java).apply {
+                action = OpenVpn3Service.ACTION_RESUME
+            }
         }
         startServiceCompat(intent)
         onStateChange(VpnCommandContract.beginResumeRequest(current))

@@ -5,6 +5,7 @@
     <string name="nav_access">Pääsy</string>
     <string name="nav_quota">Kiintiö</string>
     <string name="nav_statistics">Tilastot</string>
+    <string name="nav_statistics_short">Til.</string>
     <string name="nav_settings">Asetukset</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Kirjaudu Googlella</string>

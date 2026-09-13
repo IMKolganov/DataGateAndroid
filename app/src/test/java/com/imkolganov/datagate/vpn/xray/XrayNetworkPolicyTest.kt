@@ -119,6 +119,38 @@ class XrayNetworkPolicyTest {
     }
 
     @Test
+    fun paused_doesNotReconnectOrWait() {
+        assertFalse(
+            XrayNetworkPolicy.shouldReconnect(
+                desiredConnection = true,
+                stopping = false,
+                running = false,
+                networkAvailable = true,
+                paused = true,
+            ),
+        )
+        assertFalse(
+            XrayNetworkPolicy.shouldWaitForNetwork(
+                desiredConnection = true,
+                stopping = false,
+                running = false,
+                networkAvailable = false,
+                paused = true,
+            ),
+        )
+        assertFalse(
+            XrayNetworkPolicy.shouldRestartUnhealthySession(
+                desiredConnection = true,
+                stopping = false,
+                running = true,
+                coreRunning = false,
+                networkAvailable = true,
+                paused = true,
+            ),
+        )
+    }
+
+    @Test
     fun warnWhenConnectedWithoutVpnTransport() {
         assertTrue(XrayNetworkPolicy.shouldWarnMissingVpnTransport(running = true, hasVpnTransport = false))
         assertFalse(XrayNetworkPolicy.shouldWarnMissingVpnTransport(running = true, hasVpnTransport = true))

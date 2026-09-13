@@ -42,8 +42,6 @@ class VpnSessionCyclePolicyTest {
     @Test
     fun xray_doesNotSupportOpenVpnOnlyPhases() {
         val openVpnOnly = listOf(
-            VpnSessionPhase.PAUSED,
-            VpnSessionPhase.RESUMED,
             VpnSessionPhase.RESOLVE,
             VpnSessionPhase.WAIT,
             VpnSessionPhase.GET_CONFIG,
@@ -60,6 +58,8 @@ class VpnSessionCyclePolicyTest {
             VpnSessionPhase.DISCONNECTING,
             VpnSessionPhase.WAITING_NETWORK,
             VpnSessionPhase.RECONNECTING,
+            VpnSessionPhase.PAUSED,
+            VpnSessionPhase.RESUMED,
             VpnSessionPhase.ERROR,
         )) {
             assertTrue(phase.name, VpnSessionCyclePolicy.isSupportedBy(phase, xray))
@@ -431,7 +431,7 @@ class VpnSessionCyclePolicyTest {
         for ((from, to, engine) in edges) {
             assertTrue("$from → $to ($engine)", VpnSessionCyclePolicy.isAllowedTransition(from, to, engine))
         }
-        assertFalse(
+        assertTrue(
             VpnSessionCyclePolicy.isAllowedTransition(
                 VpnSessionPhase.CONNECTED,
                 VpnSessionPhase.PAUSED,
@@ -477,6 +477,19 @@ class VpnSessionCyclePolicyTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun xray_pauseResume_keepsDesiredSession() {
+        var state = VpnSessionCyclePolicy.beginXrayConnect(VpnSessionCyclePolicy.CycleState()).second
+        state = walk(state, xray, "CONNECTING", "CONNECTED", "PAUSED")
+        assertTrue(state.ui.paused)
+        assertFalse(state.ui.connected)
+        assertNull(state.monitorOwner)
+        state = walk(state, xray, "RESUMED", "CONNECTING", "CONNECTED")
+        assertTrue(state.ui.connected)
+        assertFalse(state.ui.paused)
+        assertEquals(VpnTunnelSessionStore.OWNER_XRAY, state.monitorOwner)
     }
 
     @Test

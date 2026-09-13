@@ -9,13 +9,16 @@ internal object XrayQueryStatusPolicy {
         running: Boolean,
         hasTun: Boolean,
         stopping: Boolean,
+        paused: Boolean = false,
         lastEventName: String,
         lastEventInfo: String,
         disconnectedInfo: String,
         connectedInfo: String,
         connectingInfo: String,
+        pausedInfo: String = connectedInfo,
     ): Pair<String, String> {
-        if (stopping) return "DISCONNECTED" to disconnectedInfo
+        if (stopping && !paused) return "DISCONNECTED" to disconnectedInfo
+        if (paused) return "PAUSED" to pausedInfo
         if (running && hasTun) return "CONNECTED" to connectedInfo
         return when (lastEventName.trim().uppercase()) {
             "CONNECTING" -> "CONNECTING" to lastEventInfo.ifBlank { connectingInfo }

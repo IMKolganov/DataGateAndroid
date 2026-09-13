@@ -5,6 +5,7 @@
     <string name="nav_access">Erişim</string>
     <string name="nav_quota">Kota</string>
     <string name="nav_statistics">İstatistikler</string>
+    <string name="nav_statistics_short">İstat.</string>
     <string name="nav_settings">Ayarlar</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Google ile giriş</string>

@@ -5,6 +5,7 @@
     <string name="nav_access">การเข้าถึง</string>
     <string name="nav_quota">โควตา</string>
     <string name="nav_statistics">สถิติ</string>
+    <string name="nav_statistics_short">สถิติ</string>
     <string name="nav_settings">การตั้งค่า</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">เข้าสู่ระบบด้วย Google</string>

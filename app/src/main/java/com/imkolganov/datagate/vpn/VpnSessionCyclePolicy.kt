@@ -204,6 +204,8 @@ object VpnSessionCyclePolicy {
         VpnSessionPhase.DISCONNECTING,
         VpnSessionPhase.WAITING_NETWORK,
         VpnSessionPhase.RECONNECTING,
+        VpnSessionPhase.PAUSED,
+        VpnSessionPhase.RESUMED,
         VpnSessionPhase.ERROR,
         VpnSessionPhase.TUN_SETUP_FAILED,
         VpnSessionPhase.SELECTING_SERVER,
@@ -267,11 +269,8 @@ object VpnSessionCyclePolicy {
                     VpnSessionPhase.RECONNECTING,
                     VpnSessionPhase.WAITING_NETWORK,
                     VpnSessionPhase.CONNECTING,
-                ) + if (xray) {
-                    emptySet()
-                } else {
-                    setOf(VpnSessionPhase.PAUSED)
-                }
+                    VpnSessionPhase.PAUSED,
+                )
             VpnSessionPhase.PAUSED -> setOf(
                 VpnSessionPhase.RESUMED,
                 VpnSessionPhase.DISCONNECTING,

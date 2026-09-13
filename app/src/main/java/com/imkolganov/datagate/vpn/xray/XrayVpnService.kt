@@ -44,7 +44,8 @@ import java.io.File
  * Android [VpnService] that runs XTLS/libXray with a TUN fd injected into the client config.
  * Status broadcasts use the same action/extras as [OpenVpn3Service] so Home/Access UI stays shared.
  *
- * Notification mirrors OpenVPN (status text + Pause/Disconnect). Pause for Xray v1 disconnects.
+ * Notification mirrors OpenVPN (status text + Pause/Resume/Disconnect).
+ * Pause drops TUN/core but keeps this service and the last config for Resume.
  */
 @SuppressLint("VpnServicePolicy")
 class XrayVpnService : VpnService() {
@@ -55,6 +56,7 @@ class XrayVpnService : VpnService() {
         const val ACTION_DISCONNECT = "com.imkolganov.datagate.vpn.xray.DISCONNECT"
         /** Same UX affordance as OpenVPN pause; tears down the Xray session. */
         const val ACTION_PAUSE = "com.imkolganov.datagate.vpn.xray.PAUSE"
+        const val ACTION_RESUME = "com.imkolganov.datagate.vpn.xray.RESUME"
         const val ACTION_QUERY_STATUS = "com.imkolganov.datagate.vpn.xray.QUERY_STATUS"
         const val EXTRA_CONFIG_PATH = "com.imkolganov.datagate.vpn.xray.EXTRA_CONFIG_PATH"
         const val EXTRA_CONFIG_TEXT = "com.imkolganov.datagate.vpn.xray.EXTRA_CONFIG_TEXT"
@@ -88,6 +90,7 @@ class XrayVpnService : VpnService() {
     /** Bumped on every connect / stop so a stale blocking [connect] cannot tear down a newer session. */
     @Volatile private var connectGeneration = 0
     @Volatile private var isStopping = false
+    @Volatile private var isPaused = false
     @Volatile private var desiredConnection = false
     @Volatile private var networkAvailable = true
     private var isNetworkCallbackRegistered = false
@@ -155,13 +158,44 @@ class XrayVpnService : VpnService() {
                     ?: statePrefs.getString("selected_server_name", null)
                         ?.trim()?.takeIf { it.isNotEmpty() }
                 desiredConnection = true
+                isPaused = false
                 isStopping = false
                 val session = ++connectGeneration
                 connectJob?.cancel()
                 connectJob = serviceScope.launch { connect(intent, session) }
             }
-            ACTION_DISCONNECT, ACTION_PAUSE -> {
+            ACTION_PAUSE -> {
+                isPaused = true
+                isStopping = false
+                desiredConnection = true
+                val pauseSession = ++connectGeneration
+                connectJob?.cancel()
+                connectJob = null
+                serviceScope.launch {
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(pauseSession, connectGeneration)) {
+                        return@launch
+                    }
+                    stopXraySession(broadcast = false)
+                    broadcastStatus("PAUSED", getString(R.string.vpn_msg_paused))
+                    startForegroundNow(getString(R.string.vpn_status_paused))
+                }
+            }
+            ACTION_RESUME -> {
+                if (!isPaused && running) return START_STICKY
+                if (pendingConnect == null) {
+                    broadcastStatus("ERROR", "No Xray session to resume")
+                    return START_STICKY
+                }
+                isPaused = false
+                isStopping = false
+                desiredConnection = true
+                broadcastStatus("RESUMED", getString(R.string.vpn_msg_resuming))
+                startForegroundNow(getString(R.string.vpn_msg_resuming))
+                reconnectFromPending()
+            }
+            ACTION_DISCONNECT -> {
                 desiredConnection = false
+                isPaused = false
                 pendingConnect = null
                 isStopping = true
                 val stopSession = ++connectGeneration
@@ -186,7 +220,7 @@ class XrayVpnService : VpnService() {
                 val (name, info) = resolveLiveStatusForQuery()
                 runHealthCheck("query_status")
                 broadcastStatus(name, info, fromQuery = true)
-                if (!desiredConnection && !running && tunPfd == null) {
+                if (!desiredConnection && !running && tunPfd == null && !isPaused) {
                     stopSelf()
                 }
             }
@@ -437,11 +471,13 @@ class XrayVpnService : VpnService() {
             running = running,
             hasTun = tunPfd != null,
             stopping = isStopping,
+            paused = isPaused,
             lastEventName = lastEventName,
             lastEventInfo = lastEventInfo,
             disconnectedInfo = getString(R.string.vpn_msg_disconnected),
             connectedInfo = getString(R.string.vpn_msg_connected),
             connectingInfo = getString(R.string.vpn_connecting_generic),
+            pausedInfo = getString(R.string.vpn_msg_paused),
         )
 
     private fun hasUsableNetwork(): Boolean {
@@ -470,6 +506,7 @@ class XrayVpnService : VpnService() {
                     running = running,
                     coreRunning = coreRunning,
                     networkAvailable = networkAvailable,
+                    paused = isPaused,
                 )
             ) {
                 VpnDebugLogger.w(TAG, "xray core not running; reconnecting trigger=$trigger")
@@ -501,6 +538,7 @@ class XrayVpnService : VpnService() {
                 stopping = isStopping,
                 running = running,
                 networkAvailable = networkAvailable,
+                paused = isPaused,
             ) -> {
                 broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
                 reconnectFromPending()
@@ -510,6 +548,7 @@ class XrayVpnService : VpnService() {
                 stopping = isStopping,
                 running = running,
                 networkAvailable = networkAvailable,
+                paused = isPaused,
             ) -> {
                 broadcastStatus("WAITING_NETWORK", getString(R.string.vpn_msg_reconnecting))
             }
@@ -619,7 +658,7 @@ class XrayVpnService : VpnService() {
             action = ACTION_DISCONNECT
         }
         val pauseIntent = Intent(this, XrayVpnService::class.java).apply {
-            action = ACTION_PAUSE
+            action = if (isPaused) ACTION_RESUME else ACTION_PAUSE
         }
         val disconnectPending = PendingIntent.getService(
             this,
@@ -660,7 +699,7 @@ class XrayVpnService : VpnService() {
             .addAction(
                 NotificationCompat.Action.Builder(
                     0,
-                    getString(R.string.action_pause),
+                    getString(if (isPaused) R.string.action_resume else R.string.action_pause),
                     pausePending,
                 ).build()
             )

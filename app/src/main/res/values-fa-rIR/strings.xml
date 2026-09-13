@@ -5,6 +5,7 @@
     <string name="nav_access">دسترسی</string>
     <string name="nav_quota">سهمیه</string>
     <string name="nav_statistics">آمار</string>
+    <string name="nav_statistics_short">آمار</string>
     <string name="nav_settings">تنظیمات</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">ورود با Google</string>

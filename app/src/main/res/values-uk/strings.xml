@@ -6,6 +6,7 @@
     <string name="nav_access">Доступ</string>
     <string name="nav_quota">Квота</string>
     <string name="nav_statistics">Статистика</string>
+    <string name="nav_statistics_short">Стат.</string>
     <string name="nav_settings">Налаштування</string>
 
     <string name="login_title">DataGate</string>
