@@ -9,6 +9,9 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.imkolganov.datagate.vpn.xray.XrayNetworkChangePolicy
+import com.imkolganov.datagate.vpn.xray.XrayNetworkChangeState
+import com.imkolganov.datagate.vpn.xray.XrayNetworkFollowUp
 import com.imkolganov.datagate.vpn.xray.XrayNetworkPolicy
 import com.imkolganov.datagate.vpn.xray.XrayQueryStatusPolicy
 import com.imkolganov.datagate.vpn.xray.XrayVpnService
@@ -51,6 +54,51 @@ class VpnLifecycleInstrumentedTest {
                 usable,
             )
         }
+    }
+
+    @Test
+    fun underlyingSwitchPolicy_homeWifiSettleThenSingleRestart() {
+        val cell = 11L
+        val wifi = 22L
+        val first = XrayNetworkChangePolicy.resolve(
+            desiredConnection = true,
+            stopping = false,
+            running = true,
+            networkAvailable = true,
+            paused = false,
+            connectInFlight = false,
+            switchHandle = wifi,
+            nowMs = 1_000L,
+            previous = XrayNetworkChangeState(lastHandle = cell),
+        )
+        assertEquals(XrayNetworkFollowUp.HEALTH, first.followUp)
+        assertTrue(first.scheduleSettleRecheck)
+
+        val settled = XrayNetworkChangePolicy.resolve(
+            desiredConnection = true,
+            stopping = false,
+            running = true,
+            networkAvailable = true,
+            paused = false,
+            connectInFlight = false,
+            switchHandle = wifi,
+            nowMs = 1_000L + XrayNetworkPolicy.UNDERLYING_SWITCH_SETTLE_MS,
+            previous = first.state,
+        )
+        assertEquals(XrayNetworkFollowUp.RESTART_SWITCH, settled.followUp)
+
+        val inFlight = XrayNetworkChangePolicy.resolve(
+            desiredConnection = true,
+            stopping = false,
+            running = false,
+            networkAvailable = true,
+            paused = false,
+            connectInFlight = true,
+            switchHandle = wifi,
+            nowMs = settled.state.lastRestartAtMs + 100L,
+            previous = settled.state,
+        )
+        assertEquals(XrayNetworkFollowUp.HEALTH, inFlight.followUp)
     }
 
     @Test

@@ -10,11 +10,13 @@ internal object XrayPausePolicy {
         paused: Boolean,
         running: Boolean,
         networkAvailable: Boolean,
+        connectInFlight: Boolean = false,
     ): Boolean = !paused &&
         XrayNetworkPolicy.shouldReconnect(
             desiredConnection = desiredConnection,
             stopping = stopping,
             running = running,
             networkAvailable = networkAvailable,
+            connectInFlight = connectInFlight,
         )
 }

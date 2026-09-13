@@ -27,5 +27,15 @@ class XrayPausePolicyTest {
                 networkAvailable = true,
             ),
         )
+        assertFalse(
+            XrayPausePolicy.shouldAutoReconnect(
+                desiredConnection = true,
+                stopping = false,
+                paused = false,
+                running = false,
+                networkAvailable = true,
+                connectInFlight = true,
+            ),
+        )
     }
 }
