@@ -49,7 +49,7 @@ val canSignRelease = !releaseStorePath.isNullOrBlank() &&
 
 android {
     namespace = "com.imkolganov.datagate"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.imkolganov.datagate"
