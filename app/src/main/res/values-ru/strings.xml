@@ -461,9 +461,17 @@
     <string name="settings_split_tunnel_filter_selected">Вне VPN</string>
     <string name="settings_split_tunnel_count">Вне VPN: %1$d из %2$d приложений</string>
     <string name="settings_split_tunnel_clear">Очистить список</string>
+    <string name="settings_split_tunnel_clear_title">Очистить список?</string>
+    <string name="settings_split_tunnel_clear_message">Вы уверены, что хотите убрать все приложения из списка исключений?</string>
+    <string name="settings_split_tunnel_clear_confirm">Очистить</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Включить исключение из VPN?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">Вы выбрали приложения вне VPN, но сама функция выключена. Включить, чтобы список применялся при следующем подключении?</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Включить</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Не сейчас</string>
     <string name="settings_split_tunnel_loading">Загрузка установленных приложений…</string>
     <string name="settings_split_tunnel_empty">Нет приложений по этому запросу.</string>
     <string name="settings_split_tunnel_system_app">Системное приложение</string>
+    <string name="settings_split_tunnel_refresh">Обновить список приложений</string>
 
     <string name="free_tier_title_link">Подключите Telegram для доступа к VPN</string>
     <string name="free_tier_title_subscribe">Подпишитесь на Telegram-канал</string>
