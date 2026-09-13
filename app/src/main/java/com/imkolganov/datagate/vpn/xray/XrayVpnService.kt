@@ -12,9 +12,11 @@ import android.content.pm.ServiceInfo
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import android.system.OsConstants
 import androidx.core.app.NotificationCompat
 import com.imkolganov.datagate.MainActivity
@@ -94,6 +96,13 @@ class XrayVpnService : VpnService() {
     @Volatile private var desiredConnection = false
     @Volatile private var networkAvailable = true
     private var isNetworkCallbackRegistered = false
+    private var isUnderlyingNetworkCallbackRegistered = false
+    /** Non-VPN default network; used to detect cell↔Wi-Fi without looping on the VPN iface. */
+    private var lastUnderlyingNetworkHandle: Long? = null
+    private var lastUnderlyingRestartAtMs: Long = 0L
+    private var underlyingSwitchWatch = XrayNetworkPolicy.UnderlyingSwitchWatch()
+    private var settleRecheckJob: Job? = null
+    private val networkLock = Any()
     private var pendingConnect: PendingXrayConnect? = null
     private val sessionLock = Any()
 
@@ -126,6 +135,24 @@ class XrayVpnService : VpnService() {
         }
     }
 
+    /**
+     * Default-network callback follows the VPN iface after establish, so cell↔Wi-Fi
+     * can be silent. This request tracks the real uplink.
+     */
+    private val underlyingNetworkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            onNetworkStateChanged("UNDERLYING_AVAILABLE")
+        }
+
+        override fun onLost(network: Network) {
+            onNetworkStateChanged("UNDERLYING_LOST")
+        }
+
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            onNetworkStateChanged("UNDERLYING_CAP")
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -140,6 +167,8 @@ class XrayVpnService : VpnService() {
         connectGeneration++
         connectJob?.cancel()
         connectJob = null
+        settleRecheckJob?.cancel()
+        settleRecheckJob = null
         unregisterNetworkCallbackSafely()
         stopXraySession(broadcast = false)
         serviceScope.cancel()
@@ -171,6 +200,8 @@ class XrayVpnService : VpnService() {
                 val pauseSession = ++connectGeneration
                 connectJob?.cancel()
                 connectJob = null
+                settleRecheckJob?.cancel()
+                settleRecheckJob = null
                 serviceScope.launch {
                     if (!XrayConnectSessionPolicy.shouldApplyStop(pauseSession, connectGeneration)) {
                         return@launch
@@ -201,6 +232,8 @@ class XrayVpnService : VpnService() {
                 val stopSession = ++connectGeneration
                 connectJob?.cancel()
                 connectJob = null
+                settleRecheckJob?.cancel()
+                settleRecheckJob = null
                 serviceScope.launch {
                     if (!XrayConnectSessionPolicy.shouldApplyStop(stopSession, connectGeneration)) {
                         return@launch
@@ -411,7 +444,16 @@ class XrayVpnService : VpnService() {
                 VpnTunIfaceCounters.read(applicationContext)
             }
             VpnDiagnostics.schedulePostConnect(applicationContext, engine = "xray")
-            runHealthCheck("post_connected")
+            currentUnderlyingNetworkHandle(requireValidated = true)?.let { handle ->
+                synchronized(networkLock) {
+                    lastUnderlyingNetworkHandle = handle
+                    underlyingSwitchWatch = XrayNetworkPolicy.UnderlyingSwitchWatch(
+                        pendingHandle = handle,
+                        pendingSinceMs = SystemClock.elapsedRealtime(),
+                    )
+                }
+            }
+            runHealthCheck("post_connected", connectInFlight = false)
             runCatching { path?.let { File(it).delete() } }
             excludedRoutesPath?.let { runCatching { File(it).delete() } }
         } catch (t: Throwable) {
@@ -489,7 +531,7 @@ class XrayVpnService : VpnService() {
         )
     }
 
-    private fun runHealthCheck(trigger: String) {
+    private fun runHealthCheck(trigger: String, connectInFlight: Boolean = isConnectInFlight()) {
         val caps = connectivityManager.activeNetwork?.let { connectivityManager.getNetworkCapabilities(it) }
         val hasVpnTransport = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
         if (XrayNetworkPolicy.shouldWarnMissingVpnTransport(running, hasVpnTransport)) {
@@ -507,6 +549,7 @@ class XrayVpnService : VpnService() {
                     coreRunning = coreRunning,
                     networkAvailable = networkAvailable,
                     paused = isPaused,
+                    connectInFlight = connectInFlight,
                 )
             ) {
                 VpnDebugLogger.w(TAG, "xray core not running; reconnecting trigger=$trigger")
@@ -515,8 +558,111 @@ class XrayVpnService : VpnService() {
         }
     }
 
+    private fun isConnectInFlight(): Boolean = connectJob?.isActive == true
+
+    private fun currentNetworkSnapshots(): List<XrayNetworkPolicy.NetworkSnapshot> =
+        connectivityManager.allNetworks.mapNotNull { network ->
+            val caps = connectivityManager.getNetworkCapabilities(network) ?: return@mapNotNull null
+            val handle = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                network.networkHandle
+            } else {
+                network.hashCode().toLong()
+            }
+            XrayNetworkPolicy.NetworkSnapshot(
+                handle = handle,
+                hasVpnTransport = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
+                hasInternet = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET),
+                validated = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED),
+            )
+        }
+
+    private fun currentUnderlyingNetworkHandle(requireValidated: Boolean = false): Long? =
+        XrayNetworkPolicy.pickUnderlyingHandle(currentNetworkSnapshots(), requireValidated = requireValidated)
+
     private fun onNetworkStateChanged(source: String) {
         networkAvailable = hasUsableNetwork()
+        val snapshots = currentNetworkSnapshots()
+        val underlying = XrayNetworkPolicy.pickUnderlyingHandle(snapshots, requireValidated = false)
+        val switchHandle = XrayNetworkPolicy.pickUnderlyingHandle(snapshots, requireValidated = true)
+        val now = SystemClock.elapsedRealtime()
+        var settledForMs = 0L
+        var connectInFlight = false
+        var action = NetworkFollowUp.HEALTH
+        var remainingSettleMs = 0L
+        synchronized(networkLock) {
+            connectInFlight = isConnectInFlight()
+            underlyingSwitchWatch = underlyingSwitchWatch.observe(switchHandle, now)
+            settledForMs = underlyingSwitchWatch.settledForMs(switchHandle, now)
+            remainingSettleMs = XrayNetworkPolicy.remainingSettleMs(settledForMs)
+            val remainingDebounceMs = if (lastUnderlyingRestartAtMs <= 0L) {
+                0L
+            } else {
+                (XrayNetworkPolicy.UNDERLYING_SWITCH_DEBOUNCE_MS - (now - lastUnderlyingRestartAtMs))
+                    .coerceAtLeast(0L)
+            }
+            val remainingWaitMs = maxOf(remainingSettleMs, remainingDebounceMs)
+            val switched = XrayNetworkPolicy.shouldRestartOnUnderlyingSwitch(
+                desiredConnection = desiredConnection,
+                stopping = isStopping,
+                running = running,
+                networkAvailable = networkAvailable,
+                paused = isPaused,
+                previousHandle = lastUnderlyingNetworkHandle,
+                currentHandle = switchHandle,
+                connectInFlight = connectInFlight,
+                settledForMs = settledForMs,
+            ) && XrayNetworkPolicy.shouldApplyRestartDebounce(
+                nowMs = now,
+                lastRestartAtMs = lastUnderlyingRestartAtMs,
+                windowMs = XrayNetworkPolicy.UNDERLYING_SWITCH_DEBOUNCE_MS,
+            )
+            if (XrayNetworkPolicy.shouldCommitUnderlyingHandle(
+                    previousHandle = lastUnderlyingNetworkHandle,
+                    currentHandle = switchHandle,
+                    didRestart = switched,
+                )
+            ) {
+                lastUnderlyingNetworkHandle = switchHandle
+            }
+            action = when {
+                switched -> {
+                    lastUnderlyingRestartAtMs = now
+                    NetworkFollowUp.RESTART_SWITCH
+                }
+                XrayNetworkPolicy.shouldReconnect(
+                    desiredConnection = desiredConnection,
+                    stopping = isStopping,
+                    running = running,
+                    networkAvailable = networkAvailable,
+                    paused = isPaused,
+                    connectInFlight = connectInFlight,
+                ) -> NetworkFollowUp.RECONNECT
+                XrayNetworkPolicy.shouldWaitForNetwork(
+                    desiredConnection = desiredConnection,
+                    stopping = isStopping,
+                    running = running,
+                    networkAvailable = networkAvailable,
+                    paused = isPaused,
+                    connectInFlight = connectInFlight,
+                ) -> NetworkFollowUp.WAIT
+                else -> NetworkFollowUp.HEALTH
+            }
+            val scheduleSettle = action == NetworkFollowUp.HEALTH &&
+                XrayNetworkPolicy.shouldScheduleSettleRecheck(
+                    previousHandle = lastUnderlyingNetworkHandle,
+                    currentHandle = switchHandle,
+                    connectInFlight = connectInFlight,
+                    remainingSettleMs = remainingWaitMs,
+                )
+            if (scheduleSettle) {
+                scheduleSettleRecheckLocked(remainingWaitMs)
+            } else if (action != NetworkFollowUp.HEALTH || switchHandle == null ||
+                switchHandle == lastUnderlyingNetworkHandle
+            ) {
+                settleRecheckJob?.cancel()
+                settleRecheckJob = null
+            }
+        }
         VpnDebugLogger.event(
             category = "network",
             action = "changed",
@@ -525,34 +671,51 @@ class XrayVpnService : VpnService() {
                 "usable" to networkAvailable,
                 "running" to running,
                 "desired" to desiredConnection,
+                "inFlight" to connectInFlight,
+                "followUp" to action.name,
+                "underlying" to (underlying ?: -1L),
+                "switchHandle" to (switchHandle ?: -1L),
+                "lastUnderlying" to (lastUnderlyingNetworkHandle ?: -1L),
+                "settledMs" to settledForMs,
                 "engine" to OpenVpn3Service.ENGINE_XRAY,
             ),
         )
         if (running) {
             VpnDiagnostics.onNetworkChanged(applicationContext, engine = "xray")
         }
-        runHealthCheck("network_changed_$source")
-        when {
-            XrayNetworkPolicy.shouldReconnect(
-                desiredConnection = desiredConnection,
-                stopping = isStopping,
-                running = running,
-                networkAvailable = networkAvailable,
-                paused = isPaused,
-            ) -> {
+        when (action) {
+            NetworkFollowUp.RESTART_SWITCH -> {
+                VpnDebugLogger.w(
+                    TAG,
+                    "underlying network switched ($source); restarting Xray session after ${settledForMs}ms settle",
+                )
                 broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
                 reconnectFromPending()
             }
-            XrayNetworkPolicy.shouldWaitForNetwork(
-                desiredConnection = desiredConnection,
-                stopping = isStopping,
-                running = running,
-                networkAvailable = networkAvailable,
-                paused = isPaused,
-            ) -> {
+            NetworkFollowUp.RECONNECT -> {
+                broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+                reconnectFromPending()
+            }
+            NetworkFollowUp.WAIT -> {
                 broadcastStatus("WAITING_NETWORK", getString(R.string.vpn_msg_reconnecting))
             }
+            NetworkFollowUp.HEALTH -> runHealthCheck("network_changed_$source")
         }
+    }
+
+    private fun scheduleSettleRecheckLocked(remainingSettleMs: Long) {
+        settleRecheckJob?.cancel()
+        settleRecheckJob = serviceScope.launch {
+            delay(remainingSettleMs + 50L)
+            onNetworkStateChanged("SETTLE_CHECK")
+        }
+    }
+
+    private enum class NetworkFollowUp {
+        RESTART_SWITCH,
+        RECONNECT,
+        WAIT,
+        HEALTH,
     }
 
     private fun reconnectFromPending() {
@@ -576,23 +739,45 @@ class XrayVpnService : VpnService() {
     }
 
     private fun registerNetworkCallbackSafely() {
-        if (isNetworkCallbackRegistered) return
-        runCatching {
-            connectivityManager.registerDefaultNetworkCallback(networkCallback)
-            isNetworkCallbackRegistered = true
-        }.onFailure {
-            VpnDebugLogger.w(TAG, "registerDefaultNetworkCallback failed", it)
+        if (!isNetworkCallbackRegistered) {
+            runCatching {
+                connectivityManager.registerDefaultNetworkCallback(networkCallback)
+                isNetworkCallbackRegistered = true
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "registerDefaultNetworkCallback failed", it)
+            }
+        }
+        if (!isUnderlyingNetworkCallbackRegistered) {
+            runCatching {
+                val request = NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                    .build()
+                connectivityManager.registerNetworkCallback(request, underlyingNetworkCallback)
+                isUnderlyingNetworkCallbackRegistered = true
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "register underlying network callback failed", it)
+            }
         }
     }
 
     private fun unregisterNetworkCallbackSafely() {
-        if (!isNetworkCallbackRegistered) return
-        runCatching {
-            connectivityManager.unregisterNetworkCallback(networkCallback)
-        }.onFailure {
-            VpnDebugLogger.w(TAG, "unregisterNetworkCallback failed", it)
+        if (isNetworkCallbackRegistered) {
+            runCatching {
+                connectivityManager.unregisterNetworkCallback(networkCallback)
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "unregisterNetworkCallback failed", it)
+            }
+            isNetworkCallbackRegistered = false
         }
-        isNetworkCallbackRegistered = false
+        if (isUnderlyingNetworkCallbackRegistered) {
+            runCatching {
+                connectivityManager.unregisterNetworkCallback(underlyingNetworkCallback)
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "unregister underlying network callback failed", it)
+            }
+            isUnderlyingNetworkCallbackRegistered = false
+        }
     }
 
     private fun resolveDnsServers(intent: Intent): List<String> =
