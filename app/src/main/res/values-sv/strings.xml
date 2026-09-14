@@ -331,6 +331,7 @@ Du kan öppna versionssidan eller ladda ner APK:n.</string>
     <string name="update_dialog_open_release">Öppna versionssida</string>
     <string name="update_dialog_download">Ladda ner och installera</string>
     <string name="update_downloading">Laddar ner…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Nedladdning misslyckades</string>
     <string name="update_return_after_allow_install">Tillåt installationer från den här appen i Inställningar och återvänd hit — installeraren öppnas automatiskt.</string>
     <string name="update_install_failed">Kunde inte öppna installeraren. Försök igen eller installera från versionssidan.</string>

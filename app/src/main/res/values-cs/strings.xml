@@ -331,6 +331,7 @@ Můžete otevřít stránku vydání nebo stáhnout APK. Pomocí volby níže po
     <string name="update_dialog_open_release">Otevřít stránku vydání</string>
     <string name="update_dialog_download">Stáhnout a nainstalovat</string>
     <string name="update_downloading">Stahování…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Stažení selhalo</string>
     <string name="update_return_after_allow_install">Povolte instalace z této aplikace v Nastavení a vraťte se sem — instalátor se otevře automaticky.</string>
     <string name="update_install_failed">Instalátor se nepodařilo otevřít. Zkuste to znovu nebo instalujte ze stránky vydání.</string>

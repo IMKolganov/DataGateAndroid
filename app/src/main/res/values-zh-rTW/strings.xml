@@ -313,6 +313,7 @@
     <string name="update_dialog_open_release">開啟發布頁</string>
     <string name="update_dialog_download">下載並安裝</string>
     <string name="update_downloading">正在下載…</string>
+    <string name="update_downloading_percent">正在下載… %1$d%%</string>
     <string name="update_download_failed">下載失敗</string>
     <string name="update_return_after_allow_install">請在設定中允許從此應用程式安裝，然後返回這裡 — 安裝程式會自動開啟。</string>
     <string name="update_install_failed">無法開啟安裝程式。請重試或從發布頁安裝。</string>

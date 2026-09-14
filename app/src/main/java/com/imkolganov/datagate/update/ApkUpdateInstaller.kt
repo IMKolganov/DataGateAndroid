@@ -29,11 +29,18 @@ object ApkUpdateInstaller {
     suspend fun downloadApkToCache(
         activity: Activity,
         http: OkHttpClient,
-        downloadUrl: String
+        downloadUrl: String,
+        onProgress: (ApkDownloadProgress) -> Unit = {},
+    ): Result<File> = downloadApkToCache(activity.cacheDir, http, downloadUrl, onProgress)
+
+    suspend fun downloadApkToCache(
+        cacheDir: File,
+        http: OkHttpClient,
+        downloadUrl: String,
+        onProgress: (ApkDownloadProgress) -> Unit = {},
     ): Result<File> = withContext(Dispatchers.IO) {
         runCatching {
-            val dir = File(activity.cacheDir, "updates").apply { mkdirs() }
-            val outFile = File(dir, "datagate-update.apk")
+            val outFile = updateApkFile(cacheDir)
             val client = http.newBuilder()
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(300, TimeUnit.SECONDS)
@@ -48,13 +55,40 @@ object ApkUpdateInstaller {
                 .build()
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) error("Download failed: HTTP ${response.code}")
-                response.body.byteStream().use { input ->
-                    outFile.outputStream().use { output -> input.copyTo(output) }
+                val body = response.body
+                val contentLength = body.contentLength()
+                var bytesRead = 0L
+                var lastPublished: ApkDownloadProgress? = null
+                fun publish(next: ApkDownloadProgress) {
+                    if (ApkDownloadProgressPolicy.shouldPublish(lastPublished, next)) {
+                        lastPublished = next
+                        onProgress(next)
+                    }
                 }
+                publish(ApkDownloadProgress(0L, contentLength))
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                body.byteStream().use { input ->
+                    outFile.outputStream().use { output ->
+                        while (true) {
+                            val n = input.read(buffer)
+                            if (n < 0) break
+                            output.write(buffer, 0, n)
+                            bytesRead += n
+                            publish(ApkDownloadProgress(bytesRead, contentLength))
+                        }
+                    }
+                }
+                val done = ApkDownloadProgress(bytesRead, if (contentLength > 0) contentLength else bytesRead)
+                if (lastPublished != done) onProgress(done)
             }
             if (!outFile.exists() || outFile.length() == 0L) error("Empty file")
             outFile
         }
+    }
+
+    internal fun updateApkFile(cacheDir: File): File {
+        val dir = File(cacheDir, "updates").apply { mkdirs() }
+        return File(dir, "datagate-update.apk")
     }
 
     sealed class InstallUiResult {

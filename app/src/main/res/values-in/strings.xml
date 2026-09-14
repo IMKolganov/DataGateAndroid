@@ -313,6 +313,7 @@ Anda dapat membuka halaman rilis atau mengunduh APK.</string>
     <string name="update_dialog_open_release">Buka halaman rilis</string>
     <string name="update_dialog_download">Unduh dan instal</string>
     <string name="update_downloading">Mengunduh…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Unduhan gagal</string>
     <string name="update_return_after_allow_install">Izinkan instalasi dari aplikasi ini di Setelan, lalu kembali ke sini — penginstal akan terbuka otomatis.</string>
     <string name="update_install_failed">Tidak dapat membuka penginstal. Coba lagi atau instal dari halaman rilis.</string>

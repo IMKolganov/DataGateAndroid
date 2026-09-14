@@ -313,6 +313,7 @@ Puoi aprire la pagina della release o scaricare l’APK.</string>
     <string name="update_dialog_open_release">Apri pagina release</string>
     <string name="update_dialog_download">Scarica e installa</string>
     <string name="update_downloading">Download…</string>
+    <string name="update_downloading_percent">Download… %1$d%%</string>
     <string name="update_download_failed">Download non riuscito</string>
     <string name="update_return_after_allow_install">Consenti installazioni da questa app nelle Impostazioni, poi torna qui — l’installer si aprirà automaticamente.</string>
     <string name="update_install_failed">Impossibile aprire l’installer. Riprova o installa dalla pagina della release.</string>

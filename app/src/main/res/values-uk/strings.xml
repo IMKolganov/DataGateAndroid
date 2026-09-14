@@ -164,6 +164,7 @@
     <string name="update_dialog_open_release">Відкрити сторінку релізу</string>
     <string name="update_dialog_download">Завантажити й установити</string>
     <string name="update_downloading">Завантаження…</string>
+    <string name="update_downloading_percent">Завантаження… %1$d%%</string>
     <string name="update_download_failed">Не вдалося завантажити</string>
     <string name="update_return_after_allow_install">Дозвольте встановлення з цього застосунку в налаштуваннях і поверніться сюди — установник відкриється автоматично.</string>
     <string name="update_install_failed">Не вдалося відкрити установник. Спробуйте ще раз або встановіть зі сторінки релізу.</string>

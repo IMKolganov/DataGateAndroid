@@ -331,6 +331,7 @@
     <string name="update_dialog_open_release">Отвори релийза</string>
     <string name="update_dialog_download">Изтегли и инсталирай</string>
     <string name="update_downloading">Изтегляне…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Изтеглянето не бе успешно</string>
     <string name="update_return_after_allow_install">Разрешете инсталиране от това приложение в Настройки, след това се върнете тук — инсталаторът ще се отвори автоматично.</string>
     <string name="update_install_failed">Инсталаторът не можа да се отвори. Опитайте отново или инсталирайте от страницата на релийза.</string>

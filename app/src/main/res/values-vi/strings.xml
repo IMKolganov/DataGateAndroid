@@ -313,6 +313,7 @@ Bạn có thể mở trang phát hành hoặc tải APK.</string>
     <string name="update_dialog_open_release">Mở trang phát hành</string>
     <string name="update_dialog_download">Tải và cài đặt</string>
     <string name="update_downloading">Đang tải…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Tải xuống thất bại</string>
     <string name="update_return_after_allow_install">Cho phép cài đặt từ ứng dụng này trong Cài đặt, rồi quay lại đây — trình cài đặt sẽ tự mở.</string>
     <string name="update_install_failed">Không thể mở trình cài đặt. Thử lại hoặc cài từ trang phát hành.</string>

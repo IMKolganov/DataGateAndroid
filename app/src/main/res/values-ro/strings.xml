@@ -331,6 +331,7 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="update_dialog_open_release">Deschide pagina versiunii</string>
     <string name="update_dialog_download">Descarcă și instalează</string>
     <string name="update_downloading">Se descarcă…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Descărcarea a eșuat</string>
     <string name="update_return_after_allow_install">Permite instalări din această aplicație în Setări, apoi revino aici — instalatorul se va deschide automat.</string>
     <string name="update_install_failed">Nu s-a putut deschide instalatorul. Încearcă din nou sau instalează din pagina versiunii.</string>

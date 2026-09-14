@@ -287,6 +287,7 @@
     <string name="update_dialog_open_release">Открыть страницу релиза</string>
     <string name="update_dialog_download">Скачать и установить</string>
     <string name="update_downloading">Загрузка…</string>
+    <string name="update_downloading_percent">Загрузка… %1$d%%</string>
     <string name="update_download_failed">Не удалось скачать</string>
     <string name="update_return_after_allow_install">Разрешите установку из этого приложения в настройках и вернитесь сюда — установщик откроется сам.</string>
     <string name="update_install_failed">Не удалось открыть установщик. Попробуйте снова или установите со страницы релиза.</string>

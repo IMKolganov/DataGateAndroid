@@ -331,6 +331,7 @@ Odprete lahko stran izdaje ali prenesete APK.</string>
     <string name="update_dialog_open_release">Odpri stran izdaje</string>
     <string name="update_dialog_download">Prenesi in namesti</string>
     <string name="update_downloading">Prenašanje…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Prenos ni uspel</string>
     <string name="update_return_after_allow_install">V nastavitvah dovolite namestitve iz te aplikacije in se vrnite sem — namestitveni program se bo odprl samodejno.</string>
     <string name="update_install_failed">Namestitvenega programa ni bilo mogoče odpreti. Poskusite znova ali namestite s strani izdaje.</string>

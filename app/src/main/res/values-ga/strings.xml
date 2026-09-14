@@ -331,6 +331,7 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="update_dialog_open_release">Oscail leathanach eisiúna</string>
     <string name="update_dialog_download">Íoslódáil agus suiteáil</string>
     <string name="update_downloading">Á íoslódáil…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Theip ar íoslódáil</string>
     <string name="update_return_after_allow_install">Ceadaigh suiteálacha ón aip seo sna Socruithe, ansin fill anseo — osclóidh an suiteálaí go huathoibríoch.</string>
     <string name="update_install_failed">Níorbh fhéidir an suiteálaí a oscailt. Bain triail eile as nó suiteáil ó leathanach an eisiúna.</string>

@@ -313,6 +313,7 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="update_dialog_open_release">Avaa julkaisusivu</string>
     <string name="update_dialog_download">Lataa ja asenna</string>
     <string name="update_downloading">Ladataan…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Lataus epäonnistui</string>
     <string name="update_return_after_allow_install">Salli asennukset tästä sovelluksesta asetuksissa ja palaa sitten tänne — asennusohjelma avautuu automaattisesti.</string>
     <string name="update_install_failed">Asennusohjelmaa ei voitu avata. Yritä uudelleen tai asenna julkaisusivulta.</string>

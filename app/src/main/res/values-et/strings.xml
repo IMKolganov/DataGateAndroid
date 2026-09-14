@@ -331,6 +331,7 @@ Võite avada väljalaske lehe või laadida APK alla.</string>
     <string name="update_dialog_open_release">Ava väljalaske leht</string>
     <string name="update_dialog_download">Laadi alla ja paigalda</string>
     <string name="update_downloading">Allalaadimine…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Allalaadimine nurjus</string>
     <string name="update_return_after_allow_install">Lubage seadetes sellest rakendusest paigaldamine ja tulge siia tagasi — paigaldaja avaneb automaatselt.</string>
     <string name="update_install_failed">Paigaldajat ei saanud avada. Proovige uuesti või paigaldage väljalaske lehelt.</string>

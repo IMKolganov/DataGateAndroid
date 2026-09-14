@@ -313,6 +313,7 @@ Je kunt de releasepagina openen of de APK downloaden.</string>
     <string name="update_dialog_open_release">Releasepagina openen</string>
     <string name="update_dialog_download">Downloaden en installeren</string>
     <string name="update_downloading">Downloaden…</string>
+    <string name="update_downloading_percent">Downloaden… %1$d%%</string>
     <string name="update_download_failed">Download mislukt</string>
     <string name="update_return_after_allow_install">Sta installaties vanuit deze app toe in Instellingen en keer terug — de installer opent automatisch.</string>
     <string name="update_install_failed">Kon de installer niet openen. Probeer opnieuw of installeer vanaf de releasepagina.</string>

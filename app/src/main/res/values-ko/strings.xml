@@ -313,6 +313,7 @@
     <string name="update_dialog_open_release">릴리스 페이지 열기</string>
     <string name="update_dialog_download">다운로드 및 설치</string>
     <string name="update_downloading">다운로드 중…</string>
+    <string name="update_downloading_percent">다운로드 중… %1$d%%</string>
     <string name="update_download_failed">다운로드 실패</string>
     <string name="update_return_after_allow_install">설정에서 이 앱의 설치를 허용한 뒤 여기로 돌아오세요 — 설치 관리자가 자동으로 열립니다.</string>
     <string name="update_install_failed">설치 관리자를 열 수 없습니다. 다시 시도하거나 릴리스 페이지에서 설치하세요.</string>

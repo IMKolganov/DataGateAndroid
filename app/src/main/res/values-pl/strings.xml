@@ -313,6 +313,7 @@ Możesz otworzyć stronę wydania lub pobrać APK.</string>
     <string name="update_dialog_open_release">Otwórz stronę wydania</string>
     <string name="update_dialog_download">Pobierz i zainstaluj</string>
     <string name="update_downloading">Pobieranie…</string>
+    <string name="update_downloading_percent">Pobieranie… %1$d%%</string>
     <string name="update_download_failed">Pobieranie nie powiodło się</string>
     <string name="update_return_after_allow_install">Zezwól w Ustawieniach na instalacje z tej aplikacji, a potem wróć tutaj — instalator otworzy się automatycznie.</string>
     <string name="update_install_failed">Nie można otworzyć instalatora. Spróbuj ponownie albo zainstaluj ze strony wydania.</string>

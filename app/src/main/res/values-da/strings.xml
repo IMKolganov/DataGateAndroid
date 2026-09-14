@@ -331,6 +331,7 @@ Du kan åbne udgivelsessiden eller downloade APK’en. Brug indstillingen nedenf
     <string name="update_dialog_open_release">Åbn udgivelsesside</string>
     <string name="update_dialog_download">Download og installér</string>
     <string name="update_downloading">Downloader…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Download mislykkedes</string>
     <string name="update_return_after_allow_install">Tillad installationer fra denne app i Indstillinger, og vend tilbage hertil — installationsprogrammet åbnes automatisk.</string>
     <string name="update_install_failed">Kunne ikke åbne installationsprogrammet. Prøv igen eller installér fra udgivelsessiden.</string>

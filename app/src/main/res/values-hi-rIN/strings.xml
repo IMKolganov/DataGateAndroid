@@ -313,6 +313,7 @@
     <string name="update_dialog_open_release">रिलीज़ पेज खोलें</string>
     <string name="update_dialog_download">डाउनलोड और इंस्टॉल करें</string>
     <string name="update_downloading">डाउनलोड हो रहा है…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">डाउनलोड विफल</string>
     <string name="update_return_after_allow_install">Settings में इस ऐप से इंस्टॉल की अनुमति दें, फिर यहां वापस आएं — इंस्टॉलर अपने आप खुलेगा।</string>
     <string name="update_install_failed">इंस्टॉलर नहीं खुल सका। फिर कोशिश करें या रिलीज़ पेज से इंस्टॉल करें।</string>

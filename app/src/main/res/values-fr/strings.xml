@@ -313,6 +313,7 @@ Vous pouvez ouvrir la page de version ou télécharger l’APK. Utilisez l’opt
     <string name="update_dialog_open_release">Ouvrir la page de version</string>
     <string name="update_dialog_download">Télécharger et installer</string>
     <string name="update_downloading">Téléchargement…</string>
+    <string name="update_downloading_percent">Téléchargement… %1$d%%</string>
     <string name="update_download_failed">Échec du téléchargement</string>
     <string name="update_return_after_allow_install">Autorisez les installations depuis cette app dans les Paramètres, puis revenez ici — l’installateur s’ouvrira automatiquement.</string>
     <string name="update_install_failed">Impossible d’ouvrir l’installateur. Réessayez ou installez depuis la page de version.</string>

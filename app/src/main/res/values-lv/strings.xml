@@ -331,6 +331,7 @@ Varat atvērt laidiena lapu vai lejupielādēt APK.</string>
     <string name="update_dialog_open_release">Atvērt laidiena lapu</string>
     <string name="update_dialog_download">Lejupielādēt un instalēt</string>
     <string name="update_downloading">Lejupielādē…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Lejupielāde neizdevās</string>
     <string name="update_return_after_allow_install">Atļaujiet instalēšanu no šīs lietotnes iestatījumos un atgriezieties šeit — instalētājs atvērsies automātiski.</string>
     <string name="update_install_failed">Neizdevās atvērt instalētāju. Mēģiniet vēlreiz vai instalējiet no laidiena lapas.</string>

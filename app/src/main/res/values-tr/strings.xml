@@ -313,6 +313,7 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="update_dialog_open_release">Sürüm sayfasını aç</string>
     <string name="update_dialog_download">İndir ve kur</string>
     <string name="update_downloading">İndiriliyor…</string>
+    <string name="update_downloading_percent">İndiriliyor… %1$d%%</string>
     <string name="update_download_failed">İndirme başarısız</string>
     <string name="update_return_after_allow_install">Ayarlar’da bu uygulamadan kurulumlara izin verin, sonra buraya dönün — kurucu otomatik açılır.</string>
     <string name="update_install_failed">Kurucu açılamadı. Tekrar deneyin veya sürüm sayfasından kurun.</string>

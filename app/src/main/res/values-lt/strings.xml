@@ -331,6 +331,7 @@ Galite atidaryti leidimo puslapį arba atsisiųsti APK.</string>
     <string name="update_dialog_open_release">Atidaryti leidimo puslapį</string>
     <string name="update_dialog_download">Atsisiųsti ir įdiegti</string>
     <string name="update_downloading">Atsisiunčiama…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Atsisiųsti nepavyko</string>
     <string name="update_return_after_allow_install">Leiskite diegti iš šios programos nustatymuose, tada grįžkite čia — diegiklis atsidarys automatiškai.</string>
     <string name="update_install_failed">Nepavyko atidaryti diegiklio. Bandykite dar kartą arba įdiekite iš leidimo puslapio.</string>

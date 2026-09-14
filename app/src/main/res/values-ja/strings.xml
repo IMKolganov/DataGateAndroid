@@ -313,6 +313,7 @@
     <string name="update_dialog_open_release">リリースページを開く</string>
     <string name="update_dialog_download">ダウンロードしてインストール</string>
     <string name="update_downloading">ダウンロード中…</string>
+    <string name="update_downloading_percent">ダウンロード中… %1$d%%</string>
     <string name="update_download_failed">ダウンロード失敗</string>
     <string name="update_return_after_allow_install">設定でこのアプリからのインストールを許可してから戻ってください — インストーラーが自動的に開きます。</string>
     <string name="update_install_failed">インストーラーを開けませんでした。もう一度試すか、リリースページからインストールしてください。</string>

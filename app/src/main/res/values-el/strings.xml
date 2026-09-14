@@ -331,6 +331,7 @@
     <string name="update_dialog_open_release">Άνοιγμα σελίδας έκδοσης</string>
     <string name="update_dialog_download">Λήψη και εγκατάσταση</string>
     <string name="update_downloading">Λήψη…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Η λήψη απέτυχε</string>
     <string name="update_return_after_allow_install">Επιτρέψτε εγκαταστάσεις από αυτήν την εφαρμογή στις Ρυθμίσεις και επιστρέψτε εδώ — ο εγκαταστάτης θα ανοίξει αυτόματα.</string>
     <string name="update_install_failed">Δεν ήταν δυνατό το άνοιγμα του εγκαταστάτη. Δοκιμάστε ξανά ή εγκαταστήστε από τη σελίδα έκδοσης.</string>

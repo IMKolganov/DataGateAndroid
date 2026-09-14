@@ -331,6 +331,7 @@ Tista’ tiftaħ il-paġna tar-rilaxx jew tniżżel l-APK.</string>
     <string name="update_dialog_open_release">Iftaħ il-paġna tar-rilaxx</string>
     <string name="update_dialog_download">Niżżel u installa</string>
     <string name="update_downloading">Qed jitniżżel…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">It-tniżżil falla</string>
     <string name="update_return_after_allow_install">Ippermetti installazzjonijiet minn din l-app fis-Settings, imbagħad erġa’ lura hawn — l-installatur jinfetaħ awtomatikament.</string>
     <string name="update_install_failed">Ma setax jinfetaħ l-installatur. Erġa’ pprova jew installa mill-paġna tar-rilaxx.</string>

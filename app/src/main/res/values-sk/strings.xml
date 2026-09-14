@@ -331,6 +331,7 @@ Môžete otvoriť stránku vydania alebo stiahnuť APK.</string>
     <string name="update_dialog_open_release">Otvoriť stránku vydania</string>
     <string name="update_dialog_download">Stiahnuť a nainštalovať</string>
     <string name="update_downloading">Sťahuje sa…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Sťahovanie zlyhalo</string>
     <string name="update_return_after_allow_install">Povoľte inštalácie z tejto aplikácie v Nastaveniach a vráťte sa sem — inštalátor sa otvorí automaticky.</string>
     <string name="update_install_failed">Inštalátor sa nepodarilo otvoriť. Skúste znova alebo nainštalujte zo stránky vydania.</string>

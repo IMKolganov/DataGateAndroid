@@ -313,6 +313,7 @@ Você pode abrir a página da versão ou baixar o APK.</string>
     <string name="update_dialog_open_release">Abrir página da versão</string>
     <string name="update_dialog_download">Baixar e instalar</string>
     <string name="update_downloading">Baixando…</string>
+    <string name="update_downloading_percent">Baixando… %1$d%%</string>
     <string name="update_download_failed">Falha no download</string>
     <string name="update_return_after_allow_install">Permita instalações deste app nas Configurações e volte aqui — o instalador abrirá automaticamente.</string>
     <string name="update_install_failed">Não foi possível abrir o instalador. Tente novamente ou instale pela página da versão.</string>

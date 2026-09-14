@@ -381,6 +381,7 @@
     <string name="update_dialog_open_release">Open release page</string>
     <string name="update_dialog_download">Download &amp; install</string>
     <string name="update_downloading">Downloading…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Download failed</string>
     <string name="update_return_after_allow_install">Allow installs from this app in Settings, then return here — the installer will open automatically.</string>
     <string name="update_install_failed">Could not open the installer. Try again or install from the release page.</string>

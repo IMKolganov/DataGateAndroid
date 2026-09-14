@@ -313,6 +313,7 @@ Sie können die Release-Seite öffnen oder die APK herunterladen. Mit der Option
     <string name="update_dialog_open_release">Release-Seite öffnen</string>
     <string name="update_dialog_download">Herunterladen und installieren</string>
     <string name="update_downloading">Wird heruntergeladen…</string>
+    <string name="update_downloading_percent">Wird heruntergeladen… %1$d%%</string>
     <string name="update_download_failed">Download fehlgeschlagen</string>
     <string name="update_return_after_allow_install">Erlauben Sie Installationen aus dieser App in den Einstellungen und kehren Sie dann hierher zurück — der Installer öffnet sich automatisch.</string>
     <string name="update_install_failed">Der Installer konnte nicht geöffnet werden. Versuchen Sie es erneut oder installieren Sie über die Release-Seite.</string>

@@ -331,6 +331,7 @@ Maaari mong buksan ang release page o i-download ang APK.</string>
     <string name="update_dialog_open_release">Buksan ang release page</string>
     <string name="update_dialog_download">I-download at i-install</string>
     <string name="update_downloading">Nagda-download…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Nabigo ang download</string>
     <string name="update_return_after_allow_install">Payagan ang installs mula sa app na ito sa Settings, pagkatapos bumalik dito — awtomatikong bubukas ang installer.</string>
     <string name="update_install_failed">Hindi mabuksan ang installer. Subukan muli o mag-install mula sa release page.</string>

@@ -313,6 +313,7 @@
     <string name="update_dialog_open_release">فتح صفحة الإصدار</string>
     <string name="update_dialog_download">تنزيل وتثبيت</string>
     <string name="update_downloading">جارٍ التنزيل…</string>
+    <string name="update_downloading_percent">جارٍ التنزيل… %1$d%%</string>
     <string name="update_download_failed">فشل التنزيل</string>
     <string name="update_return_after_allow_install">اسمح بالتثبيت من هذا التطبيق في الإعدادات، ثم عد إلى هنا — سيفتح المثبّت تلقائياً.</string>
     <string name="update_install_failed">تعذر فتح المثبّت. حاول مرة أخرى أو ثبّت من صفحة الإصدار.</string>

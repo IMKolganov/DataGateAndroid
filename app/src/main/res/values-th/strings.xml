@@ -313,6 +313,7 @@
     <string name="update_dialog_open_release">เปิดหน้ารุ่น</string>
     <string name="update_dialog_download">ดาวน์โหลดและติดตั้ง</string>
     <string name="update_downloading">กำลังดาวน์โหลด…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">ดาวน์โหลดล้มเหลว</string>
     <string name="update_return_after_allow_install">อนุญาตการติดตั้งจากแอปนี้ในการตั้งค่า แล้วกลับมาที่นี่ — ตัวติดตั้งจะเปิดอัตโนมัติ</string>
     <string name="update_install_failed">ไม่สามารถเปิดตัวติดตั้งได้ ลองอีกครั้งหรือติดตั้งจากหน้ารุ่น</string>

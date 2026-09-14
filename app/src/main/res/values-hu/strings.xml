@@ -331,6 +331,7 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="update_dialog_open_release">Kiadási oldal megnyitása</string>
     <string name="update_dialog_download">Letöltés és telepítés</string>
     <string name="update_downloading">Letöltés…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">A letöltés sikertelen</string>
     <string name="update_return_after_allow_install">Engedélyezze a telepítést ebből az alkalmazásból a Beállításokban, majd térjen vissza ide — a telepítő automatikusan megnyílik.</string>
     <string name="update_install_failed">A telepítő nem nyitható meg. Próbálja újra, vagy telepítsen a kiadási oldalról.</string>
