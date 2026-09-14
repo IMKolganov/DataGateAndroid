@@ -187,27 +187,29 @@ fun UpdateCheckHost(
                     }
                     if (downloading) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        val fraction = downloadProgress?.fraction
-                        if (fraction != null) {
-                            LinearProgressIndicator(
-                                progress = { fraction },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                stringResource(
-                                    R.string.update_downloading_percent,
-                                    downloadProgress?.percent ?: 0,
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        } else {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                stringResource(R.string.update_downloading),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
+                        when (val bar = ApkDownloadProgressPolicy.bar(downloadProgress)) {
+                            is ApkDownloadBar.Determinate -> {
+                                LinearProgressIndicator(
+                                    progress = { bar.fraction },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    stringResource(
+                                        R.string.update_downloading_percent,
+                                        bar.percent,
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            is ApkDownloadBar.Indeterminate -> {
+                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    stringResource(R.string.update_downloading),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
                         }
                     }
                 }
@@ -221,10 +223,7 @@ fun UpdateCheckHost(
                             val url = apkUrl
                             scope.launch {
                                 downloading = true
-                                downloadProgressState.value = ApkDownloadProgress(
-                                    0,
-                                    ApkDownloadProgressPolicy.UNKNOWN_LENGTH,
-                                )
+                                downloadProgressState.value = null
                                 downloadError = null
                                 UpdatePreferences.setAutoDownloadEnabled(appContext, autoDownloadNext)
                                 val file = withContext(Dispatchers.IO) {

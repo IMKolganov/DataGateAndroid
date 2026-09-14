@@ -8,6 +8,11 @@ data class ApkDownloadProgress(
     val fraction: Float? get() = ApkDownloadProgressPolicy.fraction(bytesRead, contentLength)
 }
 
+internal sealed class ApkDownloadBar {
+    data class Determinate(val fraction: Float, val percent: Int) : ApkDownloadBar()
+    data object Indeterminate : ApkDownloadBar()
+}
+
 /** Maps HTTP byte counts onto a determinate or indeterminate APK download bar. */
 internal object ApkDownloadProgressPolicy {
     const val UNKNOWN_LENGTH = -1L
@@ -21,6 +26,26 @@ internal object ApkDownloadProgressPolicy {
     fun fraction(bytesRead: Long, contentLength: Long): Float? {
         val p = percent(bytesRead, contentLength) ?: return null
         return p / 100f
+    }
+
+    fun bar(progress: ApkDownloadProgress?): ApkDownloadBar {
+        val percent = progress?.percent
+        val fraction = progress?.fraction
+        if (percent == null || fraction == null) return ApkDownloadBar.Indeterminate
+        return ApkDownloadBar.Determinate(fraction = fraction, percent = percent)
+    }
+
+    fun isComplete(bytesRead: Long, contentLength: Long): Boolean {
+        if (bytesRead <= 0L) return false
+        if (contentLength > 0L && bytesRead != contentLength) return false
+        return true
+    }
+
+    fun finishedProgress(bytesRead: Long, contentLength: Long): ApkDownloadProgress {
+        return ApkDownloadProgress(
+            bytesRead = bytesRead,
+            contentLength = if (contentLength > 0L) contentLength else bytesRead,
+        )
     }
 
     fun shouldPublish(previous: ApkDownloadProgress?, next: ApkDownloadProgress): Boolean {

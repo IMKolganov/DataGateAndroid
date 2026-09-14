@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.io.InputStream
 import java.util.concurrent.TimeUnit
 
 object ApkUpdateInstaller {
@@ -39,8 +40,10 @@ object ApkUpdateInstaller {
         downloadUrl: String,
         onProgress: (ApkDownloadProgress) -> Unit = {},
     ): Result<File> = withContext(Dispatchers.IO) {
+        val destFile = updateApkFile(cacheDir)
+        val partFile = updateApkPartFile(cacheDir)
+        partFile.delete()
         runCatching {
-            val outFile = updateApkFile(cacheDir)
             val client = http.newBuilder()
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(300, TimeUnit.SECONDS)
@@ -56,39 +59,75 @@ object ApkUpdateInstaller {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) error("Download failed: HTTP ${response.code}")
                 val body = response.body
-                val contentLength = body.contentLength()
-                var bytesRead = 0L
-                var lastPublished: ApkDownloadProgress? = null
-                fun publish(next: ApkDownloadProgress) {
-                    if (ApkDownloadProgressPolicy.shouldPublish(lastPublished, next)) {
-                        lastPublished = next
-                        onProgress(next)
-                    }
-                }
-                publish(ApkDownloadProgress(0L, contentLength))
-                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                body.byteStream().use { input ->
-                    outFile.outputStream().use { output ->
-                        while (true) {
-                            val n = input.read(buffer)
-                            if (n < 0) break
-                            output.write(buffer, 0, n)
-                            bytesRead += n
-                            publish(ApkDownloadProgress(bytesRead, contentLength))
-                        }
-                    }
-                }
-                val done = ApkDownloadProgress(bytesRead, if (contentLength > 0) contentLength else bytesRead)
-                if (lastPublished != done) onProgress(done)
+                writeValidatedApkPart(
+                    input = body.byteStream(),
+                    partFile = partFile,
+                    contentLength = body.contentLength(),
+                    onProgress = onProgress,
+                )
             }
-            if (!outFile.exists() || outFile.length() == 0L) error("Empty file")
-            outFile
+            if (!promotePartFile(partFile, destFile)) {
+                error("Could not store downloaded APK")
+            }
+            destFile
+        }.onFailure {
+            partFile.delete()
         }
     }
 
-    internal fun updateApkFile(cacheDir: File): File {
-        val dir = File(cacheDir, "updates").apply { mkdirs() }
-        return File(dir, "datagate-update.apk")
+    internal fun updateCacheDir(cacheDir: File): File =
+        File(cacheDir, "updates").apply { mkdirs() }
+
+    internal fun updateApkFile(cacheDir: File): File =
+        File(updateCacheDir(cacheDir), "datagate-update.apk")
+
+    internal fun updateApkPartFile(cacheDir: File): File =
+        File(updateCacheDir(cacheDir), "datagate-update.apk.part")
+
+    internal fun writeValidatedApkPart(
+        input: InputStream,
+        partFile: File,
+        contentLength: Long,
+        onProgress: (ApkDownloadProgress) -> Unit = {},
+    ): Long {
+        var bytesRead = 0L
+        var lastPublished: ApkDownloadProgress? = null
+        fun publish(next: ApkDownloadProgress) {
+            if (ApkDownloadProgressPolicy.shouldPublish(lastPublished, next)) {
+                lastPublished = next
+                onProgress(next)
+            }
+        }
+        publish(ApkDownloadProgress(0L, contentLength))
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        input.use { source ->
+            partFile.outputStream().use { output ->
+                while (true) {
+                    val n = source.read(buffer)
+                    if (n < 0) break
+                    output.write(buffer, 0, n)
+                    bytesRead += n
+                    publish(ApkDownloadProgress(bytesRead, contentLength))
+                }
+            }
+        }
+        if (!ApkDownloadProgressPolicy.isComplete(bytesRead, contentLength)) {
+            error("Incomplete download: $bytesRead of $contentLength bytes")
+        }
+        val done = ApkDownloadProgressPolicy.finishedProgress(bytesRead, contentLength)
+        if (lastPublished != done) onProgress(done)
+        return bytesRead
+    }
+
+    internal fun promotePartFile(partFile: File, destFile: File): Boolean {
+        if (!partFile.exists() || partFile.length() == 0L) return false
+        if (destFile.exists() && !destFile.delete()) return false
+        if (partFile.renameTo(destFile)) return true
+        return runCatching {
+            partFile.copyTo(destFile, overwrite = true)
+            partFile.delete()
+            destFile.exists() && destFile.length() > 0L
+        }.getOrDefault(false)
     }
 
     sealed class InstallUiResult {
