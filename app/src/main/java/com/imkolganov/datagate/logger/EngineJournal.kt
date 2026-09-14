@@ -68,6 +68,11 @@ class EngineJournalBuffer(
     fun snapshot(): List<String> = synchronized(lock) { lines.toList() }
 
     fun text(): String = snapshot().joinToString("\n")
+
+    /** Drops captured lines but keeps the journal enabled. */
+    fun clear() {
+        synchronized(lock) { lines.clear() }
+    }
 }
 
 object EngineJournal {
@@ -97,6 +102,11 @@ object EngineJournal {
         if (buffer.append(level, tag, message)) {
             schedulePublish()
         }
+    }
+
+    fun clear() {
+        buffer.clear()
+        publishNow()
     }
 
     fun publishNow() {

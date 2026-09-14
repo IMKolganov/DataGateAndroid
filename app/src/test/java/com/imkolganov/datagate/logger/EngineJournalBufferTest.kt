@@ -82,6 +82,20 @@ class EngineJournalBufferTest {
     }
 
     @Test
+    fun clear_dropsLinesButKeepsEnabled() {
+        val journal = EngineJournalBuffer(maxLines = 10) { "t" }
+        journal.setEnabled(true)
+        journal.appendLine("one")
+        journal.appendLine("two")
+        journal.clear()
+        assertTrue(journal.isEnabled())
+        assertEquals(0, journal.size())
+        assertEquals("", journal.text())
+        assertTrue(journal.appendLine("three"))
+        assertEquals(listOf("three"), journal.snapshot())
+    }
+
+    @Test
     fun zeroMaxLines_doesNotGrowOrLoop() {
         val journal = EngineJournalBuffer(maxLines = 0) { "t" }
         journal.setEnabled(true)

@@ -109,6 +109,8 @@
     <string name="settings_engine_journal_subtitle">Die letzten 1000 Engine-Zeilen auf dem Startbildschirm. Aus = keine Aufzeichnung.</string>
     <string name="home_engine_logs">Engine-Protokoll</string>
     <string name="home_engine_logs_waiting">Warte auf Engine-Ereignisse…</string>
+    <string name="home_engine_logs_copy">Kopieren</string>
+    <string name="home_engine_logs_clear">Leeren</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>

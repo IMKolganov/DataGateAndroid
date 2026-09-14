@@ -212,13 +212,18 @@ fun VpnStatusScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(24.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
             Spacer(modifier = Modifier.height(8.dp))
 
             homeUpdateBanner?.let { rel ->
@@ -396,15 +401,17 @@ fun VpnStatusScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            HomeTelegramChannelBanner(
-                onOpenChannel = { openUrl(projectTelegramUrl) },
-            )
-
             if (engineJournalEnabled) {
                 EngineJournalCard(text = engineJournalText)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            HomeTelegramChannelBanner(
+                onOpenChannel = { openUrl(projectTelegramUrl) },
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            )
         }
     }
 
@@ -557,11 +564,12 @@ private fun formatGraceCountdown(totalSeconds: Int): String {
 @Composable
 private fun HomeTelegramChannelBanner(
     onOpenChannel: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .widthIn(max = 520.dp)
     ) {

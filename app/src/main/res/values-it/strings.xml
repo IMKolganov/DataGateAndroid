@@ -109,6 +109,8 @@
     <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
     <string name="home_engine_logs">Engine logs</string>
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copia</string>
+    <string name="home_engine_logs_clear">Cancella</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>

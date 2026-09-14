@@ -49,6 +49,21 @@ class EngineJournalTest {
     }
 
     @Test
+    fun clear_keepsEnabledAndEmptiesPublishedText() {
+        EngineJournal.setEnabled(true)
+        EngineJournal.append("I", "T", "old")
+        EngineJournal.publishNow()
+        EngineJournal.clear()
+        assertTrue(EngineJournal.isEnabled())
+        assertTrue(EngineJournal.enabled.value)
+        assertEquals("", EngineJournal.text.value)
+        EngineJournal.append("I", "T", "new")
+        EngineJournal.publishNow()
+        assertTrue(EngineJournal.text.value.contains("new"))
+        assertFalse(EngineJournal.text.value.contains("old"))
+    }
+
+    @Test
     fun debounce_publishesAfterDelay() = runBlocking {
         EngineJournal.setEnabled(true)
         EngineJournal.append("I", "T", "debounced")

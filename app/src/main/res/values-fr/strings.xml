@@ -109,6 +109,8 @@
     <string name="settings_engine_journal_subtitle">Les 1000 dernières lignes du moteur sur l’accueil. Désactivé = rien n’est écrit.</string>
     <string name="home_engine_logs">Journaux moteur</string>
     <string name="home_engine_logs_waiting">En attente d’événements moteur…</string>
+    <string name="home_engine_logs_copy">Copier</string>
+    <string name="home_engine_logs_clear">Effacer</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>

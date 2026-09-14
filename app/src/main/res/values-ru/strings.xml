@@ -203,6 +203,8 @@
     <string name="settings_engine_journal_subtitle">Последние 1000 строк на главной, включая connectivity.verdict (сайт / интернет / VPN). Пока выключено — ничего не пишется.</string>
     <string name="home_engine_logs">Журнал движка</string>
     <string name="home_engine_logs_waiting">Ожидание событий движка…</string>
+    <string name="home_engine_logs_copy">Копировать</string>
+    <string name="home_engine_logs_clear">Очистить</string>
     <string name="settings_vpn_debug_title">Лог отладки VPN</string>
     <string name="settings_debug_mode">Писать сессию VPN в файл</string>
     <string name="settings_debug_mode_subtitle">Пишет понятный EVENT-таймлайн (connect, reconnect, потеря bridge, сеть, OpenVPN core, исключения). После сбоя отправьте файл.</string>
