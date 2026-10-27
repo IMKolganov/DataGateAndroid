@@ -1,6 +1,8 @@
 import android.util.Base64
 import com.imkolganov.datagate.configs.ApiConfig
 import com.imkolganov.datagate.json.formatHttpErrorDetail
+import com.imkolganov.datagate.json.parseBackendApiEnvelopeOrThrow
+import com.imkolganov.datagate.json.parseIssuedFilePayloadOrThrow
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -61,13 +63,14 @@ class XrayClientLinksApiClient(
             when (resp.code) {
                 200 -> {
                     val rawText = resp.body.string().orEmpty()
-                    val obj = JSONObject(rawText)
-                    val data = obj.getJSONObject("data")
-                    val fileName = data.getJSONObject("issuedOvpn").optString("fileName", "client.txt")
-                    val contentBase64 = data.getString("content")
-                    val decodedBytes = Base64.decode(contentBase64, Base64.DEFAULT)
+                    val root = parseBackendApiEnvelopeOrThrow("Xray download failed", resp.code, rawText)
+                    val payload = root.parseIssuedFilePayloadOrThrow(
+                        operation = "Xray download failed",
+                        defaultFileName = "client.txt",
+                    )
+                    val decodedBytes = Base64.decode(payload.contentBase64, Base64.DEFAULT)
                     XrayLinkDownloadResult(
-                        fileName = fileName,
+                        fileName = payload.fileName,
                         content = decodedBytes,
                         contentType = resp.header("Content-Type"),
                     )

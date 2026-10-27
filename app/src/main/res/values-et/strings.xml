@@ -41,6 +41,9 @@
 
     <string name="home_telegram_channel_title">Telli — see on oluline</string>
     <string name="home_telegram_channel_body">Projekti Telegrami kanal: uudised ja teated teenuseprobleemide korral.</string>
+    <string name="home_support_project_title">Toeta projekti</string>
+    <string name="home_support_project_body">DataGate jääb tasuta tänu toetajatele. Ava Telegrami bot, et näha pakette ja makseviise.</string>
+    <string name="home_support_project_action">Ava Telegrami bot</string>
     <string name="home_grace_banner_title">Ühendatud — ajutine juurdepääs</string>
     <string name="home_grace_banner_body">Seo oma konto või telli %1$s jooksul, vastasel juhul see seanss katkestatakse.</string>
     <string name="home_traffic">Traffic</string>
@@ -122,6 +125,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">Copy</string>
     <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Alla</string>
+    <string name="home_engine_logs_reconnects">Taasühendused: %1$d · Seansid: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -298,9 +303,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">IP-loendi uuendamine…</string>
     <string name="vpn_ip_list_ready">IP-loend valmis (%1$d marsruuti)</string>
 
@@ -408,6 +421,7 @@ Võite avada väljalaske lehe või laadida APK alla.</string>
     <string name="error_google_signin_failed">Google\'iga sisselogimine ebaõnnestus. Proovige uuesti.</string>
     <string name="error_network_no_internet">Interneti-ühendus puudub. Kontrollige võrku ja proovige uuesti.</string>
     <string name="error_network_timeout">Ühenduse ajalõpp. Proovige uuesti.</string>
+    <string name="auth_session_expired">Seanss on aegunud. Logi uuesti sisse.</string>
     <string name="error_network_interrupted">Võrguühendus katkes. Proovige uuesti.</string>
     <string name="error_network_tls">Turvalist ühendust ei saanud luua. Kontrollige võrku või VPN-i seadeid ja proovige uuesti.</string>
     <string name="home_quick_actions_title">Abi ja keel</string>

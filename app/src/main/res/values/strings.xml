@@ -128,16 +128,21 @@
     <string name="home_telegram_channel_title">Subscribe — it\'s important</string>
     <string name="home_telegram_channel_body">Join our Telegram channel for the latest news and service outage announcements.</string>
 
+    <string name="home_support_project_title">Support the project</string>
+    <string name="home_support_project_body">DataGate stays free thanks to supporters. Open our Telegram bot for plans and how to pay.</string>
+    <string name="home_support_project_action">Open Telegram bot</string>
+
     <string name="home_grace_banner_title">Connected — temporary access</string>
     <string name="home_grace_banner_body">Link your account or subscribe within %1$s or this session will be disconnected.</string>
     <string name="home_traffic">Traffic</string>
-    <string name="home_traffic_hint">Live throughput on this device through the VPN tunnel.</string>
+    <string name="home_traffic_hint">Live throughput through the VPN tunnel. Swipe to scroll history; pinch to zoom.</string>
     <string name="home_traffic_download">Download</string>
     <string name="home_traffic_upload">Upload</string>
     <string name="home_traffic_waiting">Waiting for traffic…</string>
 
     <string name="support_contact_email" translatable="false">imkolganov@gmail.com</string>
     <string name="support_telegram_bot_url" translatable="false">https://t.me/DataGateVPNBot</string>
+    <string name="support_telegram_bot_support_url" translatable="false">https://t.me/DataGateVPNBot?start=donate</string>
     <string name="project_github_issues_url" translatable="false">https://github.com/IMKolganov/DataGateAndroid/issues</string>
 
     <string name="stats_filters">Filters</string>
@@ -208,6 +213,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">Copy</string>
     <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Bottom</string>
+    <string name="home_engine_logs_reconnects">Reconnects: %1$d · Sessions: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -452,6 +459,7 @@
     <string name="error_google_signin_failed">Google sign-in failed. Please try again.</string>
     <string name="error_network_no_internet">No internet connection. Check your network and try again.</string>
     <string name="error_network_timeout">The connection timed out. Try again.</string>
+    <string name="auth_session_expired">Your session has expired. Please sign in again.</string>
     <string name="error_network_interrupted">The network connection was interrupted. Try again.</string>
     <string name="error_network_tls">Couldn\'t establish a secure connection. Check your network or VPN settings and try again.</string>
 

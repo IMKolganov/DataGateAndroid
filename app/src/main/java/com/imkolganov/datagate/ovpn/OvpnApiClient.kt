@@ -1,6 +1,8 @@
 import android.util.Base64
 import com.imkolganov.datagate.configs.ApiConfig
 import com.imkolganov.datagate.json.formatHttpErrorDetail
+import com.imkolganov.datagate.json.parseBackendApiEnvelopeOrThrow
+import com.imkolganov.datagate.json.parseIssuedFilePayloadOrThrow
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,8 +22,6 @@ class OvpnApiClient(
     private val tokenProvider: () -> String?
 ) {
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
-
-
 
     suspend fun ensureAndDownloadDeviceFile(
         vpnServerId: Int,
@@ -58,19 +58,16 @@ class OvpnApiClient(
             when (resp.code) {
                 200 -> {
                     val rawText = resp.body.string().orEmpty()
-                    val obj = JSONObject(rawText)
-                    val data = obj.getJSONObject("data")
-
-                    val fileName = data.getJSONObject("issuedOvpn").optString("fileName", "client.ovpn")
-                    val contentBase64 = data.getString("content")
-
-                    val decodedBytes = Base64.decode(contentBase64, Base64.DEFAULT)
-                    val ct = resp.header("Content-Type")
-
+                    val root = parseBackendApiEnvelopeOrThrow("Download failed", resp.code, rawText)
+                    val payload = root.parseIssuedFilePayloadOrThrow(
+                        operation = "Download failed",
+                        defaultFileName = "client.ovpn",
+                    )
+                    val decodedBytes = Base64.decode(payload.contentBase64, Base64.DEFAULT)
                     OvpnDownloadResult(
-                        fileName = fileName,
+                        fileName = payload.fileName,
                         content = decodedBytes,
-                        contentType = ct
+                        contentType = resp.header("Content-Type")
                     )
                 }
                 404 -> null
@@ -141,19 +138,5 @@ class OvpnApiClient(
         val b = if (base.endsWith("/")) base.dropLast(1) else base
         val p = if (path.startsWith("/")) path.drop(1) else path
         return "$b/$p"
-    }
-
-    private fun parseFileName(contentDisposition: String?): String? {
-        if (contentDisposition.isNullOrBlank()) return null
-
-        val fileNameStar = Regex("""filename\*\s*=\s*UTF-8''([^;]+)""", RegexOption.IGNORE_CASE)
-            .find(contentDisposition)?.groupValues?.getOrNull(1)
-
-        if (!fileNameStar.isNullOrBlank()) return fileNameStar.trim().trim('"')
-
-        val fileName = Regex("""filename\s*=\s*"?([^";]+)"?""", RegexOption.IGNORE_CASE)
-            .find(contentDisposition)?.groupValues?.getOrNull(1)
-
-        return fileName?.trim()?.trim('"')
     }
 }

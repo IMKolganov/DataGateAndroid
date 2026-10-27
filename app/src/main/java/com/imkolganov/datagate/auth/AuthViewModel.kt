@@ -755,6 +755,13 @@ class AuthViewModel(
             AuthUiState(isLoggedIn = false, adminTotpGate = AdminTotpGate.Allowed)
         }
     }
+
+    /** Server rejected the refresh token: sign out and explain why on the login screen. */
+    fun onSessionExpired(message: String) {
+        if (!_state.value.isLoggedIn) return
+        logout()
+        _state.update { it.copy(errorMessage = message) }
+    }
 }
 
 class AuthViewModelFactory(

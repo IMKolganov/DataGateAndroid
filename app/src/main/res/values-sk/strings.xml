@@ -41,6 +41,9 @@
 
     <string name="home_telegram_channel_title">Odporúčame odber — je to dôležité</string>
     <string name="home_telegram_channel_body">Telegram kanál projektu: aktuálne správy a oznámenia pri výpadkoch služby.</string>
+    <string name="home_support_project_title">Podporte projekt</string>
+    <string name="home_support_project_body">DataGate zostáva zadarmo vďaka podporovateľom. V Telegram bote nájdete tarify a spôsoby platby.</string>
+    <string name="home_support_project_action">Otvoriť Telegram bota</string>
     <string name="home_grace_banner_title">Pripojené — dočasný prístup</string>
     <string name="home_grace_banner_body">Prepojte účet alebo si predplaťte do %1$s, inak bude toto pripojenie ukončené.</string>
     <string name="home_traffic">Traffic</string>
@@ -122,6 +125,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">Copy</string>
     <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Nadol</string>
+    <string name="home_engine_logs_reconnects">Opätovné pripojenia: %1$d · Relácie: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -298,9 +303,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Aktualizuje sa zoznam IP…</string>
     <string name="vpn_ip_list_ready">Zoznam IP je pripravený (%1$d trás)</string>
 
@@ -408,6 +421,7 @@ Môžete otvoriť stránku vydania alebo stiahnuť APK.</string>
     <string name="error_google_signin_failed">Prihlásenie cez Google zlyhalo. Skúste to znova.</string>
     <string name="error_network_no_internet">Žiadne internetové pripojenie. Skontrolujte sieť a skúste znova.</string>
     <string name="error_network_timeout">Vypršal časový limit pripojenia. Skúste znova.</string>
+    <string name="auth_session_expired">Platnosť relácie vypršala. Prihláste sa znova.</string>
     <string name="error_network_interrupted">Sieťové pripojenie bolo prerušené. Skúste znova.</string>
     <string name="error_network_tls">Nepodarilo sa vytvoriť zabezpečené pripojenie. Skontrolujte sieť alebo nastavenia VPN a skúste znova.</string>
     <string name="home_quick_actions_title">Pomocník a jazyk</string>

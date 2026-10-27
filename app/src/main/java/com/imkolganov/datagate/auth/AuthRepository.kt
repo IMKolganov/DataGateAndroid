@@ -3,6 +3,7 @@ package com.imkolganov.datagate.auth
 import android.app.Activity
 import android.util.Log
 import com.imkolganov.datagate.auth.http.BackendAuthApi
+import com.imkolganov.datagate.auth.http.RefreshRejectedException
 import com.imkolganov.datagate.auth.tv.TvDeviceInfo
 import com.imkolganov.datagate.auth.tv.TvLoginApi
 import com.imkolganov.datagate.model.auth.ConfirmEmailResultDto
@@ -73,11 +74,15 @@ class AuthRepository(
             tokenStore.saveRefreshTokenExpiration(refreshed.refreshExpiration)
             autoLoginStore.setEnabled(true)
             true
-        } catch (t: Throwable) {
-            Log.w(TAG, "Session restore failed, clearing tokens", t)
+        } catch (e: RefreshRejectedException) {
+            Log.w(TAG, "Session restore rejected (${e.code}), clearing tokens", e)
             tokenStore.clear()
             autoLoginStore.setEnabled(false)
             false
+        } catch (t: Throwable) {
+            // Offline/timeout/5xx at startup: stay signed in; the authenticator refreshes on the first 401.
+            Log.w(TAG, "Session restore failed, keeping refresh token", t)
+            true
         }
     }
 

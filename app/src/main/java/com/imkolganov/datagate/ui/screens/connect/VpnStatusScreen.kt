@@ -66,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.freetier.shouldShowSupportProjectCta
 import com.imkolganov.datagate.update.GitHubLatestRelease
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.logger.EngineJournal
@@ -89,6 +90,8 @@ fun VpnStatusScreen(
     graceExpiresAtUtcMs: Long? = null,
     primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
     traffic: VpnTrafficUiState = VpnTrafficUiState(),
+    /** Active quota plan name from Access; used to hide support CTA for Pro/Unlimited. */
+    currentPlanName: String? = null,
 ) {
     val engineJournalEnabled by EngineJournal.enabled.collectAsState()
     val engineJournalText by EngineJournal.text.collectAsState()
@@ -96,6 +99,7 @@ fun VpnStatusScreen(
     val supportEmail = stringResource(R.string.support_contact_email)
     val supportEmailSubject = stringResource(R.string.home_report_email_subject)
     val telegramBotUrl = stringResource(R.string.support_telegram_bot_url)
+    val telegramBotSupportUrl = stringResource(R.string.support_telegram_bot_support_url)
     val projectTelegramUrl = stringResource(R.string.project_telegram_url)
     val githubIssuesUrl = stringResource(R.string.project_github_issues_url)
     val isConnected = state.isVpnConnected
@@ -212,18 +216,13 @@ fun VpnStatusScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
             Spacer(modifier = Modifier.height(8.dp))
 
             homeUpdateBanner?.let { rel ->
@@ -392,6 +391,14 @@ fun VpnStatusScreen(
                 LiveTrafficCard(traffic = traffic)
             }
 
+            val showSupportProject =
+                isConnected && shouldShowSupportProjectCta(currentPlanName)
+            if (showSupportProject) {
+                HomeSupportProjectBanner(
+                    onOpenBot = { openUrl(telegramBotSupportUrl) },
+                )
+            }
+
             Text(
                 modifier = Modifier
                     .widthIn(max = 520.dp)
@@ -402,16 +409,20 @@ fun VpnStatusScreen(
             )
 
             if (engineJournalEnabled) {
-                EngineJournalCard(text = engineJournalText)
+                EngineJournalCard(
+                    text = engineJournalText,
+                    reconnectCount = state.reconnectCount,
+                    sessionActive = state.isConnectRequested || state.isVpnConnected || state.isVpnPaused,
+                )
+            }
+
+            if (!showSupportProject) {
+                HomeTelegramChannelBanner(
+                    onOpenChannel = { openUrl(projectTelegramUrl) },
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            HomeTelegramChannelBanner(
-                onOpenChannel = { openUrl(projectTelegramUrl) },
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
-            )
         }
     }
 
@@ -562,6 +573,42 @@ private fun formatGraceCountdown(totalSeconds: Int): String {
 }
 
 @Composable
+private fun HomeSupportProjectBanner(
+    onOpenBot: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = modifier
+            .fillMaxWidth()
+            .widthIn(max = 520.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = stringResource(R.string.home_support_project_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.home_support_project_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f),
+            )
+            TextButton(
+                onClick = onOpenBot,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .tvFocusBorder(shape = RoundedCornerShape(8.dp)),
+            ) {
+                Text(stringResource(R.string.home_support_project_action))
+            }
+        }
+    }
+}
+
+@Composable
 private fun HomeTelegramChannelBanner(
     onOpenChannel: () -> Unit,
     modifier: Modifier = Modifier,
@@ -573,7 +620,7 @@ private fun HomeTelegramChannelBanner(
             .fillMaxWidth()
             .widthIn(max = 520.dp)
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Text(
                 text = stringResource(R.string.home_telegram_channel_title),
                 style = MaterialTheme.typography.titleSmall,
@@ -657,6 +704,7 @@ fun VpnStatusScreenPreview_Connected() {
                     TrafficSample(
                         speedInBps = (200_000 + i * 40_000).toLong(),
                         speedOutBps = (20_000 + i * 3_000).toLong(),
+                        seq = i.toLong(),
                     )
                 },
             ),

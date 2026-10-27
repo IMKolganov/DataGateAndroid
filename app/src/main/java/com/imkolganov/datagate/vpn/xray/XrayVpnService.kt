@@ -30,6 +30,7 @@ import com.imkolganov.datagate.vpn.OpenVpn3Service
 import com.imkolganov.datagate.vpn.SplitTunnelSession
 import com.imkolganov.datagate.vpn.VpnBypassApps
 import com.imkolganov.datagate.vpn.VpnExcludeRoutes
+import com.imkolganov.datagate.vpn.VpnNetworkCapChangePolicy
 import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
 import com.imkolganov.datagate.vpn.traffic.VpnTrafficMonitor
 import com.imkolganov.datagate.vpn.traffic.VpnTunIfaceCounters
@@ -96,6 +97,11 @@ class XrayVpnService : VpnService() {
     @Volatile private var isPaused = false
     @Volatile private var desiredConnection = false
     @Volatile private var networkAvailable = true
+    private var lastNetworkTransport: String? = null
+    private var lastNetworkUsable: Boolean? = null
+    /** Last observed non-VPN network identity (validated not required). */
+    private var lastUnderlyingHandle: Long? = null
+    private var unhealthyCoreWatch = XrayNetworkPolicy.UnhealthyCoreWatch()
     private var isNetworkCallbackRegistered = false
     private var isUnderlyingNetworkCallbackRegistered = false
     /** Non-VPN default network; used to detect cell↔Wi-Fi without looping on the VPN iface. */
@@ -541,6 +547,18 @@ class XrayVpnService : VpnService() {
         )
     }
 
+    private fun currentTransportLabel(): String {
+        val network = connectivityManager.activeNetwork ?: return "none"
+        val caps = connectivityManager.getNetworkCapabilities(network) ?: return "unknown"
+        return when {
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "vpn"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
+            else -> "other"
+        }
+    }
+
     private fun runHealthCheck(trigger: String, connectInFlight: Boolean = isConnectInFlight()) {
         val caps = connectivityManager.activeNetwork?.let { connectivityManager.getNetworkCapabilities(it) }
         val hasVpnTransport = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
@@ -550,22 +568,40 @@ class XrayVpnService : VpnService() {
                 "system_vpn_transport_mismatch trigger=$trigger running=$running hasVpnTransport=$hasVpnTransport",
             )
         }
-        if (running) {
-            val coreRunning = runCatching { XrayCoreFacade.isRunning() }.getOrDefault(true)
-            if (XrayNetworkPolicy.shouldRestartUnhealthySession(
-                    desiredConnection = desiredConnection,
-                    stopping = isStopping,
-                    running = running,
-                    coreRunning = coreRunning,
-                    networkAvailable = networkAvailable,
-                    paused = isPaused,
-                    connectInFlight = connectInFlight,
-                )
-            ) {
-                VpnDebugLogger.w(TAG, "xray core not running; reconnecting trigger=$trigger")
-                reconnectFromPending()
-            }
+        if (!running) {
+            unhealthyCoreWatch = XrayNetworkPolicy.UnhealthyCoreWatch()
+            return
         }
+        val coreRunning = runCatching { XrayCoreFacade.isRunning() }.getOrDefault(true)
+        val now = SystemClock.elapsedRealtime()
+        unhealthyCoreWatch = unhealthyCoreWatch.observe(coreRunning = coreRunning, nowMs = now)
+        val candidate = XrayNetworkPolicy.shouldRestartUnhealthySession(
+            desiredConnection = desiredConnection,
+            stopping = isStopping,
+            running = running,
+            coreRunning = coreRunning,
+            networkAvailable = networkAvailable,
+            paused = isPaused,
+            connectInFlight = connectInFlight,
+        )
+        if (!candidate) return
+        if (
+            !XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = unhealthyCoreWatch.consecutiveUnhealthy,
+                nowMs = now,
+                unhealthySinceMs = unhealthyCoreWatch.unhealthySinceMs,
+            )
+        ) {
+            VpnDebugLogger.w(
+                TAG,
+                "unhealthy_core_pending trigger=$trigger consecutive=${unhealthyCoreWatch.consecutiveUnhealthy}",
+            )
+            return
+        }
+        VpnDebugLogger.w(TAG, "xray core not running; reconnecting trigger=$trigger")
+        unhealthyCoreWatch = XrayNetworkPolicy.UnhealthyCoreWatch()
+        reconnectFromPending()
     }
 
     private fun isConnectInFlight(): Boolean = connectJob?.isActive == true
@@ -609,6 +645,33 @@ class XrayVpnService : VpnService() {
 
     private fun onNetworkStateChanged(source: String) {
         networkAvailable = hasUsableNetwork()
+        val transport = currentTransportLabel()
+        // Identity without requiring VALIDATED so validated flicker is not treated as a new uplink.
+        val identityHandle = currentUnderlyingNetworkHandle(requireValidated = false)
+        if (
+            !VpnNetworkCapChangePolicy.shouldDispatch(
+                source = source,
+                transport = transport,
+                usable = networkAvailable,
+                hasActiveSession = running,
+                desiredConnection = desiredConnection,
+                lastTransport = lastNetworkTransport,
+                lastUsable = lastNetworkUsable,
+                lastUnderlyingHandle = lastUnderlyingHandle,
+                currentUnderlyingHandle = identityHandle,
+            )
+        ) {
+            // Seed identity without HEALTH/reconnect work so a later handle swap still dispatches.
+            if (identityHandle != null && lastUnderlyingHandle == null) {
+                lastUnderlyingHandle = identityHandle
+            }
+            return
+        }
+        lastNetworkTransport = transport
+        lastNetworkUsable = networkAvailable
+        if (identityHandle != null) {
+            lastUnderlyingHandle = identityHandle
+        }
         val snapshots = currentNetworkSnapshots()
         val underlying = XrayNetworkPolicy.pickUnderlyingHandle(snapshots, requireValidated = false)
         val switchHandle = XrayNetworkPolicy.pickUnderlyingHandle(snapshots, requireValidated = true)

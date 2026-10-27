@@ -41,6 +41,9 @@
 
     <string name="home_telegram_channel_title">Prenumerera — det är viktigt</string>
     <string name="home_telegram_channel_body">Projektets Telegram-kanal: nyheter och meddelanden vid serviceproblem.</string>
+    <string name="home_support_project_title">Stöd projektet</string>
+    <string name="home_support_project_body">DataGate förblir gratis tack vare supportrar. Öppna vår Telegram-bot för abonnemang och betalning.</string>
+    <string name="home_support_project_action">Öppna Telegram-bot</string>
     <string name="home_grace_banner_title">Ansluten — tillfällig åtkomst</string>
     <string name="home_grace_banner_body">Länka ditt konto eller prenumerera inom %1$s, annars kopplas sessionen ner.</string>
     <string name="home_traffic">Traffic</string>
@@ -122,6 +125,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">Copy</string>
     <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Botten</string>
+    <string name="home_engine_logs_reconnects">Återanslutningar: %1$d · Sessioner: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -298,9 +303,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Uppdaterar IP-lista…</string>
     <string name="vpn_ip_list_ready">IP-lista klar (%1$d rutter)</string>
 
@@ -408,6 +421,7 @@ Du kan öppna versionssidan eller ladda ner APK:n.</string>
     <string name="error_google_signin_failed">Det gick inte att logga in med Google. Försök igen.</string>
     <string name="error_network_no_internet">Ingen internetanslutning. Kontrollera nätverket och försök igen.</string>
     <string name="error_network_timeout">Anslutningen fick timeout. Försök igen.</string>
+    <string name="auth_session_expired">Sessionen har gått ut. Logga in igen.</string>
     <string name="error_network_interrupted">Nätverksanslutningen avbröts. Försök igen.</string>
     <string name="error_network_tls">Det gick inte att upprätta en säker anslutning. Kontrollera nätverket eller VPN-inställningarna och försök igen.</string>
     <string name="home_quick_actions_title">Hjälp och språk</string>

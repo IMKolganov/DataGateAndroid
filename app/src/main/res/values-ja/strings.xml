@@ -37,6 +37,9 @@
 
     <string name="home_telegram_channel_title">チャンネル登録を — 重要です</string>
     <string name="home_telegram_channel_body">プロジェクトの Telegram チャンネル：最新ニュースとサービス障害のお知らせ。</string>
+    <string name="home_support_project_title">プロジェクトを支援</string>
+    <string name="home_support_project_body">DataGate はサポーターのおかげで無料です。プランと支払い方法は Telegram ボットで確認できます。</string>
+    <string name="home_support_project_action">Telegram ボットを開く</string>
     <string name="home_grace_banner_title">接続済み — 一時的なアクセス</string>
     <string name="home_grace_banner_body">%1$s以内にアカウントを連携するか登録しないと、この接続は切断されます。</string>
     <string name="home_traffic">トラフィック</string>
@@ -111,6 +114,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">コピー</string>
     <string name="home_engine_logs_clear">クリア</string>
+    <string name="home_engine_logs_bottom">最下部</string>
+    <string name="home_engine_logs_reconnects">再接続: %1$d · セッション: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -280,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">IP リストを更新中…</string>
     <string name="vpn_ip_list_ready">IP リスト準備完了（%1$d ルート）</string>
 
@@ -390,6 +403,7 @@
     <string name="error_google_signin_failed">Google サインインに失敗しました。もう一度お試しください。</string>
     <string name="error_network_no_internet">インターネットに接続していません。ネットワークを確認して再試行してください。</string>
     <string name="error_network_timeout">接続がタイムアウトしました。再試行してください。</string>
+    <string name="auth_session_expired">セッションの有効期限が切れました。もう一度サインインしてください。</string>
     <string name="error_network_interrupted">ネットワーク接続が中断されました。再試行してください。</string>
     <string name="error_network_tls">安全な接続を確立できませんでした。ネットワークまたは VPN の設定を確認して再試行してください。</string>
     <string name="home_quick_actions_title">ヘルプと言語</string>

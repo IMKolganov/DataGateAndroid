@@ -52,6 +52,16 @@ fun isFreeOrDefaultPlan(planName: String?): Boolean {
         planName.equals("Default", ignoreCase = true)
 }
 
+/** Top paid tiers that should not see the post-connect “support the project” CTA. */
+fun isProOrUnlimitedPlan(planName: String?): Boolean {
+    if (planName.isNullOrBlank()) return false
+    return planName.equals("Pro", ignoreCase = true) ||
+        planName.equals("Unlimited", ignoreCase = true)
+}
+
+/** Show support CTA when connected on any plan other than Pro/Unlimited (incl. unknown). */
+fun shouldShowSupportProjectCta(planName: String?): Boolean = !isProOrUnlimitedPlan(planName)
+
 /**
  * Client-side gate before calling free-tier APIs.
  * - Admins never need the Telegram compliance UX.

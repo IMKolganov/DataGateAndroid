@@ -41,6 +41,9 @@
 
     <string name="home_telegram_channel_title">Pretplatite se — važno je</string>
     <string name="home_telegram_channel_body">Telegram kanal projekta: vijesti i obavijesti o problemima usluge.</string>
+    <string name="home_support_project_title">Podržite projekt</string>
+    <string name="home_support_project_body">DataGate ostaje besplatan zahvaljujući podržavateljima. Otvorite Telegram bota za pakete i načine plaćanja.</string>
+    <string name="home_support_project_action">Otvori Telegram bota</string>
     <string name="home_grace_banner_title">Povezano — privremeni pristup</string>
     <string name="home_grace_banner_body">Povežite račun ili se pretplatite unutar %1$s, inače će ova sesija biti prekinuta.</string>
     <string name="home_traffic">Traffic</string>
@@ -122,6 +125,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">Copy</string>
     <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Dno</string>
+    <string name="home_engine_logs_reconnects">Ponovna spajanja: %1$d · Sesije: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -298,9 +303,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Ažuriranje IP popisa…</string>
     <string name="vpn_ip_list_ready">IP popis spreman (%1$d ruta)</string>
 
@@ -408,6 +421,7 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="error_google_signin_failed">Prijava putem Googlea nije uspjela. Pokušajte ponovo.</string>
     <string name="error_network_no_internet">Nema internetske veze. Provjerite mrežu i pokušajte ponovno.</string>
     <string name="error_network_timeout">Isteklo je vrijeme veze. Pokušajte ponovno.</string>
+    <string name="auth_session_expired">Sesija je istekla. Prijavite se ponovno.</string>
     <string name="error_network_interrupted">Mrežna veza je prekinuta. Pokušajte ponovno.</string>
     <string name="error_network_tls">Sigurna veza nije uspostavljena. Provjerite mrežu ili VPN postavke i pokušajte ponovno.</string>
     <string name="home_quick_actions_title">Pomoć i jezik</string>

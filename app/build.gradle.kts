@@ -55,9 +55,9 @@ android {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 17
+        versionCode = 18
         // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
-        versionName = "1.0.17"
+        versionName = "1.0.18"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
             ?: "IMKolganov/DataGateAndroid"
@@ -66,8 +66,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            //noinspection ChromeOsAbiSupport
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+            // Phones only: drop x86/x86_64 (emulators) from release APK size.
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
         }
     }
 

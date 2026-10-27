@@ -25,8 +25,11 @@ data class TrafficDeltaResult(
  * is a new baseline (no negative speed, no extra zero sample).
  */
 object TrafficDelta {
-    const val MAX_SAMPLES = 60
+    /** ~5 min of 1 Hz samples; chart shows a shorter live window and scrolls the rest. */
+    const val MAX_SAMPLES = 300
     const val MIN_CHART_SAMPLES = 2
+    /** Visible X span on the live chart (one sample ≈ one second). */
+    const val CHART_VISIBLE_SAMPLES = 90
 
     fun apply(
         previous: TrafficCounters?,
@@ -82,12 +85,13 @@ object TrafficDelta {
 
         val speedIn = (current.bytesIn - previous.bytesIn) * 1000L / dtMs
         val speedOut = (current.bytesOut - previous.bytesOut) * 1000L / dtMs
+        val seq = (samples.lastOrNull()?.seq ?: -1L) + 1L
         return TrafficDeltaResult(
             previous = current,
             previousAtMs = nowMs,
             sessionBytesIn = current.bytesIn,
             sessionBytesOut = current.bytesOut,
-            samples = append(samples, TrafficSample(speedIn, speedOut), maxSamples),
+            samples = append(samples, TrafficSample(speedIn, speedOut, seq), maxSamples),
             speedInBps = speedIn,
             speedOutBps = speedOut,
         )

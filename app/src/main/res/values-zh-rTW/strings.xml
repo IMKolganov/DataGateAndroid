@@ -37,6 +37,9 @@
 
     <string name="home_telegram_channel_title">訂閱頻道 — 很重要</string>
     <string name="home_telegram_channel_body">專案 Telegram 頻道：最新消息與服務故障公告。</string>
+    <string name="home_support_project_title">支持專案</string>
+    <string name="home_support_project_body">DataGate 因支持者而維持免費。開啟我們的 Telegram 機器人查看方案與付款方式。</string>
+    <string name="home_support_project_action">開啟 Telegram 機器人</string>
     <string name="home_grace_banner_title">已連線 — 臨時存取</string>
     <string name="home_grace_banner_body">請在%1$s內綁定帳號或訂閱,否則此連線將被中斷。</string>
     <string name="home_traffic">流量</string>
@@ -111,6 +114,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">複製</string>
     <string name="home_engine_logs_clear">清除</string>
+    <string name="home_engine_logs_bottom">底部</string>
+    <string name="home_engine_logs_reconnects">重新連線：%1$d · 工作階段：%2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -280,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">正在更新 IP 清單…</string>
     <string name="vpn_ip_list_ready">IP 清單已就緒（%1$d 條路由）</string>
 
@@ -390,6 +403,7 @@
     <string name="error_google_signin_failed">Google 登入失敗，請再試一次。</string>
     <string name="error_network_no_internet">沒有網路連線。請檢查網路後再試一次。</string>
     <string name="error_network_timeout">連線逾時。請再試一次。</string>
+    <string name="auth_session_expired">工作階段已過期，請重新登入。</string>
     <string name="error_network_interrupted">網路連線中斷。請再試一次。</string>
     <string name="error_network_tls">無法建立安全連線。請檢查網路或 VPN 設定後再試一次。</string>
     <string name="home_quick_actions_title">說明與語言</string>

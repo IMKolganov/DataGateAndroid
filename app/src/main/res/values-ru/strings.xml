@@ -123,10 +123,14 @@
 
     <string name="home_telegram_channel_title">Подпишитесь — это важно</string>
     <string name="home_telegram_channel_body">Telegram-канал проекта: актуальные новости и объявления при проблемах с сервисом.</string>
+
+    <string name="home_support_project_title">Поддержать проект</string>
+    <string name="home_support_project_body">DataGate остаётся бесплатным благодаря поддержке. В боте — тарифы и как оплатить.</string>
+    <string name="home_support_project_action">Открыть Telegram-бота</string>
     <string name="home_grace_banner_title">Подключено — временный доступ</string>
     <string name="home_grace_banner_body">Свяжите аккаунт или оформите подписку в течение %1$s, иначе сессия будет отключена.</string>
     <string name="home_traffic">Трафик</string>
-    <string name="home_traffic_hint">Живая скорость на этом устройстве через VPN-туннель.</string>
+    <string name="home_traffic_hint">Живая скорость через VPN-туннель. Свайп — история, щипок — масштаб.</string>
     <string name="home_traffic_download">Загрузка</string>
     <string name="home_traffic_upload">Отдача</string>
     <string name="home_traffic_waiting">Ожидание трафика…</string>
@@ -205,6 +209,8 @@
     <string name="home_engine_logs_waiting">Ожидание событий движка…</string>
     <string name="home_engine_logs_copy">Копировать</string>
     <string name="home_engine_logs_clear">Очистить</string>
+    <string name="home_engine_logs_bottom">Вниз</string>
+    <string name="home_engine_logs_reconnects">Переподключения: %1$d · Сессии: %2$d</string>
     <string name="settings_vpn_debug_title">Лог отладки VPN</string>
     <string name="settings_debug_mode">Писать сессию VPN в файл</string>
     <string name="settings_debug_mode_subtitle">Пишет понятный EVENT-таймлайн (connect, reconnect, потеря bridge, сеть, OpenVPN core, исключения). После сбоя отправьте файл.</string>
@@ -358,6 +364,7 @@
     <string name="error_google_signin_failed">Не удалось выполнить вход через Google. Попробуйте снова.</string>
     <string name="error_network_no_internet">Нет подключения к интернету. Проверьте сеть и попробуйте снова.</string>
     <string name="error_network_timeout">Истекло время ожидания соединения. Попробуйте снова.</string>
+    <string name="auth_session_expired">Сессия истекла. Войдите снова.</string>
     <string name="error_network_interrupted">Сетевое соединение было прервано. Попробуйте снова.</string>
     <string name="error_network_tls">Не удалось установить безопасное соединение. Проверьте сеть или настройки VPN и попробуйте снова.</string>
 

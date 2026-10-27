@@ -9,6 +9,8 @@ data class TrafficCounters(
 data class TrafficSample(
     val speedInBps: Long,
     val speedOutBps: Long,
+    /** Monotonic chart X (seconds of session samples); survives ring-buffer drops. */
+    val seq: Long = 0L,
 )
 
 fun interface VpnTrafficSource {

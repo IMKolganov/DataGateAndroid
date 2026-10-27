@@ -170,6 +170,8 @@ class OpenVpn3Service : VpnService() {
     private var desiredConnection = false
     private var pendingConnectRequest: PendingConnectRequest? = null
     private var networkAvailable = true
+    private var lastNetworkTransport: String? = null
+    private var lastNetworkUsable: Boolean? = null
     private var lastReconnectAttemptAtMs: Long = 0L
     @Volatile private var reconnectPendingAfterJob = false
     private var isNetworkCallbackRegistered = false
@@ -943,6 +945,11 @@ class OpenVpn3Service : VpnService() {
         connectInProgress = true
         hasActiveSession = false
         transitionState(VpnRuntimeState.CONNECTING, reason)
+        // Feed the shared Home reconnect/session counter (same as Xray). Deduped if caller
+        // already broadcast RECONNECTING in this cycle. Skip first connect / resume.
+        if (reason != "connect_command" && reason != "resume_command") {
+            broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+        }
         val establish = ExcludeRouteSession.resolveOpenVpnEstablish(
             storedConfig = request.configText,
             intentRoutes = request.excludedRoutes,
@@ -1435,17 +1442,34 @@ class OpenVpn3Service : VpnService() {
     }
 
     private fun onNetworkStateChanged(source: String) {
-        commandQueue.trySend(VpnCommand.NetworkChanged(source, currentTransportLabel()))
+        val transport = currentTransportLabel()
+        val usable = hasUsableNetwork()
+        if (
+            !VpnNetworkCapChangePolicy.shouldDispatch(
+                source = source,
+                transport = transport,
+                usable = usable,
+                hasActiveSession = hasActiveSession,
+                desiredConnection = desiredConnection,
+                lastTransport = lastNetworkTransport,
+                lastUsable = lastNetworkUsable,
+            )
+        ) {
+            return
+        }
+        lastNetworkTransport = transport
+        lastNetworkUsable = usable
+        commandQueue.trySend(VpnCommand.NetworkChanged(source, transport))
     }
 
     private fun currentTransportLabel(): String {
         val network = connectivityManager.activeNetwork ?: return "none"
         val caps = connectivityManager.getNetworkCapabilities(network) ?: return "unknown"
         return when {
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "vpn"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
-            caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "vpn"
             else -> "other"
         }
     }

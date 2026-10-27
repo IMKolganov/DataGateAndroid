@@ -89,3 +89,39 @@ fun JSONObject.optDataString(): String? {
         else -> null
     }
 }
+
+/**
+ * Download-by-CN payloads historically nest metadata under `issuedOvpn` (OpenVPN and Xray links
+ * share the same DTO). Newer responses may omit it or rename the key — [content] is what matters.
+ */
+data class IssuedFilePayload(
+    val fileName: String,
+    val contentBase64: String,
+)
+
+fun JSONObject.parseIssuedFilePayloadOrThrow(
+    operation: String,
+    defaultFileName: String,
+): IssuedFilePayload {
+    val data = optDataObject()
+        ?: throw java.io.IOException("$operation: missing data object in API response")
+    val content = data.optString("content", data.optString("Content", "")).trim()
+    if (content.isEmpty()) {
+        val msg = optString("message", optString("Message", "")).trim()
+        throw java.io.IOException(
+            if (msg.isNotEmpty()) "$operation: $msg"
+            else "$operation: missing file content in API response"
+        )
+    }
+    val meta = sequenceOf("issuedOvpn", "IssuedOvpn", "issuedXray", "IssuedXray", "issuedLink", "IssuedLink")
+        .mapNotNull { key ->
+            if (data.has(key) && !data.isNull(key) && data.get(key) is JSONObject) data.getJSONObject(key)
+            else null
+        }
+        .firstOrNull()
+    val fileName = meta?.optString("fileName", meta.optString("FileName", ""))
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: defaultFileName
+    return IssuedFilePayload(fileName = fileName, contentBase64 = content)
+}

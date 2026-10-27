@@ -197,6 +197,18 @@ class FreeTierOnboardingRulesTest {
     }
 
     @Test
+    fun shouldShowSupportProjectCta_hidesOnlyProAndUnlimited() {
+        assertFalse(shouldShowSupportProjectCta("Pro"))
+        assertFalse(shouldShowSupportProjectCta("pro"))
+        assertFalse(shouldShowSupportProjectCta("Unlimited"))
+        assertTrue(shouldShowSupportProjectCta("Free"))
+        assertTrue(shouldShowSupportProjectCta("Default"))
+        assertTrue(shouldShowSupportProjectCta("Standard"))
+        assertTrue(shouldShowSupportProjectCta(null))
+        assertTrue(shouldShowSupportProjectCta(""))
+    }
+
+    @Test
     fun shouldSkipFreeTierClientChecks_adminOrPaidPlan() {
         assertTrue(shouldSkipFreeTierClientChecks(isAdmin = true, knownPlanName = null))
         assertTrue(shouldSkipFreeTierClientChecks(isAdmin = true, knownPlanName = "Free"))

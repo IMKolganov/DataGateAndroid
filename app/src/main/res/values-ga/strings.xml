@@ -41,6 +41,9 @@
 
     <string name="home_telegram_channel_title">Liostáil — tá sé tábhachtach</string>
     <string name="home_telegram_channel_body">Cainéal Telegram an tionscadail: nuacht agus fógraí nuair a bhíonn fadhbanna seirbhíse.</string>
+    <string name="home_support_project_title">Tacaigh leis an tionscadal</string>
+    <string name="home_support_project_body">Fanann DataGate saor in aisce a bhuíochas le lucht tacaíochta. Oscail ár mbota Telegram le haghaidh pleananna agus íocaíochta.</string>
+    <string name="home_support_project_action">Oscail bota Telegram</string>
     <string name="home_grace_banner_title">Ceangailte — rochtain shealadach</string>
     <string name="home_grace_banner_body">Nasc do chuntas nó liostáil laistigh de %1$s nó dícheanglófar an seisiún seo.</string>
     <string name="home_traffic">Traffic</string>
@@ -122,6 +125,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">Copy</string>
     <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Bun</string>
+    <string name="home_engine_logs_reconnects">Athnaisc: %1$d · Seisiúin: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -298,9 +303,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Liosta IP á nuashonrú…</string>
     <string name="vpn_ip_list_ready">Liosta IP réidh (%1$d bealach)</string>
 
@@ -408,6 +421,7 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="error_google_signin_failed">Theip ar an síniú isteach le Google. Bain triail eile as.</string>
     <string name="error_network_no_internet">Níl aon nasc idirlín ann. Seiceáil do líonra agus bain triail eile as.</string>
     <string name="error_network_timeout">Chuaigh an nasc thar am. Bain triail eile as.</string>
+    <string name="auth_session_expired">Tá do sheisiún imithe in éag. Sínigh isteach arís.</string>
     <string name="error_network_interrupted">Cuireadh isteach ar an nasc líonra. Bain triail eile as.</string>
     <string name="error_network_tls">Níorbh fhéidir nasc slán a bhunú. Seiceáil do líonra nó socruithe VPN agus bain triail eile as.</string>
     <string name="home_quick_actions_title">Cabhair &amp; teanga</string>

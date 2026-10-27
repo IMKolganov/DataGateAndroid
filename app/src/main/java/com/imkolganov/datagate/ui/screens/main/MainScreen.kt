@@ -158,6 +158,7 @@ fun MainScreen(
                 graceExpiresAtUtcMs = graceExpiresAtUtcMs,
                 primaryFocusRequester = if (isTelevision) contentFocusRequester else null,
                 traffic = traffic,
+                currentPlanName = accessState.quota.currentPlanName,
             )
             MainTab.Access -> AccessScreen(
                 state = accessState,

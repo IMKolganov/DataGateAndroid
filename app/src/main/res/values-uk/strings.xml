@@ -40,6 +40,9 @@
 
     <string name="home_telegram_channel_title">Підпишіться — це важливо</string>
     <string name="home_telegram_channel_body">Telegram-канал проєкту: актуальні новини та оголошення при проблемах із сервісом.</string>
+    <string name="home_support_project_title">Підтримати проєкт</string>
+    <string name="home_support_project_body">DataGate залишається безкоштовним завдяки підтримці. У Telegram-боті — тарифи та способи оплати.</string>
+    <string name="home_support_project_action">Відкрити Telegram-бота</string>
     <string name="home_grace_banner_title">Підключено — тимчасовий доступ</string>
     <string name="home_grace_banner_body">Прив\'яжіть акаунт або оформіть підписку протягом %1$s, інакше сесію буде відключено.</string>
     <string name="home_traffic">Трафік</string>
@@ -122,6 +125,8 @@
     <string name="home_engine_logs_waiting">Очікування подій рушія…</string>
     <string name="home_engine_logs_copy">Копіювати</string>
     <string name="home_engine_logs_clear">Очистити</string>
+    <string name="home_engine_logs_bottom">Донизу</string>
+    <string name="home_engine_logs_reconnects">Перепідключення: %1$d · Сеанси: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -336,9 +341,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Оновлення IP-списку…</string>
     <string name="vpn_ip_list_ready">IP-список готовий (%1$d маршрутів)</string>
 
@@ -406,6 +419,7 @@
     <string name="error_google_signin_failed">Не вдалося виконати вхід через Google. Спробуйте ще раз.</string>
     <string name="error_network_no_internet">Немає підключення до інтернету. Перевірте мережу і спробуйте ще раз.</string>
     <string name="error_network_timeout">Час очікування з\'єднання минув. Спробуйте ще раз.</string>
+    <string name="auth_session_expired">Сеанс завершився. Увійдіть знову.</string>
     <string name="error_network_interrupted">Мережеве з\'єднання було перервано. Спробуйте ще раз.</string>
     <string name="error_network_tls">Не вдалося встановити безпечне з\'єднання. Перевірте мережу або налаштування VPN і спробуйте ще раз.</string>
     <string name="home_quick_actions_title">Довідка та мова</string>

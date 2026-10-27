@@ -56,6 +56,47 @@ internal object XrayNetworkPolicy {
         !coreRunning &&
         networkAvailable
 
+    /**
+     * JNI / getXrayState can briefly report !running while the core is fine.
+     * Require [UNHEALTHY_CORE_CONFIRMATIONS] consecutive false readings (or a
+     * short elapsed window) before tearing down a live session — otherwise
+     * HEALTH / QUERY_STATUS capability noise becomes a reconnect storm.
+     */
+    const val UNHEALTHY_CORE_CONFIRMATIONS = 2
+    const val UNHEALTHY_CORE_CONFIRM_MS = 1_500L
+
+    /**
+     * @param consecutiveUnhealthy how many times in a row we saw candidate
+     * unhealthy (including the current probe). Reset to 0 when core is healthy.
+     * @param unhealthySinceMs elapsedRealtime when the streak started; 0 if none.
+     */
+    fun shouldConfirmUnhealthyCoreRestart(
+        candidateRestart: Boolean,
+        consecutiveUnhealthy: Int,
+        nowMs: Long,
+        unhealthySinceMs: Long,
+        requiredConfirmations: Int = UNHEALTHY_CORE_CONFIRMATIONS,
+        confirmWindowMs: Long = UNHEALTHY_CORE_CONFIRM_MS,
+    ): Boolean {
+        if (!candidateRestart) return false
+        if (consecutiveUnhealthy >= requiredConfirmations) return true
+        if (unhealthySinceMs <= 0L) return false
+        return nowMs - unhealthySinceMs >= confirmWindowMs
+    }
+
+    data class UnhealthyCoreWatch(
+        val consecutiveUnhealthy: Int = 0,
+        val unhealthySinceMs: Long = 0L,
+    ) {
+        fun observe(coreRunning: Boolean, nowMs: Long): UnhealthyCoreWatch {
+            if (coreRunning) return UnhealthyCoreWatch()
+            if (consecutiveUnhealthy <= 0) {
+                return UnhealthyCoreWatch(consecutiveUnhealthy = 1, unhealthySinceMs = nowMs)
+            }
+            return copy(consecutiveUnhealthy = consecutiveUnhealthy + 1)
+        }
+    }
+
     fun shouldWarnMissingVpnTransport(running: Boolean, hasVpnTransport: Boolean): Boolean =
         running && !hasVpnTransport
 

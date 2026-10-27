@@ -1,6 +1,7 @@
 package com.imkolganov.datagate.ui.screens.connect
 
 import android.graphics.Paint
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,11 +41,15 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberFadingEdges
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
+import com.patrykandpatrick.vico.core.cartesian.AutoScrollCondition
+import com.patrykandpatrick.vico.core.cartesian.Scroll
+import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
@@ -162,9 +168,9 @@ private fun LiveTrafficChart(
     }
 
     val modelProducer = remember { CartesianChartModelProducer() }
-    val xValues = remember(samples) { samples.indices.map { it.toFloat() } }
-    val downValues = remember(samples) { samples.map { it.speedInBps.toFloat() } }
-    val upValues = remember(samples) { samples.map { it.speedOutBps.toFloat() } }
+    val xValues = remember(samples) { samples.map { it.seq.toDouble() } }
+    val downValues = remember(samples) { samples.map { it.speedInBps.toDouble() } }
+    val upValues = remember(samples) { samples.map { it.speedOutBps.toDouble() } }
 
     LaunchedEffect(xValues, downValues, upValues) {
         modelProducer.runTransaction {
@@ -182,6 +188,39 @@ private fun LiveTrafficChart(
         textColor = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 
+    val followLiveEdge = remember { mutableStateOf(true) }
+    val followLiveEdgeScroll = remember {
+        AutoScrollCondition { oldModel, newModel ->
+            if (!followLiveEdge.value || oldModel == null) return@AutoScrollCondition false
+            val oldMax = oldModel.models.maxOfOrNull { it.maxX } ?: return@AutoScrollCondition false
+            val newMax = newModel.models.maxOfOrNull { it.maxX } ?: return@AutoScrollCondition false
+            newMax > oldMax
+        }
+    }
+    val scrollState = rememberVicoScrollState(
+        scrollEnabled = true,
+        initialScroll = Scroll.Absolute.End,
+        autoScroll = Scroll.Absolute.End,
+        autoScrollCondition = followLiveEdgeScroll,
+        autoScrollAnimationSpec = snap(),
+    )
+    LaunchedEffect(scrollState.value, scrollState.maxValue) {
+        val max = scrollState.maxValue
+        followLiveEdge.value = max <= 0f || scrollState.value >= max - LIVE_EDGE_SLACK_PX
+    }
+    // Zoom.x(n) = show n x-units. Larger n ⇒ more zoomed out. Never use Zoom.Content
+    // as minZoom on a growing live series: with few points Content resolves *more*
+    // zoomed-in than Zoom.x(30), Vico gets min>max and crashes coerceIn.
+    val visibleX = TrafficDelta.CHART_VISIBLE_SAMPLES.toDouble()
+    val zoomOutX = TrafficDelta.MAX_SAMPLES.toDouble()
+    val zoomInX = CHART_MAX_ZOOM_IN_SAMPLES.toDouble()
+    val zoomState = rememberVicoZoomState(
+        zoomEnabled = true,
+        initialZoom = remember(visibleX) { Zoom.x(visibleX) },
+        minZoom = remember(zoomOutX) { Zoom.x(zoomOutX) },
+        maxZoom = remember(zoomInX) { Zoom.x(zoomInX) },
+    )
+
     ProvideVicoTheme(theme = vicoTheme) {
         val downLine = LineCartesianLayer.rememberLine(
             fill = LineCartesianLayer.LineFill.single(fill(DownloadGreen)),
@@ -190,7 +229,7 @@ private fun LiveTrafficChart(
                 cap = Paint.Cap.ROUND,
             ),
             areaFill = LineCartesianLayer.AreaFill.single(fill(DownloadGreen.copy(alpha = 0.22f))),
-            pointConnector = LineCartesianLayer.PointConnector.cubic(curvature = 0.5f),
+            pointConnector = LineCartesianLayer.PointConnector.Sharp,
         )
         val upLine = LineCartesianLayer.rememberLine(
             fill = LineCartesianLayer.LineFill.single(fill(UploadOrange)),
@@ -199,7 +238,7 @@ private fun LiveTrafficChart(
                 cap = Paint.Cap.ROUND,
             ),
             areaFill = LineCartesianLayer.AreaFill.single(fill(UploadOrange.copy(alpha = 0.22f))),
-            pointConnector = LineCartesianLayer.PointConnector.cubic(curvature = 0.5f),
+            pointConnector = LineCartesianLayer.PointConnector.Sharp,
         )
         val lineLayer = rememberLineCartesianLayer(
             lineProvider = LineCartesianLayer.LineProvider.series(downLine, upLine),
@@ -215,13 +254,16 @@ private fun LiveTrafficChart(
         val chart = rememberCartesianChart(
             lineLayer,
             startAxis = startAxis,
+            fadingEdges = rememberFadingEdges(width = 10.dp),
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             CartesianChartHost(
                 chart = chart,
                 modelProducer = modelProducer,
-                scrollState = rememberVicoScrollState(scrollEnabled = false),
-                zoomState = rememberVicoZoomState(zoomEnabled = false),
+                scrollState = scrollState,
+                zoomState = zoomState,
+                animationSpec = null,
+                animateIn = false,
                 modifier = modifier.height(160.dp),
             )
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -259,3 +301,6 @@ private fun ChartLegendSwatch(color: Color, label: String) {
 }
 
 private const val AXIS_PLACEHOLDER = "—"
+private const val LIVE_EDGE_SLACK_PX = 48f
+/** Most zoomed-in window (x-units); must stay below [TrafficDelta.CHART_VISIBLE_SAMPLES]. */
+private const val CHART_MAX_ZOOM_IN_SAMPLES = 30

@@ -521,4 +521,119 @@ class XrayNetworkPolicyTest {
             ),
         )
     }
+
+    @Test
+    fun unhealthyCore_oneShotFalse_doesNotConfirmRestart() {
+        val candidate = XrayNetworkPolicy.shouldRestartUnhealthySession(
+            desiredConnection = true,
+            stopping = false,
+            running = true,
+            coreRunning = false,
+            networkAvailable = true,
+        )
+        assertTrue(candidate)
+        assertFalse(
+            XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = 1,
+                nowMs = 1_000L,
+                unhealthySinceMs = 1_000L,
+            ),
+        )
+    }
+
+    @Test
+    fun unhealthyCore_twoConsecutive_confirmsRestart() {
+        assertTrue(
+            XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = 2,
+                nowMs = 1_100L,
+                unhealthySinceMs = 1_000L,
+            ),
+        )
+    }
+
+    @Test
+    fun unhealthyCore_elapsedConfirmWindow_confirmsRestart() {
+        assertTrue(
+            XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = 1,
+                nowMs = 1_000L + XrayNetworkPolicy.UNHEALTHY_CORE_CONFIRM_MS,
+                unhealthySinceMs = 1_000L,
+            ),
+        )
+    }
+
+    @Test
+    fun unhealthyCore_healthyResetsWatch() {
+        var watch = XrayNetworkPolicy.UnhealthyCoreWatch()
+        watch = watch.observe(coreRunning = false, nowMs = 500L)
+        assertEquals(1, watch.consecutiveUnhealthy)
+        assertEquals(500L, watch.unhealthySinceMs)
+        watch = watch.observe(coreRunning = false, nowMs = 600L)
+        assertEquals(2, watch.consecutiveUnhealthy)
+        assertEquals(500L, watch.unhealthySinceMs)
+        watch = watch.observe(coreRunning = true, nowMs = 700L)
+        assertEquals(0, watch.consecutiveUnhealthy)
+        assertEquals(0L, watch.unhealthySinceMs)
+    }
+
+    @Test
+    fun unhealthyCore_notCandidate_neverConfirms() {
+        assertFalse(
+            XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = false,
+                consecutiveUnhealthy = 5,
+                nowMs = 10_000L,
+                unhealthySinceMs = 1L,
+            ),
+        )
+    }
+
+    @Test
+    fun unhealthyCore_elapsedJustUnderWindow_noConfirm() {
+        assertFalse(
+            XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = 1,
+                nowMs = 1_000L + XrayNetworkPolicy.UNHEALTHY_CORE_CONFIRM_MS - 1L,
+                unhealthySinceMs = 1_000L,
+            ),
+        )
+    }
+
+    @Test
+    fun unhealthyCore_queryStatusStyle_oneProbeNoStorm_twoProbesRestart() {
+        // QUERY_STATUS / HEALTH: single false isRunning must not reconnect immediately.
+        var watch = XrayNetworkPolicy.UnhealthyCoreWatch()
+        watch = watch.observe(coreRunning = false, nowMs = 100L)
+        val candidate = XrayNetworkPolicy.shouldRestartUnhealthySession(
+            desiredConnection = true,
+            stopping = false,
+            running = true,
+            coreRunning = false,
+            networkAvailable = true,
+        )
+        assertTrue(candidate)
+        assertFalse(
+            XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = watch.consecutiveUnhealthy,
+                nowMs = 100L,
+                unhealthySinceMs = watch.unhealthySinceMs,
+            ),
+        )
+
+        watch = watch.observe(coreRunning = false, nowMs = 200L)
+        assertTrue(
+            XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = watch.consecutiveUnhealthy,
+                nowMs = 200L,
+                unhealthySinceMs = watch.unhealthySinceMs,
+            ),
+        )
+    }
 }

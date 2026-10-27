@@ -27,6 +27,7 @@ import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Route
@@ -78,6 +79,7 @@ import com.imkolganov.datagate.logger.DebugPreferences
 import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.ScreenHeader
 import com.imkolganov.datagate.ui.theme.AppLanguageDropdown
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
@@ -239,7 +241,10 @@ fun SettingsScreen(
             if (com.imkolganov.datagate.ui.tv.LocalIsTelevision.current) 16.dp else 12.dp
         )
     ) {
-        Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
+        ScreenHeader(
+            title = stringResource(R.string.settings_title),
+            icon = Icons.Filled.Settings,
+        )
 
         SessionLogoutCard(
             displayName = authInfo.displayName,

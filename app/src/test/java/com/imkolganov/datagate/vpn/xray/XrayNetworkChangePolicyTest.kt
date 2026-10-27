@@ -282,6 +282,41 @@ class XrayNetworkChangePolicyTest {
     }
 
     @Test
+    fun sameHandle_repeatedCallbacks_stayHealthNoRestart() {
+        var state = XrayNetworkChangeState(lastHandle = WIFI)
+        repeat(5) { i ->
+            val decision = resolve(
+                running = true,
+                switchHandle = WIFI,
+                nowMs = 1_000L + i * 500L,
+                previous = state,
+            )
+            assertEquals(XrayNetworkFollowUp.HEALTH, decision.followUp)
+            assertFalse(decision.scheduleSettleRecheck)
+            state = decision.state
+        }
+        assertEquals(WIFI, state.lastHandle)
+    }
+
+    @Test
+    fun cellToWifi_afterSettle_restartsOnce() {
+        val settled = resolve(
+            running = true,
+            switchHandle = WIFI,
+            nowMs = 10_000L,
+            previous = XrayNetworkChangeState(
+                lastHandle = CELL,
+                watch = XrayNetworkPolicy.UnderlyingSwitchWatch(
+                    WIFI,
+                    10_000L - XrayNetworkPolicy.UNDERLYING_SWITCH_SETTLE_MS,
+                ),
+            ),
+        )
+        assertEquals(XrayNetworkFollowUp.RESTART_SWITCH, settled.followUp)
+        assertEquals(WIFI, settled.state.lastHandle)
+    }
+
+    @Test
     fun pickUnderlying_emptyAndInternetlessAreNull() {
         assertNull(XrayNetworkPolicy.pickUnderlyingHandle(emptyList()))
         assertNull(

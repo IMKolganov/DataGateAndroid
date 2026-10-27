@@ -37,6 +37,9 @@
 
     <string name="home_telegram_channel_title">اشترك — هذا مهم</string>
     <string name="home_telegram_channel_body">انضم إلى قناة Telegram للحصول على آخر الأخبار وإعلانات انقطاع الخدمة.</string>
+    <string name="home_support_project_title">ادعم المشروع</string>
+    <string name="home_support_project_body">يبقى DataGate مجانيًا بفضل الداعمين. افتح بوت Telegram لمعرفة الخطط وطرق الدفع.</string>
+    <string name="home_support_project_action">افتح بوت Telegram</string>
     <string name="home_grace_banner_title">متصل — وصول مؤقت</string>
     <string name="home_grace_banner_body">اربط حسابك أو اشترك خلال %1$s وإلا سيتم قطع هذا الاتصال.</string>
     <string name="home_traffic">حركة البيانات</string>
@@ -111,6 +114,8 @@
     <string name="home_engine_logs_waiting">Waiting for engine events…</string>
     <string name="home_engine_logs_copy">نسخ</string>
     <string name="home_engine_logs_clear">مسح</string>
+    <string name="home_engine_logs_bottom">للأسفل</string>
+    <string name="home_engine_logs_reconnects">إعادات الاتصال: %1$d · الجلسات: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -280,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">جارٍ تحديث قائمة IP…</string>
     <string name="vpn_ip_list_ready">قائمة IP جاهزة (%1$d مسارات)</string>
 
@@ -395,6 +408,7 @@
     <string name="error_google_signin_failed">فشل تسجيل الدخول إلى Google. حاول مرة أخرى.</string>
     <string name="error_network_no_internet">لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.</string>
     <string name="error_network_timeout">انتهت مهلة الاتصال. حاول مرة أخرى.</string>
+    <string name="auth_session_expired">انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.</string>
     <string name="error_network_interrupted">انقطع الاتصال بالشبكة. حاول مرة أخرى.</string>
     <string name="error_network_tls">تعذر إنشاء اتصال آمن. تحقق من إعدادات الشبكة أو VPN وحاول مرة أخرى.</string>
     <string name="vpn_ip_list_requires_android_13">يتطلب تجاوز قائمة IP نظام Android 13 أو إصدارًا أحدث. قم بتعطيل توجيه قائمة IP أو قم بتحديث Android للاتصال بهذا الوضع.</string>
