@@ -1,6 +1,5 @@
 package com.imkolganov.datagate.ui.screens.connect
 
-import android.graphics.Paint
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -36,25 +36,24 @@ import com.imkolganov.datagate.util.formatBytesPerSecond
 import com.imkolganov.datagate.vpn.traffic.TrafficDelta
 import com.imkolganov.datagate.vpn.traffic.TrafficSample
 import com.imkolganov.datagate.vpn.traffic.VpnTrafficUiState
+import com.patrykandpatrick.vico.compose.cartesian.AutoScrollCondition
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.Zoom
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberFadingEdges
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
-import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
-import com.patrykandpatrick.vico.core.cartesian.AutoScrollCondition
-import com.patrykandpatrick.vico.core.cartesian.Scroll
-import com.patrykandpatrick.vico.core.cartesian.Zoom
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import kotlin.math.absoluteValue
 
 /** Same pairing as DataGateMac LiveTrafficChart (system green / orange). */
@@ -174,7 +173,7 @@ private fun LiveTrafficChart(
 
     LaunchedEffect(xValues, downValues, upValues) {
         modelProducer.runTransaction {
-            lineSeries {
+            lineModel {
                 series(xValues, downValues)
                 series(xValues, upValues)
             }
@@ -223,22 +222,22 @@ private fun LiveTrafficChart(
 
     ProvideVicoTheme(theme = vicoTheme) {
         val downLine = LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(fill(DownloadGreen)),
+            fill = LineCartesianLayer.LineFill.single(Fill(DownloadGreen)),
             stroke = LineCartesianLayer.LineStroke.Continuous(
-                thicknessDp = 2.dp.value,
-                cap = Paint.Cap.ROUND,
+                thickness = 2.dp,
+                cap = StrokeCap.Round,
             ),
-            areaFill = LineCartesianLayer.AreaFill.single(fill(DownloadGreen.copy(alpha = 0.22f))),
-            pointConnector = LineCartesianLayer.PointConnector.Sharp,
+            areaFill = LineCartesianLayer.AreaFill.single(Fill(DownloadGreen.copy(alpha = 0.22f))),
+            interpolator = LineCartesianLayer.Interpolator.Sharp,
         )
         val upLine = LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(fill(UploadOrange)),
+            fill = LineCartesianLayer.LineFill.single(Fill(UploadOrange)),
             stroke = LineCartesianLayer.LineStroke.Continuous(
-                thicknessDp = 2.dp.value,
-                cap = Paint.Cap.ROUND,
+                thickness = 2.dp,
+                cap = StrokeCap.Round,
             ),
-            areaFill = LineCartesianLayer.AreaFill.single(fill(UploadOrange.copy(alpha = 0.22f))),
-            pointConnector = LineCartesianLayer.PointConnector.Sharp,
+            areaFill = LineCartesianLayer.AreaFill.single(Fill(UploadOrange.copy(alpha = 0.22f))),
+            interpolator = LineCartesianLayer.Interpolator.Sharp,
         )
         val lineLayer = rememberLineCartesianLayer(
             lineProvider = LineCartesianLayer.LineProvider.series(downLine, upLine),
