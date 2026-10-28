@@ -10,13 +10,13 @@ import org.json.JSONObject
 /**
  * Thin wrapper around official [LibXray] (XTLS/libXray AAR).
  *
- * Release API (v26.7.28): `apiVersion` 0|1; methods include
- * `convertShareLinksToXrayJson`, `runXrayFromJson`, `stopXray`.
+ * Release API (v26.10.21): `apiVersion` 3; methods include
+ * `convertShareLinksToXrayJson`, `runXray`, `stopXray`.
  */
 object XrayCoreFacade {
 
     private const val TAG = "XrayCore"
-    private const val API_VERSION = 1
+    private const val API_VERSION = 3
 
     @Volatile
     private var loaded: Boolean? = null
@@ -76,10 +76,10 @@ object XrayCoreFacade {
 
     fun runFromJson(configJson: String) {
         ensureAvailable()
-        val payload = JSONObject().put("configJSON", configJson)
-        val resp = invoke("runXrayFromJson", payload)
+        val payload = JSONObject().put("xrayJson", configJson)
+        val resp = invoke("runXray", payload)
         if (!resp.optBoolean("success")) {
-            error(resp.optString("error", "runXrayFromJson failed"))
+            error(resp.optString("error", "runXray failed"))
         }
     }
 
