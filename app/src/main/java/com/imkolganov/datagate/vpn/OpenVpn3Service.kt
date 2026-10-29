@@ -543,7 +543,8 @@ class OpenVpn3Service : VpnService() {
         desiredConnection = false
         pendingConnectRequest = null
         if (runtimeState == VpnRuntimeState.IDLE && !connectInProgress && !hasActiveSession) {
-            logCommandDropped("DISCONNECT", "already_idle")
+            // Expected: VpnController always stops the peer engine before starting Xray.
+            logCommandDropped("DISCONNECT", "already_idle", reportNonFatal = false)
         } else {
             transitionState(VpnRuntimeState.DISCONNECTING, "disconnect_command")
         }
@@ -745,7 +746,8 @@ class OpenVpn3Service : VpnService() {
                 transitionState(VpnRuntimeState.CONNECTED, "core_connected")
                 updateNotification("Connected")
                 broadcastStatus(name, info)
-                runSystemVpnHealthCheck("core_connected")
+                // The VPN becomes the default network ~1–2 s later; the rechecks decide.
+                runSystemVpnHealthCheck("core_connected", settling = true)
                 scheduleSystemVpnHealthRecheck()
             }
             name.equals("DISCONNECTED", ignoreCase = true) -> {
@@ -1004,7 +1006,7 @@ class OpenVpn3Service : VpnService() {
         }
     }
 
-    private fun logCommandDropped(command: String, reason: String) {
+    private fun logCommandDropped(command: String, reason: String, reportNonFatal: Boolean = true) {
         VpnDebugLogger.event(
             category = "service.command",
             action = "dropped",
@@ -1014,6 +1016,10 @@ class OpenVpn3Service : VpnService() {
                 "state" to runtimeState.name,
             ),
         )
+        if (!reportNonFatal) {
+            VpnDebugLogger.d(TAG, "vpn_command_dropped: command=$command reason=$reason state=$runtimeState")
+            return
+        }
         VpnDebugLogger.w(TAG, "vpn_command_dropped: command=$command reason=$reason state=$runtimeState")
         crashLogger.logNonFatal(
             tag = "OpenVpn3Service.command_dropped",
@@ -1059,7 +1065,7 @@ class OpenVpn3Service : VpnService() {
         postPersistentNotification()
     }
 
-    private fun runSystemVpnHealthCheck(trigger: String) {
+    private fun runSystemVpnHealthCheck(trigger: String, settling: Boolean = false) {
         val snapshot = collectSystemVpnSnapshot()
         VpnDebugLogger.i(
             TAG,
@@ -1069,7 +1075,7 @@ class OpenVpn3Service : VpnService() {
                 "notificationsEnabled=${snapshot.notificationsEnabled} channelImportance=${snapshot.channelImportance}"
         )
 
-        if (hasActiveSession && !snapshot.hasVpnTransport) {
+        if (hasActiveSession && !snapshot.hasVpnTransport && !settling) {
             VpnDebugLogger.w(
                 TAG,
                 "system_vpn_transport_mismatch trigger=$trigger state=$runtimeState " +
