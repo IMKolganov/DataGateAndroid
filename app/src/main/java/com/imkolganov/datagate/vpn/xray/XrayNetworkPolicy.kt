@@ -97,8 +97,16 @@ internal object XrayNetworkPolicy {
         }
     }
 
-    fun shouldWarnMissingVpnTransport(running: Boolean, hasVpnTransport: Boolean): Boolean =
-        running && !hasVpnTransport
+    /**
+     * Right after establish() the system needs ~1–2 s to make the VPN the default network, so a
+     * check at that moment ([settling]) is expected to miss it; the follow-up recheck decides.
+     */
+    fun shouldWarnMissingVpnTransport(
+        running: Boolean,
+        hasVpnTransport: Boolean,
+        settling: Boolean = false,
+    ): Boolean =
+        running && !hasVpnTransport && !settling
 
     /**
      * Xray does not recover outbound sockets after cell↔Wi-Fi. Restart the live

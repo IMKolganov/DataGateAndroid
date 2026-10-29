@@ -107,6 +107,7 @@ class XrayVpnService : VpnService() {
     /** Non-VPN default network; used to detect cell↔Wi-Fi without looping on the VPN iface. */
     private var networkChangeState = XrayNetworkChangeState()
     private var settleRecheckJob: Job? = null
+    private var postConnectRecheckJob: Job? = null
     private val networkLock = Any()
     private val trackedNetworks = ConcurrentHashMap<Network, XrayNetworkPolicy.NetworkSnapshot>()
     private var pendingConnect: PendingXrayConnect? = null
@@ -469,7 +470,8 @@ class XrayVpnService : VpnService() {
                     )
                 }
             }
-            runHealthCheck("post_connected", connectInFlight = false)
+            runHealthCheck("post_connected", connectInFlight = false, settling = true)
+            schedulePostConnectRecheck()
             runCatching { path?.let { File(it).delete() } }
             excludedRoutesPath?.let { runCatching { File(it).delete() } }
         } catch (t: Throwable) {
@@ -510,6 +512,8 @@ class XrayVpnService : VpnService() {
     private fun stopXraySession(broadcast: Boolean) {
         synchronized(sessionLock) {
             running = false
+            postConnectRecheckJob?.cancel()
+            postConnectRecheckJob = null
             VpnTrafficMonitor.stop(VpnTunnelSessionStore.OWNER_XRAY)
             runCatching { XrayCoreFacade.stop() }
             tunPfd.safeClose()
@@ -559,10 +563,23 @@ class XrayVpnService : VpnService() {
         }
     }
 
-    private fun runHealthCheck(trigger: String, connectInFlight: Boolean = isConnectInFlight()) {
+    private fun schedulePostConnectRecheck() {
+        postConnectRecheckJob?.cancel()
+        postConnectRecheckJob = serviceScope.launch {
+            delay(2_000)
+            if (!running) return@launch
+            runHealthCheck("post_connected_2s")
+        }
+    }
+
+    private fun runHealthCheck(
+        trigger: String,
+        connectInFlight: Boolean = isConnectInFlight(),
+        settling: Boolean = false,
+    ) {
         val caps = connectivityManager.activeNetwork?.let { connectivityManager.getNetworkCapabilities(it) }
         val hasVpnTransport = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
-        if (XrayNetworkPolicy.shouldWarnMissingVpnTransport(running, hasVpnTransport)) {
+        if (XrayNetworkPolicy.shouldWarnMissingVpnTransport(running, hasVpnTransport, settling)) {
             VpnDebugLogger.w(
                 TAG,
                 "system_vpn_transport_mismatch trigger=$trigger running=$running hasVpnTransport=$hasVpnTransport",

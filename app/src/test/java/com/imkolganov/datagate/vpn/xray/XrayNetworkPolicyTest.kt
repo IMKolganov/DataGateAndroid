@@ -168,6 +168,17 @@ class XrayNetworkPolicyTest {
     }
 
     @Test
+    fun noWarnWhileVpnTransportIsSettlingAfterConnect() {
+        assertFalse(
+            XrayNetworkPolicy.shouldWarnMissingVpnTransport(
+                running = true,
+                hasVpnTransport = false,
+                settling = true,
+            )
+        )
+    }
+
+    @Test
     fun underlyingSwitch_restartsLiveSessionOnHomeWifi() {
         assertTrue(
             XrayNetworkPolicy.shouldRestartOnUnderlyingSwitch(
