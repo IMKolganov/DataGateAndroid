@@ -50,6 +50,8 @@ val canSignRelease = !releaseStorePath.isNullOrBlank() &&
 android {
     namespace = "com.imkolganov.datagate"
     compileSdk = 37
+    // Must be installed: without it AGP cannot find llvm-strip and packages .so with debug info.
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         applicationId = "com.imkolganov.datagate"
@@ -136,6 +138,13 @@ android {
         compose = true
         buildConfig = true
         resValues = true
+    }
+
+    packaging {
+        jniLibs {
+            // Universal APK carries two ABIs: compress .so to cut download size; only one gets extracted on install.
+            useLegacyPackaging = true
+        }
     }
 
     testOptions {
