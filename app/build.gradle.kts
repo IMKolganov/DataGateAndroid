@@ -68,8 +68,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            // Phones only: drop x86/x86_64 (emulators) from release APK size.
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+            // Phones and TV boxes: ARM only. Separate non-ARM build: -Pdatagate.abis=x86,x86_64
+            val abis = (project.findProperty("datagate.abis") as String?)?.split(",")?.map { it.trim() }
+            abiFilters += abis ?: listOf("arm64-v8a", "armeabi-v7a")
         }
     }
 
