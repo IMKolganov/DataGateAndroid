@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -25,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,7 +37,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,12 +57,13 @@ import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.profiles.LocalVpnProfile
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.ScreenHeader
 import com.imkolganov.datagate.ui.components.VpnServerTypeIcon
 import com.imkolganov.datagate.ui.components.VpnServerTypeLabel
+import com.imkolganov.datagate.ui.tv.LocalIsTelevision
 import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import com.imkolganov.datagate.vpn.VpnStatusUiState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfilesScreen(
     viewModel: ProfilesViewModel,
@@ -75,6 +75,9 @@ fun ProfilesScreen(
     val ui by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val isTelevision = LocalIsTelevision.current
+    val contentPad = if (isTelevision) 24.dp else 16.dp
+    val contentGap = if (isTelevision) 16.dp else 12.dp
     var showAddMenu by remember { mutableStateOf(false) }
     var renameTarget by remember { mutableStateOf<LocalVpnProfile?>(null) }
     var credsTarget by remember { mutableStateOf<LocalVpnProfile?>(null) }
@@ -123,11 +126,6 @@ fun ProfilesScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.profiles_title)) },
-            )
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             Box {
@@ -166,15 +164,28 @@ fun ProfilesScreen(
             }
         },
     ) { padding ->
+        // Nested under MainScreen: only keep bottom inset for the FAB so the header
+        // aligns with Settings / Quota / Access (full Scaffold padding pushed it down).
+        val fabBottomPad = padding.calculateBottomPadding()
         if (ui.profiles.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(bottom = fabBottomPad)
+                    .padding(contentPad),
+                verticalArrangement = Arrangement.spacedBy(contentGap),
             ) {
+                ScreenHeader(
+                    title = stringResource(R.string.profiles_title),
+                    icon = Icons.Filled.Folder,
+                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                 Text(
                     text = stringResource(R.string.profiles_empty_title),
                     style = MaterialTheme.typography.titleMedium,
@@ -211,15 +222,22 @@ fun ProfilesScreen(
                 ) {
                     Text(stringResource(R.string.profiles_import_xray_link))
                 }
+                }
             }
         } else {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(bottom = fabBottomPad),
+                contentPadding = PaddingValues(contentPad),
+                verticalArrangement = Arrangement.spacedBy(contentGap),
             ) {
+                item {
+                    ScreenHeader(
+                        title = stringResource(R.string.profiles_title),
+                        icon = Icons.Filled.Folder,
+                    )
+                }
                 items(ui.profiles.size, key = { ui.profiles[it].id }) { index ->
                     val profile = ui.profiles[index]
                     ProfileCard(

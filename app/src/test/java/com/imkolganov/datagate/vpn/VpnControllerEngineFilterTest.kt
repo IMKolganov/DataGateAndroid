@@ -106,5 +106,35 @@ class VpnControllerEngineFilterTest {
         assertFalse(state.isVpnConnected)
         assertFalse(state.isConnectRequested)
         assertEquals(null, state.selectedServerId)
+        val prefs = activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
+        assertEquals(null, prefs.getString("vpn_active_engine", null))
+    }
+
+    @Test
+    fun serviceError_clearsActiveEnginePref() {
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        var state = VpnStatusUiState(isConnectRequested = true, isVpnConnected = true)
+        val controller = VpnController(
+            activity = activity,
+            permissionLauncher = noopLauncher,
+            onStateChange = { state = it },
+            getState = { state },
+        )
+        controller.onStart()
+        activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE).edit {
+            putString("vpn_active_engine", OpenVpn3Service.ENGINE_XRAY)
+        }
+
+        activity.sendBroadcast(
+            statusIntent("ERROR", OpenVpn3Service.ENGINE_XRAY, "libXray missing"),
+        )
+        shadowOf(android.os.Looper.getMainLooper()).idle()
+
+        assertFalse(state.isVpnConnected)
+        assertEquals(
+            null,
+            activity.getSharedPreferences("vpn_state", Context.MODE_PRIVATE)
+                .getString("vpn_active_engine", null),
+        )
     }
 }

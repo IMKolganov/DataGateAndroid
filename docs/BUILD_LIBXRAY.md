@@ -6,7 +6,7 @@ Official Xray-core mobile wrapper used by DataGate Android.
 - Core: https://github.com/XTLS/Xray-core
 - Submodule: [`native-libxray`](../native-libxray) (same pattern as `native-openvpn3/openvpn3`)
 
-Pinned release for the shipped AAR: **v26.7.28** (`LIBXRAY_RELEASE_TAG`), matching submodule tag **v1.260728.0**.
+Pinned release for the shipped AAR: **v26.10.21** (`LIBXRAY_RELEASE_TAG`), matching submodule tag **v1.261021.0**.
 
 ## Produce `app/libs/libxray.aar`
 
@@ -23,4 +23,4 @@ Gradle requires `app/libs/libxray.aar` (fail-fast if missing).
 ## Notes
 
 - Do not load another independently built Go/gomobile library in the same process (OpenVPN3 is C++ — OK).
-- API used by the app: `libXray.LibXray.invoke(json)` with methods `convertShareLinksToXrayJson`, `runXrayFromJson`, `stopXray` (apiVersion 0/1 on this release).
+- API used by the app: `libXray.LibXray.invoke(json)` with methods `convertShareLinksToXrayJson`, `runXray` (payload `xrayJson`), `stopXray` (apiVersion 3 on this release).

@@ -5,6 +5,7 @@
     <string name="nav_access">Truy cập</string>
     <string name="nav_quota">Hạn mức</string>
     <string name="nav_statistics">Thống kê</string>
+    <string name="nav_statistics_short">TK</string>
     <string name="nav_settings">Cài đặt</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Đăng nhập bằng Google</string>
@@ -36,8 +37,16 @@
 
     <string name="home_telegram_channel_title">Đăng ký theo dõi — rất quan trọng</string>
     <string name="home_telegram_channel_body">Kênh Telegram của dự án: tin mới và thông báo khi dịch vụ gặp sự cố.</string>
+    <string name="home_support_project_title">Ủng hộ dự án</string>
+    <string name="home_support_project_body">DataGate miễn phí nhờ những người ủng hộ. Mở bot Telegram để xem gói và cách thanh toán.</string>
+    <string name="home_support_project_action">Mở bot Telegram</string>
     <string name="home_grace_banner_title">Đã kết nối — quyền truy cập tạm thời</string>
     <string name="home_grace_banner_body">Liên kết tài khoản hoặc đăng ký trong vòng %1$s, nếu không phiên này sẽ bị ngắt kết nối.</string>
+    <string name="home_traffic">Lưu lượng</string>
+    <string name="home_traffic_hint">Thông lượng trực tiếp trên thiết bị này qua đường hầm VPN.</string>
+    <string name="home_traffic_download">Tải xuống</string>
+    <string name="home_traffic_upload">Tải lên</string>
+    <string name="home_traffic_waiting">Đang chờ lưu lượng…</string>
     <string name="stats_filters">Bộ lọc</string>
     <string name="stats_overview">Tổng quan</string>
     <string name="stats_chart_hint">Chạm biểu đồ · chụm để phóng to · kéo để cuộn</string>
@@ -98,6 +107,15 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copy</string>
+    <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Cuối</string>
+    <string name="home_engine_logs_reconnects">Kết nối lại: %1$d · Phiên: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -267,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Đang cập nhật danh sách IP…</string>
     <string name="vpn_ip_list_ready">Danh sách IP sẵn sàng (%1$d tuyến)</string>
 
@@ -300,6 +326,7 @@ Bạn có thể mở trang phát hành hoặc tải APK.</string>
     <string name="update_dialog_open_release">Mở trang phát hành</string>
     <string name="update_dialog_download">Tải và cài đặt</string>
     <string name="update_downloading">Đang tải…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Tải xuống thất bại</string>
     <string name="update_return_after_allow_install">Cho phép cài đặt từ ứng dụng này trong Cài đặt, rồi quay lại đây — trình cài đặt sẽ tự mở.</string>
     <string name="update_install_failed">Không thể mở trình cài đặt. Thử lại hoặc cài từ trang phát hành.</string>
@@ -376,6 +403,7 @@ Bạn có thể mở trang phát hành hoặc tải APK.</string>
     <string name="error_google_signin_failed">Đăng nhập Google không thành công. Vui lòng thử lại.</string>
     <string name="error_network_no_internet">Không có kết nối internet. Kiểm tra mạng của bạn và thử lại.</string>
     <string name="error_network_timeout">Kết nối đã hết thời gian chờ. Thử lại.</string>
+    <string name="auth_session_expired">Phiên đã hết hạn. Vui lòng đăng nhập lại.</string>
     <string name="error_network_interrupted">Kết nối mạng đã bị ngắt. Thử lại.</string>
     <string name="error_network_tls">Không thể thiết lập kết nối an toàn. Kiểm tra mạng hoặc cài đặt VPN và thử lại.</string>
     <string name="home_quick_actions_title">Trợ giúp &amp; ngôn ngữ</string>

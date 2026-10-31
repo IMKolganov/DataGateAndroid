@@ -6,6 +6,7 @@
     <string name="nav_access">Access</string>
     <string name="nav_quota">Квота</string>
     <string name="nav_statistics">Statistics</string>
+    <string name="nav_statistics_short">Stats</string>
     <string name="nav_settings">Settings</string>
 
     <string name="login_title">DataGate</string>
@@ -40,8 +41,16 @@
 
     <string name="home_telegram_channel_title">Абонирайте се — важно е</string>
     <string name="home_telegram_channel_body">Telegram каналът на проекта: актуални новини и съобщения при проблеми с услугата.</string>
+    <string name="home_support_project_title">Подкрепете проекта</string>
+    <string name="home_support_project_body">DataGate остава безплатен благодарение на поддръжниците. Отворете Telegram бота за плановете и начините на плащане.</string>
+    <string name="home_support_project_action">Отвори Telegram бота</string>
     <string name="home_grace_banner_title">Свързан — временен достъп</string>
     <string name="home_grace_banner_body">Свържете акаунта си или се абонирайте до %1$s, иначе тази сесия ще бъде прекратена.</string>
+    <string name="home_traffic">Traffic</string>
+    <string name="home_traffic_hint">Live throughput on this device through the VPN tunnel.</string>
+    <string name="home_traffic_download">Download</string>
+    <string name="home_traffic_upload">Upload</string>
+    <string name="home_traffic_waiting">Waiting for traffic…</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -109,6 +118,15 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copy</string>
+    <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Надолу</string>
+    <string name="home_engine_logs_reconnects">Повторни свързвания: %1$d · Сесии: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -285,9 +303,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Обновяване на IP списъка…</string>
     <string name="vpn_ip_list_ready">IP списъкът е готов (%1$d маршрута)</string>
 
@@ -318,6 +344,7 @@
     <string name="update_dialog_open_release">Отвори релийза</string>
     <string name="update_dialog_download">Изтегли и инсталирай</string>
     <string name="update_downloading">Изтегляне…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Изтеглянето не бе успешно</string>
     <string name="update_return_after_allow_install">Разрешете инсталиране от това приложение в Настройки, след това се върнете тук — инсталаторът ще се отвори автоматично.</string>
     <string name="update_install_failed">Инсталаторът не можа да се отвори. Опитайте отново или инсталирайте от страницата на релийза.</string>
@@ -394,6 +421,7 @@
     <string name="error_google_signin_failed">Влизането с Google не бе успешно. Опитайте отново.</string>
     <string name="error_network_no_internet">Няма връзка с интернет. Проверете мрежата и опитайте отново.</string>
     <string name="error_network_timeout">Връзката изтече. Опитайте отново.</string>
+    <string name="auth_session_expired">Сесията изтече. Моля, влезте отново.</string>
     <string name="error_network_interrupted">Мрежовата връзка беше прекъсната. Опитайте отново.</string>
     <string name="error_network_tls">Не може да се установи защитена връзка. Проверете мрежата или настройките на VPN и опитайте отново.</string>
     <string name="home_quick_actions_title">Помощ и език</string>

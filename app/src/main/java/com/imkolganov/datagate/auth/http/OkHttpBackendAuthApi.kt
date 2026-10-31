@@ -235,7 +235,11 @@ class OkHttpBackendAuthApi(
         resp.use { r ->
             val raw = r.body.string()
             if (r.code !in 200..299) {
-                throw IOException(formatHttpErrorDetail("refresh failed", r.code, raw.orEmpty()))
+                val detail = formatHttpErrorDetail("refresh failed", r.code, raw.orEmpty())
+                if (RefreshRejectedException.isRejectionCode(r.code)) {
+                    throw RefreshRejectedException(r.code, detail)
+                }
+                throw IOException(detail)
             }
 
             val obj = JSONObject(raw)

@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SUBMODULE="${REPO_ROOT}/native-libxray"
 OUT_AAR="${REPO_ROOT}/app/libs/libxray.aar"
-RELEASE_TAG="${LIBXRAY_RELEASE_TAG:-v26.7.28}"
+RELEASE_TAG="${LIBXRAY_RELEASE_TAG:-v26.10.21}"
 
 mkdir -p "${REPO_ROOT}/app/libs"
 

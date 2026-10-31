@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.auth
 
+import com.imkolganov.datagate.auth.http.RefreshRejectedException
 import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RefreshResponseDto
 import kotlinx.coroutines.runBlocking
@@ -11,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.net.SocketTimeoutException
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], application = android.app.Application::class)
@@ -55,9 +57,9 @@ class AuthRepositorySessionTest {
     }
 
     @Test
-    fun tryRestoreSession_refreshFails_clearsTokens() = runBlocking {
+    fun tryRestoreSession_refreshRejected_clearsTokens() = runBlocking {
         val store = FakeTokenStore(refresh = "refresh-stale")
-        val api = RecordingAuthApi(refreshThrows = true)
+        val api = RecordingAuthApi(refreshError = RefreshRejectedException(401, "refresh failed"))
         val autoLogin = FakeAutoLoginStore(autoLoginEnabled = true)
         val repo = AuthRepository(api, store, autoLogin)
 
@@ -65,6 +67,18 @@ class AuthRepositorySessionTest {
         assertNull(store.getAccessToken())
         assertNull(store.getRefreshToken())
         assertFalse(autoLogin.isEnabled())
+    }
+
+    @Test
+    fun tryRestoreSession_networkFailure_keepsRefreshToken() = runBlocking {
+        val store = FakeTokenStore(refresh = "refresh-1")
+        val api = RecordingAuthApi(refreshError = SocketTimeoutException("timeout"))
+        val autoLogin = FakeAutoLoginStore(autoLoginEnabled = true)
+        val repo = AuthRepository(api, store, autoLogin)
+
+        assertTrue(repo.tryRestoreSession())
+        assertEquals("refresh-1", store.getRefreshToken())
+        assertTrue(autoLogin.isEnabled())
     }
 
     @Test
@@ -95,7 +109,7 @@ class AuthRepositorySessionTest {
     ) = AuthRepository(api, store, autoLogin)
 }
 
-private class FakeTokenStore(
+internal class FakeTokenStore(
     private var access: String? = null,
     private var refresh: String? = null,
 ) : TokenStore {
@@ -111,25 +125,25 @@ private class FakeTokenStore(
     }
 }
 
-private class FakeAutoLoginStore(private var autoLoginEnabled: Boolean = false) : AutoLoginStore {
+internal class FakeAutoLoginStore(private var autoLoginEnabled: Boolean = false) : AutoLoginStore {
     override fun isEnabled(): Boolean = autoLoginEnabled
     override fun setEnabled(enabled: Boolean) { autoLoginEnabled = enabled }
 }
 
-private class RecordingAuthApi(
+internal class RecordingAuthApi(
     val refreshResponse: RefreshResponseDto = RefreshResponseDto(
         token = "access",
         expiration = "2026-01-01T00:00:00Z",
         refreshToken = "refresh",
         refreshExpiration = "2027-01-01T00:00:00Z",
     ),
-    private val refreshThrows: Boolean = false,
+    private val refreshError: Throwable? = null,
 ) : com.imkolganov.datagate.auth.http.BackendAuthApi {
     var refreshCalls = 0
 
     override suspend fun refresh(request: RefreshRequestDto): RefreshResponseDto {
         refreshCalls++
-        if (refreshThrows) throw IllegalStateException("refresh failed")
+        refreshError?.let { throw it }
         return refreshResponse
     }
 

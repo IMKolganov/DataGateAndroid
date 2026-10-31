@@ -5,6 +5,7 @@
     <string name="nav_access">액세스</string>
     <string name="nav_quota">할당량</string>
     <string name="nav_statistics">통계</string>
+    <string name="nav_statistics_short">통계</string>
     <string name="nav_settings">설정</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Google로 로그인</string>
@@ -36,8 +37,16 @@
 
     <string name="home_telegram_channel_title">구독하세요 — 중요합니다</string>
     <string name="home_telegram_channel_body">프로젝트 Telegram 채널: 최신 소식 및 서비스 장애 공지.</string>
+    <string name="home_support_project_title">프로젝트 후원하기</string>
+    <string name="home_support_project_body">DataGate는 후원자 덕분에 무료로 유지됩니다. 요금제와 결제 방법은 Telegram 봇에서 확인하세요.</string>
+    <string name="home_support_project_action">Telegram 봇 열기</string>
     <string name="home_grace_banner_title">연결됨 — 임시 액세스</string>
     <string name="home_grace_banner_body">%1$s 이내에 계정을 연결하거나 구독하지 않으면 이 세션이 연결 해제됩니다.</string>
+    <string name="home_traffic">트래픽</string>
+    <string name="home_traffic_hint">이 기기에서 VPN 터널을 통한 실시간 처리량.</string>
+    <string name="home_traffic_download">다운로드</string>
+    <string name="home_traffic_upload">업로드</string>
+    <string name="home_traffic_waiting">트래픽 대기 중…</string>
     <string name="stats_filters">필터</string>
     <string name="stats_overview">개요</string>
     <string name="stats_chart_hint">차트 탭 · 핀치로 확대 · 드래그로 스크롤</string>
@@ -98,6 +107,15 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">복사</string>
+    <string name="home_engine_logs_clear">지우기</string>
+    <string name="home_engine_logs_bottom">맨 아래</string>
+    <string name="home_engine_logs_reconnects">재연결: %1$d · 세션: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -267,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">IP 목록 업데이트 중…</string>
     <string name="vpn_ip_list_ready">IP 목록 준비됨(%1$d개 경로)</string>
 
@@ -300,6 +326,7 @@
     <string name="update_dialog_open_release">릴리스 페이지 열기</string>
     <string name="update_dialog_download">다운로드 및 설치</string>
     <string name="update_downloading">다운로드 중…</string>
+    <string name="update_downloading_percent">다운로드 중… %1$d%%</string>
     <string name="update_download_failed">다운로드 실패</string>
     <string name="update_return_after_allow_install">설정에서 이 앱의 설치를 허용한 뒤 여기로 돌아오세요 — 설치 관리자가 자동으로 열립니다.</string>
     <string name="update_install_failed">설치 관리자를 열 수 없습니다. 다시 시도하거나 릴리스 페이지에서 설치하세요.</string>
@@ -376,6 +403,7 @@
     <string name="error_google_signin_failed">Google 로그인에 실패했습니다. 다시 시도하세요.</string>
     <string name="error_network_no_internet">인터넷에 연결되어 있지 않습니다. 네트워크를 확인한 후 다시 시도하세요.</string>
     <string name="error_network_timeout">연결 시간이 초과되었습니다. 다시 시도하세요.</string>
+    <string name="auth_session_expired">세션이 만료되었습니다. 다시 로그인하세요.</string>
     <string name="error_network_interrupted">네트워크 연결이 끊어졌습니다. 다시 시도하세요.</string>
     <string name="error_network_tls">보안 연결을 설정할 수 없습니다. 네트워크 또는 VPN 설정을 확인한 후 다시 시도하세요.</string>
     <string name="home_quick_actions_title">도움말 및 언어</string>

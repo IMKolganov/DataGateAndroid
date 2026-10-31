@@ -42,6 +42,28 @@ class VpnDebugLoggerTest {
     }
 
     @Test
+    fun isoUtc_isZuluWithMillis() {
+        val formatted = VpnDebugLogRotation.isoUtc(java.util.Date(0))
+        assertEquals("1970-01-01T00:00:00.000Z", formatted)
+    }
+
+    @Test
+    fun formatLine_includesErrorClassAndStack() {
+        val line = VpnDebugLogRotation.formatLine(
+            timestampUtc = "2026-07-19T20:00:00.000Z",
+            level = "E",
+            tag = "OpenVPN3",
+            threadName = "test-thread",
+            message = "failed\nhere",
+            error = IllegalStateException("nope"),
+        )
+        assertTrue(line.startsWith("2026-07-19T20:00:00.000Z E/OpenVPN3 [test-thread] failed here"))
+        assertTrue(line.contains("java.lang.IllegalStateException: nope"))
+        assertTrue(line.contains("IllegalStateException"))
+        assertTrue(line.endsWith("\n"))
+    }
+
+    @Test
     fun formatLine_includesLevelTagAndThread() {
         val line = VpnDebugLogRotation.formatLine(
             timestampUtc = "2026-07-19T20:00:00.000Z",

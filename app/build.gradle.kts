@@ -21,28 +21,45 @@ val keystoreProps = loadProps("keystore.properties")
 fun env(name: String): String =
     envProps.getProperty(name)
         ?: System.getenv(name)
+        ?: dummyEnv[name]
         ?: error("Missing env property: $name")
 
 fun envOpt(name: String): String? =
     envProps.getProperty(name)
         ?: System.getenv(name)
 
-fun ks(name: String): String =
-    keystoreProps.getProperty(name)
-        ?: System.getenv(name)
-        ?: error("Missing keystore property: $name")
+fun ksOpt(name: String): String? =
+    keystoreProps.getProperty(name)?.takeIf { it.isNotBlank() }
+        ?: System.getenv(name)?.takeIf { it.isNotBlank() }
+
+/** Lets unit tests / local debug configure without env.properties. */
+val dummyEnv = mapOf(
+    "DEV_BACKEND_URL" to "https://dev.invalid",
+    "DEV_WEB_CLIENT_ID" to "dummy-dev-web-client-id.apps.googleusercontent.com",
+    "PROD_BACKEND_URL" to "https://prod.invalid",
+    "PROD_WEB_CLIENT_ID" to "dummy-prod-web-client-id.apps.googleusercontent.com",
+)
+
+val releaseStorePath = ksOpt("storeFile")
+val canSignRelease = !releaseStorePath.isNullOrBlank() &&
+    !ksOpt("storePassword").isNullOrBlank() &&
+    !ksOpt("keyAlias").isNullOrBlank() &&
+    !ksOpt("keyPassword").isNullOrBlank() &&
+    file(releaseStorePath!!).isFile
 
 android {
     namespace = "com.imkolganov.datagate"
-    compileSdk = 36
+    compileSdk = 37
+    // Must be installed: without it AGP cannot find llvm-strip and packages .so with debug info.
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 17
+        versionCode = 18
         // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
-        versionName = "1.0.17"
+        versionName = "1.0.18"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
             ?: "IMKolganov/DataGateAndroid"
@@ -51,17 +68,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            //noinspection ChromeOsAbiSupport
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+            // Phones and TV boxes: ARM only. Separate non-ARM build: -Pdatagate.abis=x86,x86_64
+            val abis = (project.findProperty("datagate.abis") as String?)?.split(",")?.map { it.trim() }
+            abiFilters += abis ?: listOf("arm64-v8a", "armeabi-v7a")
         }
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = file(ks("storeFile"))
-            storePassword = ks("storePassword")
-            keyAlias = ks("keyAlias")
-            keyPassword = ks("keyPassword")
+        if (canSignRelease) {
+            create("release") {
+                storeFile = file(releaseStorePath!!)
+                storePassword = ksOpt("storePassword")
+                keyAlias = ksOpt("keyAlias")
+                keyPassword = ksOpt("keyPassword")
+            }
         }
     }
 
@@ -72,7 +92,9 @@ android {
 
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+            if (canSignRelease) {
+                signingConfig = signingConfigs.getByName("release")
+            }
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -117,6 +139,13 @@ android {
         compose = true
         buildConfig = true
         resValues = true
+    }
+
+    packaging {
+        jniLibs {
+            // Universal APK carries two ABIs: compress .so to cut download size; only one gets extracted on install.
+            useLegacyPackaging = true
+        }
     }
 
     testOptions {

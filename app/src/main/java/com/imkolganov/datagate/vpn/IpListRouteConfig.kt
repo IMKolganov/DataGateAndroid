@@ -94,6 +94,14 @@ object IpListRouteConfig {
     const val MIN_ANDROID12_OVPN_ROUTE_LIMIT = 50
     const val MAX_ANDROID12_OVPN_ROUTE_LIMIT = 3_000
     const val MAX_OPENVPN_PROFILE_BYTES = 240 * 1024
+    const val BYPASS_ROUTES_MARKER = "# DataGate IP list bypass routes"
+
+    /** Drops a previously appended IP-list block so reconnect can rewrite Android 12 profiles. */
+    fun stripAppendedBypassRoutes(config: String): String {
+        val idx = config.indexOf(BYPASS_ROUTES_MARKER)
+        if (idx < 0) return config.trimEnd()
+        return config.substring(0, idx).trimEnd()
+    }
 
     /** The `excludeRoute()` cap that applies for a given [coverageMode] — see [prepareConnectionRoutes]. */
     fun androidExcludeRouteLimitFor(coverageMode: IpListCoverageMode): Int = when (coverageMode) {
@@ -362,7 +370,7 @@ object IpListRouteConfig {
 
         val baseConfig = config.trimEnd()
         val out = StringBuilder(baseConfig)
-        val header = "\n\n# DataGate IP list bypass routes\n"
+        val header = "\n\n$BYPASS_ROUTES_MARKER\n"
         var projectedBytes = baseConfig.toByteArray(Charsets.UTF_8).size
         val headerBytes = header.toByteArray(Charsets.UTF_8).size
         if (projectedBytes + headerBytes > MAX_OPENVPN_PROFILE_BYTES) {

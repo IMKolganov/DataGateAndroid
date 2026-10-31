@@ -6,6 +6,7 @@
     <string name="nav_access">Access</string>
     <string name="nav_quota">Kvóta</string>
     <string name="nav_statistics">Statistics</string>
+    <string name="nav_statistics_short">Stats</string>
     <string name="nav_settings">Settings</string>
 
     <string name="login_title">DataGate</string>
@@ -40,8 +41,16 @@
 
     <string name="home_telegram_channel_title">Iratkozz fel — fontos</string>
     <string name="home_telegram_channel_body">A projekt Telegram-csatornája: hírek és közlemények szolgáltatásproblémák esetén.</string>
+    <string name="home_support_project_title">Támogasd a projektet</string>
+    <string name="home_support_project_body">A DataGate a támogatóknak köszönhetően ingyenes. A csomagokért és fizetési módokért nyisd meg a Telegram botot.</string>
+    <string name="home_support_project_action">Telegram bot megnyitása</string>
     <string name="home_grace_banner_title">Csatlakozva — ideiglenes hozzáférés</string>
     <string name="home_grace_banner_body">Kösd össze a fiókodat vagy fizess elő %1$s-en belül, különben ez a munkamenet megszakad.</string>
+    <string name="home_traffic">Traffic</string>
+    <string name="home_traffic_hint">Live throughput on this device through the VPN tunnel.</string>
+    <string name="home_traffic_download">Download</string>
+    <string name="home_traffic_upload">Upload</string>
+    <string name="home_traffic_waiting">Waiting for traffic…</string>
     <string name="stats_filters">Filters</string>
     <string name="stats_overview">Overview</string>
     <string name="stats_chart_hint">Tap the chart for values · pinch to zoom · drag to scroll</string>
@@ -109,6 +118,15 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copy</string>
+    <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Le</string>
+    <string name="home_engine_logs_reconnects">Újracsatlakozások: %1$d · Munkamenetek: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -285,9 +303,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">IP-lista frissítése…</string>
     <string name="vpn_ip_list_ready">IP-lista kész (%1$d útvonal)</string>
 
@@ -318,6 +344,7 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="update_dialog_open_release">Kiadási oldal megnyitása</string>
     <string name="update_dialog_download">Letöltés és telepítés</string>
     <string name="update_downloading">Letöltés…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">A letöltés sikertelen</string>
     <string name="update_return_after_allow_install">Engedélyezze a telepítést ebből az alkalmazásból a Beállításokban, majd térjen vissza ide — a telepítő automatikusan megnyílik.</string>
     <string name="update_install_failed">A telepítő nem nyitható meg. Próbálja újra, vagy telepítsen a kiadási oldalról.</string>
@@ -394,6 +421,7 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="error_google_signin_failed">A Google-bejelentkezés sikertelen volt. Próbáld újra.</string>
     <string name="error_network_no_internet">Nincs internetkapcsolat. Ellenőrizd a hálózatot, és próbáld újra.</string>
     <string name="error_network_timeout">A kapcsolat túllépte az időkorlátot. Próbáld újra.</string>
+    <string name="auth_session_expired">A munkamenet lejárt. Jelentkezz be újra.</string>
     <string name="error_network_interrupted">A hálózati kapcsolat megszakadt. Próbáld újra.</string>
     <string name="error_network_tls">Nem sikerült biztonságos kapcsolatot létesíteni. Ellenőrizd a hálózatot vagy a VPN-beállításokat, és próbáld újra.</string>
     <string name="home_quick_actions_title">Súgó és nyelv</string>

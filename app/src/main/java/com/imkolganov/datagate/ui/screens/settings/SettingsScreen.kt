@@ -27,6 +27,7 @@ import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Route
@@ -78,6 +79,7 @@ import com.imkolganov.datagate.logger.DebugPreferences
 import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.network.HttpClients
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.ScreenHeader
 import com.imkolganov.datagate.ui.theme.AppLanguageDropdown
 import com.imkolganov.datagate.ui.theme.AppLocale
 import com.imkolganov.datagate.ui.theme.ThemeMode
@@ -128,6 +130,7 @@ fun SettingsScreen(
     var crashFilesCount by remember { mutableStateOf(0) }
     var crashShareMessage by remember { mutableStateOf<String?>(null) }
     var vpnDebugModeEnabled by remember { mutableStateOf(false) }
+    var engineJournalEnabled by remember { mutableStateOf(false) }
     var debugLogStatus by remember { mutableStateOf("0 B") }
     var hasDebugLogs by remember { mutableStateOf(false) }
     var debugLogPath by remember { mutableStateOf("") }
@@ -205,6 +208,9 @@ fun SettingsScreen(
         vpnDebugModeEnabled = withContext(Dispatchers.IO) {
             DebugPreferences.isVpnDebugModeEnabled(appCtx)
         }
+        engineJournalEnabled = withContext(Dispatchers.IO) {
+            DebugPreferences.isEngineJournalEnabled(appCtx)
+        }
         refreshDebugLogUi(appCtx) { size, has, path, preview ->
             debugLogStatus = size
             hasDebugLogs = has
@@ -235,7 +241,10 @@ fun SettingsScreen(
             if (com.imkolganov.datagate.ui.tv.LocalIsTelevision.current) 16.dp else 12.dp
         )
     ) {
-        Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
+        ScreenHeader(
+            title = stringResource(R.string.settings_title),
+            icon = Icons.Filled.Settings,
+        )
 
         SessionLogoutCard(
             displayName = authInfo.displayName,
@@ -712,8 +721,46 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    stringResource(R.string.settings_vpn_debug_title),
+                    stringResource(R.string.settings_development_title),
                     style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    stringResource(R.string.settings_engine_journal_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(R.string.settings_engine_journal),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = engineJournalEnabled,
+                        onCheckedChange = { enabled ->
+                            engineJournalEnabled = enabled
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    DebugPreferences.setEngineJournalEnabled(
+                                        context.applicationContext,
+                                        enabled
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+
+                HorizontalDivider()
+
+                Text(
+                    stringResource(R.string.settings_vpn_debug_title),
+                    style = MaterialTheme.typography.titleSmall
                 )
                 Text(
                     stringResource(R.string.settings_debug_mode_subtitle),

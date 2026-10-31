@@ -66,10 +66,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
+import com.imkolganov.datagate.freetier.shouldShowSupportProjectCta
 import com.imkolganov.datagate.update.GitHubLatestRelease
 import com.imkolganov.datagate.util.userFriendlyApiError
+import com.imkolganov.datagate.logger.EngineJournal
 import com.imkolganov.datagate.vpn.VpnCommandContract
 import com.imkolganov.datagate.vpn.VpnStatusUiState
+import com.imkolganov.datagate.vpn.traffic.TrafficSample
+import com.imkolganov.datagate.vpn.traffic.VpnTrafficUiState
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -84,11 +89,17 @@ fun VpnStatusScreen(
     onHomeUpdateBannerDismiss: (GitHubLatestRelease) -> Unit = {},
     graceExpiresAtUtcMs: Long? = null,
     primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
+    traffic: VpnTrafficUiState = VpnTrafficUiState(),
+    /** Active quota plan name from Access; used to hide support CTA for Pro/Unlimited. */
+    currentPlanName: String? = null,
 ) {
+    val engineJournalEnabled by EngineJournal.enabled.collectAsState()
+    val engineJournalText by EngineJournal.text.collectAsState()
     val context = LocalContext.current
     val supportEmail = stringResource(R.string.support_contact_email)
     val supportEmailSubject = stringResource(R.string.home_report_email_subject)
     val telegramBotUrl = stringResource(R.string.support_telegram_bot_url)
+    val telegramBotSupportUrl = stringResource(R.string.support_telegram_bot_support_url)
     val projectTelegramUrl = stringResource(R.string.project_telegram_url)
     val githubIssuesUrl = stringResource(R.string.project_github_issues_url)
     val isConnected = state.isVpnConnected
@@ -376,6 +387,18 @@ fun VpnStatusScreen(
             }
             }
 
+            if (isConnected && traffic.isActive) {
+                LiveTrafficCard(traffic = traffic)
+            }
+
+            val showSupportProject =
+                isConnected && shouldShowSupportProjectCta(currentPlanName)
+            if (showSupportProject) {
+                HomeSupportProjectBanner(
+                    onOpenBot = { openUrl(telegramBotSupportUrl) },
+                )
+            }
+
             Text(
                 modifier = Modifier
                     .widthIn(max = 520.dp)
@@ -385,9 +408,19 @@ fun VpnStatusScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            HomeTelegramChannelBanner(
-                onOpenChannel = { openUrl(projectTelegramUrl) },
-            )
+            if (engineJournalEnabled) {
+                EngineJournalCard(
+                    text = engineJournalText,
+                    reconnectCount = state.reconnectCount,
+                    sessionActive = state.isConnectRequested || state.isVpnConnected || state.isVpnPaused,
+                )
+            }
+
+            if (!showSupportProject) {
+                HomeTelegramChannelBanner(
+                    onOpenChannel = { openUrl(projectTelegramUrl) },
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -540,17 +573,54 @@ private fun formatGraceCountdown(totalSeconds: Int): String {
 }
 
 @Composable
+private fun HomeSupportProjectBanner(
+    onOpenBot: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = modifier
+            .fillMaxWidth()
+            .widthIn(max = 520.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = stringResource(R.string.home_support_project_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.home_support_project_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f),
+            )
+            TextButton(
+                onClick = onOpenBot,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .tvFocusBorder(shape = RoundedCornerShape(8.dp)),
+            ) {
+                Text(stringResource(R.string.home_support_project_action))
+            }
+        }
+    }
+}
+
+@Composable
 private fun HomeTelegramChannelBanner(
     onOpenChannel: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .widthIn(max = 520.dp)
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Text(
                 text = stringResource(R.string.home_telegram_channel_title),
                 style = MaterialTheme.typography.titleSmall,
@@ -623,7 +693,21 @@ fun VpnStatusScreenPreview_Connected() {
                 lastMessage = "Connected to DataGate VPN (10.0.0.2)"
             ),
             onConnectClick = {},
-            onDisconnectClick = {}
+            onDisconnectClick = {},
+            traffic = VpnTrafficUiState(
+                isActive = true,
+                speedInBps = 1_250_000,
+                speedOutBps = 80_000,
+                sessionBytesIn = 12_000_000,
+                sessionBytesOut = 900_000,
+                samples = List(20) { i ->
+                    TrafficSample(
+                        speedInBps = (200_000 + i * 40_000).toLong(),
+                        speedOutBps = (20_000 + i * 3_000).toLong(),
+                        seq = i.toLong(),
+                    )
+                },
+            ),
         )
     }
 }

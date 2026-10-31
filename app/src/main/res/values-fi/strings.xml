@@ -5,6 +5,7 @@
     <string name="nav_access">Pääsy</string>
     <string name="nav_quota">Kiintiö</string>
     <string name="nav_statistics">Tilastot</string>
+    <string name="nav_statistics_short">Til.</string>
     <string name="nav_settings">Asetukset</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Kirjaudu Googlella</string>
@@ -36,8 +37,16 @@
 
     <string name="home_telegram_channel_title">Tilaa — se on tärkeää</string>
     <string name="home_telegram_channel_body">Projektin Telegram-kanava: uutiset ja ilmoitukset palveluhäiriöistä.</string>
+    <string name="home_support_project_title">Tue projektia</string>
+    <string name="home_support_project_body">DataGate pysyy ilmaisena tukijoiden ansiosta. Avaa Telegram-botti nähdäksesi tilaukset ja maksutavat.</string>
+    <string name="home_support_project_action">Avaa Telegram-botti</string>
     <string name="home_grace_banner_title">Yhdistetty — väliaikainen käyttöoikeus</string>
     <string name="home_grace_banner_body">Liitä tilisi tai tilaa %1$s kuluessa, tai tämä istunto katkaistaan.</string>
+    <string name="home_traffic">Liikenne</string>
+    <string name="home_traffic_hint">Tämän laitteen live-nopeus VPN-tunnelin kautta.</string>
+    <string name="home_traffic_download">Lataus</string>
+    <string name="home_traffic_upload">Lähetys</string>
+    <string name="home_traffic_waiting">Odotetaan liikennettä…</string>
     <string name="stats_filters">Suodattimet</string>
     <string name="stats_overview">Yleiskuva</string>
     <string name="stats_chart_hint">Napauta kaaviota · nipistä zoom · vedä vieritys</string>
@@ -98,6 +107,15 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copy</string>
+    <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Alas</string>
+    <string name="home_engine_logs_reconnects">Uudelleenyhdistykset: %1$d · Istunnot: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -267,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Päivitetään IP-listaa…</string>
     <string name="vpn_ip_list_ready">IP-lista valmis (%1$d reittiä)</string>
 
@@ -300,6 +326,7 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="update_dialog_open_release">Avaa julkaisusivu</string>
     <string name="update_dialog_download">Lataa ja asenna</string>
     <string name="update_downloading">Ladataan…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Lataus epäonnistui</string>
     <string name="update_return_after_allow_install">Salli asennukset tästä sovelluksesta asetuksissa ja palaa sitten tänne — asennusohjelma avautuu automaattisesti.</string>
     <string name="update_install_failed">Asennusohjelmaa ei voitu avata. Yritä uudelleen tai asenna julkaisusivulta.</string>
@@ -376,6 +403,7 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="error_google_signin_failed">Google-kirjautuminen epäonnistui. Yritä uudelleen.</string>
     <string name="error_network_no_internet">Ei internetyhteyttä. Tarkista verkkoyhteys ja yritä uudelleen.</string>
     <string name="error_network_timeout">Yhteys aikakatkaistiin. Yritä uudelleen.</string>
+    <string name="auth_session_expired">Istunto on vanhentunut. Kirjaudu sisään uudelleen.</string>
     <string name="error_network_interrupted">Verkkoyhteys katkesi. Yritä uudelleen.</string>
     <string name="error_network_tls">Suojattua yhteyttä ei voitu muodostaa. Tarkista verkko- tai VPN-asetukset ja yritä uudelleen.</string>
     <string name="home_quick_actions_title">Ohje ja kieli</string>

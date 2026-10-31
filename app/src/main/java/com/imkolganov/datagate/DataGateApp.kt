@@ -9,6 +9,7 @@ import com.imkolganov.datagate.auth.LegacyAuthMigration
 import com.imkolganov.datagate.logger.CrashLogger
 import com.imkolganov.datagate.logger.CrashUploadWorkScheduler
 import com.imkolganov.datagate.logger.DebugPreferences
+import com.imkolganov.datagate.logger.EngineJournal
 import com.imkolganov.datagate.logger.VpnDebugLogger
 import com.imkolganov.datagate.ui.theme.LanguagePreferenceStore
 import com.imkolganov.datagate.ui.theme.ThemePreferenceStore
@@ -42,6 +43,11 @@ class DataGateApp : Application() {
         appScope.launch {
             DebugPreferences.vpnDebugModeFlow(this@DataGateApp).collectLatest { enabled ->
                 vpnDebugLogger.setEnabled(enabled)
+            }
+        }
+        appScope.launch {
+            DebugPreferences.engineJournalEnabledFlow(this@DataGateApp).collectLatest { enabled ->
+                EngineJournal.setEnabled(enabled)
             }
         }
     }
