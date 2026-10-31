@@ -5,6 +5,7 @@
     <string name="nav_access">Acceso</string>
     <string name="nav_quota">Cuota</string>
     <string name="nav_statistics">Estadísticas</string>
+    <string name="nav_statistics_short">Estad.</string>
     <string name="nav_settings">Ajustes</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Iniciar sesión con Google</string>
@@ -36,8 +37,16 @@
 
     <string name="home_telegram_channel_title">Suscríbete — es importante</string>
     <string name="home_telegram_channel_body">Canal de Telegram del proyecto: noticias y avisos en caso de problemas del servicio.</string>
+    <string name="home_support_project_title">Apoya el proyecto</string>
+    <string name="home_support_project_body">DataGate sigue siendo gratis gracias a quienes lo apoyan. Abre nuestro bot de Telegram para ver planes y formas de pago.</string>
+    <string name="home_support_project_action">Abrir bot de Telegram</string>
     <string name="home_grace_banner_title">Conectado — acceso temporal</string>
     <string name="home_grace_banner_body">Vincula tu cuenta o suscríbete en %1$s o esta sesión se desconectará.</string>
+    <string name="home_traffic">Tráfico</string>
+    <string name="home_traffic_hint">Rendimiento en vivo en este dispositivo a través del túnel VPN.</string>
+    <string name="home_traffic_download">Descarga</string>
+    <string name="home_traffic_upload">Subida</string>
+    <string name="home_traffic_waiting">Esperando tráfico…</string>
     <string name="stats_filters">Filtros</string>
     <string name="stats_overview">Resumen</string>
     <string name="stats_chart_hint">Toca el gráfico · pellizca para ampliar · arrastra para desplazar</string>
@@ -98,6 +107,15 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copiar</string>
+    <string name="home_engine_logs_clear">Borrar</string>
+    <string name="home_engine_logs_bottom">Abajo</string>
+    <string name="home_engine_logs_reconnects">Reconexiones: %1$d · Sesiones: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -267,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Actualizando lista IP…</string>
     <string name="vpn_ip_list_ready">Lista IP lista (%1$d rutas)</string>
 
@@ -300,6 +326,7 @@ Puedes abrir la página de la versión o descargar el APK. Usa la opción de aba
     <string name="update_dialog_open_release">Abrir página de versión</string>
     <string name="update_dialog_download">Descargar e instalar</string>
     <string name="update_downloading">Descargando…</string>
+    <string name="update_downloading_percent">Descargando… %1$d%%</string>
     <string name="update_download_failed">Error de descarga</string>
     <string name="update_return_after_allow_install">Permite instalaciones desde esta app en Ajustes y vuelve aquí; el instalador se abrirá automáticamente.</string>
     <string name="update_install_failed">No se pudo abrir el instalador. Inténtalo de nuevo o instala desde la página de la versión.</string>
@@ -376,6 +403,7 @@ Puedes abrir la página de la versión o descargar el APK. Usa la opción de aba
     <string name="error_google_signin_failed">No se pudo iniciar sesión con Google. Inténtelo de nuevo.</string>
     <string name="error_network_no_internet">No hay conexión a internet. Compruebe su red e inténtelo de nuevo.</string>
     <string name="error_network_timeout">La conexión ha superado el tiempo de espera. Inténtelo de nuevo.</string>
+    <string name="auth_session_expired">Tu sesión ha caducado. Inicia sesión de nuevo.</string>
     <string name="error_network_interrupted">La conexión de red se ha interrumpido. Inténtelo de nuevo.</string>
     <string name="error_network_tls">No se pudo establecer una conexión segura. Compruebe su red o la configuración de VPN e inténtelo de nuevo.</string>
     <string name="home_quick_actions_title">Ayuda e idioma</string>

@@ -14,8 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -61,6 +67,7 @@ private val rowShape = RoundedCornerShape(12.dp)
  * Picker for apps that should bypass the tunnel. Selections are persisted immediately, but the OS
  * only reads them at `establish()`, so the hint tells the user to reconnect.
  */
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SplitTunnelScreen(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -72,14 +79,52 @@ fun SplitTunnelScreen(onBack: () -> Unit) {
     var apps by remember { mutableStateOf<List<InstalledAppInfo>?>(null) }
     var query by remember { mutableStateOf("") }
     var bypassOnly by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
+    var showEnablePrompt by remember { mutableStateOf(false) }
+    var enablePromptDismissed by remember { mutableStateOf(false) }
     val iconCache = remember { mutableMapOf<String, ImageBitmap?>() }
 
-    LaunchedEffect(Unit) {
+    suspend fun loadCatalog(clearList: Boolean) {
         val appContext = context.applicationContext
+        if (clearList) {
+            apps = null
+            iconCache.clear()
+        }
         val settings = withContext(Dispatchers.IO) { SplitTunnelStore.getSettings(appContext) }
         enabled = settings.enabled
         bypassPackages = settings.bypassPackages.toSet()
-        apps = withContext(Dispatchers.IO) { InstalledAppsCatalog.loadNetworkApps(appContext) }
+        val loaded = withContext(Dispatchers.IO) { InstalledAppsCatalog.loadNetworkApps(appContext) }
+        iconCache.clear()
+        apps = loaded
+    }
+
+    fun refreshApps() {
+        if (isRefreshing) return
+        scope.launch {
+            isRefreshing = true
+            try {
+                loadCatalog(clearList = false)
+            } finally {
+                isRefreshing = false
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        loadCatalog(clearList = true)
+    }
+
+    fun persistEnabled(value: Boolean) {
+        enabled = value
+        if (value) {
+            showEnablePrompt = false
+            enablePromptDismissed = false
+        }
+        val appContext = context.applicationContext
+        scope.launch {
+            withContext(Dispatchers.IO) { SplitTunnelStore.setEnabled(appContext, value) }
+        }
     }
 
     fun persistBypassPackages(next: Set<String>) {
@@ -90,7 +135,20 @@ fun SplitTunnelScreen(onBack: () -> Unit) {
         }
     }
 
+    fun onBypassToggle(packageName: String, bypassing: Boolean) {
+        val next = if (bypassing) {
+            bypassPackages + packageName
+        } else {
+            bypassPackages - packageName
+        }
+        persistBypassPackages(next)
+        if (bypassing && !enabled && !enablePromptDismissed) {
+            showEnablePrompt = true
+        }
+    }
+
     val loadedApps = apps
+    val catalogLoaded = loadedApps != null
     val visibleApps = remember(loadedApps, query, bypassOnly, bypassPackages) {
         SplitTunnelPolicy.visibleApps(
             apps = loadedApps.orEmpty(),
@@ -99,174 +157,248 @@ fun SplitTunnelScreen(onBack: () -> Unit) {
             bypassPackages = bypassPackages,
         )
     }
+    val listState = SplitTunnelPolicy.listState(catalogLoaded, visibleApps.size)
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = ::refreshApps,
+    )
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(if (isTelevision) 24.dp else 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .then(
+                if (isTelevision) Modifier
+                else Modifier.pullRefresh(pullRefreshState),
+            ),
     ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = stringResource(R.string.action_back),
-                    )
-                }
-                Text(
-                    stringResource(R.string.settings_split_tunnel_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                )
-            }
-        }
-
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = AppCards.shape,
-                colors = AppCards.defaultColors(),
-                elevation = AppCards.defaultElevation(),
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(if (isTelevision) 24.dp else 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item(key = "header") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = stringResource(R.string.action_back),
+                        )
+                    }
+                    Text(
+                        stringResource(R.string.settings_split_tunnel_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(
+                        onClick = ::refreshApps,
+                        enabled = !isRefreshing,
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp),
+                        Icon(
+                            Icons.Outlined.Refresh,
+                            contentDescription = stringResource(R.string.settings_split_tunnel_refresh),
+                        )
+                    }
+                }
+            }
+
+            item(key = "enable") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = AppCards.shape,
+                    colors = AppCards.defaultColors(),
+                    elevation = AppCards.defaultElevation(),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(
-                                stringResource(R.string.settings_split_tunnel_enable_title),
-                                style = MaterialTheme.typography.titleMedium,
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 8.dp),
+                            ) {
+                                Text(
+                                    stringResource(R.string.settings_split_tunnel_enable_title),
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                Text(
+                                    stringResource(R.string.settings_split_tunnel_enable_subtitle),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Switch(
+                                checked = enabled,
+                                onCheckedChange = { value -> persistEnabled(value) },
                             )
+                        }
+                        if (!enabled) {
                             Text(
-                                stringResource(R.string.settings_split_tunnel_enable_subtitle),
+                                stringResource(R.string.settings_split_tunnel_disabled_notice),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Switch(
-                            checked = enabled,
-                            onCheckedChange = { value ->
-                                enabled = value
-                                val appContext = context.applicationContext
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        SplitTunnelStore.setEnabled(appContext, value)
-                                    }
-                                }
-                            },
-                        )
-                    }
-                    if (!enabled) {
                         Text(
-                            stringResource(R.string.settings_split_tunnel_disabled_notice),
+                            stringResource(R.string.settings_split_tunnel_reconnect_notice),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    Text(
-                        stringResource(R.string.settings_split_tunnel_reconnect_notice),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
             }
-        }
 
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = AppCards.shape,
-                colors = AppCards.defaultColors(),
-                elevation = AppCards.defaultElevation(),
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+            item(key = "filters") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = AppCards.shape,
+                    colors = AppCards.defaultColors(),
+                    elevation = AppCards.defaultElevation(),
                 ) {
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = { query = it },
-                        label = { Text(stringResource(R.string.settings_split_tunnel_search_label)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        FilterChip(
-                            selected = !bypassOnly,
-                            onClick = { bypassOnly = false },
-                            label = { Text(stringResource(R.string.settings_split_tunnel_filter_all)) },
+                        OutlinedTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            label = { Text(stringResource(R.string.settings_split_tunnel_search_label)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
                         )
-                        FilterChip(
-                            selected = bypassOnly,
-                            onClick = { bypassOnly = true },
-                            label = { Text(stringResource(R.string.settings_split_tunnel_filter_selected)) },
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            FilterChip(
+                                selected = !bypassOnly,
+                                onClick = { bypassOnly = false },
+                                label = { Text(stringResource(R.string.settings_split_tunnel_filter_all)) },
+                            )
+                            FilterChip(
+                                selected = bypassOnly,
+                                onClick = { bypassOnly = true },
+                                label = { Text(stringResource(R.string.settings_split_tunnel_filter_selected)) },
+                            )
+                        }
+                        Text(
+                            stringResource(
+                                R.string.settings_split_tunnel_count,
+                                bypassPackages.size,
+                                loadedApps?.size ?: 0,
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                    }
-                    Text(
-                        stringResource(
-                            R.string.settings_split_tunnel_count,
-                            bypassPackages.size,
-                            loadedApps?.size ?: 0,
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (bypassPackages.isNotEmpty()) {
-                        TextButton(onClick = { persistBypassPackages(emptySet()) }) {
-                            Text(stringResource(R.string.settings_split_tunnel_clear))
+                        if (bypassPackages.isNotEmpty()) {
+                            TextButton(onClick = { showClearConfirm = true }) {
+                                Text(stringResource(R.string.settings_split_tunnel_clear))
+                            }
                         }
                     }
                 }
             }
-        }
 
-        when (SplitTunnelPolicy.listState(loadedApps != null, visibleApps.size)) {
-            SplitTunnelListState.Loading -> item {
-                Text(
-                    stringResource(R.string.settings_split_tunnel_loading),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            // Keep `items()` always in the LazyList DSL. Switching between `item` and `items`
+            // via `when` can leave the list blank until another state change (e.g. search).
+            if (listState != SplitTunnelListState.Apps) {
+                item(key = "list-status") {
+                    Text(
+                        stringResource(
+                            if (listState == SplitTunnelListState.Loading) {
+                                R.string.settings_split_tunnel_loading
+                            } else {
+                                R.string.settings_split_tunnel_empty
+                            },
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-            SplitTunnelListState.Empty -> item {
-                Text(
-                    stringResource(R.string.settings_split_tunnel_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            SplitTunnelListState.Apps -> items(visibleApps, key = { it.packageName }) { app ->
+
+            items(visibleApps, key = { it.packageName }) { app ->
                 AppBypassRow(
                     app = app,
                     bypassing = app.packageName in bypassPackages,
                     iconCache = iconCache,
                     onToggle = { bypassing ->
-                        persistBypassPackages(
-                            if (bypassing) {
-                                bypassPackages + app.packageName
-                            } else {
-                                bypassPackages - app.packageName
-                            },
-                        )
+                        onBypassToggle(app.packageName, bypassing)
                     },
                 )
             }
         }
+
+        if (!isTelevision) {
+            PullRefreshIndicator(
+                refreshing = isRefreshing,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
+    }
+
+    if (showClearConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirm = false },
+            title = { Text(stringResource(R.string.settings_split_tunnel_clear_title)) },
+            text = { Text(stringResource(R.string.settings_split_tunnel_clear_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showClearConfirm = false
+                        persistBypassPackages(emptySet())
+                    },
+                ) {
+                    Text(stringResource(R.string.settings_split_tunnel_clear_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearConfirm = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
+    }
+
+    if (showEnablePrompt) {
+        AlertDialog(
+            onDismissRequest = {
+                showEnablePrompt = false
+                enablePromptDismissed = true
+            },
+            title = { Text(stringResource(R.string.settings_split_tunnel_enable_prompt_title)) },
+            text = { Text(stringResource(R.string.settings_split_tunnel_enable_prompt_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showEnablePrompt = false
+                        persistEnabled(true)
+                    },
+                ) {
+                    Text(stringResource(R.string.settings_split_tunnel_enable_prompt_action))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEnablePrompt = false
+                        enablePromptDismissed = true
+                    },
+                ) {
+                    Text(stringResource(R.string.settings_split_tunnel_enable_prompt_later))
+                }
+            },
+        )
     }
 }
 

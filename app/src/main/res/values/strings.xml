@@ -128,11 +128,21 @@
     <string name="home_telegram_channel_title">Subscribe — it\'s important</string>
     <string name="home_telegram_channel_body">Join our Telegram channel for the latest news and service outage announcements.</string>
 
+    <string name="home_support_project_title">Support the project</string>
+    <string name="home_support_project_body">DataGate stays free thanks to supporters. Open our Telegram bot for plans and how to pay.</string>
+    <string name="home_support_project_action">Open Telegram bot</string>
+
     <string name="home_grace_banner_title">Connected — temporary access</string>
     <string name="home_grace_banner_body">Link your account or subscribe within %1$s or this session will be disconnected.</string>
+    <string name="home_traffic">Traffic</string>
+    <string name="home_traffic_hint">Live throughput through the VPN tunnel. Swipe to scroll history; pinch to zoom.</string>
+    <string name="home_traffic_download">Download</string>
+    <string name="home_traffic_upload">Upload</string>
+    <string name="home_traffic_waiting">Waiting for traffic…</string>
 
     <string name="support_contact_email" translatable="false">imkolganov@gmail.com</string>
     <string name="support_telegram_bot_url" translatable="false">https://t.me/DataGateVPNBot</string>
+    <string name="support_telegram_bot_support_url" translatable="false">https://t.me/DataGateVPNBot?start=donate</string>
     <string name="project_github_issues_url" translatable="false">https://github.com/IMKolganov/DataGateAndroid/issues</string>
 
     <string name="stats_filters">Filters</string>
@@ -196,6 +206,15 @@
     <string name="settings_error_logs_count">%1$d file(s)</string>
     <string name="settings_share_logs">Share Error Logs</string>
     <string name="share_logs_chooser_title">Share error logs</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Last 1000 engine lines on Home, including connectivity.verdict (site vs internet vs VPN). Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copy</string>
+    <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Bottom</string>
+    <string name="home_engine_logs_reconnects">Reconnects: %1$d · Sessions: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -308,9 +327,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
 
     <string name="settings_bridge_ports_title">Local bridge ports</string>
     <string name="settings_bridge_ports_subtitle">For experienced users only. Change only if VPN conflicts with other apps over localhost ports.</string>
@@ -361,6 +388,7 @@
     <string name="update_dialog_open_release">Open release page</string>
     <string name="update_dialog_download">Download &amp; install</string>
     <string name="update_downloading">Downloading…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Download failed</string>
     <string name="update_return_after_allow_install">Allow installs from this app in Settings, then return here — the installer will open automatically.</string>
     <string name="update_install_failed">Could not open the installer. Try again or install from the release page.</string>
@@ -431,6 +459,7 @@
     <string name="error_google_signin_failed">Google sign-in failed. Please try again.</string>
     <string name="error_network_no_internet">No internet connection. Check your network and try again.</string>
     <string name="error_network_timeout">The connection timed out. Try again.</string>
+    <string name="auth_session_expired">Your session has expired. Please sign in again.</string>
     <string name="error_network_interrupted">The network connection was interrupted. Try again.</string>
     <string name="error_network_tls">Couldn\'t establish a secure connection. Check your network or VPN settings and try again.</string>
 

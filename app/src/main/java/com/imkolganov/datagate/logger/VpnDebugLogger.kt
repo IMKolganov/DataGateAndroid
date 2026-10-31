@@ -11,9 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Session file logger for VPN / network / UI diagnostics.
  *
- * Enable in Settings → **VPN Debug Log**. Writes under
+ * Enable file recording in Settings → **Development**. Writes under
  * [Context.getNoBackupFilesDir]/`debug/vpn_debug.txt` (rotates to `.prev.txt`).
- * Share/preview/clear from the same Settings card. Never auto-uploads.
+ * The Home engine journal is a separate in-memory sink ([EngineJournal]).
+ * Share/preview/clear the file from the same Settings card. Never auto-uploads.
  */
 class VpnDebugLogger(
     context: Context,
@@ -51,24 +52,7 @@ class VpnDebugLogger(
 
     /** Structured breadcrumb — preferred for forensics (readable story in the file). */
     fun event(category: String, action: String, details: Map<String, Any?> = emptyMap()) {
-        val detailText = details.entries
-            .filter { it.value != null && it.value.toString().isNotBlank() }
-            .joinToString(" ") { (k, v) ->
-                val raw = v.toString().replace('\n', ' ').replace('"', '\'')
-                val clipped = if (raw.length > 240) raw.take(237) + "..." else raw
-                "$k=$clipped"
-            }
-        val message = buildString {
-            append("EVENT ")
-            append(category)
-            append('.')
-            append(action)
-            if (detailText.isNotEmpty()) {
-                append(' ')
-                append(detailText)
-            }
-        }
-        i(TAG_EVENT, message)
+        i(TAG_EVENT, VpnDebugLogFormat.eventMessage(category, action, details))
     }
 
     fun d(tag: String, message: String) = append("D", tag, message, null)
@@ -135,6 +119,9 @@ class VpnDebugLogger(
             "I" -> Log.i(tag, message)
             else -> Log.d(tag, message)
         }
+        if (EngineJournal.isEnabled()) {
+            EngineJournal.append(level, tag, VpnDebugLogFormat.journalMessage(message, error))
+        }
         if (!enabled.get()) return
 
         appendRaw(
@@ -175,19 +162,35 @@ class VpnDebugLogger(
         }
 
         fun d(tag: String, message: String) {
-            get()?.d(tag, message) ?: Log.d(tag, message)
+            get()?.d(tag, message) ?: run {
+                Log.d(tag, message)
+                EngineJournal.append("D", tag, message)
+            }
         }
 
         fun i(tag: String, message: String) {
-            get()?.i(tag, message) ?: Log.i(tag, message)
+            get()?.i(tag, message) ?: run {
+                Log.i(tag, message)
+                EngineJournal.append("I", tag, message)
+            }
         }
 
         fun w(tag: String, message: String, error: Throwable? = null) {
-            get()?.w(tag, message, error) ?: if (error != null) Log.w(tag, message, error) else Log.w(tag, message)
+            get()?.w(tag, message, error) ?: run {
+                if (error != null) Log.w(tag, message, error) else Log.w(tag, message)
+                EngineJournal.append("W", tag, VpnDebugLogFormat.journalMessage(message, error))
+            }
         }
 
         fun e(tag: String, message: String, error: Throwable? = null) {
-            get()?.e(tag, message, error) ?: if (error != null) Log.e(tag, message, error) else Log.e(tag, message)
+            get()?.e(tag, message, error) ?: run {
+                if (error != null) Log.e(tag, message, error) else Log.e(tag, message)
+                EngineJournal.append("E", tag, VpnDebugLogFormat.journalMessage(message, error))
+            }
+        }
+
+        internal fun uninstallForTests() {
+            instance = null
         }
     }
 }

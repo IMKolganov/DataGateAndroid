@@ -5,6 +5,7 @@
     <string name="nav_access">Akses</string>
     <string name="nav_quota">Kuota</string>
     <string name="nav_statistics">Statistik</string>
+    <string name="nav_statistics_short">Stat.</string>
     <string name="nav_settings">Pengaturan</string>
     <string name="login_title">DataGate</string>
     <string name="login_sign_in_google">Masuk dengan Google</string>
@@ -36,8 +37,16 @@
 
     <string name="home_telegram_channel_title">Berlangganan — ini penting</string>
     <string name="home_telegram_channel_body">Saluran Telegram proyek: berita terbaru dan pengumuman jika layanan bermasalah.</string>
+    <string name="home_support_project_title">Dukung proyek ini</string>
+    <string name="home_support_project_body">DataGate tetap gratis berkat para pendukung. Buka bot Telegram kami untuk paket dan cara pembayaran.</string>
+    <string name="home_support_project_action">Buka bot Telegram</string>
     <string name="home_grace_banner_title">Tersambung — akses sementara</string>
     <string name="home_grace_banner_body">Tautkan akun Anda atau berlangganan dalam %1$s atau sesi ini akan diputus.</string>
+    <string name="home_traffic">Lalu lintas</string>
+    <string name="home_traffic_hint">Throughput langsung di perangkat ini melalui terowongan VPN.</string>
+    <string name="home_traffic_download">Unduh</string>
+    <string name="home_traffic_upload">Unggah</string>
+    <string name="home_traffic_waiting">Menunggu lalu lintas…</string>
     <string name="stats_filters">Filter</string>
     <string name="stats_overview">Ringkasan</string>
     <string name="stats_chart_hint">Ketuk grafik · cubit untuk zoom · seret untuk gulir</string>
@@ -98,6 +107,15 @@
     <string name="settings_debug_log_refresh">Refresh</string>
     <string name="settings_debug_log_preview">Preview</string>
     <string name="settings_debug_log_path">File path</string>
+    <string name="settings_development_title">Development</string>
+    <string name="settings_engine_journal">Show engine journal</string>
+    <string name="settings_engine_journal_subtitle">Live last 1000 engine lines on the Home screen. Nothing is written until this is on.</string>
+    <string name="home_engine_logs">Engine logs</string>
+    <string name="home_engine_logs_waiting">Waiting for engine events…</string>
+    <string name="home_engine_logs_copy">Copy</string>
+    <string name="home_engine_logs_clear">Clear</string>
+    <string name="home_engine_logs_bottom">Bawah</string>
+    <string name="home_engine_logs_reconnects">Sambung ulang: %1$d · Sesi: %2$d</string>
     <string name="settings_vpn_debug_title">VPN Debug Log</string>
     <string name="settings_debug_mode">Record VPN session to file</string>
     <string name="settings_debug_mode_subtitle">Writes a readable EVENT timeline (connect, reconnect, bridge loss, network, core OpenVPN, exceptions). Share the file after a problem.</string>
@@ -267,9 +285,17 @@
     <string name="settings_split_tunnel_filter_selected">Outside VPN</string>
     <string name="settings_split_tunnel_count">%1$d of %2$d apps bypass the VPN</string>
     <string name="settings_split_tunnel_clear">Clear list</string>
+    <string name="settings_split_tunnel_clear_title">Clear the list?</string>
+    <string name="settings_split_tunnel_clear_message">Are you sure you want to remove all apps from the bypass list?</string>
+    <string name="settings_split_tunnel_clear_confirm">Clear</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Enable bypass?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">You chose apps to keep outside the VPN, but bypass is still off. Enable it so the list takes effect on the next connect.</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Enable</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Not now</string>
     <string name="settings_split_tunnel_loading">Loading installed apps…</string>
     <string name="settings_split_tunnel_empty">No apps match this search.</string>
     <string name="settings_split_tunnel_system_app">System app</string>
+    <string name="settings_split_tunnel_refresh">Refresh app list</string>
     <string name="vpn_updating_ip_list">Memperbarui daftar IP…</string>
     <string name="vpn_ip_list_ready">Daftar IP siap (%1$d rute)</string>
 
@@ -300,6 +326,7 @@ Anda dapat membuka halaman rilis atau mengunduh APK.</string>
     <string name="update_dialog_open_release">Buka halaman rilis</string>
     <string name="update_dialog_download">Unduh dan instal</string>
     <string name="update_downloading">Mengunduh…</string>
+    <string name="update_downloading_percent">Downloading… %1$d%%</string>
     <string name="update_download_failed">Unduhan gagal</string>
     <string name="update_return_after_allow_install">Izinkan instalasi dari aplikasi ini di Setelan, lalu kembali ke sini — penginstal akan terbuka otomatis.</string>
     <string name="update_install_failed">Tidak dapat membuka penginstal. Coba lagi atau instal dari halaman rilis.</string>
@@ -376,6 +403,7 @@ Anda dapat membuka halaman rilis atau mengunduh APK.</string>
     <string name="error_google_signin_failed">Login Google gagal. Coba lagi.</string>
     <string name="error_network_no_internet">Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.</string>
     <string name="error_network_timeout">Koneksi melewati batas waktu. Coba lagi.</string>
+    <string name="auth_session_expired">Sesi Anda telah berakhir. Silakan masuk lagi.</string>
     <string name="error_network_interrupted">Koneksi jaringan terputus. Coba lagi.</string>
     <string name="error_network_tls">Tidak dapat membuat koneksi aman. Periksa jaringan atau setelan VPN Anda dan coba lagi.</string>
     <string name="home_quick_actions_title">Bantuan &amp; bahasa</string>

@@ -3,9 +3,11 @@ package com.imkolganov.datagate.update
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,6 +34,7 @@ import com.imkolganov.datagate.R
 import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,6 +54,8 @@ fun UpdateCheckHost(
     var autoDownloadNext by remember { mutableStateOf(false) }
     var downloadError by remember { mutableStateOf<String?>(null) }
     var downloading by remember { mutableStateOf(false) }
+    val downloadProgressState = remember { MutableStateFlow<ApkDownloadProgress?>(null) }
+    val downloadProgress by downloadProgressState.collectAsState()
     var showInstallPermissionHint by remember { mutableStateOf(false) }
 
     val dismissUpdateDialog = rememberUpdatedState {
@@ -180,6 +185,33 @@ fun UpdateCheckHost(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+                    if (downloading) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        when (val bar = ApkDownloadProgressPolicy.bar(downloadProgress)) {
+                            is ApkDownloadBar.Determinate -> {
+                                LinearProgressIndicator(
+                                    progress = { bar.fraction },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    stringResource(
+                                        R.string.update_downloading_percent,
+                                        bar.percent,
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            is ApkDownloadBar.Indeterminate -> {
+                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    stringResource(R.string.update_downloading),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
@@ -191,12 +223,16 @@ fun UpdateCheckHost(
                             val url = apkUrl
                             scope.launch {
                                 downloading = true
+                                downloadProgressState.value = null
                                 downloadError = null
                                 UpdatePreferences.setAutoDownloadEnabled(appContext, autoDownloadNext)
                                 val file = withContext(Dispatchers.IO) {
-                                    ApkUpdateInstaller.downloadApkToCache(activity, http, url)
+                                    ApkUpdateInstaller.downloadApkToCache(activity, http, url) { progress ->
+                                        downloadProgressState.value = progress
+                                    }
                                 }
                                 downloading = false
+                                downloadProgressState.value = null
                                 file.fold(
                                     onSuccess = { apk ->
                                         downloadError = null

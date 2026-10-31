@@ -30,6 +30,7 @@ class IpListRoutesRepository(
         val settings = IpListPreferences.getSettings(appContext)
         if (!settings.cidrListsEnabled) {
             VpnDebugLogger.d("OpenVPN3", "CIDR IP lists disabled in settings; no bypass routes")
+            ExcludeRouteSession.publishDisabled()
             return IpListConnectionRoutes(emptyList(), emptyList())
         }
 
@@ -50,7 +51,9 @@ class IpListRoutesRepository(
 
         if (resolvedContent.isNullOrBlank()) {
             IpListPreferences.savePriorityRouteCount(appContext, priorityRoutes.size)
-            return IpListConnectionRoutes(emptyList(), priorityRoutes)
+            val connectionRoutes = IpListConnectionRoutes(emptyList(), priorityRoutes)
+            ExcludeRouteSession.publish(connectionRoutes, settings)
+            return connectionRoutes
         }
 
         val result = IpListRouteConfig.parseCidrRoutesResult(resolvedContent)
@@ -64,12 +67,18 @@ class IpListRoutesRepository(
             "OpenVPN3",
             "IP list routes loaded: ${result.routes.size} general, ${priorityRoutes.size} priority"
         )
-        return IpListConnectionRoutes(generalRoutes = result.routes, priorityRoutes = priorityRoutes)
+        val connectionRoutes = IpListConnectionRoutes(
+            generalRoutes = result.routes,
+            priorityRoutes = priorityRoutes,
+        )
+        ExcludeRouteSession.publish(connectionRoutes, settings)
+        return connectionRoutes
     }
 
     suspend fun updateNow(): IpListUpdateResult {
         val settings = IpListPreferences.getSettings(appContext)
         if (!settings.cidrListsEnabled) {
+            ExcludeRouteSession.publishDisabled()
             return IpListUpdateResult(
                 routeCount = 0,
                 priorityRouteCount = 0,
@@ -85,6 +94,10 @@ class IpListRoutesRepository(
         return fetchConfiguredLists(settings.sourceUrls).fold(
             onSuccess = {
                 val result = saveParsedList(it, priorityRouteCount = priorityCount)
+                ExcludeRouteSession.publish(
+                    IpListConnectionRoutes(result.routes, priorityRoutes),
+                    settings,
+                )
                 IpListUpdateResult(
                     routeCount = result.routes.size,
                     priorityRouteCount = priorityCount,

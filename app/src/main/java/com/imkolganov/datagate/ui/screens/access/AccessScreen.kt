@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.servers.VpnServerType
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.ScreenHeader
 import com.imkolganov.datagate.ui.tv.tvFocusBorder
 import com.imkolganov.datagate.util.userFriendlyApiError
 import com.imkolganov.datagate.vpn.ServerSelectionMode
@@ -259,9 +261,29 @@ fun AccessScreen(
             verticalArrangement = Arrangement.spacedBy(if (isTelevision) 16.dp else 12.dp)
         ) {
             item {
-                HeaderRow(
-                    onRefresh = { onEvent(AccessContract.UiEvent.RefreshServers) },
-                    primaryFocusRequester = primaryFocusRequester,
+                ScreenHeader(
+                    title = stringResource(R.string.nav_access),
+                    icon = Icons.Filled.Lock,
+                    subtitle = stringResource(R.string.access_choose_server),
+                    actions = {
+                        IconButton(
+                            onClick = { onEvent(AccessContract.UiEvent.RefreshServers) },
+                            modifier = Modifier
+                                .then(
+                                    if (primaryFocusRequester != null) {
+                                        Modifier.focusRequester(primaryFocusRequester)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                                .tvFocusBorder(shape = RoundedCornerShape(50)),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Refresh,
+                                contentDescription = stringResource(R.string.access_refresh),
+                            )
+                        }
+                    },
                 )
             }
 
@@ -603,36 +625,3 @@ private fun AccessUpgradeAccessNote() {
     }
 }
 
-@Composable
-private fun HeaderRow(
-    onRefresh: () -> Unit,
-    primaryFocusRequester: androidx.compose.ui.focus.FocusRequester? = null,
-) {
-    Row(
-        modifier = Modifier.padding(bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = stringResource(R.string.access_choose_server),
-            style = MaterialTheme.typography.titleMedium
-        )
-        IconButton(
-            onClick = onRefresh,
-            modifier = Modifier
-                .then(
-                    if (primaryFocusRequester != null) {
-                        Modifier.focusRequester(primaryFocusRequester)
-                    } else {
-                        Modifier
-                    }
-                )
-                .tvFocusBorder(shape = RoundedCornerShape(50)),
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Refresh,
-                contentDescription = stringResource(R.string.access_refresh)
-            )
-        }
-    }
-}

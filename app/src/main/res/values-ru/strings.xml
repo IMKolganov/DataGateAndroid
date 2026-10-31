@@ -123,8 +123,17 @@
 
     <string name="home_telegram_channel_title">Подпишитесь — это важно</string>
     <string name="home_telegram_channel_body">Telegram-канал проекта: актуальные новости и объявления при проблемах с сервисом.</string>
+
+    <string name="home_support_project_title">Поддержать проект</string>
+    <string name="home_support_project_body">DataGate остаётся бесплатным благодаря поддержке. В боте — тарифы и как оплатить.</string>
+    <string name="home_support_project_action">Открыть Telegram-бота</string>
     <string name="home_grace_banner_title">Подключено — временный доступ</string>
     <string name="home_grace_banner_body">Свяжите аккаунт или оформите подписку в течение %1$s, иначе сессия будет отключена.</string>
+    <string name="home_traffic">Трафик</string>
+    <string name="home_traffic_hint">Живая скорость через VPN-туннель. Свайп — история, щипок — масштаб.</string>
+    <string name="home_traffic_download">Загрузка</string>
+    <string name="home_traffic_upload">Отдача</string>
+    <string name="home_traffic_waiting">Ожидание трафика…</string>
 
     <string name="stats_filters">Фильтры</string>
     <string name="stats_overview">Обзор</string>
@@ -193,6 +202,15 @@
     <string name="settings_debug_log_refresh">Обновить</string>
     <string name="settings_debug_log_preview">Просмотр</string>
     <string name="settings_debug_log_path">Путь к файлу</string>
+    <string name="settings_development_title">Разработка</string>
+    <string name="settings_engine_journal">Показывать журнал движка</string>
+    <string name="settings_engine_journal_subtitle">Последние 1000 строк на главной, включая connectivity.verdict (сайт / интернет / VPN). Пока выключено — ничего не пишется.</string>
+    <string name="home_engine_logs">Журнал движка</string>
+    <string name="home_engine_logs_waiting">Ожидание событий движка…</string>
+    <string name="home_engine_logs_copy">Копировать</string>
+    <string name="home_engine_logs_clear">Очистить</string>
+    <string name="home_engine_logs_bottom">Вниз</string>
+    <string name="home_engine_logs_reconnects">Переподключения: %1$d · Сессии: %2$d</string>
     <string name="settings_vpn_debug_title">Лог отладки VPN</string>
     <string name="settings_debug_mode">Писать сессию VPN в файл</string>
     <string name="settings_debug_mode_subtitle">Пишет понятный EVENT-таймлайн (connect, reconnect, потеря bridge, сеть, OpenVPN core, исключения). После сбоя отправьте файл.</string>
@@ -275,6 +293,7 @@
     <string name="update_dialog_open_release">Открыть страницу релиза</string>
     <string name="update_dialog_download">Скачать и установить</string>
     <string name="update_downloading">Загрузка…</string>
+    <string name="update_downloading_percent">Загрузка… %1$d%%</string>
     <string name="update_download_failed">Не удалось скачать</string>
     <string name="update_return_after_allow_install">Разрешите установку из этого приложения в настройках и вернитесь сюда — установщик откроется сам.</string>
     <string name="update_install_failed">Не удалось открыть установщик. Попробуйте снова или установите со страницы релиза.</string>
@@ -345,6 +364,7 @@
     <string name="error_google_signin_failed">Не удалось выполнить вход через Google. Попробуйте снова.</string>
     <string name="error_network_no_internet">Нет подключения к интернету. Проверьте сеть и попробуйте снова.</string>
     <string name="error_network_timeout">Истекло время ожидания соединения. Попробуйте снова.</string>
+    <string name="auth_session_expired">Сессия истекла. Войдите снова.</string>
     <string name="error_network_interrupted">Сетевое соединение было прервано. Попробуйте снова.</string>
     <string name="error_network_tls">Не удалось установить безопасное соединение. Проверьте сеть или настройки VPN и попробуйте снова.</string>
 
@@ -451,9 +471,17 @@
     <string name="settings_split_tunnel_filter_selected">Вне VPN</string>
     <string name="settings_split_tunnel_count">Вне VPN: %1$d из %2$d приложений</string>
     <string name="settings_split_tunnel_clear">Очистить список</string>
+    <string name="settings_split_tunnel_clear_title">Очистить список?</string>
+    <string name="settings_split_tunnel_clear_message">Вы уверены, что хотите убрать все приложения из списка исключений?</string>
+    <string name="settings_split_tunnel_clear_confirm">Очистить</string>
+    <string name="settings_split_tunnel_enable_prompt_title">Включить исключение из VPN?</string>
+    <string name="settings_split_tunnel_enable_prompt_message">Вы выбрали приложения вне VPN, но сама функция выключена. Включить, чтобы список применялся при следующем подключении?</string>
+    <string name="settings_split_tunnel_enable_prompt_action">Включить</string>
+    <string name="settings_split_tunnel_enable_prompt_later">Не сейчас</string>
     <string name="settings_split_tunnel_loading">Загрузка установленных приложений…</string>
     <string name="settings_split_tunnel_empty">Нет приложений по этому запросу.</string>
     <string name="settings_split_tunnel_system_app">Системное приложение</string>
+    <string name="settings_split_tunnel_refresh">Обновить список приложений</string>
 
     <string name="free_tier_title_link">Подключите Telegram для доступа к VPN</string>
     <string name="free_tier_title_subscribe">Подпишитесь на Telegram-канал</string>

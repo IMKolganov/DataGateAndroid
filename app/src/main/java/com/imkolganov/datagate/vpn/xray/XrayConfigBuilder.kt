@@ -5,7 +5,7 @@ import org.json.JSONObject
 
 /**
  * Builds a full Xray client JSON (TUN inbound + proxy outbounds + routing)
- * suitable for [libXray.LibXray] `runXrayFromJson`.
+ * suitable for [libXray.LibXray] `runXray`.
  */
 object XrayConfigBuilder {
 
@@ -80,7 +80,7 @@ object XrayConfigBuilder {
         require(outbounds.length() > 0) { "No Xray outbounds in config" }
         // libXray convertShareLinks stores the fragment/display name in sendThrough.
         // Xray-core treats sendThrough as a bind address → "unable to send through: <name>".
-        // DataGateLinux never sets this field; strip before runXrayFromJson.
+        // DataGateLinux never sets this field; strip before runXray.
         sanitizeOutboundsForRuntime(outbounds)
 
         // Ensure first proxy outbound has a stable tag for routing.

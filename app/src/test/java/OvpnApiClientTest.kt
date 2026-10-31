@@ -66,16 +66,16 @@ class OvpnApiClientTest {
     }
 
     @Test
-    fun ensureAndDownloadDeviceFile_skipsCreateWhenDownloadSucceeds() = runBlocking {
+    fun ensureAndDownloadDeviceFile_acceptsResponseWithoutIssuedOvpn() = runBlocking {
         MockWebServer().use { server ->
             server.start()
 
             val downloadBody = JSONObject()
+                .put("success", true)
                 .put(
                     "data",
                     JSONObject()
-                        .put("issuedOvpn", JSONObject().put("fileName", "existing.ovpn"))
-                        .put("content", Base64.getEncoder().encodeToString("existing".toByteArray()))
+                        .put("content", Base64.getEncoder().encodeToString("bare-content".toByteArray()))
                 )
             server.enqueue(MockResponse().setResponseCode(200).setBody(downloadBody.toString()))
 
@@ -85,16 +85,15 @@ class OvpnApiClientTest {
                 tokenProvider = { null }
             )
 
-            client.ensureAndDownloadDeviceFile(
+            val result = client.ensureAndDownloadDeviceFile(
                 vpnServerId = 2,
                 commonName = "adg-2-google-sub-dev",
                 externalId = "google-sub",
                 issuedTo = "issued-to"
             )
 
-            assertEquals(1, server.requestCount)
-            val downloadRequest: RecordedRequest = server.takeRequest()
-            assertTrue(downloadRequest.path!!.endsWith(ApiConfig.API_OPEN_VPN_FILES_DOWNLOAD_FILE_BY_CN_PATH))
+            assertEquals("client.ovpn", result.fileName)
+            assertEquals("bare-content", result.content.toString(Charsets.UTF_8))
         }
     }
 }

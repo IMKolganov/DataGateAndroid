@@ -9,5 +9,9 @@ data class VpnStatusUiState(
     val selectedServerName: String? = null,
     val lastMessage: String = "",
     val selectedServerId: Int? = null,
-    val hasVpnPermission: Boolean = false
+    val hasVpnPermission: Boolean = false,
+    /** RECONNECTING cycles since this user connection started (reset on disconnect). */
+    val reconnectCount: Int = 0,
+    /** True between RECONNECTING and the next CONNECTED/PAUSED (dedupes spam). */
+    val reconnectCycleActive: Boolean = false,
 )

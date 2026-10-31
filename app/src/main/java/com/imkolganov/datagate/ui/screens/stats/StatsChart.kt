@@ -1,6 +1,5 @@
 package com.imkolganov.datagate.ui.screens.stats
 
-import android.graphics.Paint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -10,39 +9,39 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.imkolganov.datagate.R
 import androidx.compose.ui.unit.sp
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.model.overview.Metric
 import com.imkolganov.datagate.model.overview.OverviewRow
 import com.imkolganov.datagate.util.formatBytes
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberFadingEdges
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.Insets
 import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
+import com.patrykandpatrick.vico.compose.common.component.ShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.component.shapeComponent
-import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
-import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
-import com.patrykandpatrick.vico.core.common.Insets
-import com.patrykandpatrick.vico.core.common.shape.Shape
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -70,12 +69,12 @@ fun StatsChart(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     val labels = remember(rows) { rows.map { formatLabel(it.ts) } }
-    val xValues = remember(rows) { rows.indices.map { it.toFloat() } }
-    val yValues = remember(rows, metric) { rows.map { metricValue(it, metric).toFloat() } }
+    val xValues = remember(rows) { rows.indices.map { it.toDouble() } }
+    val yValues = remember(rows, metric) { rows.map { metricValue(it, metric).toDouble() } }
 
     LaunchedEffect(xValues, yValues) {
         modelProducer.runTransaction {
-            lineSeries { series(xValues, yValues) }
+            lineModel { series(xValues, yValues) }
         }
     }
 
@@ -95,15 +94,15 @@ fun StatsChart(
 
     ProvideVicoTheme(theme = vicoTheme) {
         val lineSpec = LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(fill(primary)),
+            fill = LineCartesianLayer.LineFill.single(Fill(primary)),
             stroke = LineCartesianLayer.LineStroke.Continuous(
-                thicknessDp = 3.dp.value,
-                cap = Paint.Cap.ROUND
+                thickness = 3.dp,
+                cap = StrokeCap.Round
             ),
             areaFill = LineCartesianLayer.AreaFill.single(
-                fill(primary.copy(alpha = 0.22f))
+                Fill(primary.copy(alpha = 0.22f))
             ),
-            pointConnector = LineCartesianLayer.PointConnector.cubic(curvature = 0.5f)
+            interpolator = LineCartesianLayer.Interpolator.cubic(curvature = 0.5f)
         )
 
         val lineLayer = rememberLineCartesianLayer(
@@ -111,12 +110,11 @@ fun StatsChart(
         )
 
         val markerLabel = rememberTextComponent(
-            color = onSurface,
-            textSize = 12.sp
+            style = TextStyle(color = onSurface, fontSize = 12.sp)
         )
 
         val markerGuideline = rememberLineComponent(
-            fill = fill(outlineSoft),
+            fill = Fill(outlineSoft),
             thickness = 1.dp
         )
 
@@ -150,10 +148,10 @@ fun StatsChart(
             labelPosition = DefaultCartesianMarker.LabelPosition.Bottom,
             guideline = markerGuideline,
             indicator = { color ->
-                shapeComponent(
-                    fill = fill(color),
-                    shape = Shape.Rectangle,
-                    margins = Insets(allDp = 1f)
+                ShapeComponent(
+                    fill = Fill(color),
+                    shape = RectangleShape,
+                    margins = Insets(1.dp)
                 )
             },
             indicatorSize = 8.dp

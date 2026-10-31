@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.auth.http
 
+import com.imkolganov.datagate.auth.SessionEvents
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.configs.ApiConfig
 import com.imkolganov.datagate.model.auth.RefreshRequestDto
@@ -42,6 +43,7 @@ class RefreshTokenAuthenticator(
                 val refresh = tokenStore.getRefreshToken()
                 if (refresh.isNullOrBlank()) {
                     tokenStore.clear()
+                    SessionEvents.notifySessionExpired()
                     return@runBlocking null
                 }
 
@@ -53,9 +55,14 @@ class RefreshTokenAuthenticator(
                             userAgent = userAgentProvider()
                         )
                     )
-                } catch (t: Throwable) {
-                    android.util.Log.e("Auth", "refresh failed", t)
+                } catch (e: RefreshRejectedException) {
+                    android.util.Log.w("Auth", "refresh rejected (${e.code}), ending session", e)
                     tokenStore.clear()
+                    SessionEvents.notifySessionExpired()
+                    return@runBlocking null
+                } catch (t: Throwable) {
+                    // Network/5xx: keep the session; the caller sees this 401 and the next request retries.
+                    android.util.Log.w("Auth", "refresh failed, keeping session", t)
                     return@runBlocking null
                 }
 

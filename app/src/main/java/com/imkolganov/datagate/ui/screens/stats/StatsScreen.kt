@@ -15,6 +15,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +36,7 @@ import com.imkolganov.datagate.R
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.ScreenHeader
 import com.imkolganov.datagate.ui.tv.tvFocusBorder
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -67,6 +70,12 @@ fun StatsScreen(
             contentPadding = PaddingValues(if (isTelevision) 24.dp else 16.dp),
             verticalArrangement = Arrangement.spacedBy(if (isTelevision) 16.dp else 12.dp)
         ) {
+            item {
+                ScreenHeader(
+                    title = stringResource(R.string.nav_statistics),
+                    icon = Icons.Filled.AccountBox,
+                )
+            }
             item {
                 Card(
                     modifier = Modifier

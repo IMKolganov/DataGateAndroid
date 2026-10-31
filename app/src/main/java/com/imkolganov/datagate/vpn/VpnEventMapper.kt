@@ -17,7 +17,7 @@ object VpnEventMapper {
         if (previous.pendingUserCommand != null && !VpnCommandContract.isAuthoritativeTunnelEvent(eventName)) {
             return previous
         }
-        return when (eventName) {
+        val mapped = when (eventName) {
 
             "SELECTING_SERVER" -> previous.copy(
                 isConnectRequested = true,
@@ -194,6 +194,18 @@ object VpnEventMapper {
                 previous.copy(lastMessage = msg)
             }
         }
+        if (mapped === previous) return previous
+        val reconnect = VpnReconnectCountPolicy.onEvent(
+            previous = VpnReconnectCountPolicy.Snapshot(
+                reconnectCount = previous.reconnectCount,
+                cycleActive = previous.reconnectCycleActive,
+            ),
+            eventName = eventName,
+        )
+        return mapped.copy(
+            reconnectCount = reconnect.reconnectCount,
+            reconnectCycleActive = reconnect.cycleActive,
+        )
     }
 
     internal fun shouldShowReconnectingOnNetworkChange(previous: VpnStatusUiState): Boolean {

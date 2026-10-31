@@ -9,33 +9,47 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import android.system.OsConstants
 import androidx.core.app.NotificationCompat
 import com.imkolganov.datagate.MainActivity
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.ui.tv.isTelevision
+import com.imkolganov.datagate.vpn.diag.VpnDiagnostics
+import com.imkolganov.datagate.vpn.ExcludeRouteSession
 import com.imkolganov.datagate.vpn.IpListRouteConfig
 import com.imkolganov.datagate.vpn.OpenVpn3Service
 import com.imkolganov.datagate.vpn.SplitTunnelSession
 import com.imkolganov.datagate.vpn.VpnBypassApps
 import com.imkolganov.datagate.vpn.VpnExcludeRoutes
+import com.imkolganov.datagate.vpn.VpnNetworkCapChangePolicy
 import com.imkolganov.datagate.vpn.VpnTunnelSessionStore
+import com.imkolganov.datagate.vpn.traffic.VpnTrafficMonitor
+import com.imkolganov.datagate.vpn.traffic.VpnTunIfaceCounters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Android [VpnService] that runs XTLS/libXray with a TUN fd injected into the client config.
  * Status broadcasts use the same action/extras as [OpenVpn3Service] so Home/Access UI stays shared.
  *
- * Notification mirrors OpenVPN (status text + Pause/Disconnect). Pause for Xray v1 disconnects.
+ * Notification mirrors OpenVPN (status text + Pause/Resume/Disconnect).
+ * Pause drops TUN/core but keeps this service and the last config for Resume.
  */
 @SuppressLint("VpnServicePolicy")
 class XrayVpnService : VpnService() {
@@ -46,6 +60,7 @@ class XrayVpnService : VpnService() {
         const val ACTION_DISCONNECT = "com.imkolganov.datagate.vpn.xray.DISCONNECT"
         /** Same UX affordance as OpenVPN pause; tears down the Xray session. */
         const val ACTION_PAUSE = "com.imkolganov.datagate.vpn.xray.PAUSE"
+        const val ACTION_RESUME = "com.imkolganov.datagate.vpn.xray.RESUME"
         const val ACTION_QUERY_STATUS = "com.imkolganov.datagate.vpn.xray.QUERY_STATUS"
         const val EXTRA_CONFIG_PATH = "com.imkolganov.datagate.vpn.xray.EXTRA_CONFIG_PATH"
         const val EXTRA_CONFIG_TEXT = "com.imkolganov.datagate.vpn.xray.EXTRA_CONFIG_TEXT"
@@ -71,23 +86,105 @@ class XrayVpnService : VpnService() {
     private var tunPfd: ParcelFileDescriptor? = null
     private var sessionServerDisplayName: String? = null
     private var notificationWatchdogJob: Job? = null
+    private var connectJob: Job? = null
     private var lastNotificationStatusText: String = ""
     @Volatile private var running = false
     /** True while the FGS notification should remain visible (connecting or connected). */
     @Volatile private var foregroundDesired = false
+    /** Bumped on every connect / stop so a stale blocking [connect] cannot tear down a newer session. */
+    @Volatile private var connectGeneration = 0
+    @Volatile private var isStopping = false
+    @Volatile private var isPaused = false
+    @Volatile private var desiredConnection = false
+    @Volatile private var networkAvailable = true
+    private var lastNetworkTransport: String? = null
+    private var lastNetworkUsable: Boolean? = null
+    /** Last observed non-VPN network identity (validated not required). */
+    private var lastUnderlyingHandle: Long? = null
+    private var unhealthyCoreWatch = XrayNetworkPolicy.UnhealthyCoreWatch()
+    private var isNetworkCallbackRegistered = false
+    private var isUnderlyingNetworkCallbackRegistered = false
+    /** Non-VPN default network; used to detect cell↔Wi-Fi without looping on the VPN iface. */
+    private var networkChangeState = XrayNetworkChangeState()
+    private var settleRecheckJob: Job? = null
+    private var postConnectRecheckJob: Job? = null
+    private val networkLock = Any()
+    private val trackedNetworks = ConcurrentHashMap<Network, XrayNetworkPolicy.NetworkSnapshot>()
+    private var pendingConnect: PendingXrayConnect? = null
+    private val sessionLock = Any()
+
+    private data class PendingXrayConnect(
+        val configText: String,
+        val excludedRoutesPath: String?,
+        val dnsServers: List<String>,
+        val dnsIdentityEnabled: Boolean,
+    )
 
     private val statePrefs: SharedPreferences by lazy {
         getSharedPreferences(OpenVpn3Service.PREFS_VPN_STATE, Context.MODE_PRIVATE)
     }
 
+    private val connectivityManager: ConnectivityManager by lazy {
+        getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            rememberNetwork(network)
+            onNetworkStateChanged("AVAILABLE")
+        }
+
+        override fun onLost(network: Network) {
+            forgetNetwork(network)
+            onNetworkStateChanged("LOST")
+        }
+
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            rememberNetwork(network, networkCapabilities)
+            onNetworkStateChanged("CAP_CHANGED")
+        }
+    }
+
+    /**
+     * Default-network callback follows the VPN iface after establish, so cell↔Wi-Fi
+     * can be silent. This request tracks the real uplink.
+     */
+    private val underlyingNetworkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            rememberNetwork(network)
+            onNetworkStateChanged("UNDERLYING_AVAILABLE")
+        }
+
+        override fun onLost(network: Network) {
+            forgetNetwork(network)
+            onNetworkStateChanged("UNDERLYING_LOST")
+        }
+
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            rememberNetwork(network, networkCapabilities)
+            onNetworkStateChanged("UNDERLYING_CAP")
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        networkAvailable = hasUsableNetwork()
+        registerNetworkCallbackSafely()
         VpnDebugLogger.d(TAG, "Service created")
     }
 
     override fun onDestroy() {
+        isStopping = true
+        desiredConnection = false
+        connectGeneration++
+        connectJob?.cancel()
+        connectJob = null
+        settleRecheckJob?.cancel()
+        settleRecheckJob = null
+        unregisterNetworkCallbackSafely()
         stopXraySession(broadcast = false)
+        serviceScope.cancel()
         super.onDestroy()
     }
 
@@ -102,33 +199,92 @@ class XrayVpnService : VpnService() {
                     ?.trim()?.takeIf { it.isNotEmpty() }
                     ?: statePrefs.getString("selected_server_name", null)
                         ?.trim()?.takeIf { it.isNotEmpty() }
-                serviceScope.launch { connect(intent) }
+                desiredConnection = true
+                isPaused = false
+                isStopping = false
+                val session = ++connectGeneration
+                connectJob?.cancel()
+                connectJob = serviceScope.launch { connect(intent, session) }
             }
-            ACTION_DISCONNECT, ACTION_PAUSE -> {
+            ACTION_PAUSE -> {
+                isPaused = true
+                isStopping = false
+                desiredConnection = true
+                val pauseSession = ++connectGeneration
+                connectJob?.cancel()
+                connectJob = null
+                settleRecheckJob?.cancel()
+                settleRecheckJob = null
                 serviceScope.launch {
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(pauseSession, connectGeneration)) {
+                        return@launch
+                    }
+                    stopXraySession(broadcast = false)
+                    broadcastStatus("PAUSED", getString(R.string.vpn_msg_paused))
+                    startForegroundNow(getString(R.string.vpn_status_paused))
+                }
+            }
+            ACTION_RESUME -> {
+                if (!isPaused && running) return START_STICKY
+                if (pendingConnect == null) {
+                    broadcastStatus("ERROR", "No Xray session to resume")
+                    return START_STICKY
+                }
+                isPaused = false
+                isStopping = false
+                desiredConnection = true
+                broadcastStatus("RESUMED", getString(R.string.vpn_msg_resuming))
+                startForegroundNow(getString(R.string.vpn_msg_resuming))
+                reconnectFromPending()
+            }
+            ACTION_DISCONNECT -> {
+                desiredConnection = false
+                isPaused = false
+                pendingConnect = null
+                isStopping = true
+                val stopSession = ++connectGeneration
+                connectJob?.cancel()
+                connectJob = null
+                settleRecheckJob?.cancel()
+                settleRecheckJob = null
+                serviceScope.launch {
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(stopSession, connectGeneration)) {
+                        return@launch
+                    }
                     stopXraySession(broadcast = true)
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(stopSession, connectGeneration)) {
+                        return@launch
+                    }
                     stopForegroundCompat()
+                    if (!XrayConnectSessionPolicy.shouldApplyStop(stopSession, connectGeneration)) {
+                        return@launch
+                    }
                     stopSelf()
                 }
             }
             ACTION_QUERY_STATUS -> {
-                val (name, info) = resolvedCachedStatusForUi()
+                val (name, info) = resolveLiveStatusForQuery()
+                runHealthCheck("query_status")
                 broadcastStatus(name, info, fromQuery = true)
+                if (!desiredConnection && !running && tunPfd == null && !isPaused) {
+                    stopSelf()
+                }
             }
             else -> Unit
         }
         return START_STICKY
     }
 
-    private fun connect(intent: Intent) {
+    private fun connect(intent: Intent, session: Int) {
+        var localPfd: ParcelFileDescriptor? = null
         try {
+            if (!isCurrentConnect(session)) return
+
             if (!XrayCoreFacade.isAvailable()) {
-                broadcastStatus(
-                    "ERROR",
+                failCurrentConnect(
+                    session,
                     "libXray is not available on this device (${Build.SUPPORTED_ABIS.joinToString()})",
                 )
-                stopForegroundCompat()
-                stopSelf()
                 return
             }
 
@@ -138,21 +294,15 @@ class XrayVpnService : VpnService() {
                 !path.isNullOrBlank() -> File(path).readText()
                 !inline.isNullOrBlank() -> inline
                 else -> {
-                    broadcastStatus("ERROR", "Missing Xray config")
-                    stopForegroundCompat()
-                    stopSelf()
+                    failCurrentConnect(session, "Missing Xray config")
                     return
                 }
             }
 
-            broadcastStatus("CONNECTING", getString(R.string.vpn_connecting_generic))
-            startForegroundNow(getString(R.string.vpn_connecting_generic))
-
-            // Tear down any previous session in this service.
-            stopXraySession(broadcast = false)
+            if (!isCurrentConnect(session)) return
 
             val excludedRoutesPath = intent.getStringExtra(EXTRA_EXCLUDED_ROUTES_PATH)
-            val excludedRoutes = excludedRoutesPath
+            val intentRoutes = excludedRoutesPath
                 ?.takeIf { it.isNotBlank() }
                 ?.let { path ->
                     runCatching {
@@ -160,9 +310,44 @@ class XrayVpnService : VpnService() {
                     }.getOrElse { emptyList() }
                 }
                 ?: emptyList()
-
             val dnsServers = resolveDnsServers(intent)
             val dnsIdentityEnabled = intent.getBooleanExtra(EXTRA_DNS_IDENTITY_ENABLED, false)
+            pendingConnect = PendingXrayConnect(
+                configText = raw,
+                excludedRoutesPath = excludedRoutesPath,
+                dnsServers = dnsServers,
+                dnsIdentityEnabled = dnsIdentityEnabled,
+            )
+
+            if (!networkAvailable &&
+                XrayNetworkPolicy.shouldWaitForNetwork(
+                    desiredConnection = desiredConnection,
+                    stopping = isStopping,
+                    running = running,
+                    networkAvailable = false,
+                )
+            ) {
+                broadcastStatus("WAITING_NETWORK", getString(R.string.vpn_msg_reconnecting))
+                startForegroundNow(getString(R.string.vpn_msg_reconnecting))
+                return
+            }
+
+            broadcastStatus("CONNECTING", getString(R.string.vpn_connecting_generic))
+            startForegroundNow(getString(R.string.vpn_connecting_generic))
+
+            if (!isCurrentConnect(session)) return
+
+            // Tear down any previous session in this service.
+            stopXraySession(broadcast = false)
+
+            if (!isCurrentConnect(session)) return
+
+            val excludedRoutes = ExcludeRouteSession.resolveForEstablish(
+                intentRoutes = intentRoutes,
+                forXray = true,
+                supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+                constrainedDevice = isTelevision(this),
+            )
             val builder = Builder()
                 .setSession(sessionServerDisplayName ?: "DataGate Xray")
                 .setMtu(1500)
@@ -206,14 +391,21 @@ class XrayVpnService : VpnService() {
                 ),
             )
 
+            if (!isCurrentConnect(session)) return
+
             // Register protect before establish/run so any early dials cannot loop into TUN.
             XrayCoreFacade.registerProtect(this)
 
+            if (!isCurrentConnect(session)) return
+
             val pfd = builder.establish()
+            localPfd = pfd
             if (pfd == null) {
-                broadcastStatus("ERROR", "VpnService.Builder.establish() returned null")
-                stopForegroundCompat()
-                stopSelf()
+                failCurrentConnect(session, "VpnService.Builder.establish() returned null")
+                return
+            }
+            if (!isCurrentConnect(session)) {
+                abandonLocalTun(pfd)
                 return
             }
             tunPfd = pfd
@@ -233,20 +425,63 @@ class XrayVpnService : VpnService() {
                 owner = VpnTunnelSessionStore.OWNER_XRAY,
             )
 
+            if (!isCurrentConnect(session)) {
+                abandonLocalTun(pfd)
+                return
+            }
+
             val fullConfig = XrayConfigBuilder.buildTunClientConfig(
                 outboundsJson = raw,
                 tunFd = pfd.fd,
                 directBypassCidrs = routingBypassCidrs,
                 tunnelDnsServers = dnsServers,
             )
-            XrayCoreFacade.runFromJson(fullConfig)
+            val startedCore = synchronized(sessionLock) {
+                if (!isCurrentConnect(session)) {
+                    false
+                } else {
+                    XrayCoreFacade.runFromJson(fullConfig)
+                    true
+                }
+            }
+            if (!startedCore || !isCurrentConnect(session)) {
+                // A newer connect or stop owns teardown. Closing only our TUN avoids
+                // XrayCoreFacade.stop() killing a session that already replaced us.
+                abandonLocalTun(pfd)
+                return
+            }
             running = true
             broadcastStatus("CONNECTED", getString(R.string.vpn_msg_connected))
             startForegroundNow(getString(R.string.vpn_status_connected))
+            VpnTrafficMonitor.start(owner = VpnTunnelSessionStore.OWNER_XRAY) {
+                VpnTunIfaceCounters.read(applicationContext)
+            }
+            VpnDiagnostics.schedulePostConnect(applicationContext, engine = "xray")
+            currentUnderlyingNetworkHandle(requireValidated = true)?.let { handle ->
+                synchronized(networkLock) {
+                    val now = SystemClock.elapsedRealtime()
+                    networkChangeState = XrayNetworkChangeState(
+                        lastHandle = handle,
+                        lastRestartAtMs = networkChangeState.lastRestartAtMs,
+                        watch = XrayNetworkPolicy.UnderlyingSwitchWatch(
+                            pendingHandle = handle,
+                            pendingSinceMs = now,
+                        ),
+                    )
+                }
+            }
+            runHealthCheck("post_connected", connectInFlight = false, settling = true)
+            schedulePostConnectRecheck()
             runCatching { path?.let { File(it).delete() } }
             excludedRoutesPath?.let { runCatching { File(it).delete() } }
         } catch (t: Throwable) {
+            if (!isCurrentConnect(session)) {
+                localPfd?.let { abandonLocalTun(it) }
+                return
+            }
             VpnDebugLogger.e(TAG, "Xray connect failed", t)
+            desiredConnection = false
+            pendingConnect = null
             stopXraySession(broadcast = false)
             broadcastStatus("ERROR", t.message ?: t.javaClass.simpleName)
             stopForegroundCompat()
@@ -254,15 +489,341 @@ class XrayVpnService : VpnService() {
         }
     }
 
+    private fun isCurrentConnect(session: Int): Boolean =
+        XrayConnectSessionPolicy.isCurrent(session, connectGeneration, isStopping)
+
+    private fun failCurrentConnect(session: Int, message: String) {
+        if (!isCurrentConnect(session)) return
+        desiredConnection = false
+        pendingConnect = null
+        stopXraySession(broadcast = false)
+        broadcastStatus("ERROR", message)
+        stopForegroundCompat()
+        stopSelf()
+    }
+
+    private fun abandonLocalTun(pfd: ParcelFileDescriptor) {
+        pfd.safeClose()
+        if (tunPfd === pfd) {
+            tunPfd = null
+        }
+    }
+
     private fun stopXraySession(broadcast: Boolean) {
-        running = false
-        runCatching { XrayCoreFacade.stop() }
-        tunPfd.safeClose()
-        tunPfd = null
-        VpnTunnelSessionStore.clear(applicationContext, expectedOwner = VpnTunnelSessionStore.OWNER_XRAY)
+        synchronized(sessionLock) {
+            running = false
+            postConnectRecheckJob?.cancel()
+            postConnectRecheckJob = null
+            VpnTrafficMonitor.stop(VpnTunnelSessionStore.OWNER_XRAY)
+            runCatching { XrayCoreFacade.stop() }
+            tunPfd.safeClose()
+            tunPfd = null
+            VpnTunnelSessionStore.clear(
+                applicationContext,
+                expectedOwner = VpnTunnelSessionStore.OWNER_XRAY,
+            )
+        }
         if (broadcast) {
             broadcastStatus("DISCONNECTED", getString(R.string.vpn_msg_disconnected))
         }
+    }
+
+    private fun resolveLiveStatusForQuery(): Pair<String, String> =
+        XrayQueryStatusPolicy.resolve(
+            running = running,
+            hasTun = tunPfd != null,
+            stopping = isStopping,
+            paused = isPaused,
+            lastEventName = lastEventName,
+            lastEventInfo = lastEventInfo,
+            disconnectedInfo = getString(R.string.vpn_msg_disconnected),
+            connectedInfo = getString(R.string.vpn_msg_connected),
+            connectingInfo = getString(R.string.vpn_connecting_generic),
+            pausedInfo = getString(R.string.vpn_msg_paused),
+        )
+
+    private fun hasUsableNetwork(): Boolean {
+        val network = connectivityManager.activeNetwork ?: return false
+        val caps = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return XrayNetworkPolicy.hasUsableNetwork(
+            hasInternet = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET),
+            validated = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED),
+        )
+    }
+
+    private fun currentTransportLabel(): String {
+        val network = connectivityManager.activeNetwork ?: return "none"
+        val caps = connectivityManager.getNetworkCapabilities(network) ?: return "unknown"
+        return when {
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "vpn"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
+            else -> "other"
+        }
+    }
+
+    private fun schedulePostConnectRecheck() {
+        postConnectRecheckJob?.cancel()
+        postConnectRecheckJob = serviceScope.launch {
+            delay(2_000)
+            if (!running) return@launch
+            runHealthCheck("post_connected_2s")
+        }
+    }
+
+    private fun runHealthCheck(
+        trigger: String,
+        connectInFlight: Boolean = isConnectInFlight(),
+        settling: Boolean = false,
+    ) {
+        val caps = connectivityManager.activeNetwork?.let { connectivityManager.getNetworkCapabilities(it) }
+        val hasVpnTransport = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
+        if (XrayNetworkPolicy.shouldWarnMissingVpnTransport(running, hasVpnTransport, settling)) {
+            VpnDebugLogger.w(
+                TAG,
+                "system_vpn_transport_mismatch trigger=$trigger running=$running hasVpnTransport=$hasVpnTransport",
+            )
+        }
+        if (!running) {
+            unhealthyCoreWatch = XrayNetworkPolicy.UnhealthyCoreWatch()
+            return
+        }
+        val coreRunning = runCatching { XrayCoreFacade.isRunning() }.getOrDefault(true)
+        val now = SystemClock.elapsedRealtime()
+        unhealthyCoreWatch = unhealthyCoreWatch.observe(coreRunning = coreRunning, nowMs = now)
+        val candidate = XrayNetworkPolicy.shouldRestartUnhealthySession(
+            desiredConnection = desiredConnection,
+            stopping = isStopping,
+            running = running,
+            coreRunning = coreRunning,
+            networkAvailable = networkAvailable,
+            paused = isPaused,
+            connectInFlight = connectInFlight,
+        )
+        if (!candidate) return
+        if (
+            !XrayNetworkPolicy.shouldConfirmUnhealthyCoreRestart(
+                candidateRestart = true,
+                consecutiveUnhealthy = unhealthyCoreWatch.consecutiveUnhealthy,
+                nowMs = now,
+                unhealthySinceMs = unhealthyCoreWatch.unhealthySinceMs,
+            )
+        ) {
+            VpnDebugLogger.w(
+                TAG,
+                "unhealthy_core_pending trigger=$trigger consecutive=${unhealthyCoreWatch.consecutiveUnhealthy}",
+            )
+            return
+        }
+        VpnDebugLogger.w(TAG, "xray core not running; reconnecting trigger=$trigger")
+        unhealthyCoreWatch = XrayNetworkPolicy.UnhealthyCoreWatch()
+        reconnectFromPending()
+    }
+
+    private fun isConnectInFlight(): Boolean = connectJob?.isActive == true
+
+    private fun rememberNetwork(network: Network, caps: NetworkCapabilities? = connectivityManager.getNetworkCapabilities(network)) {
+        val snapshot = caps?.let { snapshotOf(network, it) }
+        if (snapshot == null) {
+            trackedNetworks.remove(network)
+        } else {
+            trackedNetworks[network] = snapshot
+        }
+    }
+
+    private fun forgetNetwork(network: Network) {
+        trackedNetworks.remove(network)
+    }
+
+    private fun snapshotOf(network: Network, caps: NetworkCapabilities): XrayNetworkPolicy.NetworkSnapshot {
+        val api28Handle = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            network.networkHandle
+        } else {
+            0L
+        }
+        return XrayNetworkPolicy.NetworkSnapshot(
+            handle = XrayNetworkChangePolicy.networkIdentityHandle(
+                sdkInt = Build.VERSION.SDK_INT,
+                api28Handle = api28Handle,
+                hashCode = network.hashCode(),
+            ),
+            hasVpnTransport = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
+            hasInternet = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET),
+            validated = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED),
+        )
+    }
+
+    private fun currentNetworkSnapshots(): List<XrayNetworkPolicy.NetworkSnapshot> =
+        trackedNetworks.values.toList()
+
+    private fun currentUnderlyingNetworkHandle(requireValidated: Boolean = false): Long? =
+        XrayNetworkPolicy.pickUnderlyingHandle(currentNetworkSnapshots(), requireValidated = requireValidated)
+
+    private fun onNetworkStateChanged(source: String) {
+        networkAvailable = hasUsableNetwork()
+        val transport = currentTransportLabel()
+        // Identity without requiring VALIDATED so validated flicker is not treated as a new uplink.
+        val identityHandle = currentUnderlyingNetworkHandle(requireValidated = false)
+        if (
+            !VpnNetworkCapChangePolicy.shouldDispatch(
+                source = source,
+                transport = transport,
+                usable = networkAvailable,
+                hasActiveSession = running,
+                desiredConnection = desiredConnection,
+                lastTransport = lastNetworkTransport,
+                lastUsable = lastNetworkUsable,
+                lastUnderlyingHandle = lastUnderlyingHandle,
+                currentUnderlyingHandle = identityHandle,
+            )
+        ) {
+            // Seed identity without HEALTH/reconnect work so a later handle swap still dispatches.
+            if (identityHandle != null && lastUnderlyingHandle == null) {
+                lastUnderlyingHandle = identityHandle
+            }
+            return
+        }
+        lastNetworkTransport = transport
+        lastNetworkUsable = networkAvailable
+        if (identityHandle != null) {
+            lastUnderlyingHandle = identityHandle
+        }
+        val snapshots = currentNetworkSnapshots()
+        val underlying = XrayNetworkPolicy.pickUnderlyingHandle(snapshots, requireValidated = false)
+        val switchHandle = XrayNetworkPolicy.pickUnderlyingHandle(snapshots, requireValidated = true)
+        val now = SystemClock.elapsedRealtime()
+        val connectInFlight = isConnectInFlight()
+        val decision = synchronized(networkLock) {
+            val next = XrayNetworkChangePolicy.resolve(
+                desiredConnection = desiredConnection,
+                stopping = isStopping,
+                running = running,
+                networkAvailable = networkAvailable,
+                paused = isPaused,
+                connectInFlight = connectInFlight,
+                switchHandle = switchHandle,
+                nowMs = now,
+                previous = networkChangeState,
+            )
+            networkChangeState = next.state
+            if (next.scheduleSettleRecheck) {
+                scheduleSettleRecheckLocked(next.remainingWaitMs)
+            } else if (next.cancelSettleRecheck) {
+                settleRecheckJob?.cancel()
+                settleRecheckJob = null
+            }
+            next
+        }
+        VpnDebugLogger.event(
+            category = "network",
+            action = "changed",
+            details = mapOf(
+                "source" to source,
+                "usable" to networkAvailable,
+                "running" to running,
+                "desired" to desiredConnection,
+                "inFlight" to connectInFlight,
+                "followUp" to decision.followUp.name,
+                "underlying" to (underlying ?: -1L),
+                "switchHandle" to (switchHandle ?: -1L),
+                "lastUnderlying" to (decision.state.lastHandle ?: -1L),
+                "settledMs" to decision.settledForMs,
+                "engine" to OpenVpn3Service.ENGINE_XRAY,
+            ),
+        )
+        if (running) {
+            VpnDiagnostics.onNetworkChanged(applicationContext, engine = "xray")
+        }
+        when (decision.followUp) {
+            XrayNetworkFollowUp.RESTART_SWITCH -> {
+                VpnDebugLogger.w(
+                    TAG,
+                    "underlying network switched ($source); restarting Xray session after ${decision.settledForMs}ms settle",
+                )
+                broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+                reconnectFromPending()
+            }
+            XrayNetworkFollowUp.RECONNECT -> {
+                broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+                reconnectFromPending()
+            }
+            XrayNetworkFollowUp.WAIT -> {
+                broadcastStatus("WAITING_NETWORK", getString(R.string.vpn_msg_reconnecting))
+            }
+            XrayNetworkFollowUp.HEALTH -> runHealthCheck("network_changed_$source")
+        }
+    }
+
+    private fun scheduleSettleRecheckLocked(remainingSettleMs: Long) {
+        settleRecheckJob?.cancel()
+        settleRecheckJob = serviceScope.launch {
+            delay(remainingSettleMs + 50L)
+            onNetworkStateChanged("SETTLE_CHECK")
+        }
+    }
+
+    private fun reconnectFromPending() {
+        val pending = pendingConnect ?: return
+        isStopping = false
+        val session = ++connectGeneration
+        connectJob?.cancel()
+        connectJob = serviceScope.launch {
+            connectFromPending(pending, session)
+        }
+    }
+
+    private fun connectFromPending(pending: PendingXrayConnect, session: Int) {
+        val intent = Intent().apply {
+            putExtra(EXTRA_CONFIG_TEXT, pending.configText)
+            pending.excludedRoutesPath?.let { putExtra(EXTRA_EXCLUDED_ROUTES_PATH, it) }
+            putStringArrayListExtra(EXTRA_DNS_SERVERS, ArrayList(pending.dnsServers))
+            putExtra(EXTRA_DNS_IDENTITY_ENABLED, pending.dnsIdentityEnabled)
+        }
+        connect(intent, session)
+    }
+
+    private fun registerNetworkCallbackSafely() {
+        if (!isNetworkCallbackRegistered) {
+            runCatching {
+                connectivityManager.registerDefaultNetworkCallback(networkCallback)
+                isNetworkCallbackRegistered = true
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "registerDefaultNetworkCallback failed", it)
+            }
+        }
+        if (!isUnderlyingNetworkCallbackRegistered) {
+            runCatching {
+                val request = NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                    .build()
+                connectivityManager.registerNetworkCallback(request, underlyingNetworkCallback)
+                isUnderlyingNetworkCallbackRegistered = true
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "register underlying network callback failed", it)
+            }
+        }
+    }
+
+    private fun unregisterNetworkCallbackSafely() {
+        if (isNetworkCallbackRegistered) {
+            runCatching {
+                connectivityManager.unregisterNetworkCallback(networkCallback)
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "unregisterNetworkCallback failed", it)
+            }
+            isNetworkCallbackRegistered = false
+        }
+        if (isUnderlyingNetworkCallbackRegistered) {
+            runCatching {
+                connectivityManager.unregisterNetworkCallback(underlyingNetworkCallback)
+            }.onFailure {
+                VpnDebugLogger.w(TAG, "unregister underlying network callback failed", it)
+            }
+            isUnderlyingNetworkCallbackRegistered = false
+        }
+        trackedNetworks.clear()
     }
 
     private fun resolveDnsServers(intent: Intent): List<String> =
@@ -328,7 +889,7 @@ class XrayVpnService : VpnService() {
             action = ACTION_DISCONNECT
         }
         val pauseIntent = Intent(this, XrayVpnService::class.java).apply {
-            action = ACTION_PAUSE
+            action = if (isPaused) ACTION_RESUME else ACTION_PAUSE
         }
         val disconnectPending = PendingIntent.getService(
             this,
@@ -369,7 +930,7 @@ class XrayVpnService : VpnService() {
             .addAction(
                 NotificationCompat.Action.Builder(
                     0,
-                    getString(R.string.action_pause),
+                    getString(if (isPaused) R.string.action_resume else R.string.action_pause),
                     pausePending,
                 ).build()
             )
@@ -445,7 +1006,16 @@ class XrayVpnService : VpnService() {
                 .putLong(OpenVpn3Service.PREF_LAST_EVENT_AT_MS, System.currentTimeMillis())
                 .apply()
         }
-        VpnDebugLogger.d(TAG, "broadcast $name: $info (fromQuery=$fromQuery running=$running)")
+        VpnDebugLogger.event(
+            category = "service.broadcast",
+            action = name,
+            details = mapOf(
+                "info" to info,
+                "fromQuery" to fromQuery,
+                "engine" to OpenVpn3Service.ENGINE_XRAY,
+                "running" to running,
+            ),
+        )
         val intent = Intent(OpenVpn3Service.ACTION_STATUS)
             .setPackage(packageName)
             .apply {

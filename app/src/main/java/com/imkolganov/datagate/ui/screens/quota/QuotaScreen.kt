@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -34,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imkolganov.datagate.R
 import com.imkolganov.datagate.ui.components.AppCards
+import com.imkolganov.datagate.ui.components.ScreenHeader
 import com.imkolganov.datagate.ui.screens.access.AccessContract
 import com.imkolganov.datagate.ui.tv.LocalIsTelevision
 import com.imkolganov.datagate.ui.tv.tvFocusBorder
@@ -70,33 +72,29 @@ fun QuotaScreen(
             verticalArrangement = Arrangement.spacedBy(if (isTelevision) 16.dp else 12.dp)
         ) {
             item {
-                Row(
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(R.string.nav_quota),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    IconButton(
-                        onClick = { onEvent(AccessContract.UiEvent.RefreshQuota) },
-                        modifier = Modifier
-                            .then(
-                                if (primaryFocusRequester != null) {
-                                    Modifier.focusRequester(primaryFocusRequester)
-                                } else {
-                                    Modifier
-                                }
+                ScreenHeader(
+                    title = stringResource(R.string.nav_quota),
+                    icon = Icons.Filled.Star,
+                    actions = {
+                        IconButton(
+                            onClick = { onEvent(AccessContract.UiEvent.RefreshQuota) },
+                            modifier = Modifier
+                                .then(
+                                    if (primaryFocusRequester != null) {
+                                        Modifier.focusRequester(primaryFocusRequester)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                                .tvFocusBorder(shape = RoundedCornerShape(50)),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Refresh,
+                                contentDescription = stringResource(R.string.access_refresh),
                             )
-                            .tvFocusBorder(shape = RoundedCornerShape(50)),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Refresh,
-                            contentDescription = stringResource(R.string.access_refresh)
-                        )
-                    }
-                }
+                        }
+                    },
+                )
             }
 
             item {
@@ -132,12 +130,6 @@ fun QuotaPlansContent(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(
-            text = stringResource(R.string.access_quota_section_title),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
         if (isQuotaLoading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }

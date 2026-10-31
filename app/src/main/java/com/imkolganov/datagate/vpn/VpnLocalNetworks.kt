@@ -14,6 +14,7 @@ object VpnLocalNetworks {
     fun collectCidrs(connectivity: ConnectivityManager?, ipv6: Boolean): List<String> {
         if (connectivity == null) return emptyList()
         val out = LinkedHashSet<String>()
+        @Suppress("DEPRECATION")
         for (network in connectivity.allNetworks) {
             val caps = connectivity.getNetworkCapabilities(network) ?: continue
             if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue

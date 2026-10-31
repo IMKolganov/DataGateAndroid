@@ -23,6 +23,11 @@ import com.imkolganov.datagate.freetier.FreeTierComplianceController
 import com.imkolganov.datagate.freetier.isDisconnectAttributableToGraceExpiry
 import com.imkolganov.datagate.logger.CrashLogger
 import com.imkolganov.datagate.logger.VpnDebugLogger
+import com.imkolganov.datagate.vpn.diag.VpnDiagnostics
+import com.imkolganov.datagate.vpn.traffic.OpenVpnLiveTrafficRead
+import com.imkolganov.datagate.vpn.traffic.TrafficCounters
+import com.imkolganov.datagate.vpn.traffic.VpnTrafficMonitor
+import com.imkolganov.datagate.vpn.traffic.VpnTunIfaceCounters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -165,6 +170,8 @@ class OpenVpn3Service : VpnService() {
     private var desiredConnection = false
     private var pendingConnectRequest: PendingConnectRequest? = null
     private var networkAvailable = true
+    private var lastNetworkTransport: String? = null
+    private var lastNetworkUsable: Boolean? = null
     private var lastReconnectAttemptAtMs: Long = 0L
     @Volatile private var reconnectPendingAfterJob = false
     private var isNetworkCallbackRegistered = false
@@ -536,7 +543,8 @@ class OpenVpn3Service : VpnService() {
         desiredConnection = false
         pendingConnectRequest = null
         if (runtimeState == VpnRuntimeState.IDLE && !connectInProgress && !hasActiveSession) {
-            logCommandDropped("DISCONNECT", "already_idle")
+            // Expected: VpnController always stops the peer engine before starting Xray.
+            logCommandDropped("DISCONNECT", "already_idle", reportNonFatal = false)
         } else {
             transitionState(VpnRuntimeState.DISCONNECTING, "disconnect_command")
         }
@@ -738,7 +746,8 @@ class OpenVpn3Service : VpnService() {
                 transitionState(VpnRuntimeState.CONNECTED, "core_connected")
                 updateNotification("Connected")
                 broadcastStatus(name, info)
-                runSystemVpnHealthCheck("core_connected")
+                // The VPN becomes the default network ~1–2 s later; the rechecks decide.
+                runSystemVpnHealthCheck("core_connected", settling = true)
                 scheduleSystemVpnHealthRecheck()
             }
             name.equals("DISCONNECTED", ignoreCase = true) -> {
@@ -878,6 +887,9 @@ class OpenVpn3Service : VpnService() {
             ),
         )
         runSystemVpnHealthCheck("network_changed_$source")
+        if (runtimeState == VpnRuntimeState.CONNECTED) {
+            VpnDiagnostics.onNetworkChanged(applicationContext, engine = "openvpn")
+        }
         if (!hasActiveSession && (connectInProgress || desiredConnection)) {
             broadcastStatus("NETWORK_CHANGED", info)
         } else {
@@ -935,12 +947,22 @@ class OpenVpn3Service : VpnService() {
         connectInProgress = true
         hasActiveSession = false
         transitionState(VpnRuntimeState.CONNECTING, reason)
+        // Feed the shared Home reconnect/session counter (same as Xray). Deduped if caller
+        // already broadcast RECONNECTING in this cycle. Skip first connect / resume.
+        if (reason != "connect_command" && reason != "resume_command") {
+            broadcastStatus("RECONNECTING", getString(R.string.vpn_msg_reconnecting))
+        }
+        val establish = ExcludeRouteSession.resolveOpenVpnEstablish(
+            storedConfig = request.configText,
+            intentRoutes = request.excludedRoutes,
+            supportsAndroidRouteExclusion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+        )
         startVpn(
-            configText = request.configText,
+            configText = establish.configText,
             wssUrl = request.wssUrl,
             transport = request.transport,
             linkProtocol = request.linkProtocol,
-            excludedRoutes = request.excludedRoutes,
+            excludedRoutes = establish.excludedRoutes,
             username = request.username,
             password = request.password,
         )
@@ -961,9 +983,30 @@ class OpenVpn3Service : VpnService() {
                 "paused" to isPaused,
             ),
         )
+        if (next == VpnRuntimeState.CONNECTED && previous != VpnRuntimeState.CONNECTED) {
+            startTrafficMonitor()
+            VpnDiagnostics.schedulePostConnect(applicationContext, engine = "openvpn")
+        } else if (previous == VpnRuntimeState.CONNECTED && next != VpnRuntimeState.CONNECTED) {
+            VpnTrafficMonitor.stop(VpnTunnelSessionStore.OWNER_OPENVPN)
+        }
     }
 
-    private fun logCommandDropped(command: String, reason: String) {
+    private fun startTrafficMonitor() {
+        VpnTrafficMonitor.start(owner = VpnTunnelSessionStore.OWNER_OPENVPN) {
+            OpenVpnLiveTrafficRead.resolve(
+                ifaceCounters = VpnTunIfaceCounters.read(applicationContext),
+                tunStatsProvider = {
+                    runCatching {
+                        vpnClient?.tun_stats()?.let { stats ->
+                            TrafficCounters(bytesIn = stats.bytesIn, bytesOut = stats.bytesOut)
+                        }
+                    }.getOrNull()
+                },
+            )
+        }
+    }
+
+    private fun logCommandDropped(command: String, reason: String, reportNonFatal: Boolean = true) {
         VpnDebugLogger.event(
             category = "service.command",
             action = "dropped",
@@ -973,6 +1016,10 @@ class OpenVpn3Service : VpnService() {
                 "state" to runtimeState.name,
             ),
         )
+        if (!reportNonFatal) {
+            VpnDebugLogger.d(TAG, "vpn_command_dropped: command=$command reason=$reason state=$runtimeState")
+            return
+        }
         VpnDebugLogger.w(TAG, "vpn_command_dropped: command=$command reason=$reason state=$runtimeState")
         crashLogger.logNonFatal(
             tag = "OpenVpn3Service.command_dropped",
@@ -1018,7 +1065,7 @@ class OpenVpn3Service : VpnService() {
         postPersistentNotification()
     }
 
-    private fun runSystemVpnHealthCheck(trigger: String) {
+    private fun runSystemVpnHealthCheck(trigger: String, settling: Boolean = false) {
         val snapshot = collectSystemVpnSnapshot()
         VpnDebugLogger.i(
             TAG,
@@ -1028,7 +1075,7 @@ class OpenVpn3Service : VpnService() {
                 "notificationsEnabled=${snapshot.notificationsEnabled} channelImportance=${snapshot.channelImportance}"
         )
 
-        if (hasActiveSession && !snapshot.hasVpnTransport) {
+        if (hasActiveSession && !snapshot.hasVpnTransport && !settling) {
             VpnDebugLogger.w(
                 TAG,
                 "system_vpn_transport_mismatch trigger=$trigger state=$runtimeState " +
@@ -1298,6 +1345,7 @@ class OpenVpn3Service : VpnService() {
 
     private fun stopVpnInternal() {
         VpnDebugLogger.d(TAG, "stopVpnInternal")
+        VpnTrafficMonitor.stop(VpnTunnelSessionStore.OWNER_OPENVPN)
 
         val job = vpnJob
         vpnJob = null
@@ -1400,17 +1448,34 @@ class OpenVpn3Service : VpnService() {
     }
 
     private fun onNetworkStateChanged(source: String) {
-        commandQueue.trySend(VpnCommand.NetworkChanged(source, currentTransportLabel()))
+        val transport = currentTransportLabel()
+        val usable = hasUsableNetwork()
+        if (
+            !VpnNetworkCapChangePolicy.shouldDispatch(
+                source = source,
+                transport = transport,
+                usable = usable,
+                hasActiveSession = hasActiveSession,
+                desiredConnection = desiredConnection,
+                lastTransport = lastNetworkTransport,
+                lastUsable = lastNetworkUsable,
+            )
+        ) {
+            return
+        }
+        lastNetworkTransport = transport
+        lastNetworkUsable = usable
+        commandQueue.trySend(VpnCommand.NetworkChanged(source, transport))
     }
 
     private fun currentTransportLabel(): String {
         val network = connectivityManager.activeNetwork ?: return "none"
         val caps = connectivityManager.getNetworkCapabilities(network) ?: return "unknown"
         return when {
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "vpn"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
-            caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "vpn"
             else -> "other"
         }
     }

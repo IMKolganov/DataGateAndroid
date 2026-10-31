@@ -107,6 +107,68 @@ class VpnEventMapperTest {
     }
 
     @Test
+    fun map_reconnecting_countsOncePerCycleUntilConnected() {
+        val connected = VpnStatusUiState(isConnectRequested = true, isVpnConnected = true)
+        val first = VpnEventMapper.map(context.resources, connected, "RECONNECTING", "")
+        assertEquals(1, first.reconnectCount)
+        assertTrue(first.reconnectCycleActive)
+
+        val spam = VpnEventMapper.map(context.resources, first, "RECONNECTING", "")
+        assertEquals(1, spam.reconnectCount)
+
+        val back = VpnEventMapper.map(context.resources, spam, "CONNECTED", "")
+        assertEquals(1, back.reconnectCount)
+        assertFalse(back.reconnectCycleActive)
+
+        val second = VpnEventMapper.map(context.resources, back, "RECONNECTING", "")
+        assertEquals(2, second.reconnectCount)
+
+        val gone = VpnEventMapper.map(context.resources, second, "DISCONNECTED", "")
+        assertEquals(0, gone.reconnectCount)
+    }
+
+    @Test
+    fun map_connecting_doesNotCountAsReconnect() {
+        val idle = VpnStatusUiState()
+        val connecting = VpnEventMapper.map(context.resources, idle, "CONNECTING", "")
+        assertEquals(0, connecting.reconnectCount)
+        val connected = VpnEventMapper.map(context.resources, connecting, "CONNECTED", "")
+        assertEquals(0, connected.reconnectCount)
+        assertEquals(
+            1,
+            VpnReconnectCountPolicy.estimatedSessions(
+                connected.reconnectCount,
+                sessionActive = connected.isConnectRequested,
+            ),
+        )
+    }
+
+    @Test
+    fun map_paused_endsReconnectCycleKeepsCount() {
+        val mid = VpnStatusUiState(
+            isConnectRequested = true,
+            reconnectCount = 3,
+            reconnectCycleActive = true,
+        )
+        val paused = VpnEventMapper.map(context.resources, mid, "PAUSED", "")
+        assertEquals(3, paused.reconnectCount)
+        assertFalse(paused.reconnectCycleActive)
+    }
+
+    @Test
+    fun map_error_resetsReconnectCount() {
+        val mid = VpnStatusUiState(
+            isConnectRequested = true,
+            isVpnConnected = true,
+            reconnectCount = 5,
+            reconnectCycleActive = true,
+        )
+        val error = VpnEventMapper.map(context.resources, mid, "ERROR", "boom")
+        assertEquals(0, error.reconnectCount)
+        assertFalse(error.reconnectCycleActive)
+    }
+
+    @Test
     fun map_disconnecting_clearsSessionFlags() {
         val previous = VpnStatusUiState(
             isConnectRequested = true,

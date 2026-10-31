@@ -9,14 +9,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.imkolganov.datagate.BuildConfig
+import com.imkolganov.datagate.R
 import com.imkolganov.datagate.auth.AdminTotpGate
 import com.imkolganov.datagate.auth.AuthUiState
 import com.imkolganov.datagate.auth.AuthViewModel
 import com.imkolganov.datagate.auth.JwtClaimsReader
+import com.imkolganov.datagate.auth.SessionEvents
 import com.imkolganov.datagate.auth.TokenStore
 import com.imkolganov.datagate.freetier.FreeTierApi
 import com.imkolganov.datagate.ui.freetier.FreeTierOnboardingHost
@@ -133,6 +136,25 @@ private fun AppRootContent(
         if (authState.isLoggedIn) {
             accessViewModel.onUserSessionReady()
             onAuthChanged()
+        }
+    }
+
+    val currentVpnState by rememberUpdatedState(vpnState)
+    LaunchedEffect(Unit) {
+        SessionEvents.sessionExpired.collect {
+            if (!authViewModel.state.value.isLoggedIn) return@collect
+            performLogout(
+                vpnState = currentVpnState,
+                onRequestDisconnect = onRequestDisconnect,
+                logout = {
+                    authViewModel.onSessionExpired(appContext.getString(R.string.auth_session_expired))
+                },
+                onAuthChanged = onAuthChanged,
+                clearServerSelection = {
+                    VpnServerSelectionStore.clear(appContext)
+                    accessViewModel.resetSessionLocalState()
+                },
+            )
         }
     }
 
