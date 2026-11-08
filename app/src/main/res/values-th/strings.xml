@@ -404,6 +404,8 @@
     <string name="error_network_no_internet">ไม่มีการเชื่อมต่ออินเทอร์เน็ต ตรวจสอบเครือข่ายของคุณแล้วลองอีกครั้ง</string>
     <string name="error_network_timeout">การเชื่อมต่อหมดเวลา ลองอีกครั้ง</string>
     <string name="auth_session_expired">เซสชันหมดอายุแล้ว โปรดลงชื่อเข้าใช้อีกครั้ง</string>
+    <string name="client_outdated_title">ต้องอัปเดต</string>
+    <string name="client_outdated_message">เซิร์ฟเวอร์ไม่รองรับ DataGate เวอร์ชันนี้อีกต่อไป โปรดอัปเดตแอป</string>
     <string name="error_network_interrupted">การเชื่อมต่อเครือข่ายถูกขัดจังหวะ ลองอีกครั้ง</string>
     <string name="error_network_tls">ไม่สามารถสร้างการเชื่อมต่อที่ปลอดภัยได้ ตรวจสอบเครือข่ายหรือการตั้งค่า VPN แล้วลองอีกครั้ง</string>
     <string name="home_quick_actions_title">ความช่วยเหลือและภาษา</string>

@@ -404,6 +404,8 @@ Vous pouvez ouvrir la page de version ou télécharger l’APK. Utilisez l’opt
     <string name="error_network_no_internet">Aucune connexion internet. Vérifiez votre réseau et réessayez.</string>
     <string name="error_network_timeout">La connexion a expiré. Réessayez.</string>
     <string name="auth_session_expired">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="client_outdated_title">Mise à jour requise</string>
+    <string name="client_outdated_message">Cette version de DataGate n\'est plus prise en charge par le serveur. Veuillez mettre à jour l\'application.</string>
     <string name="error_network_interrupted">La connexion réseau a été interrompue. Réessayez.</string>
     <string name="error_network_tls">Impossible d’établir une connexion sécurisée. Vérifiez votre réseau ou les paramètres VPN et réessayez.</string>
     <string name="home_quick_actions_title">Aide et langue</string>

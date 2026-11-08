@@ -422,6 +422,8 @@
     <string name="error_network_no_internet">Δεν υπάρχει σύνδεση στο διαδίκτυο. Ελέγξτε το δίκτυό σας και δοκιμάστε ξανά.</string>
     <string name="error_network_timeout">Η σύνδεση έληξε (timeout). Δοκιμάστε ξανά.</string>
     <string name="auth_session_expired">Η συνεδρία έληξε. Συνδεθείτε ξανά.</string>
+    <string name="client_outdated_title">Απαιτείται ενημέρωση</string>
+    <string name="client_outdated_message">Αυτή η έκδοση του DataGate δεν υποστηρίζεται πλέον από τον διακομιστή. Ενημερώστε την εφαρμογή.</string>
     <string name="error_network_interrupted">Η σύνδεση δικτύου διακόπηκε. Δοκιμάστε ξανά.</string>
     <string name="error_network_tls">Δεν ήταν δυνατή η δημιουργία ασφαλούς σύνδεσης. Ελέγξτε το δίκτυο ή τις ρυθμίσεις VPN και δοκιμάστε ξανά.</string>
     <string name="home_quick_actions_title">Βοήθεια και γλώσσα</string>

@@ -404,6 +404,8 @@ Anda dapat membuka halaman rilis atau mengunduh APK.</string>
     <string name="error_network_no_internet">Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.</string>
     <string name="error_network_timeout">Koneksi melewati batas waktu. Coba lagi.</string>
     <string name="auth_session_expired">Sesi Anda telah berakhir. Silakan masuk lagi.</string>
+    <string name="client_outdated_title">Pembaruan diperlukan</string>
+    <string name="client_outdated_message">Versi DataGate ini tidak lagi didukung oleh server. Perbarui aplikasi.</string>
     <string name="error_network_interrupted">Koneksi jaringan terputus. Coba lagi.</string>
     <string name="error_network_tls">Tidak dapat membuat koneksi aman. Periksa jaringan atau setelan VPN Anda dan coba lagi.</string>
     <string name="home_quick_actions_title">Bantuan &amp; bahasa</string>

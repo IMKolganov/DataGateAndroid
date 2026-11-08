@@ -409,6 +409,8 @@
     <string name="error_network_no_internet">لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.</string>
     <string name="error_network_timeout">انتهت مهلة الاتصال. حاول مرة أخرى.</string>
     <string name="auth_session_expired">انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.</string>
+    <string name="client_outdated_title">التحديث مطلوب</string>
+    <string name="client_outdated_message">لم يعد الخادم يدعم هذا الإصدار من DataGate. يرجى تحديث التطبيق.</string>
     <string name="error_network_interrupted">انقطع الاتصال بالشبكة. حاول مرة أخرى.</string>
     <string name="error_network_tls">تعذر إنشاء اتصال آمن. تحقق من إعدادات الشبكة أو VPN وحاول مرة أخرى.</string>
     <string name="vpn_ip_list_requires_android_13">يتطلب تجاوز قائمة IP نظام Android 13 أو إصدارًا أحدث. قم بتعطيل توجيه قائمة IP أو قم بتحديث Android للاتصال بهذا الوضع.</string>

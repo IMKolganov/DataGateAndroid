@@ -422,6 +422,8 @@ Is féidir leat leathanach an eisiúna a oscailt nó an APK a íoslódáil.</str
     <string name="error_network_no_internet">Níl aon nasc idirlín ann. Seiceáil do líonra agus bain triail eile as.</string>
     <string name="error_network_timeout">Chuaigh an nasc thar am. Bain triail eile as.</string>
     <string name="auth_session_expired">Tá do sheisiún imithe in éag. Sínigh isteach arís.</string>
+    <string name="client_outdated_title">Nuashonrú ag teastáil</string>
+    <string name="client_outdated_message">Ní thacaíonn an freastalaí leis an leagan seo de DataGate a thuilleadh. Nuashonraigh an aip le do thoil.</string>
     <string name="error_network_interrupted">Cuireadh isteach ar an nasc líonra. Bain triail eile as.</string>
     <string name="error_network_tls">Níorbh fhéidir nasc slán a bhunú. Seiceáil do líonra nó socruithe VPN agus bain triail eile as.</string>
     <string name="home_quick_actions_title">Cabhair &amp; teanga</string>

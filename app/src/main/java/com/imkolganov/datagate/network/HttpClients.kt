@@ -15,6 +15,7 @@ object HttpClients {
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(ClientIdentityInterceptor())
             .build()
 
     fun createAuth(
@@ -29,6 +30,7 @@ object HttpClients {
             // Hard cap for the whole call: DNS lookups and multi-route connect retries are not
             // bounded by connect/read timeouts, so a stalled tunnel could keep a refresh spinning.
             .callTimeout(AUTH_CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .addInterceptor(ClientIdentityInterceptor())
             .addInterceptor(AuthHeaderInterceptor(tokenStore))
             .authenticator(
                 RefreshTokenAuthenticator(

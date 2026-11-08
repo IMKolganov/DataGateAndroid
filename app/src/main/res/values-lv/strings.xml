@@ -422,6 +422,8 @@ Varat atvērt laidiena lapu vai lejupielādēt APK.</string>
     <string name="error_network_no_internet">Nav interneta savienojuma. Pārbaudiet tīklu un mēģiniet vēlreiz.</string>
     <string name="error_network_timeout">Iestājās savienojuma noildze. Mēģiniet vēlreiz.</string>
     <string name="auth_session_expired">Sesija ir beigusies. Lūdzu, piesakieties vēlreiz.</string>
+    <string name="client_outdated_title">Nepieciešams atjauninājums</string>
+    <string name="client_outdated_message">Serveris vairs neatbalsta šo DataGate versiju. Lūdzu, atjauniniet lietotni.</string>
     <string name="error_network_interrupted">Tīkla savienojums tika pārtraukts. Mēģiniet vēlreiz.</string>
     <string name="error_network_tls">Nevarēja izveidot drošu savienojumu. Pārbaudiet tīklu vai VPN iestatījumus un mēģiniet vēlreiz.</string>
     <string name="home_quick_actions_title">Palīdzība un valoda</string>

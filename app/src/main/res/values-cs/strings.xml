@@ -422,6 +422,8 @@ Můžete otevřít stránku vydání nebo stáhnout APK. Pomocí volby níže po
     <string name="error_network_no_internet">Není k dispozici internetové připojení. Zkontrolujte síť a zkuste to znovu.</string>
     <string name="error_network_timeout">Vypršel časový limit připojení. Zkuste to znovu.</string>
     <string name="auth_session_expired">Platnost relace vypršela. Přihlaste se znovu.</string>
+    <string name="client_outdated_title">Vyžadována aktualizace</string>
+    <string name="client_outdated_message">Tato verze DataGate už není serverem podporována. Aktualizujte prosím aplikaci.</string>
     <string name="error_network_interrupted">Síťové připojení bylo přerušeno. Zkuste to znovu.</string>
     <string name="error_network_tls">Nepodařilo se navázat zabezpečené připojení. Zkontrolujte síť nebo nastavení VPN a zkuste to znovu.</string>
     <string name="home_quick_actions_title">Nápověda a jazyk</string>

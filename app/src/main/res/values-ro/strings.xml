@@ -422,6 +422,8 @@ Poți deschide pagina versiunii sau descărca APK-ul.</string>
     <string name="error_network_no_internet">Nu există conexiune la internet. Verifică rețeaua și încearcă din nou.</string>
     <string name="error_network_timeout">Conexiunea a expirat. Încearcă din nou.</string>
     <string name="auth_session_expired">Sesiunea a expirat. Conectează-te din nou.</string>
+    <string name="client_outdated_title">Actualizare necesară</string>
+    <string name="client_outdated_message">Această versiune DataGate nu mai este acceptată de server. Actualizează aplicația.</string>
     <string name="error_network_interrupted">Conexiunea la rețea a fost întreruptă. Încearcă din nou.</string>
     <string name="error_network_tls">Nu s-a putut stabili o conexiune securizată. Verifică rețeaua sau setările VPN și încearcă din nou.</string>
     <string name="home_quick_actions_title">Ajutor și limbă</string>

@@ -422,6 +422,8 @@ Du kan öppna versionssidan eller ladda ner APK:n.</string>
     <string name="error_network_no_internet">Ingen internetanslutning. Kontrollera nätverket och försök igen.</string>
     <string name="error_network_timeout">Anslutningen fick timeout. Försök igen.</string>
     <string name="auth_session_expired">Sessionen har gått ut. Logga in igen.</string>
+    <string name="client_outdated_title">Uppdatering krävs</string>
+    <string name="client_outdated_message">Den här versionen av DataGate stöds inte längre av servern. Uppdatera appen.</string>
     <string name="error_network_interrupted">Nätverksanslutningen avbröts. Försök igen.</string>
     <string name="error_network_tls">Det gick inte att upprätta en säker anslutning. Kontrollera nätverket eller VPN-inställningarna och försök igen.</string>
     <string name="home_quick_actions_title">Hjälp och språk</string>

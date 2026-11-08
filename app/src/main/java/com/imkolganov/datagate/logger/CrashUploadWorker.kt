@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.imkolganov.datagate.BuildConfig
+import com.imkolganov.datagate.network.ClientIdentityInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -68,6 +69,7 @@ class CrashUploadWorker(
                 .connectTimeout(8, TimeUnit.SECONDS)
                 .readTimeout(12, TimeUnit.SECONDS)
                 .writeTimeout(12, TimeUnit.SECONDS)
+                .addInterceptor(ClientIdentityInterceptor())
                 .build()
         }
     }

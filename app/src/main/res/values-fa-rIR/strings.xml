@@ -404,6 +404,8 @@
     <string name="error_network_no_internet">اتصال اینترنت وجود ندارد. شبکه را بررسی کنید و دوباره تلاش کنید.</string>
     <string name="error_network_timeout">زمان اتصال به پایان رسید. دوباره تلاش کنید.</string>
     <string name="auth_session_expired">نشست شما منقضی شده است. لطفاً دوباره وارد شوید.</string>
+    <string name="client_outdated_title">به‌روزرسانی لازم است</string>
+    <string name="client_outdated_message">این نسخه از DataGate دیگر توسط سرور پشتیبانی نمی‌شود. لطفاً برنامه را به‌روزرسانی کنید.</string>
     <string name="error_network_interrupted">اتصال شبکه قطع شد. دوباره تلاش کنید.</string>
     <string name="error_network_tls">برقراری اتصال امن ممکن نشد. شبکه یا تنظیمات VPN را بررسی کنید و دوباره تلاش کنید.</string>
     <string name="home_quick_actions_title">راهنما و زبان</string>

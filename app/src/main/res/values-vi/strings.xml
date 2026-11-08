@@ -404,6 +404,8 @@ Bạn có thể mở trang phát hành hoặc tải APK.</string>
     <string name="error_network_no_internet">Không có kết nối internet. Kiểm tra mạng của bạn và thử lại.</string>
     <string name="error_network_timeout">Kết nối đã hết thời gian chờ. Thử lại.</string>
     <string name="auth_session_expired">Phiên đã hết hạn. Vui lòng đăng nhập lại.</string>
+    <string name="client_outdated_title">Cần cập nhật</string>
+    <string name="client_outdated_message">Máy chủ không còn hỗ trợ phiên bản DataGate này. Vui lòng cập nhật ứng dụng.</string>
     <string name="error_network_interrupted">Kết nối mạng đã bị ngắt. Thử lại.</string>
     <string name="error_network_tls">Không thể thiết lập kết nối an toàn. Kiểm tra mạng hoặc cài đặt VPN và thử lại.</string>
     <string name="home_quick_actions_title">Trợ giúp &amp; ngôn ngữ</string>

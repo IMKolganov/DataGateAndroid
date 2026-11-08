@@ -460,6 +460,8 @@
     <string name="error_network_no_internet">No internet connection. Check your network and try again.</string>
     <string name="error_network_timeout">The connection timed out. Try again.</string>
     <string name="auth_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="client_outdated_title">Update required</string>
+    <string name="client_outdated_message">This version of DataGate is no longer supported by the server. Please update the app.</string>
     <string name="error_network_interrupted">The network connection was interrupted. Try again.</string>
     <string name="error_network_tls">Couldn\'t establish a secure connection. Check your network or VPN settings and try again.</string>
 

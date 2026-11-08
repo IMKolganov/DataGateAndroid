@@ -422,6 +422,8 @@ Tista’ tiftaħ il-paġna tar-rilaxx jew tniżżel l-APK.</string>
     <string name="error_network_no_internet">M\'hemm l-ebda konnessjoni tal-internet. Iċċekkja n-network tiegħek u erġa\' pprova.</string>
     <string name="error_network_timeout">Il-konnessjoni skadiet. Erġa\' pprova.</string>
     <string name="auth_session_expired">Is-sessjoni tiegħek skadiet. Erġa’ idħol.</string>
+    <string name="client_outdated_title">Meħtieġ aġġornament</string>
+    <string name="client_outdated_message">Din il-verżjoni ta\' DataGate m\'għadhiex appoġġjata mis-server. Jekk jogħġbok aġġorna l-app.</string>
     <string name="error_network_interrupted">Il-konnessjoni tan-network ġiet interrotta. Erġa\' pprova.</string>
     <string name="error_network_tls">Ma setgħetx tinbena konnessjoni sigura. Iċċekkja n-network jew is-settings tal-VPN u erġa\' pprova.</string>
     <string name="home_quick_actions_title">Għajnuna u lingwa</string>

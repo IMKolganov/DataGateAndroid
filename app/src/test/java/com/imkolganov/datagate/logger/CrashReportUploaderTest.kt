@@ -135,6 +135,32 @@ class CrashReportUploaderTest {
         assertTrue(first.exists())
     }
 
+    @Test
+    fun uploadBatch_clientIdentityRejection_keepsFilesAndStops() {
+        MockWebServer().use { server ->
+            server.enqueue(
+                MockResponse().setResponseCode(400)
+                    .setBody("""{"success":false,"data":{"code":"client_version_missing"}}""")
+            )
+            server.start()
+
+            val dir = createCrashDir()
+            val first = writeCrashFile(dir, "fatal_2026-05-01T00-00-00.000Z.txt")
+            val second = writeCrashFile(dir, "fatal_2026-05-01T00-00-01.000Z.txt")
+            val uploader = createUploader(dir)
+
+            val result = uploader.uploadBatch(
+                endpointUrl = server.url("/api/v1/mobile/crash-ingest").toString(),
+                crashReportToken = null
+            )
+
+            assertEquals(CrashReportUploader.Outcome.COMPLETED, result.outcome)
+            assertTrue(first.exists())
+            assertTrue(second.exists())
+            assertEquals(1, server.requestCount)
+        }
+    }
+
     private fun createUploader(dir: File): CrashReportUploader {
         return CrashReportUploader(
             crashDir = dir,

@@ -404,6 +404,8 @@ Voit avata julkaisusivun tai ladata APK:n.</string>
     <string name="error_network_no_internet">Ei internetyhteyttä. Tarkista verkkoyhteys ja yritä uudelleen.</string>
     <string name="error_network_timeout">Yhteys aikakatkaistiin. Yritä uudelleen.</string>
     <string name="auth_session_expired">Istunto on vanhentunut. Kirjaudu sisään uudelleen.</string>
+    <string name="client_outdated_title">Päivitys vaaditaan</string>
+    <string name="client_outdated_message">Palvelin ei enää tue tätä DataGate-versiota. Päivitä sovellus.</string>
     <string name="error_network_interrupted">Verkkoyhteys katkesi. Yritä uudelleen.</string>
     <string name="error_network_tls">Suojattua yhteyttä ei voitu muodostaa. Tarkista verkko- tai VPN-asetukset ja yritä uudelleen.</string>
     <string name="home_quick_actions_title">Ohje ja kieli</string>

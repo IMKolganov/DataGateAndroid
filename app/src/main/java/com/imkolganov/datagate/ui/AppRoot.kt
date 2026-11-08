@@ -101,6 +101,7 @@ fun AppRoot(
             authState = authState,
             appContext = appContext,
         )
+        ClientOutdatedDialog()
     }
 }
 

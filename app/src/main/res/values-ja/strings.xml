@@ -404,6 +404,8 @@
     <string name="error_network_no_internet">インターネットに接続していません。ネットワークを確認して再試行してください。</string>
     <string name="error_network_timeout">接続がタイムアウトしました。再試行してください。</string>
     <string name="auth_session_expired">セッションの有効期限が切れました。もう一度サインインしてください。</string>
+    <string name="client_outdated_title">アップデートが必要です</string>
+    <string name="client_outdated_message">このバージョンの DataGate はサーバーでサポートされなくなりました。アプリをアップデートしてください。</string>
     <string name="error_network_interrupted">ネットワーク接続が中断されました。再試行してください。</string>
     <string name="error_network_tls">安全な接続を確立できませんでした。ネットワークまたは VPN の設定を確認して再試行してください。</string>
     <string name="home_quick_actions_title">ヘルプと言語</string>

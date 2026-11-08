@@ -422,6 +422,8 @@ Maaari mong buksan ang release page o i-download ang APK.</string>
     <string name="error_network_no_internet">Walang koneksyon sa internet. Suriin ang iyong network at subukan ulit.</string>
     <string name="error_network_timeout">Nag-timeout ang koneksyon. Subukan ulit.</string>
     <string name="auth_session_expired">Nag-expire na ang iyong session. Mag-sign in muli.</string>
+    <string name="client_outdated_title">Kailangang mag-update</string>
+    <string name="client_outdated_message">Hindi na sinusuportahan ng server ang bersyong ito ng DataGate. Paki-update ang app.</string>
     <string name="error_network_interrupted">Naputol ang koneksyon sa network. Subukan ulit.</string>
     <string name="error_network_tls">Hindi maiestablish ang secure na koneksyon. Suriin ang network o VPN settings at subukan ulit.</string>
     <string name="home_quick_actions_title">Tulong at wika</string>

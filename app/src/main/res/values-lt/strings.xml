@@ -422,6 +422,8 @@ Galite atidaryti leidimo puslapį arba atsisiųsti APK.</string>
     <string name="error_network_no_internet">Nėra interneto ryšio. Patikrinkite tinklą ir bandykite dar kartą.</string>
     <string name="error_network_timeout">Baigėsi ryšio laukimo laikas. Bandykite dar kartą.</string>
     <string name="auth_session_expired">Sesija baigėsi. Prisijunkite iš naujo.</string>
+    <string name="client_outdated_title">Reikia atnaujinti</string>
+    <string name="client_outdated_message">Serveris nebepalaiko šios DataGate versijos. Atnaujinkite programėlę.</string>
     <string name="error_network_interrupted">Tinklo ryšys buvo nutrauktas. Bandykite dar kartą.</string>
     <string name="error_network_tls">Nepavyko sukurti saugaus ryšio. Patikrinkite tinklą arba VPN nustatymus ir bandykite dar kartą.</string>
     <string name="home_quick_actions_title">Žinynas ir kalba</string>

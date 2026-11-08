@@ -1,5 +1,6 @@
 package com.imkolganov.datagate.logger
 
+import com.imkolganov.datagate.network.ClientIdentity
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -82,6 +83,10 @@ internal class CrashReportUploader(
                     val code = response.code
                     when {
                         code in 200..299 -> HttpAction.DeleteAndContinue
+                        // This build's client identity is refused: keep the reports for an updated app.
+                        code == 400 && ClientIdentity.parseRejectionCode(
+                            runCatching { response.peekBody(16L * 1024).string() }.getOrNull()
+                        ) != null -> HttpAction.KeepAndStop
                         code == 400 || code == 413 -> HttpAction.DeleteAndContinue
                         code == 429 -> HttpAction.RetryAndStop(parseRetryAfterSeconds(response.header("Retry-After")))
                         code in 500..599 -> HttpAction.RetryAndStop()
@@ -105,6 +110,8 @@ internal class CrashReportUploader(
                         eventLogger("Failed to delete uploaded crash file=${file.name}")
                     }
                 }
+
+                is HttpAction.KeepAndStop -> return BatchResult(Outcome.COMPLETED)
 
                 is HttpAction.RetryAndStop -> {
                     return BatchResult(
@@ -130,6 +137,7 @@ internal class CrashReportUploader(
 
     private sealed class HttpAction {
         data object DeleteAndContinue : HttpAction()
+        data object KeepAndStop : HttpAction()
         data class RetryAndStop(val retryAfterSeconds: Long? = null) : HttpAction()
     }
 

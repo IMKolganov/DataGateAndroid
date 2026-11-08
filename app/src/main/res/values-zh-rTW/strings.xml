@@ -404,6 +404,8 @@
     <string name="error_network_no_internet">沒有網路連線。請檢查網路後再試一次。</string>
     <string name="error_network_timeout">連線逾時。請再試一次。</string>
     <string name="auth_session_expired">工作階段已過期，請重新登入。</string>
+    <string name="client_outdated_title">需要更新</string>
+    <string name="client_outdated_message">伺服器已不再支援此版本的 DataGate。請更新應用程式。</string>
     <string name="error_network_interrupted">網路連線中斷。請再試一次。</string>
     <string name="error_network_tls">無法建立安全連線。請檢查網路或 VPN 設定後再試一次。</string>
     <string name="home_quick_actions_title">說明與語言</string>

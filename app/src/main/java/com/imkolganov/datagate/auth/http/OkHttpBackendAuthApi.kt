@@ -18,6 +18,7 @@ import com.imkolganov.datagate.model.auth.TotpVerifyLoginRequestDto
 import com.imkolganov.datagate.json.parseApiErrorMessage
 import com.imkolganov.datagate.model.auth.RefreshRequestDto
 import com.imkolganov.datagate.model.auth.RefreshResponseDto
+import com.imkolganov.datagate.network.ClientIdentity
 import com.imkolganov.datagate.model.auth.RegisterUserRequestDto
 import com.imkolganov.datagate.model.auth.RegisterUserResponseDto
 import com.imkolganov.datagate.model.auth.ResetPasswordResultDto
@@ -236,6 +237,10 @@ class OkHttpBackendAuthApi(
             val raw = r.body.string()
             if (r.code !in 200..299) {
                 val detail = formatHttpErrorDetail("refresh failed", r.code, raw.orEmpty())
+                // A client-identity 400 says nothing about the refresh token: keep the session.
+                if (ClientIdentity.parseRejectionCode(raw) != null) {
+                    throw IOException(detail)
+                }
                 if (RefreshRejectedException.isRejectionCode(r.code)) {
                     throw RefreshRejectedException(r.code, detail)
                 }

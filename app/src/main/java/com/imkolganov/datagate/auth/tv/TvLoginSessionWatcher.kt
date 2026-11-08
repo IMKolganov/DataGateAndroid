@@ -5,6 +5,7 @@ import com.google.gson.JsonObject
 import com.imkolganov.datagate.model.auth.CreateTvLoginSessionResponse
 import com.imkolganov.datagate.model.auth.TvLoginSessionPollResponse
 import com.imkolganov.datagate.model.auth.TvLoginSessionStatus
+import com.imkolganov.datagate.network.ClientIdentity
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
@@ -178,7 +179,10 @@ class TvLoginSessionWatcher(
         var connection: HubConnection? = null
         var watching = false
         try {
-            connection = HubConnectionBuilder.create(hubUrl).build()
+            connection = HubConnectionBuilder.create(ClientIdentity.appendToHubUrl(hubUrl))
+                .withHeader(ClientIdentity.NAME_HEADER, ClientIdentity.CLIENT_NAME)
+                .withHeader(ClientIdentity.VERSION_HEADER, ClientIdentity.clientVersion)
+                .build()
             connection.on(STATUS_EVENT, { json: JsonObject ->
                 val status = jsonString(json, "status", "Status") ?: return@on
                 val expiresAt = jsonString(json, "expiresAt", "ExpiresAt")

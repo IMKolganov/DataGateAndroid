@@ -422,6 +422,8 @@ Võite avada väljalaske lehe või laadida APK alla.</string>
     <string name="error_network_no_internet">Interneti-ühendus puudub. Kontrollige võrku ja proovige uuesti.</string>
     <string name="error_network_timeout">Ühenduse ajalõpp. Proovige uuesti.</string>
     <string name="auth_session_expired">Seanss on aegunud. Logi uuesti sisse.</string>
+    <string name="client_outdated_title">Vajalik on värskendus</string>
+    <string name="client_outdated_message">Server ei toeta enam seda DataGate\'i versiooni. Palun värskenda rakendust.</string>
     <string name="error_network_interrupted">Võrguühendus katkes. Proovige uuesti.</string>
     <string name="error_network_tls">Turvalist ühendust ei saanud luua. Kontrollige võrku või VPN-i seadeid ja proovige uuesti.</string>
     <string name="home_quick_actions_title">Abi ja keel</string>

@@ -404,6 +404,8 @@
     <string name="error_network_no_internet">इंटरनेट कनेक्शन नहीं है। अपना नेटवर्क जाँचें और फिर से प्रयास करें।</string>
     <string name="error_network_timeout">कनेक्शन का समय समाप्त हो गया। फिर से प्रयास करें।</string>
     <string name="auth_session_expired">आपका सत्र समाप्त हो गया है। कृपया फिर से साइन इन करें।</string>
+    <string name="client_outdated_title">अपडेट ज़रूरी है</string>
+    <string name="client_outdated_message">सर्वर अब DataGate के इस संस्करण का समर्थन नहीं करता। कृपया ऐप अपडेट करें।</string>
     <string name="error_network_interrupted">नेटवर्क कनेक्शन बाधित हो गया। फिर से प्रयास करें।</string>
     <string name="error_network_tls">सुरक्षित कनेक्शन स्थापित नहीं हो सका। अपना नेटवर्क या VPN सेटिंग्स जाँचें और फिर से प्रयास करें।</string>
     <string name="home_quick_actions_title">सहायता और भाषा</string>

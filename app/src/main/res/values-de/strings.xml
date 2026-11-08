@@ -404,6 +404,8 @@ Sie können die Release-Seite öffnen oder die APK herunterladen. Mit der Option
     <string name="error_network_no_internet">Keine Internetverbindung. Prüfen Sie Ihr Netzwerk und versuchen Sie es erneut.</string>
     <string name="error_network_timeout">Zeitüberschreitung bei der Verbindung. Versuchen Sie es erneut.</string>
     <string name="auth_session_expired">Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.</string>
+    <string name="client_outdated_title">Update erforderlich</string>
+    <string name="client_outdated_message">Diese Version von DataGate wird vom Server nicht mehr unterstützt. Bitte aktualisiere die App.</string>
     <string name="error_network_interrupted">Die Netzwerkverbindung wurde unterbrochen. Versuchen Sie es erneut.</string>
     <string name="error_network_tls">Es konnte keine sichere Verbindung hergestellt werden. Prüfen Sie Ihr Netzwerk oder Ihre VPN-Einstellungen und versuchen Sie es erneut.</string>
     <string name="home_quick_actions_title">Hilfe &amp; Sprache</string>

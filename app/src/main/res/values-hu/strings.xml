@@ -422,6 +422,8 @@ Megnyithatja a kiadási oldalt vagy letöltheti az APK-t.</string>
     <string name="error_network_no_internet">Nincs internetkapcsolat. Ellenőrizd a hálózatot, és próbáld újra.</string>
     <string name="error_network_timeout">A kapcsolat túllépte az időkorlátot. Próbáld újra.</string>
     <string name="auth_session_expired">A munkamenet lejárt. Jelentkezz be újra.</string>
+    <string name="client_outdated_title">Frissítés szükséges</string>
+    <string name="client_outdated_message">A szerver már nem támogatja a DataGate ezen verzióját. Kérjük, frissítsd az alkalmazást.</string>
     <string name="error_network_interrupted">A hálózati kapcsolat megszakadt. Próbáld újra.</string>
     <string name="error_network_tls">Nem sikerült biztonságos kapcsolatot létesíteni. Ellenőrizd a hálózatot vagy a VPN-beállításokat, és próbáld újra.</string>
     <string name="home_quick_actions_title">Súgó és nyelv</string>

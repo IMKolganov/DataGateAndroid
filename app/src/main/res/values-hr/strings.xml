@@ -422,6 +422,8 @@ Možete otvoriti stranicu izdanja ili preuzeti APK.</string>
     <string name="error_network_no_internet">Nema internetske veze. Provjerite mrežu i pokušajte ponovno.</string>
     <string name="error_network_timeout">Isteklo je vrijeme veze. Pokušajte ponovno.</string>
     <string name="auth_session_expired">Sesija je istekla. Prijavite se ponovno.</string>
+    <string name="client_outdated_title">Potrebno ažuriranje</string>
+    <string name="client_outdated_message">Poslužitelj više ne podržava ovu verziju aplikacije DataGate. Ažurirajte aplikaciju.</string>
     <string name="error_network_interrupted">Mrežna veza je prekinuta. Pokušajte ponovno.</string>
     <string name="error_network_tls">Sigurna veza nije uspostavljena. Provjerite mrežu ili VPN postavke i pokušajte ponovno.</string>
     <string name="home_quick_actions_title">Pomoć i jezik</string>

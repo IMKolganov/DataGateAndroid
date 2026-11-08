@@ -57,9 +57,9 @@ android {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 18
+        versionCode = 19
         // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
-        versionName = "1.0.18"
+        versionName = "1.0.19"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
             ?: "IMKolganov/DataGateAndroid"

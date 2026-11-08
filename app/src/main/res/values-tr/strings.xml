@@ -404,6 +404,8 @@ Sürüm sayfasını açabilir veya APK’yı indirebilirsiniz.</string>
     <string name="error_network_no_internet">İnternet bağlantısı yok. Ağınızı kontrol edin ve tekrar deneyin.</string>
     <string name="error_network_timeout">Bağlantı zaman aşımına uğradı. Tekrar deneyin.</string>
     <string name="auth_session_expired">Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.</string>
+    <string name="client_outdated_title">Güncelleme gerekli</string>
+    <string name="client_outdated_message">DataGate\'in bu sürümü artık sunucu tarafından desteklenmiyor. Lütfen uygulamayı güncelleyin.</string>
     <string name="error_network_interrupted">Ağ bağlantısı kesildi. Tekrar deneyin.</string>
     <string name="error_network_tls">Güvenli bağlantı kurulamadı. Ağ veya VPN ayarlarınızı kontrol edin ve tekrar deneyin.</string>
     <string name="home_quick_actions_title">Yardım ve dil</string>

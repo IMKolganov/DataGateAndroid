@@ -422,6 +422,8 @@
     <string name="error_network_no_internet">Няма връзка с интернет. Проверете мрежата и опитайте отново.</string>
     <string name="error_network_timeout">Връзката изтече. Опитайте отново.</string>
     <string name="auth_session_expired">Сесията изтече. Моля, влезте отново.</string>
+    <string name="client_outdated_title">Необходима е актуализация</string>
+    <string name="client_outdated_message">Тази версия на DataGate вече не се поддържа от сървъра. Моля, актуализирайте приложението.</string>
     <string name="error_network_interrupted">Мрежовата връзка беше прекъсната. Опитайте отново.</string>
     <string name="error_network_tls">Не може да се установи защитена връзка. Проверете мрежата или настройките на VPN и опитайте отново.</string>
     <string name="home_quick_actions_title">Помощ и език</string>
