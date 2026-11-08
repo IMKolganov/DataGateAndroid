@@ -273,7 +273,11 @@ class OpenVpn3Client(
 
     override fun tun_builder_set_session_name(name: String): Boolean {
         VpnDebugLogger.d(TAG, "tun_builder_set_session_name($name)")
-        builder?.setSession(name)
+        // OpenVPN passes the remote endpoint here (127.0.0.1 behind the WSS bridge). Keep the
+        // app's session name so Android VPN settings / system UI don't show localhost.
+        if (!name.contains('.') && !name.contains(':')) {
+            builder?.setSession(name)
+        }
         return true
     }
 
