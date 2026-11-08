@@ -1,80 +1,42 @@
-# OpenVPN 3 Core — Android Native Build
+# OpenVPN 3 Core — Android native build
 
-This module builds OpenVPN 3 Core as a native library for Android and generates a Java/JNI API via SWIG.
+Gradle builds `libovpncli.so` from the pinned `openvpn3` submodule and packages it in the APK. It generates the C++ JNI wrapper with SWIG as part of each ABI's CMake build; a manually copied native library is not needed.
 
-After cloning the repo, initialize nested submodules (OpenVPN3 + **fmt** in `openvpn3/external/fmt`):
+## Prerequisites
 
-```
-git submodule update --init --recursive
-```
+- Initialize sources with `git submodule update --init --recursive`.
+- Install SWIG on the host and Android SDK CMake 3.22.1 / NDK 29.0.14206865.
+- Prepare static OpenSSL and LZ4 libraries for each selected ABI in `$HOME/Android/deps/<ABI>/{openssl,lz4}` (headers under `include`, archives under `lib`). The scripts in `scripts/` show the dependency build steps; set their NDK path for your machine.
 
-## 1. Generate SWIG JNI wrapper
+## Build an APK
 
-```
-cd native-openvpn3
-./generate_swig.sh
-```
+From the Android repository root:
 
-Creates:
-- `out/swig/ovpncli_wrap.cxx`
-- `out/java/net/openvpn/ovpn3/*.java`
-
-## 2. Build native libraries
-
-```
-cd ~/Android/DataGateAndroid
-
-export ANDROID_NDK_HOME="$HOME/Android/Sdk/ndk/26.1.10909125"
-
-cmake \
--DANDROID_ABI=arm64-v8a \
--DANDROID_PLATFORM=android-24 \ 
--DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \ 
--B build-arm64\ 
--S native-openvpn3
-
-cmake --build build-arm64 -j$(nproc)
+```bash
+./gradlew :app:assembleProdDebug
 ```
 
-After assembly:
-`out/arm64-v8a/libovpncli.so`
+Default ABIs are `arm64-v8a` and `armeabi-v7a`. To select other ABIs:
 
-## 3. Files for Android
-
-JNI library:
-```
-app/src/main/jniLibs/arm64-v8a/libovpncli.so
+```bash
+./gradlew :app:assembleProdDebug -Pdatagate.abis=x86,x86_64
 ```
 
-Java API:
-```
-app/src/main/java/net/openvpn/ovpn3/*.java
-```
+The native build uses the same ABI filters as the app. Gradle stages the resulting library from its CMake build directory and strips it with the configured NDK.
 
-## 4. Use in Kotlin
+## Build a single native ABI manually
 
-```
-System.loadLibrary("ovpncli")
-
-val client = OpenVPNClient()
-val config = ClientAPI_Config()
-config.content = ovpnProfileString
-
-val eval = client.eval_config(config)
-if (eval.error) throw RuntimeException(eval.message)
-
-client.connect()
+```bash
+cmake -S native-openvpn3 -B build-arm64 \
+  -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 \
+  -DCMAKE_TOOLCHAIN_FILE="$HOME/Android/Sdk/ndk/29.0.14206865/build/cmake/android.toolchain.cmake"
+cmake --build build-arm64 -j4
 ```
 
-## 5. Structure
+The output is `build-arm64/libovpncli.so`.
 
-```
-native-openvpn3/ 
-openvpn3/ 
-third_party/ 
-out/ 
-java/ 
-swig/ 
-CMakeLists.txt 
-generate_swig.sh
-```
+## Java bindings
+
+Java bindings are tracked in `app/src/main/java/net/openvpn/ovpn3/`. When an upstream API change requires regenerating them, run `native-openvpn3/generate_swig.sh`, then review and copy the generated Java files from `native-openvpn3/out/java/`. Regular APK builds generate only the wrapper used by the native target; they compile the tracked Java sources.
+
+Keep `DATAGATE_OPENVPN_VERSION` in `CMakeLists.txt` aligned with the core pin and the app's `versionName`; the value is reported to the VPN server as `IV_VER`.

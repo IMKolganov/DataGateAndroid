@@ -6,7 +6,7 @@ Official Xray-core mobile wrapper used by DataGate Android.
 - Core: https://github.com/XTLS/Xray-core
 - Submodule: [`native-libxray`](../native-libxray) (same pattern as `native-openvpn3/openvpn3`)
 
-Pinned release for the shipped AAR: **v26.10.21** (`LIBXRAY_RELEASE_TAG`), matching submodule tag **v1.261021.0**.
+Pinned release for the shipped AAR: **v26.10.31** (`LIBXRAY_RELEASE_TAG`), matching submodule tag **v1.261031.0**. Source builds require Go **1.27.3** or newer.
 
 ## Produce `app/libs/libxray.aar`
 

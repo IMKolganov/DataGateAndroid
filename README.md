@@ -55,6 +55,8 @@ The project expects optional config files (see `app/build.gradle.kts`):
 
 Add these files as needed; they are typically in `.gitignore`.
 
+OpenVPN JNI is built and packaged by Gradle from `native-openvpn3/openvpn3` for every selected ABI. Install SWIG and prepare the OpenSSL/LZ4 static dependencies described in [the native build guide](native-openvpn3/README.md) before building an APK. No separately copied `libovpncli.so` is used.
+
 #### Crash report upload config
 
 Add crash ingest settings into your local `env.properties` (used by `app/build.gradle.kts`):

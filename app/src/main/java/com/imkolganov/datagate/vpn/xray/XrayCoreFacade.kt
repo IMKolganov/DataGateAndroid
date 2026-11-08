@@ -10,7 +10,7 @@ import org.json.JSONObject
 /**
  * Thin wrapper around official [LibXray] (XTLS/libXray AAR).
  *
- * Release API (v26.10.21): `apiVersion` 3; methods include
+ * Release API (v26.10.31): `apiVersion` 3; methods include
  * `convertShareLinksToXrayJson`, `runXray`, `stopXray`.
  */
 object XrayCoreFacade {

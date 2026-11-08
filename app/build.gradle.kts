@@ -53,13 +53,20 @@ android {
     // Must be installed: without it AGP cannot find llvm-strip and packages .so with debug info.
     ndkVersion = "29.0.14206865"
 
+    externalNativeBuild {
+        cmake {
+            path = file("../native-openvpn3/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.imkolganov.datagate"
         minSdk = 24
         targetSdk = 36
-        versionCode = 19
+        versionCode = 20
         // Keep native-openvpn3/CMakeLists.txt DATAGATE_OPENVPN_VERSION in sync with versionName.
-        versionName = "1.0.19"
+        versionName = "1.0.20"
 
         val githubRepo = (project.findProperty("github.repo") as String?)?.trim()?.takeIf { it.isNotEmpty() }
             ?: "IMKolganov/DataGateAndroid"
